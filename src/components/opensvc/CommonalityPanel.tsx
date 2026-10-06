@@ -11,6 +11,7 @@ import {
   type ValueGroup,
 } from "@/lib/commonality";
 import { copyText } from "@/lib/clipboard";
+import { labelMatches, normalizeSearch } from "@/lib/label-search";
 import { SlideOver } from "@/components/ui/SlideOver";
 import { CheckIcon, SearchIcon } from "@/components/ui/icons";
 import type { ListColumn } from "./CollectorList";
@@ -110,15 +111,13 @@ export function CommonalityPanel<T>({
   const filled = attributes.filter((attribute) => !attribute.empty);
   const empty = attributes.filter((attribute) => attribute.empty);
   const sharedCount = filled.filter((attribute) => attribute.shared).length;
-  const needle = query.trim().toLocaleLowerCase();
+  // An attribute is found by its name in English or in French, without case nor accents.
+  const needle = normalizeSearch(query.trim());
   const listed = filled.filter((attribute) => {
     if (show === "shared" && !attribute.shared) return false;
     if (show === "differing" && attribute.shared) return false;
     const column = byProp.get(attribute.prop);
-    return (
-      needle === "" ||
-      (column !== undefined && t(column.labelKey).toLocaleLowerCase().includes(needle))
-    );
+    return needle === "" || (column !== undefined && labelMatches(i18n, column.labelKey, needle));
   });
   const total = rows.data?.length ?? 0;
   const percent = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });

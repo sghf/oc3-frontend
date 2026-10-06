@@ -30,6 +30,7 @@ import { TransientNotice, type NoticeTone } from "@/components/ui/TransientNotic
 import { describeFilter, isFilterable } from "./list-filter-describe";
 import { PAGE_SIZES, visibleProps, type ResolvedListSearch } from "@/lib/list-search";
 import { readProp } from "@/lib/row";
+import { labelMatches, normalizeSearch } from "@/lib/label-search";
 import { FlashCell, FlashScope } from "./Flash";
 
 export interface ListColumn<T> {
@@ -530,14 +531,11 @@ export function CollectorList<T>({
     if (isFetching || total === undefined || total === 0 || lastOffset === undefined) return;
     if (search.offset > lastOffset) onChange({ offset: lastOffset });
   }, [isFetching, total, lastOffset, search.offset, onChange]);
-  const needle = columnFilter.trim().toLowerCase();
+  // A column is found by its name in English or in French, without case nor accents.
+  const needle = normalizeSearch(columnFilter.trim());
   const pickerColumns = table
     .getAllLeafColumns()
-    .filter(
-      (column) =>
-        needle === "" ||
-        t(getMeta(column.columnDef).column.labelKey).toLowerCase().includes(needle),
-    );
+    .filter((column) => labelMatches(i18n, getMeta(column.columnDef).column.labelKey, needle));
   const sortableSomewhere = columns.some((column) => column.sortable !== false);
   const selectedCount = Object.values(rowSelection).filter(Boolean).length;
   const pageFullySelected = rows.length > 0 && table.getIsAllPageRowsSelected();

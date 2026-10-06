@@ -4,6 +4,7 @@ import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { CaretRightIcon, CloseIcon, SearchIcon } from "@/components/ui/icons";
 import { useState, type KeyboardEvent } from "react";
 import { useNavCollapsedPref } from "@/lib/user-prefs";
+import { labelMatches, normalizeSearch } from "@/lib/label-search";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 import { NAV_CATEGORIES, NAV_TOP, type NavEntry } from "./navigation";
 
@@ -30,14 +31,6 @@ function NavLink({ entry }: { entry: NavEntry }) {
   );
 }
 
-/** Text compared without case nor accents: "securite" finds "Sécurité". */
-function normalize(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase();
-}
-
 /**
  * Side menu. Foldable: on a narrow screen, or when a wide table needs all the room.
  * Folded, it keeps its place in the grid but not its width, and `inert` takes it out
@@ -54,29 +47,31 @@ function normalize(text: string): string {
  * show: the menu does not lose its way to the views, the API checking the actions.
  *
  * The field at the top filters the entries by their name, or by the name of their
- * section, without case nor accents. While it filters, the sections holding a match
+ * section, in English or in French whatever the language on display, without case
+ * nor accents. While it filters, the sections holding a match
  * are open whatever their saved state, the others go; Enter opens the first entry
  * left, Escape empties the field, the down arrow goes on to the entries.
  */
 export function Sidebar({ open }: { open: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const sections = useNavCollapsedPref();
   const privileges = useEffectivePrivileges();
   const [query, setQuery] = useState("");
-  const needle = normalize(query.trim());
+  const needle = normalizeSearch(query.trim());
   const filtering = needle !== "";
-  const matches = (text: string) => normalize(text).includes(needle);
+  // In English and in French, whichever the interface shows.
+  const matches = (key: string) => labelMatches(i18n, key, needle);
   const allowed = (entry: NavEntry) =>
     entry.privileges === undefined ||
     privileges.isError ||
     (privileges.data !== undefined && hasPrivilege(privileges.data, entry.privileges));
-  const shown = (entry: NavEntry) => allowed(entry) && (!filtering || matches(t(entry.labelKey)));
+  const shown = (entry: NavEntry) => allowed(entry) && (!filtering || matches(entry.labelKey));
 
   const top = NAV_TOP.filter(shown);
   const categories = NAV_CATEGORIES.map((category) => {
     const visible = category.entries.filter(allowed);
     // A section found by its name keeps all its entries.
-    const entries = filtering && !matches(t(category.labelKey)) ? visible.filter(shown) : visible;
+    const entries = filtering && !matches(category.labelKey) ? visible.filter(shown) : visible;
     return { category, entries };
   }).filter(({ entries }) => entries.length > 0);
   const nothing = filtering && top.length === 0 && categories.length === 0;

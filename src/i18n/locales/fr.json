@@ -1,6 +1,6 @@
 {
   "nav": {
-    "nodes": "Nodes",
+    "nodes": "Nœuds",
     "services": "Services",
     "dashboard": "Dashboard",
     "main": "Principal",
@@ -32,7 +32,7 @@
     "forms": "Formulaires",
     "newRequest": "Nouvelle demande",
     "packages": "Paquets",
-    "hardware": "Matériel des nodes",
+    "hardware": "Matériel des nœuds",
     "switches": "Commutateurs SAN",
     "allRequests": "Toutes les demandes",
     "teamRequests": "Assignées à mon équipe",
@@ -87,7 +87,7 @@
     "frozenMixed": "Partiellement gelé"
   },
   "nodes": {
-    "title": "Nodes",
+    "title": "Nœuds",
     "fields": {
       "nodename": "Nom",
       "fqdn": "FQDN",
@@ -169,7 +169,7 @@
       "os_obs_alert_date": "Alerte d'obsolescence de l'OS"
     },
     "detail": {
-      "title": "Détail du node",
+      "title": "Détail du nœud",
       "groups": {
         "identity": "Identité",
         "hardware": "Matériel",
@@ -179,16 +179,16 @@
       }
     },
     "create": {
-      "open": "Nouveau node",
-      "title": "Nouveau node",
-      "intro": "Un node s'enregistre normalement tout seul depuis l'agent. La création à la main sert quand la fiche doit exister avant la première remontée.",
+      "open": "Nouveau nœud",
+      "title": "Nouveau nœud",
+      "intro": "Un nœud s'enregistre normalement tout seul depuis l'agent. La création à la main sert quand la fiche doit exister avant la première remontée.",
       "defaultApp": "Par défaut pour mon compte",
-      "exists": "Un node nommé {{nodename}} existe déjà. Le recréer le modifierait.",
+      "exists": "Un nœud nommé {{nodename}} existe déjà. Le recréer le modifierait.",
       "submit": "Créer",
       "submitting": "Création…"
     },
     "related": {
-      "label": "Données du node",
+      "label": "Données du nœud",
       "hardware": "Inventaire matériel",
       "alerts": "Alertes",
       "networks": "Réseaux",
@@ -201,15 +201,15 @@
     },
     "actions": {
       "open": "Actions",
-      "question_one": "Mettre {{action}} en file sur ce node ?",
-      "question_other": "Mettre {{action}} en file sur {{count}} nodes ?",
+      "question_one": "Mettre {{action}} en file sur ce nœud ?",
+      "question_other": "Mettre {{action}} en file sur {{count}} nœuds ?",
       "confirm": "Mettre en file",
       "queueing": "Mise en file…",
-      "queued_one": "{{action}} en file sur 1 node.",
-      "queued_other": "{{action}} en file sur {{count}} nodes.",
+      "queued_one": "{{action}} en file sur 1 nœud.",
+      "queued_other": "{{action}} en file sur {{count}} nœuds.",
       "failure": "{{name}} : {{message}}",
       "items": {
-        "pushasset": "Remonter l'inventaire du node",
+        "pushasset": "Remonter l'inventaire du nœud",
         "checks": "Remonter les relevés",
         "sysreport": "Remonter le sysreport",
         "pushdisks": "Remonter les disques",
@@ -250,7 +250,7 @@
     },
     "hardware": {
       "reported": "Remonté par l'agent",
-      "empty": "Aucun inventaire matériel : l'agent n'en a pas remonté pour ce node.",
+      "empty": "Aucun inventaire matériel : l'agent n'en a pas remonté pour ce nœud.",
       "types": {
         "mem": "Mémoire",
         "cpu": "Processeurs",
@@ -264,17 +264,17 @@
         "hw_description": "Description",
         "hw_driver": "Pilote"
       },
-      "openView": "Ouvrir dans la vue Matériel des nodes"
+      "openView": "Ouvrir dans la vue Matériel des nœuds"
     },
     "alerts": {
       "open": "Ouvrir dans le dashboard",
-      "empty": "Aucune alerte sur ce node."
+      "empty": "Aucune alerte sur ce nœud."
     },
     "stats": {
       "period": "Période",
       "days_one": "Dernières 24 heures",
       "days_other": "{{count}} derniers jours",
-      "empty": "Aucune statistique de performance enregistrée pour ce node sur la période.",
+      "empty": "Aucune statistique de performance enregistrée pour ce nœud sur la période.",
       "chartLabel_one": "{{name}}, dernières 24 heures",
       "chartLabel_other": "{{name}}, {{count}} derniers jours",
       "charts": {
@@ -327,12 +327,12 @@
       }
     },
     "logs": {
-      "empty": "Aucune entrée de journal pour ce node.",
+      "empty": "Aucune entrée de journal pour ce nœud.",
       "latest": "Les {{count}} dernières entrées sur {{total}}.",
       "open": "Ouvrir dans la vue Journal"
     },
     "networks": {
-      "empty": "Aucune adresse IP remontée pour ce node.",
+      "empty": "Aucune adresse IP remontée pour ce nœud.",
       "open": "Ouvrir dans la vue Réseaux",
       "undeclared": "Hors réseau déclaré",
       "deprecated": "obsolète",
@@ -352,7 +352,7 @@
       "matching_other": "{{count}} paquets sur {{total}}",
       "openView": "Ouvrir dans la vue Paquets",
       "reported": "Remonté par l'agent",
-      "empty": "Aucun paquet : l'agent n'en a pas remonté pour ce node.",
+      "empty": "Aucun paquet : l'agent n'en a pas remonté pour ce nœud.",
       "noMatch": "Aucun paquet ne correspond à la recherche."
     },
     "inventory": {
@@ -617,17 +617,17 @@
       "svc_notifications": "Notifications",
       "svc_topology": "Topologie",
       "svc_placement": "Placement",
-      "svc_nodes": "Nodes",
+      "svc_nodes": "Nœuds",
       "svc_ha": "Haute disponibilité",
       "svc_autostart": "Démarrage automatique",
-      "svc_flex_min_nodes": "Nodes flex minimum",
-      "svc_flex_max_nodes": "Nodes flex maximum",
+      "svc_flex_min_nodes": "Nœuds flex minimum",
+      "svc_flex_max_nodes": "Nœuds flex maximum",
       "svc_flex_target": "Cible flex",
       "svc_flex_cpu_low_threshold": "Seuil CPU flex bas",
       "svc_flex_cpu_high_threshold": "Seuil CPU flex haut",
       "svc_wave": "Vague",
-      "svc_drpnode": "Node de secours",
-      "svc_drpnodes": "Nodes de secours",
+      "svc_drpnode": "Nœud de secours",
+      "svc_drpnodes": "Nœuds de secours",
       "svc_drptype": "Type de secours",
       "svc_metrocluster": "Metrocluster",
       "svc_drnoaction": "Pas d'action de secours",
@@ -654,7 +654,7 @@
     "related": {
       "label": "Données du service",
       "storage": "Stockage",
-      "nodediff": "Différences entre nodes",
+      "nodediff": "Différences entre nœuds",
       "resources": "Statut des ressources",
       "logs": "Journal",
       "actions": "Actions"
@@ -737,7 +737,7 @@
     "pkgdiff": {
       "missing": "non installé",
       "identical": "Aucune différence trouvée.",
-      "singleNode": "Le service tourne sur moins de deux nodes : rien à comparer."
+      "singleNode": "Le service tourne sur moins de deux nœuds : rien à comparer."
     },
     "nodediff": {
       "property": "Propriété",
@@ -745,7 +745,7 @@
       "moduleset": "Moduleset",
       "ruleset": "Ruleset",
       "unset": "non renseigné",
-      "notRun": "jamais exécuté sur ce node",
+      "notRun": "jamais exécuté sur ce nœud",
       "attached": "attaché",
       "notAttached": "non attaché",
       "noMatch": "Rien ne correspond à la recherche.",
@@ -779,7 +779,7 @@
       "chip": {
         "differs_one": "{{count}} différence",
         "differs_other": "{{count}} différences",
-        "identical": "identique sur tous les nodes",
+        "identical": "identique sur tous les nœuds",
         "pending": "chargement",
         "error": "lecture impossible",
         "none": "rien à comparer"
@@ -821,9 +821,9 @@
       "dash_created": "Levée le",
       "dash_updated": "Mise à jour",
       "services.svcname": "Service",
-      "nodes.nodename": "Node",
+      "nodes.nodename": "Nœud",
       "svc_id": "Identifiant de service",
-      "node_id": "Identifiant de node",
+      "node_id": "Identifiant de nœud",
       "dash_fmt": "Gabarit du message",
       "dash_dict": "Valeurs du message",
       "dash_dict_md5": "Empreinte des valeurs"
@@ -894,8 +894,8 @@
   "networks": {
     "fields": {
       "id": "Identifiant d'enregistrement",
-      "node_id": "Identifiant de node",
-      "nodename": "Node",
+      "node_id": "Identifiant de nœud",
+      "nodename": "Nœud",
       "intf": "Interface",
       "mac": "Adresse MAC",
       "type": "Type d'adresse",
@@ -925,7 +925,7 @@
       }
     },
     "delete": {
-      "question": "Supprimer le relevé de {{addr}} sur {{nodename}} ? Si le node remonte encore cette adresse, elle réapparaîtra à la prochaine remontée d'inventaire."
+      "question": "Supprimer le relevé de {{addr}} sur {{nodename}} ? Si le nœud remonte encore cette adresse, elle réapparaîtra à la prochaine remontée d'inventaire."
     },
     "create": {
       "open": "Nouveau réseau",
@@ -1004,8 +1004,8 @@
       "disk_arrayid": "Baie",
       "disk_dg": "Groupe de la baie",
       "disk_region": "Région",
-      "node_id": "Identifiant de node",
-      "nodename": "Node",
+      "node_id": "Identifiant de nœud",
+      "nodename": "Nœud",
       "svc_id": "Identifiant de service",
       "svcname": "Service",
       "app": "Application",
@@ -1210,9 +1210,9 @@
     "title": "Instances de service",
     "fields": {
       "services.svcname": "Service",
-      "nodes.nodename": "Node",
+      "nodes.nodename": "Nœud",
       "svc_id": "Identifiant du service",
-      "node_id": "Identifiant du node",
+      "node_id": "Identifiant du nœud",
       "mon_svctype": "Type de service",
       "mon_availstatus": "Disponibilité",
       "mon_overallstatus": "État global",
@@ -1305,12 +1305,12 @@
   },
   "obsolescence": {
     "title": "Obsolescence",
-    "intro": "Dates d'avertissement et d'alerte pour chaque modèle matériel et chaque version d'OS remontés par les nodes. Le collector les applique aux nodes concernés et lève des alertes au dashboard à leur échéance.",
+    "intro": "Dates d'avertissement et d'alerte pour chaque modèle matériel et chaque version d'OS remontés par les nœuds. Le collector les applique aux nœuds concernés et lève des alertes au dashboard à leur échéance.",
     "fields": {
       "id": "Identifiant",
       "obs_type": "Type",
       "obs_name": "Modèle ou version d'OS",
-      "obs_count": "Nodes",
+      "obs_count": "Nœuds",
       "obs_warn_date": "Date d'avertissement",
       "obs_alert_date": "Date d'alerte",
       "obs_warn_date_updated_by": "Avertissement fixé par",
@@ -1326,7 +1326,7 @@
       "open": "Ajouter les réglages manquants",
       "pending": "Ajout…",
       "done": "Les réglages sont à jour de l'inventaire.",
-      "hint": "Crée un réglage pour chaque modèle matériel et chaque version d'OS remontés par les nodes qui n'en ont pas encore. Les réglages existants et leurs dates ne changent pas."
+      "hint": "Crée un réglage pour chaque modèle matériel et chaque version d'OS remontés par les nœuds qui n'en ont pas encore. Les réglages existants et leurs dates ne changent pas."
     },
     "detail": {
       "title": "Réglage d'obsolescence",
@@ -1334,7 +1334,7 @@
         "target": "S'applique à",
         "deadlines": "Échéances"
       },
-      "editHint": "Seules les échéances se modifient ; en vider une la supprime. Une modification s'applique aux nodes concernés et met à jour leurs alertes d'obsolescence au dashboard."
+      "editHint": "Seules les échéances se modifient ; en vider une la supprime. Une modification s'applique aux nœuds concernés et met à jour leurs alertes d'obsolescence au dashboard."
     }
   },
   "logs": {
@@ -1344,7 +1344,7 @@
       "log_date": "Date",
       "log_level": "Niveau",
       "services.svcname": "Service",
-      "nodes.nodename": "Node",
+      "nodes.nodename": "Nœud",
       "log_user": "Utilisateur",
       "log_action": "Action",
       "log_fmt": "Message",
@@ -1352,7 +1352,7 @@
       "log_dict": "Valeurs du message",
       "id": "Identifiant",
       "svc_id": "Identifiant du service",
-      "node_id": "Identifiant du node",
+      "node_id": "Identifiant du nœud",
       "log_entry_id": "Identifiant d'entrée",
       "log_gtalk_sent": "Envoyé par messagerie",
       "log_email_sent": "Envoyé par e-mail",
@@ -1391,7 +1391,7 @@
       "open": "Nouveau graphique",
       "title": "Nouveau graphique",
       "intro": "Le graphique est publié pour votre équipe principale, qui en devient aussi responsable. Créer un graphique demande le privilège ReportsManager.",
-      "yamlPlaceholder": "Metrics:\n  - metric_id: 186\n    label: Nodes par OS\nOptions:\n  stack: true",
+      "yamlPlaceholder": "Metrics:\n  - metric_id: 186\n    label: Nœuds par OS\nOptions:\n  stack: true",
       "yamlHint": "Facultative : la définition peut être écrite plus tard. Elle doit être du YAML valide : les métriques historisées tracées (metric_id) et les Options.",
       "saving": "Création…",
       "save": "Créer"
@@ -1408,7 +1408,7 @@
       "date": "Date",
       "total": "Total",
       "tab": "Aperçu",
-      "notice": "Aperçu du rapport : chaque métrique est exécutée maintenant. Ses paramètres désignent les nodes et services que vous voyez, restreints par votre filtre de session.",
+      "notice": "Aperçu du rapport : chaque métrique est exécutée maintenant. Ses paramètres désignent les nœuds et services que vous voyez, restreints par votre filtre de session.",
       "empty": "Le rapport n'a pas encore de définition : en écrire une pour l'aperçu.",
       "untitled": "Section sans titre",
       "emptySection": "Rien dans cette section.",
@@ -1473,7 +1473,7 @@
       "createIntro": "La métrique est publiée pour votre équipe principale, dont les membres la voient. Créer une métrique demande le privilège Manager.",
       "editIntro": "Les graphiques et rapports qui l'utilisent la lisent avec la nouvelle définition. La modifier demande le privilège Manager.",
       "sqlPlaceholder": "SELECT os_name, COUNT(*) FROM nodes WHERE node_id IN (%%fset_node_ids%%) GROUP BY os_name",
-      "sqlHint": "%%fset_node_ids%% et %%fset_svc_ids%% désignent les nodes et services du filterset de la session où la métrique est lue.",
+      "sqlHint": "%%fset_node_ids%% et %%fset_svc_ids%% désignent les nœuds et services du filterset de la session où la métrique est lue.",
       "indexHint": "Colonnes du résultat, comptées à partir de 0. Laisser la colonne de l'instance vide quand la requête rend une seule valeur.",
       "noInstance": "Aucune",
       "historizeHint": "Le collector calcule la métrique chaque jour et garde ses valeurs pour les graphiques.",
@@ -1484,7 +1484,7 @@
   },
   "filters": {
     "title": "Filtres",
-    "intro": "Un filtre est une condition sur une colonne d'une table du collector. Les filtersets combinent des filtres pour sélectionner nodes et services.",
+    "intro": "Un filtre est une condition sur une colonne d'une table du collector. Les filtersets combinent des filtres pour sélectionner nœuds et services.",
     "fields": {
       "f_label": "Filtre",
       "f_table": "Table",
@@ -1523,7 +1523,7 @@
   },
   "filtersets": {
     "title": "Filtersets",
-    "intro": "Un filterset combine des filtres, et d'autres filtersets, par des opérateurs logiques. Les vues et les rulesets de conformité s'en servent pour sélectionner nodes et services.",
+    "intro": "Un filterset combine des filtres, et d'autres filtersets, par des opérateurs logiques. Les vues et les rulesets de conformité s'en servent pour sélectionner nœuds et services.",
     "fields": {
       "fset_name": "Nom",
       "fset_stats": "Filterset de statistiques",
@@ -1566,8 +1566,8 @@
     },
     "matches": {
       "title": "Sélection",
-      "nodes_one": "{{count}} node",
-      "nodes_other": "{{count}} nodes",
+      "nodes_one": "{{count}} nœud",
+      "nodes_other": "{{count}} nœuds",
       "services_one": "{{count}} service",
       "services_other": "{{count}} services"
     },
@@ -1594,7 +1594,7 @@
       "title": "Connexions SAN",
       "loading": "Chargement des connexions SAN…",
       "error": "Impossible de charger les connexions SAN : {{message}}",
-      "empty": "Aucune connexion SAN connue pour ce node : aucun de ses adaptateurs n'est branché sur un commutateur inventorié par le collector.",
+      "empty": "Aucune connexion SAN connue pour ce nœud : aucun de ses adaptateurs n'est branché sur un commutateur inventorié par le collector.",
       "label": "Connexions SAN de {{name}}",
       "speed": "{{speed}} Gb/s",
       "speedOther": "Autre vitesse",
@@ -1607,7 +1607,7 @@
       "openSwitch": "Voir les ports de {{name}} dans la vue Commutateurs SAN",
       "link": "{{tail}} {{tailPort}} vers {{head}} {{headPort}}, {{speed}}",
       "kinds": {
-        "server": "Node",
+        "server": "Nœud",
         "switch": "Commutateur",
         "array": "Baie"
       }
@@ -1662,7 +1662,7 @@
   "crossLink": {
     "hint": "Voir ce {{kind}}",
     "kinds": {
-      "node": "node",
+      "node": "nœud",
       "service": "service",
       "instance": "instance",
       "app": "application",
@@ -1694,9 +1694,9 @@
       "ret": "Code de retour",
       "stdout": "Sortie standard",
       "stderr": "Sortie d'erreur",
-      "node_id": "Identifiant du node",
+      "node_id": "Identifiant du nœud",
       "svc_id": "Identifiant du service",
-      "nodes.nodename": "Node",
+      "nodes.nodename": "Nœud",
       "services.svcname": "Service"
     },
     "queueActions": {
@@ -1851,9 +1851,9 @@
   "packages": {
     "title": "Paquets",
     "fields": {
-      "nodes.nodename": "Node",
+      "nodes.nodename": "Nœud",
       "id": "Identifiant",
-      "node_id": "Identifiant du node",
+      "node_id": "Identifiant du nœud",
       "pkg_name": "Nom",
       "pkg_version": "Version",
       "pkg_arch": "Architecture",
@@ -1862,13 +1862,13 @@
       "sig_provider": "Signé par",
       "pkg_install_date": "Installé le",
       "pkg_updated": "Mis à jour",
-      "nodes.app": "App du node",
+      "nodes.app": "App du nœud",
       "nodes.os_name": "OS"
     }
   },
   "switches": {
     "title": "Commutateurs SAN",
-    "intro": "Une ligne par port de commutateur, avec ce qui est branché à l'autre bout : un node, une baie de stockage ou un autre commutateur.",
+    "intro": "Une ligne par port de commutateur, avec ce qui est branché à l'autre bout : un nœud, une baie de stockage ou un autre commutateur.",
     "fields": {
       "sw_fabric": "Fabric",
       "sw_name": "Commutateur",
@@ -1883,23 +1883,23 @@
       "sw_rportname": "Nom du port distant",
       "sw_rname": "Nom distant",
       "sw_updated": "Mis à jour",
-      "node_id": "Id du node distant",
+      "node_id": "Id du nœud distant",
       "id": "Id de l'enregistrement"
     }
   },
   "hardware": {
-    "title": "Matériel des nodes",
+    "title": "Matériel des nœuds",
     "fields": {
-      "nodes.nodename": "Node",
+      "nodes.nodename": "Nœud",
       "id": "Identifiant",
-      "node_id": "Identifiant du node",
+      "node_id": "Identifiant du nœud",
       "hw_type": "Type",
       "hw_path": "Adresse",
       "hw_class": "Classe",
       "hw_description": "Description",
       "hw_driver": "Pilote",
       "updated": "Mis à jour",
-      "nodes.app": "App du node",
+      "nodes.app": "App du nœud",
       "nodes.os_name": "OS"
     }
   },
@@ -2067,8 +2067,8 @@
     "fields": {
       "id": "Id",
       "run_date": "Date d'exécution",
-      "node_id": "Id du node",
-      "nodes.nodename": "Node",
+      "node_id": "Id du nœud",
+      "nodes.nodename": "Nœud",
       "svc_id": "Id du service",
       "services.svcname": "Service",
       "run_module": "Module",
@@ -2104,7 +2104,7 @@
     },
     "rulesets": "Rulesets",
     "modulesets": "Modulesets",
-    "nodes": "Nodes",
+    "nodes": "Nœuds",
     "services": "Services",
     "new": {
       "ruleset": "Nouveau ruleset",
@@ -2154,11 +2154,11 @@
     },
     "typeHelp": {
       "explicit": "S'applique là où il est attaché.",
-      "contextual": "S'applique aux nodes que son filterset sélectionne."
+      "contextual": "S'applique aux nœuds que son filterset sélectionne."
     },
     "filterset": "Filterset",
     "chooseFilterset": "Choisir un filterset",
-    "noFiltersetWarning": "Sans filterset, un ruleset contextuel ne sélectionne aucun node.",
+    "noFiltersetWarning": "Sans filterset, un ruleset contextuel ne sélectionne aucun nœud.",
     "public": "Public",
     "publicHelp": "Listé seul et attachable.",
     "privateHelp": "Accessible seulement par les rulesets qui l'incluent.",
@@ -2474,7 +2474,7 @@
     "noMatch": "Aucun rapport ne correspond.",
     "fold": "Replier la liste",
     "unfold": "Déplier la liste",
-    "intro": "Choisir un rapport dans la liste pour le lire. Ses métriques sont exécutées à l'ouverture, sur les nodes et services que vous voyez, restreints par votre filtre de session ; ses graphiques montrent leur historique enregistré.",
+    "intro": "Choisir un rapport dans la liste pour le lire. Ses métriques sont exécutées à l'ouverture, sur les nœuds et services que vous voyez, restreints par votre filtre de session ; ses graphiques montrent leur historique enregistré.",
     "empty": "Ce rapport n'a pas encore de contenu.",
     "period": "Période des graphiques",
     "days_one": "{{count}} jour",
@@ -2493,15 +2493,15 @@
   },
   "clusters": {
     "title": "Clusters",
-    "intro": "Les clusters dont le démon envoie son état au collector, avec les nodes et services qui les nomment. Un Manager voit tous les clusters ; les autres voient ceux qui contiennent un node ou un service d'une app dont leurs équipes sont responsables.",
+    "intro": "Les clusters dont le démon envoie son état au collector, avec les nœuds et services qui les nomment. Un Manager voit tous les clusters ; les autres voient ceux qui contiennent un nœud ou un service d'une app dont leurs équipes sont responsables.",
     "incompatible": "Incompatibles",
     "fields": {
       "cluster_name": "Nom",
       "cluster_id": "ID du cluster",
       "id": "ID d'enregistrement",
-      "node_count": "Nodes",
+      "node_count": "Nœuds",
       "svc_count": "Services",
-      "cluster_nodes": "Nodes configurés",
+      "cluster_nodes": "Nœuds configurés",
       "agent_versions": "Versions de l'agent",
       "frozen": "Gelé",
       "quorum": "Quorum",
@@ -2517,7 +2517,7 @@
         "state": "État"
       }
     },
-    "nodeUnknown": "Absent des nodes que vous voyez dans le collector",
+    "nodeUnknown": "Absent des nœuds que vous voyez dans le collector",
     "actions": {
       "open": "Actions",
       "question_one": "Mettre {{action}} en file sur ce cluster ?",
@@ -2528,8 +2528,8 @@
       "queued_other": "{{action}} en file sur {{count}} clusters.",
       "failure": "{{name}} : {{message}}",
       "items": {
-        "freeze": "Geler tous les nodes",
-        "thaw": "Dégeler tous les nodes",
+        "freeze": "Geler tous les nœuds",
+        "thaw": "Dégeler tous les nœuds",
         "abort": "Interrompre l'orchestration en cours"
       }
     }
@@ -2541,8 +2541,8 @@
       "id": "ID d'enregistrement",
       "svc_id": "ID du service",
       "services.svcname": "Service",
-      "node_id": "ID du node",
-      "nodes.nodename": "Node",
+      "node_id": "ID du nœud",
+      "nodes.nodename": "Nœud",
       "vmname": "Conteneur",
       "rid": "ID de ressource",
       "res_type": "Type",
