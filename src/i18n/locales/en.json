@@ -640,7 +640,8 @@
       "storage": "Storage",
       "nodediff": "Nodes Differences",
       "resources": "Resource status",
-      "logs": "Logs"
+      "logs": "Logs",
+      "actions": "Actions"
     },
     "actions": {
       "open": "Actions",
@@ -678,7 +679,36 @@
           "done_one": "1 service deleted.",
           "done_other": "{{count}} services deleted."
         }
-      }
+      },
+      "fields": {
+        "begin": "Begin",
+        "node": "Node",
+        "action": "Action",
+        "status": "Status",
+        "time": "Duration",
+        "ack": "Acknowledged",
+        "log": "Log"
+      },
+      "statusNames": {
+        "ok": "ok",
+        "warn": "warning",
+        "err": "error",
+        "running": "running"
+      },
+      "scheduled": "Run by the agent's scheduler",
+      "acked": "by {{by}}",
+      "showLog": "Log",
+      "logTitle": "Log of {{action}}",
+      "noLog": "The agent wrote no log line for this action.",
+      "empty": "No action in the last {{days}} days.",
+      "period": "Actions of the last {{days}} days.",
+      "latest": "The latest {{count}} of {{total}} actions of the last {{days}} days.",
+      "errCount_one": "1 in error",
+      "errCount_other": "{{count}} in error",
+      "warnCount_one": "1 in warning",
+      "warnCount_other": "{{count}} in warning",
+      "otherCount_one": "1 other",
+      "otherCount_other": "{{count}} others"
     },
     "pkgdiff": {
       "missing": "not installed",

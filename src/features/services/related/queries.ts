@@ -3,6 +3,7 @@ import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { toPage } from "@/lib/api/page";
+import { toValueStats } from "@/lib/api/value-stats";
 import { toTagRows } from "@/features/tags/tag-row";
 import { NODE_PROPS } from "@/features/nodes/node-props";
 
@@ -290,6 +291,106 @@ export function useServiceLogs(svcId: string | undefined) {
       if (error !== undefined) throw new Error(problemText(error));
       const rows: LogRow[] = Array.isArray(data.data) ? data.data : [];
       return toPage(rows, data.meta, SERVICE_LOGS_LIMIT);
+    },
+  });
+}
+
+export type ServiceAction = components["schemas"]["ServiceActionRow"];
+
+/** Actions shown in the service tab, the latest first. */
+export const SERVICE_ACTIONS_LIMIT = 100;
+/** Days of actions the tab covers, as the historical service actions tab. */
+export const SERVICE_ACTIONS_DAYS = 60;
+
+/**
+ * The start of the period the tab covers, as the collector writes dates. Rounded
+ * to the day, so that the cache key holds all day.
+ */
+function actionsSince(): string {
+  const day = new Date(Date.now() - SERVICE_ACTIONS_DAYS * 24 * 3600 * 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${String(day.getFullYear())}-${pad(day.getMonth() + 1)}-${pad(day.getDate())} 00:00:00`;
+}
+
+/**
+ * The filters of the tab: the actions themselves (`log_type` "status"), not their
+ * log lines, of the period covered.
+ */
+function actionFilters(): string[] {
+  return ["log_type:eq:status", `begin:gte:${actionsSince()}`];
+}
+
+/** The latest actions the agents ran on the service. */
+export function useServiceActions(svcId: string | undefined) {
+  return useQuery({
+    queryKey: ["service", svcId, "actions", actionsSince()],
+    enabled: svcId !== undefined,
+    queryFn: async () => {
+      const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        params: {
+          path: { svc_id: svcId ?? "" },
+          query: {
+            props:
+              "id,node_id,nodes.nodename,action,rid,subset,status,begin,end,time,cron,sid,pid,command,ack,acked_by,acked_date,acked_comment",
+            // One more than shown: whether older actions remain.
+            limit: SERVICE_ACTIONS_LIMIT + 1,
+            filter: actionFilters(),
+          },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
+      return toPage(rows, data.meta, SERVICE_ACTIONS_LIMIT);
+    },
+  });
+}
+
+/** The actions of the period counted by status, all of them and not only those shown. */
+export function useServiceActionStats(svcId: string | undefined) {
+  return useQuery({
+    queryKey: ["service", svcId, "actions", "stats", actionsSince()],
+    enabled: svcId !== undefined,
+    queryFn: async () => {
+      const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        params: {
+          path: { svc_id: svcId ?? "" },
+          query: { props: "status", stats: "1", filter: actionFilters() },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      return toValueStats(data.data, data.meta, "status");
+    },
+  });
+}
+
+/**
+ * The log lines of an action: the rows of the same agent session, process and
+ * node that are not an action, in the order they were written.
+ */
+export function useServiceActionLog(svcId: string, action: ServiceAction | undefined) {
+  return useQuery({
+    queryKey: ["service", svcId, "actions", "log", action?.id],
+    enabled: action !== undefined,
+    queryFn: async () => {
+      const filter = ["log_type:empty", `node_id:eq:${action?.node_id ?? ""}`];
+      if (action?.sid !== undefined && action.sid !== null && action.sid !== "")
+        filter.push(`sid:eq:${action.sid}`);
+      if (action?.pid !== undefined && action.pid !== null && action.pid !== "")
+        filter.push(`pid:eq:${action.pid}`);
+      const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        params: {
+          path: { svc_id: svcId },
+          query: {
+            props: "id,begin,rid,subset,status,status_log",
+            orderby: "begin,id",
+            limit: 0,
+            filter,
+          },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
+      return rows;
     },
   });
 }

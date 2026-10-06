@@ -1,12 +1,20 @@
 import { ColumnFamilyIcon } from "@/components/opensvc/ColumnFamily";
+import { GearIcon } from "@/components/ui/icons";
 import type { RelatedTab } from "@/components/opensvc/related-tabs";
 import { useTranslation } from "react-i18next";
+import { ServiceActions } from "./ServiceActions";
 import { ServiceLogs } from "./ServiceLogs";
 import { ServiceNodesDiff } from "./ServiceNodesDiff";
 import { ServiceResources } from "./ServiceResources";
 import { resourceStatusSummary } from "./resource-status";
+import { actionStatusSummary } from "./action-status";
 import { ServiceStorage } from "./ServiceStorage";
-import { useServiceDisks, useServiceLogs, useServiceResources } from "./queries";
+import {
+  useServiceActionStats,
+  useServiceDisks,
+  useServiceLogs,
+  useServiceResources,
+} from "./queries";
 import { useNodesDiffSummary } from "./use-nodes-diff-summary";
 
 /**
@@ -44,6 +52,19 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
     // reuses them.
     useSummary: (svcId) => useNodesDiffSummary(svcId),
     render: (svcId) => <ServiceNodesDiff svcId={svcId} />,
+  },
+  {
+    key: "actions",
+    labelKey: "services.related.actions",
+    // The gear of the historical actions tab (`action16`).
+    icon: <GearIcon className="h-4 w-4 shrink-0 text-icon-service" />,
+    // The actions of the period split into those in error, in warning and the
+    // others, counted by the server over all of them, not only those the tab shows.
+    useSummary: (svcId) => {
+      const { t } = useTranslation();
+      return actionStatusSummary(useServiceActionStats(svcId).data, t);
+    },
+    render: (svcId, locale) => <ServiceActions svcId={svcId} locale={locale} />,
   },
   {
     key: "logs",

@@ -3844,6 +3844,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/services/{svc_id}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List the actions the agents ran on a service (svcactions), as the
+         *     historical collector's service actions tab: an action row has
+         *     `log_type` "status", a log line of an action an empty `log_type` and its
+         *     text in `status_log`. With the names of the node and the service as
+         *     joined props (`nodes.nodename`, `services.svcname`). The latest first by
+         *     default. A manager sees the actions of every service; the others those of
+         *     a service of an app their groups are responsible for, the other services
+         *     answering 404.
+         */
+        get: operations["GetServiceActions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/services/{svc_id}/alerts": {
         parameters: {
             query?: never;
@@ -6035,6 +6061,52 @@ export interface components {
         };
         SearchResponse: {
             data: components["schemas"]["SearchGroup"][];
+        };
+        ServiceActionListResponse: {
+            data: components["schemas"]["ServiceActionRow"][] | {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            meta?: components["schemas"]["ListMeta"];
+        };
+        /**
+         * @description An action an agent ran on a service, or a log line of one. Every property
+         *     is optional: the `props` query parameter selects which columns the server
+         *     returns. The `services.` and `nodes.` props come from joined tables.
+         */
+        ServiceActionRow: {
+            ack?: number | null;
+            acked_by?: string | null;
+            acked_comment?: string | null;
+            acked_date?: string | null;
+            action?: string | null;
+            alert?: number | null;
+            begin?: string;
+            command?: string | null;
+            /** @description 1 when the scheduler of the agent ran the action */
+            cron?: number | null;
+            end?: string | null;
+            hostid?: string | null;
+            id?: number;
+            /** @description "status" for an action, empty for a log line of an action */
+            log_type?: string | null;
+            node_id?: string;
+            "nodes.nodename"?: string | null;
+            origin?: string | null;
+            pid?: string | null;
+            rid?: string | null;
+            "services.svcname"?: string;
+            /** @description Session id, shared by the actions of one agent command */
+            sid?: string | null;
+            /** @description ok, warn, err, or empty while the action runs */
+            status?: string | null;
+            status_log?: string | null;
+            subset?: string | null;
+            svc_id?: string;
+            /** @description Duration, in seconds */
+            time?: number | null;
+            version?: string | null;
         };
         ServiceAvailability: {
             available_s: number;
@@ -19282,6 +19354,82 @@ export interface operations {
             };
             401: components["responses"]["401"];
             403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetServiceActions: {
+        parameters: {
+            query?: {
+                /** @description A list of properties to include in each data dictionnary. */
+                props?: components["parameters"]["inQueryProps"];
+                /** @description The maximum number of entries to return. 0 means no limit. */
+                limit?: components["parameters"]["inQueryLimit"];
+                /** @description Skip the first entries of the data cursor. */
+                offset?: components["parameters"]["inQueryOffset"];
+                /**
+                 * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+                 *     the meta field. The metadata of a list carries its total number of rows
+                 *     without pagination (total), as well as the rows returned (count), the offset
+                 *     and the limit.
+                 */
+                meta?: components["parameters"]["inQueryMeta"];
+                /**
+                 * @description With "1" or "true", the response counts the distinct values of each
+                 *     selected property instead of listing the rows: `data` maps each property
+                 *     to an object of value → number of rows ("empty" for a null or blank
+                 *     value), over the whole selection (access control, filters and session
+                 *     filterset applied, `offset` ignored). `limit`, when given, caps the
+                 *     number of values returned per property, the most frequent first; without
+                 *     it every value is returned. `meta.total` is the number of rows,
+                 *     `meta.distinct` the number of distinct values of each property, and
+                 *     `meta.other` the number of rows whose value was left out by the limit.
+                 *     A count taking longer than 5 seconds is refused with a 400, asking to
+                 *     narrow the selection.
+                 */
+                stats?: components["parameters"]["inQueryStats"];
+                /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+                orderby?: components["parameters"]["inQueryOrderby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
+                /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+                groupby?: components["parameters"]["inQueryGroupby"];
+            };
+            header?: never;
+            path: {
+                /** @description Service identifier (svc_id UUID or svcname) */
+                svc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceActionListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
             404: components["responses"]["404"];
             500: components["responses"]["500"];
         };

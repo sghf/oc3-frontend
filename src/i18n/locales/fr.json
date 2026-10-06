@@ -640,7 +640,8 @@
       "storage": "Stockage",
       "nodediff": "Différences entre nodes",
       "resources": "Statut des ressources",
-      "logs": "Journal"
+      "logs": "Journal",
+      "actions": "Actions"
     },
     "actions": {
       "open": "Actions",
@@ -678,7 +679,36 @@
           "done_one": "1 service supprimé.",
           "done_other": "{{count}} services supprimés."
         }
-      }
+      },
+      "fields": {
+        "begin": "Début",
+        "node": "Nœud",
+        "action": "Action",
+        "status": "État",
+        "time": "Durée",
+        "ack": "Acquittée",
+        "log": "Journal"
+      },
+      "statusNames": {
+        "ok": "ok",
+        "warn": "avertissement",
+        "err": "erreur",
+        "running": "en cours"
+      },
+      "scheduled": "Lancée par l'ordonnanceur de l'agent",
+      "acked": "par {{by}}",
+      "showLog": "Journal",
+      "logTitle": "Journal de {{action}}",
+      "noLog": "L'agent n'a écrit aucune ligne de journal pour cette action.",
+      "empty": "Aucune action ces {{days}} derniers jours.",
+      "period": "Actions des {{days}} derniers jours.",
+      "latest": "Les {{count}} dernières des {{total}} actions des {{days}} derniers jours.",
+      "errCount_one": "1 en erreur",
+      "errCount_other": "{{count}} en erreur",
+      "warnCount_one": "1 en avertissement",
+      "warnCount_other": "{{count}} en avertissement",
+      "otherCount_one": "1 autre",
+      "otherCount_other": "{{count}} autres"
     },
     "pkgdiff": {
       "missing": "non installé",
