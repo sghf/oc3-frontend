@@ -506,12 +506,14 @@
         "xlsx": "Excel workbook (.xlsx)",
         "csv": "CSV file (.csv)"
       },
-      "hint": "Every row matching the filters, in the current sort, with every column: those on display first, then the hidden ones.",
+      "hint": "Every row matching the filters, in the current sort, with the columns on display, in their order; the hidden ones after them when included.",
       "done_one": "1 row exported.",
       "done_other": "{{count}} rows exported.",
       "truncated": "Export stopped at {{count}} rows: narrow the list with filters to export the rest.",
       "error": "Could not export the list: {{message}}",
-      "dismiss": "Dismiss the export report"
+      "dismiss": "Dismiss the export report",
+      "withHidden_one": "Include the hidden column (1)",
+      "withHidden_other": "Include the hidden columns ({{count}})"
     },
     "filterColumns": "Filter columns",
     "resetColumns": "Reset to default columns",

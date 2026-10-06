@@ -506,12 +506,14 @@
         "xlsx": "Classeur Excel (.xlsx)",
         "csv": "Fichier CSV (.csv)"
       },
-      "hint": "Toutes les lignes correspondant aux filtres, dans le tri courant, avec toutes les colonnes : celles affichées d'abord, puis les masquées.",
+      "hint": "Toutes les lignes correspondant aux filtres, dans le tri courant, avec les colonnes affichées, dans leur ordre ; les masquées après elles si elles sont incluses.",
       "done_one": "1 ligne exportée.",
       "done_other": "{{count}} lignes exportées.",
       "truncated": "Export arrêté à {{count}} lignes : resserrer la liste avec des filtres pour exporter le reste.",
       "error": "Impossible d'exporter la liste : {{message}}",
-      "dismiss": "Fermer le compte rendu de l'export"
+      "dismiss": "Fermer le compte rendu de l'export",
+      "withHidden_one": "Inclure la colonne masquée (1)",
+      "withHidden_other": "Inclure les colonnes masquées ({{count}})"
     },
     "filterColumns": "Filtrer les colonnes",
     "resetColumns": "Revenir aux colonnes par défaut",

@@ -218,6 +218,8 @@ export function CollectorList<T>({
   const pickerSearch = useRef<HTMLInputElement>(null);
   const exportMenu = useRef<HTMLDetailsElement>(null);
   const { pathname } = useLocation();
+  // Whether the export takes the hidden columns too; off, those on display only.
+  const [exportHidden, setExportHidden] = useState(false);
   // Rows read so far by the export under way, or null when none is.
   const [exported, setExported] = useState<number | null>(null);
   // The report of the last export, numbered, never twice: a new one starts its time again.
@@ -412,7 +414,10 @@ export function CollectorList<T>({
     setExportNotice(null);
     setExported(0);
     try {
-      const exportedProps = [...shown, ...allProps.filter((prop) => !shown.includes(prop))];
+      // The columns on display, in their order; the hidden ones after them on demand.
+      const exportedProps = exportHidden
+        ? [...shown, ...allProps.filter((prop) => !shown.includes(prop))]
+        : shown;
       const all: T[] = [];
       let truncated = false;
       for (let offset = 0; ; offset += EXPORT_CHUNK) {
@@ -682,6 +687,21 @@ export function CollectorList<T>({
                 : t("list.export.running", { count: exported })}
             </summary>
             <div className="absolute z-20 mt-1 w-64 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg">
+              <label
+                className={`mb-1 flex items-center gap-2 border-b border-line px-2 py-1.5 ${
+                  allProps.length === shown.length ? "text-ink-muted" : "cursor-pointer"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={exportHidden && allProps.length > shown.length}
+                  disabled={exported !== null || allProps.length === shown.length}
+                  onChange={(event) => {
+                    setExportHidden(event.target.checked);
+                  }}
+                />
+                {t("list.export.withHidden", { count: allProps.length - shown.length })}
+              </label>
               {(["xlsx", "csv"] as const).map((format) => (
                 <button
                   key={format}
