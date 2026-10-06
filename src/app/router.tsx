@@ -15,6 +15,7 @@ import { parseReaderSearch } from "@/features/report-reader/reader-search";
 import { ChartsPage } from "@/features/charts/ChartsPage";
 import { ClustersPage } from "@/features/clusters/ClustersPage";
 import { ResourcesPage } from "@/features/resources/ResourcesPage";
+import { ServiceActionsPage } from "@/features/service-actions/ServiceActionsPage";
 import { FiltersPage } from "@/features/filters/FiltersPage";
 import { FiltersetsPage } from "@/features/filtersets/FiltersetsPage";
 import { FormsPage } from "@/features/forms/FormsPage";
@@ -186,6 +187,14 @@ const resourcesRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+// `view-actions` of the historical menu: the actions the agents ran on the services.
+const serviceActionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/service-actions",
+  component: ServiceActionsPage,
+  validateSearch: parseListSearch,
+});
+
 const tagsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tags",
@@ -317,6 +326,7 @@ const routeTree = rootRoute.addChildren([
   servicesRoute,
   instancesRoute,
   resourcesRoute,
+  serviceActionsRoute,
   networksRoute,
   disksRoute,
   switchesRoute,

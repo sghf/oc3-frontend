@@ -33,6 +33,7 @@ export type ObjectKind =
   | "service"
   | "instance"
   | "resource"
+  | "action"
   | "network"
   | "disk"
   | "app"
@@ -73,6 +74,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   instance: { Icon: InstanceIcon, className: "text-icon-service" },
   // The sea green hashtag of the historical `resource` class, a part of a service.
   resource: { Icon: HashIcon, className: "text-icon-service" },
+  // The gear of the historical `action16` class, in the green of the services.
+  action: { Icon: GearIcon, className: "text-icon-service" },
   network: { Icon: NetworkIcon, className: "text-icon-network" },
   disk: { Icon: DatabaseIcon, className: "text-icon-disk" },
   app: { Icon: AsteriskIcon, className: "text-icon-app" },

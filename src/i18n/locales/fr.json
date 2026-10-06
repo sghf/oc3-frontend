@@ -43,7 +43,8 @@
     "designer": "Concepteur",
     "statReports": "Rapports",
     "clusters": "Clusters",
-    "resources": "Ressources"
+    "resources": "Ressources",
+    "serviceActions": "Actions"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -689,17 +690,9 @@
         "ack": "Acquittée",
         "log": "Journal"
       },
-      "statusNames": {
-        "ok": "ok",
-        "warn": "avertissement",
-        "err": "erreur",
-        "running": "en cours"
-      },
-      "scheduled": "Lancée par l'ordonnanceur de l'agent",
       "acked": "par {{by}}",
       "showLog": "Journal",
       "logTitle": "Journal de {{action}}",
-      "noLog": "L'agent n'a écrit aucune ligne de journal pour cette action.",
       "empty": "Aucune action ces {{days}} derniers jours.",
       "period": "Actions des {{days}} derniers jours.",
       "latest": "Les {{count}} dernières des {{total}} actions des {{days}} derniers jours.",
@@ -2581,5 +2574,52 @@
     "copy": "Copier en texte",
     "copied": "Copié",
     "copyFailed": "Échec de la copie"
+  },
+  "agentActions": {
+    "statusNames": {
+      "ok": "ok",
+      "warn": "avertissement",
+      "err": "erreur",
+      "running": "en cours"
+    },
+    "scheduled": "Lancée par l'ordonnanceur de l'agent",
+    "noLog": "L'agent n'a écrit aucune ligne de journal pour cette action."
+  },
+  "serviceActions": {
+    "title": "Actions",
+    "intro": "Les actions que les agents ont lancées sur les services : démarrage, arrêt, synchronisation… avec leur état et leur durée. Ouvrez-en une pour ses détails et les lignes écrites par l'agent. La file d'actions, dans la barre du haut, liste au contraire ce que le collector demande aux agents.",
+    "detail": {
+      "title": "Action",
+      "log": "Journal",
+      "groups": {
+        "identity": "Action",
+        "run": "Exécution",
+        "ack": "Acquittement"
+      }
+    },
+    "fields": {
+      "id": "Identifiant",
+      "services.svcname": "Service",
+      "svc_id": "Id du service",
+      "nodes.nodename": "Nœud",
+      "node_id": "Id du nœud",
+      "action": "Action",
+      "rid": "Ressources",
+      "subset": "Sous-ensemble",
+      "status": "État",
+      "begin": "Début",
+      "end": "Fin",
+      "time": "Durée",
+      "cron": "Planifiée",
+      "sid": "Id de session",
+      "pid": "Id de processus",
+      "command": "Commande",
+      "origin": "Origine",
+      "version": "Version de l'agent",
+      "ack": "Acquittée",
+      "acked_by": "Acquittée par",
+      "acked_date": "Acquittée le",
+      "acked_comment": "Commentaire d'acquittement"
+    }
   }
 }

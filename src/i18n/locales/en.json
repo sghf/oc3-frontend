@@ -43,7 +43,8 @@
     "designer": "Designer",
     "statReports": "Reports",
     "clusters": "Clusters",
-    "resources": "Resources"
+    "resources": "Resources",
+    "serviceActions": "Actions"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -689,17 +690,9 @@
         "ack": "Acknowledged",
         "log": "Log"
       },
-      "statusNames": {
-        "ok": "ok",
-        "warn": "warning",
-        "err": "error",
-        "running": "running"
-      },
-      "scheduled": "Run by the agent's scheduler",
       "acked": "by {{by}}",
       "showLog": "Log",
       "logTitle": "Log of {{action}}",
-      "noLog": "The agent wrote no log line for this action.",
       "empty": "No action in the last {{days}} days.",
       "period": "Actions of the last {{days}} days.",
       "latest": "The latest {{count}} of {{total}} actions of the last {{days}} days.",
@@ -2581,5 +2574,52 @@
     "copy": "Copy as text",
     "copied": "Copied",
     "copyFailed": "Copy failed"
+  },
+  "agentActions": {
+    "statusNames": {
+      "ok": "ok",
+      "warn": "warning",
+      "err": "error",
+      "running": "running"
+    },
+    "scheduled": "Run by the agent's scheduler",
+    "noLog": "The agent wrote no log line for this action."
+  },
+  "serviceActions": {
+    "title": "Actions",
+    "intro": "The actions the agents ran on the services: start, stop, sync… with their status and duration. Open one for its details and the lines the agent wrote. The action queue, in the top bar, lists instead what the collector asks the agents to do.",
+    "detail": {
+      "title": "Action",
+      "log": "Log",
+      "groups": {
+        "identity": "Action",
+        "run": "Run",
+        "ack": "Acknowledgement"
+      }
+    },
+    "fields": {
+      "id": "Record id",
+      "services.svcname": "Service",
+      "svc_id": "Service id",
+      "nodes.nodename": "Node",
+      "node_id": "Node id",
+      "action": "Action",
+      "rid": "Resources",
+      "subset": "Subset",
+      "status": "Status",
+      "begin": "Begin",
+      "end": "End",
+      "time": "Duration",
+      "cron": "Scheduled",
+      "sid": "Session id",
+      "pid": "Process id",
+      "command": "Command",
+      "origin": "Origin",
+      "version": "Agent version",
+      "ack": "Acknowledged",
+      "acked_by": "Acknowledged by",
+      "acked_date": "Acknowledged on",
+      "acked_comment": "Acknowledgement comment"
+    }
   }
 }

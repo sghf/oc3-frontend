@@ -28,6 +28,8 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   services: ["services", "service", "search", "object-label"],
   svcmon: ["instances", "instance", "service", "node", "services"],
   resmon: ["service", "instance", "resources", "resource"],
+  // The actions the agents ran: the service tab, the Actions view and its detail.
+  svcactions: ["service", "serviceActions", "agentAction"],
   resinfo: ["service", "instance"],
   dashboard: ["alerts", "alert", "node", "service"],
   action_queue: ["actions", "action"],

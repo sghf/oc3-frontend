@@ -295,7 +295,7 @@ export function useServiceLogs(svcId: string | undefined) {
   });
 }
 
-export type ServiceAction = components["schemas"]["ServiceActionRow"];
+type ServiceAction = components["schemas"]["ServiceActionRow"];
 
 /** Actions shown in the service tab, the latest first. */
 export const SERVICE_ACTIONS_LIMIT = 100;
@@ -331,7 +331,7 @@ export function useServiceActions(svcId: string | undefined) {
           path: { svc_id: svcId ?? "" },
           query: {
             props:
-              "id,node_id,nodes.nodename,action,rid,subset,status,begin,end,time,cron,sid,pid,command,ack,acked_by,acked_date,acked_comment",
+              "id,svc_id,node_id,nodes.nodename,action,rid,subset,status,begin,end,time,cron,sid,pid,command,ack,acked_by,acked_date,acked_comment",
             // One more than shown: whether older actions remain.
             limit: SERVICE_ACTIONS_LIMIT + 1,
             filter: actionFilters(),
@@ -359,38 +359,6 @@ export function useServiceActionStats(svcId: string | undefined) {
       });
       if (error !== undefined) throw new Error(problemText(error));
       return toValueStats(data.data, data.meta, "status");
-    },
-  });
-}
-
-/**
- * The log lines of an action: the rows of the same agent session, process and
- * node that are not an action, in the order they were written.
- */
-export function useServiceActionLog(svcId: string, action: ServiceAction | undefined) {
-  return useQuery({
-    queryKey: ["service", svcId, "actions", "log", action?.id],
-    enabled: action !== undefined,
-    queryFn: async () => {
-      const filter = ["log_type:empty", `node_id:eq:${action?.node_id ?? ""}`];
-      if (action?.sid !== undefined && action.sid !== null && action.sid !== "")
-        filter.push(`sid:eq:${action.sid}`);
-      if (action?.pid !== undefined && action.pid !== null && action.pid !== "")
-        filter.push(`pid:eq:${action.pid}`);
-      const { data, error } = await api.GET("/services/{svc_id}/actions", {
-        params: {
-          path: { svc_id: svcId },
-          query: {
-            props: "id,begin,rid,subset,status,status_log",
-            orderby: "begin,id",
-            limit: 0,
-            filter,
-          },
-        },
-      });
-      if (error !== undefined) throw new Error(problemText(error));
-      const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
-      return rows;
     },
   });
 }

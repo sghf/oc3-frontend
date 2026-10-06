@@ -459,6 +459,7 @@ export function DetailPanel<T>({
   kind,
   isPending,
   before,
+  after,
   recordId,
   ...content
 }: DetailContentProps<T> & {
@@ -469,6 +470,8 @@ export function DetailPanel<T>({
   kind: ObjectKind;
   /** Content placed before the properties, such as the object's tags. */
   before?: ReactNode;
+  /** Content placed after the properties, such as the log of an action. */
+  after?: ReactNode;
   /** Id of the object, for the bookmark button when a bookmark can reopen it. */
   recordId?: string;
 }) {
@@ -490,6 +493,7 @@ export function DetailPanel<T>({
         {before}
         {/* A disabled query stays "pending": panel closed, nothing to load. */}
         <DetailContent {...content} isPending={open && isPending} />
+        {after}
       </FlashScope>
     </SlideOver>
   );
