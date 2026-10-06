@@ -8,11 +8,13 @@ import "@/i18n";
 import { queryClient } from "@/lib/query";
 import { router } from "@/app/router";
 import { applyPalette, applyTheme, cachedPalette, cachedTheme } from "@/lib/theme";
+import { applyLanguage, cachedLanguage } from "@/lib/language";
 
-// Before the first render: the cached choices, otherwise the system theme and the
-// standard palette.
+// Before the first render: the cached choices, otherwise the system theme, the
+// standard palette and the browser's language.
 applyTheme(cachedTheme());
 applyPalette(cachedPalette());
+applyLanguage(cachedLanguage());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

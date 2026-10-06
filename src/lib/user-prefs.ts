@@ -15,6 +15,13 @@ import {
   type Palette,
   type Theme,
 } from "./theme";
+import {
+  applyLanguage,
+  cachedLanguage,
+  isLanguageChoice,
+  watchBrowserLanguage,
+  type LanguageChoice,
+} from "./language";
 
 /**
  * User preferences, as the historical collector keeps them in the `prefs` column of
@@ -58,6 +65,11 @@ export interface UserPrefs {
   theme?: string;
   /** Chosen colour palette; absent means "standard". */
   palette?: string;
+  /**
+   * Chosen language of the interface, "en" or "fr"; absent means the browser's
+   * ("system"), which is never stored. The old interface has no such choice.
+   */
+  language?: string;
   /**
    * The side menu: the keys of the collapsed sections. Absent, every section is
    * expanded. The old interface does not fold its menu, so the key is ours alone.
@@ -294,7 +306,18 @@ function currentAppearance(prefs: ReturnType<typeof useUserPrefs>): {
  * page opened. Until then, the local cache applied at startup (`src/main.tsx`) holds.
  */
 export function useAppearance(): void {
-  const { theme, palette } = currentAppearance(useUserPrefs());
+  const prefs = useUserPrefs();
+  const { theme, palette } = currentAppearance(prefs);
+  const language = currentLanguage(prefs);
+  useEffect(() => {
+    applyLanguage(language);
+  }, [language]);
+  // The browser's language may change during the session, while it is the one used.
+  const currentChoice = useRef(language);
+  useEffect(() => {
+    currentChoice.current = language;
+  }, [language]);
+  useEffect(() => watchBrowserLanguage(() => currentChoice.current), []);
 
   useEffect(() => {
     applyTheme(theme);
@@ -352,6 +375,45 @@ export function useThemePref() {
 export function usePalettePref() {
   const { palette } = currentAppearance(useUserPrefs());
   return useAppearanceChoice("palette", palette, applyPalette);
+}
+
+/** Language in effect: the account's once known, the local cache until then. */
+function currentLanguage(prefs: ReturnType<typeof useUserPrefs>): LanguageChoice {
+  const stored = prefs.data?.language;
+  if (isLanguageChoice(stored) && stored !== "system") return stored;
+  return prefs.isSuccess ? "system" : cachedLanguage();
+}
+
+/**
+ * Language chosen by the account, as the profile page edits it, in the shape of the
+ * appearance choices. "system" is not stored: choosing it removes `language` from
+ * the preferences, the browser's language then applying as before any choice.
+ */
+export function useLanguagePref() {
+  const queryClient = useQueryClient();
+  const language = currentLanguage(useUserPrefs());
+  const save = useMutation({
+    mutationFn: async (next: LanguageChoice) => {
+      applyLanguage(next);
+      await savePrefs(queryClient, (currentPrefs) => {
+        const rest = { ...currentPrefs };
+        delete rest.language;
+        return next === "system" ? rest : { ...rest, language: next };
+      });
+    },
+    onError: () => {
+      applyLanguage(language);
+    },
+  });
+  return {
+    // The choice being saved shows at once, rather than when the server confirms it.
+    value: save.isPending ? save.variables : language,
+    set: (next: LanguageChoice) => {
+      save.mutate(next);
+    },
+    isSaving: save.isPending,
+    errorMessage: save.isError ? save.error.message : null,
+  };
 }
 
 /**

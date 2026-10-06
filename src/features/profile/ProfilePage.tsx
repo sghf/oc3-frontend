@@ -13,11 +13,13 @@ import {
   usePalettePref,
   useResetViewPrefs,
   useThemePref,
+  useLanguagePref,
   useUserPrefs,
 } from "@/lib/user-prefs";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { ResetIcon } from "@/components/ui/icons";
 import { PALETTES, THEMES } from "@/lib/theme";
+import { LANGUAGES, browserLanguage } from "@/lib/language";
 import { PasswordSection } from "./PasswordSection";
 import { ProfileCard } from "./ProfileCard";
 
@@ -150,11 +152,12 @@ function initials(fullName: string, email: string | null | undefined): string {
   return (email ?? "?").slice(0, 1).toUpperCase();
 }
 
-/** Theme and light or dark mode, the two sides of how the interface looks. */
+/** Theme and light or dark mode, the two sides of how the interface looks, and its language. */
 function AppearanceCard() {
   const { t } = useTranslation();
   const theme = useThemePref();
   const palette = usePalettePref();
+  const language = useLanguagePref();
   return (
     <ProfileCard
       title={t("profile.appearance.title")}
@@ -182,6 +185,23 @@ function AppearanceCard() {
             optionLabel={(value) => t(`profile.theme.options.${value}`)}
             choice={theme}
           />
+        </div>
+        <div>
+          <p className="mb-1 font-medium">{t("profile.language.title")}</p>
+          <ChoiceGroup
+            name="language"
+            label={t("profile.language.title")}
+            options={LANGUAGES}
+            optionLabel={(value) =>
+              value === "system"
+                ? t("profile.language.system", {
+                    language: t(`profile.language.options.${browserLanguage()}`),
+                  })
+                : t(`profile.language.options.${value}`)
+            }
+            choice={language}
+          />
+          <p className="mt-1 text-ink-muted">{t("profile.language.hint")}</p>
         </div>
       </div>
     </ProfileCard>

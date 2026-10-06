@@ -1204,6 +1204,15 @@
     "identity": {
       "hint": "Votre nom et votre e-mail sont modifiables ; les autres propriétés sont gérées par un administrateur.",
       "editHint": "Survolez un champ pour le modifier. L'e-mail est aussi votre identifiant : vous vous connectez désormais avec le nouveau."
+    },
+    "language": {
+      "title": "Langue",
+      "system": "Système ({{language}})",
+      "options": {
+        "en": "English",
+        "fr": "Français"
+      },
+      "hint": "Système suit la langue du navigateur. Une langue choisie suit le compte, sur tous les navigateurs."
     }
   },
   "instances": {

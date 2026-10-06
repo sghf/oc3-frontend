@@ -1204,6 +1204,15 @@
     "identity": {
       "hint": "Your name and email are yours to change; the other properties are managed by an administrator.",
       "editHint": "Hover a field to change it. The email is also your sign-in name: you sign in with the new one from now on."
+    },
+    "language": {
+      "title": "Language",
+      "system": "System ({{language}})",
+      "options": {
+        "en": "English",
+        "fr": "Français"
+      },
+      "hint": "System follows the language of the browser. A chosen language follows the account, on every browser."
     }
   },
   "instances": {
