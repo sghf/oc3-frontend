@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
-import { ChevronDownIcon, SignOutIcon, UserIcon } from "@/components/ui/icons";
+import { SignOutIcon, UserIcon } from "@/components/ui/icons";
 import { signOut, stopImpersonating } from "@/lib/session";
 import { useImpersonation } from "@/lib/api/impersonation";
 import { ImpersonateDialog } from "@/features/users/ImpersonateDialog";
@@ -13,7 +13,7 @@ const ITEM =
   "flex w-full items-center gap-2 rounded-(--radius-control) px-2 py-1.5 text-left text-ink hover:bg-surface focus:bg-surface focus:outline-none";
 
 /**
- * Account menu, opened from the user name in the top bar.
+ * Account menu, opened from the user icon in the top bar.
  *
  * It follows the "menu button" pattern of the ARIA APG: the button announces the
  * menu and its state, opening from the keyboard puts the focus on the first entry,
@@ -120,16 +120,17 @@ export function UserMenu({ user }: { user: string }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
-        title={t("header.accountMenu")}
+        // The icon alone in the bar: the user is named in the tooltip, to assistive
+        // technologies and at the head of the menu.
+        title={t("header.accountMenuOf", { user })}
+        aria-label={t("header.accountMenuOf", { user })}
         onClick={() => {
           setOpen((previous) => !previous);
         }}
         onKeyDown={onButtonKeyDown}
-        className="flex items-center gap-1.5 rounded-(--radius-control) px-1 py-1 text-ink-muted hover:text-ink aria-expanded:text-ink"
+        className="flex items-center rounded-(--radius-control) p-1 text-ink-muted hover:text-ink aria-expanded:text-ink"
       >
-        <ObjectIcon kind="user" />
-        {user}
-        <ChevronDownIcon className="h-3.5 w-3.5" />
+        <ObjectIcon kind="user" className="h-4 w-4" />
       </button>
 
       {open && (
@@ -141,6 +142,10 @@ export function UserMenu({ user }: { user: string }) {
           onKeyDown={onMenuKeyDown}
           className="absolute right-0 z-30 mt-1 min-w-48 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg"
         >
+          {/* Who is signed in: text, not an entry, which the arrows skip. */}
+          <p className="mb-1 truncate border-b border-line px-2 pt-1 pb-1.5 text-data text-ink-muted">
+            {t("header.signedInAs", { user })}
+          </p>
           <Link
             to="/profile"
             role="menuitem"

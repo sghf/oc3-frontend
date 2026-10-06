@@ -70,7 +70,9 @@
     "sessionFilterNoMatch": "Aucun filterset ne correspond",
     "sessionFilterFailed": "Non appliqué",
     "sessionFilterImpersonating": "Le filtre de session de l'utilisateur incarné : il ne peut pas être changé en agissant comme un autre utilisateur.",
-    "sessionFilterClear": "Retirer le filtre de session"
+    "sessionFilterClear": "Retirer le filtre de session",
+    "accountMenuOf": "Menu du compte : {{user}}",
+    "signedInAs": "Connecté en tant que {{user}}"
   },
   "state": {
     "up": "up",
