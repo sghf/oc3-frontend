@@ -386,6 +386,8 @@ export function useResetViewPrefs() {
     },
     isPending: reset.isPending,
     isDone: reset.isSuccess,
+    /** When the reset that succeeded was asked: tells one report from the next. */
+    doneAt: reset.isSuccess ? reset.submittedAt : null,
     errorMessage: reset.isError ? reset.error.message : null,
   };
 }

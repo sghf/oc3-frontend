@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { TransientNotice } from "@/components/ui/TransientNotice";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
@@ -140,6 +142,8 @@ export function ObsolescencePage() {
    * that do not have one yet, like the "refresh obsolescence" action of the
    * historical collector. Existing settings and their dates are left untouched.
    */
+  // The refresh whose report was dismissed, or left by itself: by when it was asked.
+  const [dismissedRefresh, setDismissedRefresh] = useState<number | null>(null);
   const refresh = useMutation({
     mutationFn: async () => {
       const { error: failure } = await api.PUT("/obsolescence/refresh");
@@ -212,9 +216,17 @@ export function ObsolescencePage() {
           <RefreshIcon className="h-3.5 w-3.5" />
           {refresh.isPending ? t("obsolescence.refresh.pending") : t("obsolescence.refresh.open")}
         </button>
-        <span aria-live="polite" className="text-ink-muted">
-          {refresh.isSuccess && t("obsolescence.refresh.done")}
-        </span>
+        {refresh.isSuccess && dismissedRefresh !== refresh.submittedAt && (
+          <TransientNotice
+            id={refresh.submittedAt}
+            tone="info"
+            text={t("obsolescence.refresh.done")}
+            dismissLabel={t("actionsMenu.dismiss")}
+            onDismiss={() => {
+              setDismissedRefresh(refresh.submittedAt);
+            }}
+          />
+        )}
         {refresh.isError && (
           <span role="alert" className="text-state-down">
             ■ {refresh.error.message}

@@ -510,7 +510,8 @@
       "done_one": "1 row exported.",
       "done_other": "{{count}} rows exported.",
       "truncated": "Export stopped at {{count}} rows: narrow the list with filters to export the rest.",
-      "error": "Could not export the list: {{message}}"
+      "error": "Could not export the list: {{message}}",
+      "dismiss": "Dismiss the export report"
     },
     "filterColumns": "Filter columns",
     "resetColumns": "Reset to default columns",
@@ -2567,7 +2568,8 @@
     "dataActions": "Data actions",
     "more_one": "and 1 more",
     "more_other": "and {{count}} more",
-    "compare": "Compare the selection"
+    "compare": "Compare the selection",
+    "dismiss": "Dismiss"
   },
   "commonality": {
     "title": "Commonality of {{what}}",

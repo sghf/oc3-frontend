@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { TransientNotice } from "@/components/ui/TransientNotice";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { DetailContent } from "@/components/opensvc/DetailPanel";
@@ -191,6 +193,8 @@ function SavedSettingsCard() {
   const { t } = useTranslation();
   const prefs = useUserPrefs();
   const resetViews = useResetViewPrefs();
+  // The reset whose report was dismissed, or left by itself: by when it was asked.
+  const [dismissedReset, setDismissedReset] = useState<number | null>(null);
   return (
     <ProfileCard title={t("profile.saved.title")} family="team" hint={t("profile.saved.hint")}>
       <div className="grid gap-3">
@@ -208,10 +212,19 @@ function SavedSettingsCard() {
               pending={resetViews.isPending}
               onConfirm={resetViews.reset}
             />
+          ) : // Just reset, the report says so for a while, then the state says it.
+          resetViews.doneAt !== null && dismissedReset !== resetViews.doneAt ? (
+            <TransientNotice
+              id={resetViews.doneAt}
+              tone="success"
+              text={t("profile.viewPrefs.done")}
+              dismissLabel={t("actionsMenu.dismiss")}
+              onDismiss={() => {
+                setDismissedReset(resetViews.doneAt);
+              }}
+            />
           ) : (
-            <p role="status" className="text-ink-muted">
-              {resetViews.isDone ? t("profile.viewPrefs.done") : t("profile.viewPrefs.none")}
-            </p>
+            <p className="text-ink-muted">{t("profile.viewPrefs.none")}</p>
           )}
           {resetViews.errorMessage !== null && (
             <p role="alert" className="mt-2 text-state-down">

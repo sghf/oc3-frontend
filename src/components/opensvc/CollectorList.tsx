@@ -26,6 +26,7 @@ import { ColumnFamilyIcon, type ColumnFamily } from "./ColumnFamily";
 import { invertFilter, isInverted, withFilter, type ColumnFilters } from "@/lib/column-filters";
 import type { ValueStats } from "@/lib/api/value-stats";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
+import { TransientNotice, type NoticeTone } from "@/components/ui/TransientNotice";
 import { describeFilter, isFilterable } from "./list-filter-describe";
 import { PAGE_SIZES, visibleProps, type ResolvedListSearch } from "@/lib/list-search";
 import { readProp } from "@/lib/row";
@@ -217,7 +218,17 @@ export function CollectorList<T>({
   const { pathname } = useLocation();
   // Rows read so far by the export under way, or null when none is.
   const [exported, setExported] = useState<number | null>(null);
-  const [exportNotice, setExportNotice] = useState<{ error: boolean; text: string } | null>(null);
+  // The report of the last export, numbered: a new one starts its time again.
+  const [exportNotice, setExportNoticeState] = useState<{
+    id: number;
+    tone: NoticeTone;
+    text: string;
+  } | null>(null);
+  function setExportNotice(next: { tone: NoticeTone; text: string } | null) {
+    setExportNoticeState((previous) =>
+      next === null ? null : { ...next, id: (previous?.id ?? 0) + 1 },
+    );
+  }
 
   /**
    * Escape closes the column picker and gives the focus back to its button.
@@ -432,14 +443,15 @@ export function CollectorList<T>({
       const blob = format === "csv" ? toCsv(content) : await toXlsx(content, view);
       download(blob, `${view}-${stamp}.${format}`);
       setExportNotice({
-        error: false,
+        // Cut short: the user did not get every row, which deserves the time of a warning.
+        tone: truncated ? "warning" : "info",
         text: truncated
           ? t("list.export.truncated", { count: all.length })
           : t("list.export.done", { count: all.length }),
       });
     } catch (error) {
       setExportNotice({
-        error: true,
+        tone: "error",
         text: t("list.export.error", {
           message: error instanceof Error ? error.message : String(error),
         }),
@@ -881,13 +893,16 @@ export function CollectorList<T>({
       )}
 
       {exportNotice !== null && (
-        <p
-          role={exportNotice.error ? "alert" : "status"}
-          className={`mb-2 ${exportNotice.error ? "text-state-down" : "text-ink-muted"}`}
-        >
-          {exportNotice.error ? "■ " : ""}
-          {exportNotice.text}
-        </p>
+        <TransientNotice
+          id={exportNotice.id}
+          tone={exportNotice.tone}
+          text={exportNotice.text}
+          dismissLabel={t("list.export.dismiss")}
+          onDismiss={() => {
+            setExportNotice(null);
+          }}
+          className="mb-2"
+        />
       )}
       {selectionError !== null && (
         <p role="alert" className="mb-2 text-state-down">

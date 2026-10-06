@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { TransientNotice } from "@/components/ui/TransientNotice";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { setCredentials, useCredentials } from "@/lib/api/auth";
@@ -37,6 +38,8 @@ export function PasswordSection({ email }: { email: string | undefined }) {
   const [visible, setVisible] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
 
+  // The change whose report was dismissed, or left by itself: by when it was asked.
+  const [dismissedChange, setDismissedChange] = useState<number | null>(null);
   const change = useMutation({
     mutationFn: async ({ current, next }: { current: string; next: string }) => {
       const { error, response } = await api.POST("/users/self/password", {
@@ -126,10 +129,16 @@ export function PasswordSection({ email }: { email: string | undefined }) {
           >
             {t("profile.password.open")}
           </button>
-          {change.isSuccess && (
-            <p role="status" className="text-state-up">
-              ● {t("profile.password.done")}
-            </p>
+          {change.isSuccess && dismissedChange !== change.submittedAt && (
+            <TransientNotice
+              id={change.submittedAt}
+              tone="success"
+              text={t("profile.password.done")}
+              dismissLabel={t("actionsMenu.dismiss")}
+              onDismiss={() => {
+                setDismissedChange(change.submittedAt);
+              }}
+            />
           )}
         </div>
       ) : (

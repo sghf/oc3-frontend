@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { CloseIcon, ResetIcon } from "@/components/ui/icons";
 import { useFormUser } from "@/features/forms/use-form-user";
-import { useDesigner } from "./designer-context";
+import { useDesigner, type Notice } from "./designer-context";
 import { DragHint, DragProvider } from "./dnd";
 import { ModulesetEditor } from "./ModulesetEditor";
 import type { Operation } from "./model";
@@ -225,7 +226,6 @@ function SandboxBar() {
 
 /** The outcome of the last operations, announced to assistive technologies. */
 function Notices() {
-  const { t } = useTranslation();
   const designer = useDesigner();
   return (
     <div
@@ -233,33 +233,50 @@ function Notices() {
       className="fixed right-4 bottom-4 z-40 flex w-96 max-w-[calc(100vw-2rem)] flex-col gap-2"
     >
       {designer.notices.map((notice) => (
-        <div
+        <NoticeItem
           key={notice.id}
-          className={`flex items-start gap-2 rounded-(--radius-control) border bg-surface-raised px-3 py-2 shadow ${
-            notice.tone === "refused" ? "border-state-down text-state-down" : "border-line"
-          }`}
-        >
-          <span aria-hidden="true">{notice.tone === "refused" ? "■" : "✓"}</span>
-          <span className="flex-1">
-            {t(notice.key, {
-              ...notice.values,
-              ...(notice.inner === undefined
-                ? {}
-                : { what: t(notice.inner.key, notice.inner.values) }),
-            })}
-          </span>
-          <button
-            type="button"
-            aria-label={t("designer.dismiss")}
-            onClick={() => {
-              designer.dismiss(notice.id);
-            }}
-            className="text-ink-muted hover:text-ink"
-          >
-            <CloseIcon className="h-3.5 w-3.5" />
-          </button>
-        </div>
+          notice={notice}
+          onDismiss={() => {
+            designer.dismiss(notice.id);
+          }}
+        />
       ))}
+    </div>
+  );
+}
+
+/**
+ * A notice of the designer, which leaves by itself after the time to read it,
+ * longer when the operation was refused; hovered or focused, it waits.
+ */
+function NoticeItem({ notice, onDismiss }: { notice: Notice; onDismiss: () => void }) {
+  const { t } = useTranslation();
+  const text = t(notice.key, {
+    ...notice.values,
+    ...(notice.inner === undefined ? {} : { what: t(notice.inner.key, notice.inner.values) }),
+  });
+  const dismissal = useAutoDismiss(
+    notice.id,
+    noticeTime(text, notice.tone === "refused"),
+    onDismiss,
+  );
+  return (
+    <div
+      {...dismissal.handlers}
+      className={`flex items-start gap-2 rounded-(--radius-control) border bg-surface-raised px-3 py-2 shadow transition-opacity duration-400 motion-reduce:transition-none ${
+        dismissal.leaving ? "opacity-0" : "opacity-100"
+      } ${notice.tone === "refused" ? "border-state-down text-state-down" : "border-line"}`}
+    >
+      <span aria-hidden="true">{notice.tone === "refused" ? "■" : "✓"}</span>
+      <span className="flex-1">{text}</span>
+      <button
+        type="button"
+        aria-label={t("designer.dismiss")}
+        onClick={onDismiss}
+        className="text-ink-muted hover:text-ink"
+      >
+        <CloseIcon className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }

@@ -78,10 +78,8 @@ export function DesignerProvider({
   const notify = useCallback((notice: Omit<Notice, "id">) => {
     const id = ++noticeId;
     // The last few only: a burst of drops must not pile up messages.
+    // Each notice leaves by itself after the time to read it (`Notices`).
     setNotices((previous) => [...previous.slice(-2), { ...notice, id }]);
-    window.setTimeout(() => {
-      setNotices((previous) => previous.filter((n) => n.id !== id));
-    }, 5000);
   }, []);
   const dismiss = useCallback((id: number) => {
     setNotices((previous) => previous.filter((n) => n.id !== id));

@@ -510,7 +510,8 @@
       "done_one": "1 ligne exportée.",
       "done_other": "{{count}} lignes exportées.",
       "truncated": "Export arrêté à {{count}} lignes : resserrer la liste avec des filtres pour exporter le reste.",
-      "error": "Impossible d'exporter la liste : {{message}}"
+      "error": "Impossible d'exporter la liste : {{message}}",
+      "dismiss": "Fermer le compte rendu de l'export"
     },
     "filterColumns": "Filtrer les colonnes",
     "resetColumns": "Revenir aux colonnes par défaut",
@@ -2567,7 +2568,8 @@
     "dataActions": "Actions sur les données",
     "more_one": "et 1 autre",
     "more_other": "et {{count}} autres",
-    "compare": "Comparer la sélection"
+    "compare": "Comparer la sélection",
+    "dismiss": "Fermer"
   },
   "commonality": {
     "title": "Points communs de {{what}}",

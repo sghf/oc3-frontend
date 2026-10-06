@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { MenuButton, type MenuItem } from "@/components/ui/MenuButton";
+import { CloseIcon } from "@/components/ui/icons";
+import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
 /** An entry of the menu: the action posted to the queue, and its group. */
@@ -69,6 +71,10 @@ type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataAc
  * `<prefix>.open`, `.question`, `.confirm`, `.queueing`, `.queued` and `.failure`:
  * each kind of object keeps its own wording.
  *
+ * The report of an action (what was queued or done, and what was refused) leaves
+ * by itself after the time to read it, by its length and longer when something
+ * failed; it waits while hovered or focused, and its close button removes it.
+ *
  * The data actions, last in their own submenu as in the historical collector, act
  * on the collector at once and cannot be undone: their confirmation names the
  * objects and its button says what it does. An entry the user's privileges do not
@@ -97,7 +103,23 @@ export function ActionsMenu({
 }) {
   const { t } = useTranslation();
   const [pending, setPending] = useState<Pending | null>(null);
-  const [outcome, setOutcome] = useState<Outcome | null>(null);
+  // Each report numbered: a new one starts its time again.
+  const [outcome, setOutcomeState] = useState<(Outcome & { id: number }) | null>(null);
+  function setOutcome(next: Outcome | null) {
+    setOutcomeState((previous) =>
+      next === null ? null : { ...next, id: (previous?.id ?? 0) + 1 },
+    );
+  }
+  // The report leaves after the time to read it, longer when something failed;
+  // hovered or focused, it waits.
+  const reportText = outcome === null ? "" : [outcome.done ?? "", ...outcome.failures].join(" ");
+  const dismissal = useAutoDismiss(
+    outcome?.id ?? null,
+    noticeTime(reportText, outcome !== null && outcome.failures.length > 0),
+    () => {
+      setOutcome(null);
+    },
+  );
   const privileges = useEffectivePrivileges();
 
   const failureText = (target: ActionTarget, message: string | null) =>
@@ -285,17 +307,37 @@ export function ActionsMenu({
         </div>
       )}
 
-      {outcome !== null && outcome.done !== null && (
-        <span role="status" className="text-ink-muted">
-          {outcome.done}
-        </span>
-      )}
-      {outcome !== null && outcome.failures.length > 0 && (
-        <ul role="alert" className="text-state-down">
-          {outcome.failures.map((failure) => (
-            <li key={failure}>■ {failure}</li>
-          ))}
-        </ul>
+      {outcome !== null && (
+        <div
+          {...dismissal.handlers}
+          className={`flex items-start gap-2 transition-opacity duration-400 motion-reduce:transition-none ${dismissal.leaving ? "opacity-0" : "opacity-100"}`}
+        >
+          <div className="flex flex-col gap-1">
+            {outcome.done !== null && (
+              <span role="status" className="text-ink-muted">
+                {outcome.done}
+              </span>
+            )}
+            {outcome.failures.length > 0 && (
+              <ul role="alert" className="text-state-down">
+                {outcome.failures.map((failure) => (
+                  <li key={failure}>■ {failure}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setOutcome(null);
+            }}
+            aria-label={t("actionsMenu.dismiss")}
+            title={t("actionsMenu.dismiss")}
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface-sunken hover:text-ink"
+          >
+            <CloseIcon className="h-3 w-3" />
+          </button>
+        </div>
       )}
     </div>
   );
