@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { RelatedTable, type RelatedColumn } from "@/components/opensvc/RelatedTable";
@@ -8,28 +8,48 @@ import {
   ActionTargets,
   ScheduledMark,
 } from "@/components/opensvc/AgentActionParts";
-import type { AgentAction } from "@/components/opensvc/agent-action";
+import { actionDuration, type AgentAction } from "@/components/opensvc/agent-action";
 import { DateTime } from "@/components/ui/DateTime";
 import { CloseIcon } from "@/components/ui/icons";
 import { formatDuration } from "@/lib/format";
-import { SERVICE_ACTIONS_DAYS, SERVICE_ACTIONS_LIMIT, useServiceActions } from "./queries";
+import {
+  SERVICE_ACTIONS_DEFAULT_DAYS,
+  SERVICE_ACTIONS_LIMIT,
+  SERVICE_ACTIONS_PERIODS,
+  SERVICE_ACTIONS_TIMELINE_LIMIT,
+  useServiceActions,
+} from "./queries";
+import { ServiceActionsTimeline } from "./ServiceActionsTimeline";
 
 /**
- * The actions the agents ran on a service over the last `SERVICE_ACTIONS_DAYS`
- * days, the latest first, as the historical service actions tab
- * (`table_actions_svc`): when, on which node, which action and on which
- * resources, its status, its duration, whether the agent's scheduler ran it, and
- * the acknowledgement of a failure. "Log" shows the lines the agent wrote during
- * the action, under the list.
+ * The actions the agents ran on a service over a period chosen at the top (a day,
+ * a week, a month, two), as the historical service actions tab
+ * (`table_actions_svc`) and its timeline: the timeline draws every action of the
+ * period by node and status; the list shows the latest, with when, on which node,
+ * which action and on which resources, its status, its duration, whether the
+ * agent's scheduler ran it, and the acknowledgement of a failure. Selecting an
+ * action, from either, outlines it in the timeline and shows under the list the
+ * lines the agent wrote during it.
  */
-export function ServiceActions({ svcId, locale }: { svcId: string; locale: string }) {
+export function ServiceActions({
+  svcId,
+  nodeId,
+  locale,
+}: {
+  svcId: string;
+  /** The node of an instance: its actions only, without the node column. */
+  nodeId?: string;
+  locale: string;
+}) {
   const { t } = useTranslation();
-  const actions = useServiceActions(svcId);
-  const rows = actions.data?.rows ?? [];
+  const [days, setDays] = useState<number>(SERVICE_ACTIONS_DEFAULT_DAYS);
+  const actions = useServiceActions(svcId, days, nodeId);
+  const all = actions.data?.rows ?? [];
+  const rows = all.slice(0, SERVICE_ACTIONS_LIMIT);
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
-  const selected = rows.find((row) => row.id === selectedId);
+  const selected = all.find((row) => row.id === selectedId);
 
-  const columns: RelatedColumn<AgentAction>[] = [
+  const allColumns: RelatedColumn<AgentAction>[] = [
     {
       key: "begin",
       label: t("services.actions.fields.begin"),
@@ -67,8 +87,10 @@ export function ServiceActions({ svcId, locale }: { svcId: string; locale: strin
       key: "time",
       label: t("services.actions.fields.time"),
       numeric: true,
-      render: (row) =>
-        row.time === null || row.time === undefined ? null : formatDuration(row.time, locale),
+      render: (row) => {
+        const seconds = actionDuration(row);
+        return seconds === undefined ? null : formatDuration(seconds, locale);
+      },
     },
     {
       key: "ack",
@@ -99,26 +121,69 @@ export function ServiceActions({ svcId, locale }: { svcId: string; locale: strin
     },
   ];
 
+  // An instance names its node already.
+  const columns =
+    nodeId === undefined
+      ? allColumns
+      : allColumns.filter((column) => column.key !== "nodes.nodename");
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      <div
+        role="radiogroup"
+        aria-label={t("services.actions.period.label")}
+        className="flex flex-wrap gap-1"
+      >
+        {SERVICE_ACTIONS_PERIODS.map((period) => (
+          <button
+            key={period}
+            type="button"
+            role="radio"
+            aria-checked={days === period}
+            onClick={() => {
+              setDays(period);
+            }}
+            className="h-7 rounded-(--radius-control) border border-line px-2 aria-checked:border-accent aria-checked:bg-accent-soft aria-checked:font-medium"
+          >
+            {t(`services.actions.period.days`, { count: period })}
+          </button>
+        ))}
+      </div>
+      {all.length > 0 && (
+        <ServiceActionsTimeline
+          actions={all}
+          days={days}
+          locale={locale}
+          selectedId={selectedId}
+          onSelect={(id) => {
+            setSelectedId(id === selectedId ? undefined : id);
+          }}
+        />
+      )}
+      {actions.data?.hasMore === true && (
+        <p className="text-state-warn">
+          ▲ {t("services.actions.timeline.capped", { count: SERVICE_ACTIONS_TIMELINE_LIMIT })}
+        </p>
+      )}
       <RelatedTable
         columns={columns}
         groups={[{ key: "all", label: "", rows }]}
         rowKey={(row) => String(row.id)}
         isPending={actions.isPending}
         errorMessage={actions.isError ? actions.error.message : null}
-        empty={t("services.actions.empty", { days: SERVICE_ACTIONS_DAYS })}
+        empty={t("services.actions.empty", { count: days })}
         caption={t("services.related.actions")}
       />
       {rows.length > 0 && (
         <p className="text-ink-muted">
-          {actions.data?.hasMore === true
+          {all.length > rows.length
             ? t("services.actions.latest", {
-                count: SERVICE_ACTIONS_LIMIT,
-                total: actions.data.total ?? SERVICE_ACTIONS_LIMIT,
-                days: SERVICE_ACTIONS_DAYS,
+                count: rows.length,
+                total:
+                  actions.data?.hasMore === true ? (actions.data.total ?? all.length) : all.length,
+                days,
               })
-            : t("services.actions.period", { days: SERVICE_ACTIONS_DAYS })}
+            : t("services.actions.periodNote", { count: days })}
         </p>
       )}
       {selected !== undefined && (
@@ -145,8 +210,14 @@ function ActionLog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const section = useRef<HTMLElement>(null);
+  // Chosen from the timeline, the log may open below the fold.
+  useEffect(() => {
+    section.current?.scrollIntoView({ block: "nearest" });
+  }, [action.id]);
   return (
     <section
+      ref={section}
       aria-label={t("services.actions.logTitle", { action: action.action ?? "" })}
       className="rounded-(--radius-panel) border border-line bg-surface-raised p-3"
     >

@@ -297,33 +297,43 @@ export function useServiceLogs(svcId: string | undefined) {
 
 type ServiceAction = components["schemas"]["ServiceActionRow"];
 
-/** Actions shown in the service tab, the latest first. */
+/** Actions listed in the service tab, the latest first; the timeline draws them all. */
 export const SERVICE_ACTIONS_LIMIT = 100;
-/** Days of actions the tab covers, as the historical service actions tab. */
+/** Days of actions the tab counter covers, as the historical service actions tab. */
 export const SERVICE_ACTIONS_DAYS = 60;
+/** The periods the tab offers, in days, and the one it opens on. */
+export const SERVICE_ACTIONS_PERIODS = [1, 7, 30, 60] as const;
+export const SERVICE_ACTIONS_DEFAULT_DAYS = 7;
+/** Actions the timeline draws at most: past them, a note asks for a shorter period. */
+export const SERVICE_ACTIONS_TIMELINE_LIMIT = 1000;
 
 /**
- * The start of the period the tab covers, as the collector writes dates. Rounded
- * to the day, so that the cache key holds all day.
+ * The start of a period of `days`, as the collector writes dates. Rounded down to
+ * the hour, so that the cache key holds that long.
  */
-function actionsSince(): string {
-  const day = new Date(Date.now() - SERVICE_ACTIONS_DAYS * 24 * 3600 * 1000);
+function actionsSince(days: number): string {
+  const start = new Date(Date.now() - days * 24 * 3600 * 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${String(day.getFullYear())}-${pad(day.getMonth() + 1)}-${pad(day.getDate())} 00:00:00`;
+  return `${String(start.getFullYear())}-${pad(start.getMonth() + 1)}-${pad(start.getDate())} ${pad(start.getHours())}:00:00`;
 }
 
 /**
  * The filters of the tab: the actions themselves (`log_type` "status"), not their
  * log lines, of the period covered.
  */
-function actionFilters(): string[] {
-  return ["log_type:eq:status", `begin:gte:${actionsSince()}`];
+function actionFilters(days: number, nodeId?: string): string[] {
+  const filters = ["log_type:eq:status", `begin:gte:${actionsSince(days)}`];
+  return nodeId === undefined ? filters : [...filters, `node_id:eq:${nodeId}`];
 }
 
-/** The latest actions the agents ran on the service. */
-export function useServiceActions(svcId: string | undefined) {
+/**
+ * The actions the agents ran on the service over the last `days`, the latest
+ * first, up to `SERVICE_ACTIONS_TIMELINE_LIMIT`: the timeline draws them, the list
+ * shows the latest of them.
+ */
+export function useServiceActions(svcId: string | undefined, days: number, nodeId?: string) {
   return useQuery({
-    queryKey: ["service", svcId, "actions", actionsSince()],
+    queryKey: ["service", svcId, "actions", nodeId ?? "", actionsSince(days)],
     enabled: svcId !== undefined,
     queryFn: async () => {
       const { data, error } = await api.GET("/services/{svc_id}/actions", {
@@ -332,29 +342,43 @@ export function useServiceActions(svcId: string | undefined) {
           query: {
             props:
               "id,svc_id,node_id,nodes.nodename,action,rid,subset,status,begin,end,time,cron,sid,pid,command,ack,acked_by,acked_date,acked_comment",
-            // One more than shown: whether older actions remain.
-            limit: SERVICE_ACTIONS_LIMIT + 1,
-            filter: actionFilters(),
+            // One more than drawn: whether older actions remain.
+            limit: SERVICE_ACTIONS_TIMELINE_LIMIT + 1,
+            filter: actionFilters(days, nodeId),
           },
         },
       });
       if (error !== undefined) throw new Error(problemText(error));
       const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
-      return toPage(rows, data.meta, SERVICE_ACTIONS_LIMIT);
+      return toPage(rows, data.meta, SERVICE_ACTIONS_TIMELINE_LIMIT);
     },
   });
 }
 
-/** The actions of the period counted by status, all of them and not only those shown. */
-export function useServiceActionStats(svcId: string | undefined) {
+/**
+ * The actions of the period counted by status, all of them and not only those
+ * shown; of one node only, for an instance, with `nodeId`.
+ */
+export function useServiceActionStats(svcId: string | undefined, nodeId?: string) {
   return useQuery({
-    queryKey: ["service", svcId, "actions", "stats", actionsSince()],
+    queryKey: [
+      "service",
+      svcId,
+      "actions",
+      "stats",
+      nodeId ?? "",
+      actionsSince(SERVICE_ACTIONS_DAYS),
+    ],
     enabled: svcId !== undefined,
     queryFn: async () => {
       const { data, error } = await api.GET("/services/{svc_id}/actions", {
         params: {
           path: { svc_id: svcId ?? "" },
-          query: { props: "status", stats: "1", filter: actionFilters() },
+          query: {
+            props: "status",
+            stats: "1",
+            filter: actionFilters(SERVICE_ACTIONS_DAYS, nodeId),
+          },
         },
       });
       if (error !== undefined) throw new Error(problemText(error));

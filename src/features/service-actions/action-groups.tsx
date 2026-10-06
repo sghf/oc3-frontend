@@ -1,6 +1,6 @@
 import type { DetailGroup } from "@/components/opensvc/DetailPanel";
 import { ActionStatus, ScheduledMark } from "@/components/opensvc/AgentActionParts";
-import { actionTargets, type AgentAction } from "@/components/opensvc/agent-action";
+import { actionDuration, actionTargets, type AgentAction } from "@/components/opensvc/agent-action";
 import { linkedField } from "@/components/opensvc/linked-field";
 import { formatDateTime, formatDuration } from "@/lib/format";
 
@@ -70,10 +70,10 @@ export const ACTION_GROUPS: DetailGroup<AgentAction>[] = [
       date("end"),
       {
         prop: "time",
-        format: (row, locale) =>
-          row.time === null || row.time === undefined
-            ? undefined
-            : formatDuration(row.time, locale),
+        format: (row, locale) => {
+          const seconds = actionDuration(row);
+          return seconds === undefined ? undefined : formatDuration(seconds, locale);
+        },
       },
       {
         prop: "cron",

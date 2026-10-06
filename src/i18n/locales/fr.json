@@ -693,15 +693,31 @@
       "acked": "par {{by}}",
       "showLog": "Journal",
       "logTitle": "Journal de {{action}}",
-      "empty": "Aucune action ces {{days}} derniers jours.",
-      "period": "Actions des {{days}} derniers jours.",
-      "latest": "Les {{count}} dernières des {{total}} actions des {{days}} derniers jours.",
+      "latest": "Les {{count}} dernières des {{total}} actions de la période.",
       "errCount_one": "1 en erreur",
       "errCount_other": "{{count}} en erreur",
       "warnCount_one": "1 en avertissement",
       "warnCount_other": "{{count}} en avertissement",
       "otherCount_one": "1 autre",
-      "otherCount_other": "{{count}} autres"
+      "otherCount_other": "{{count}} autres",
+      "period": {
+        "label": "Période",
+        "days_one": "24 heures",
+        "days_other": "{{count}} jours"
+      },
+      "timeline": {
+        "title_one": "Actions des dernières 24 heures, par nœud",
+        "title_other": "Actions des {{count}} derniers jours, par nœud",
+        "ongoing": "en cours",
+        "end": "Fin",
+        "showTable": "Afficher en tableau",
+        "selectHint": "Les flèches parcourent les actions, Entrée ouvre le journal de l'une d'elles.",
+        "capped": "Seules les {{count}} dernières actions sont dessinées : choisissez une période plus courte pour les voir toutes."
+      },
+      "empty_one": "Aucune action ces dernières 24 heures.",
+      "empty_other": "Aucune action ces {{count}} derniers jours.",
+      "periodNote_one": "Actions des dernières 24 heures.",
+      "periodNote_other": "Actions des {{count}} derniers jours."
     },
     "pkgdiff": {
       "missing": "non installé",

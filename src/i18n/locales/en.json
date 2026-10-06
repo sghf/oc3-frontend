@@ -693,15 +693,31 @@
       "acked": "by {{by}}",
       "showLog": "Log",
       "logTitle": "Log of {{action}}",
-      "empty": "No action in the last {{days}} days.",
-      "period": "Actions of the last {{days}} days.",
-      "latest": "The latest {{count}} of {{total}} actions of the last {{days}} days.",
+      "latest": "The latest {{count}} of the {{total}} actions of the period.",
       "errCount_one": "1 in error",
       "errCount_other": "{{count}} in error",
       "warnCount_one": "1 in warning",
       "warnCount_other": "{{count}} in warning",
       "otherCount_one": "1 other",
-      "otherCount_other": "{{count}} others"
+      "otherCount_other": "{{count}} others",
+      "period": {
+        "label": "Period",
+        "days_one": "24 hours",
+        "days_other": "{{count}} days"
+      },
+      "timeline": {
+        "title_one": "Actions of the last 24 hours, by node",
+        "title_other": "Actions of the last {{count}} days, by node",
+        "ongoing": "ongoing",
+        "end": "End",
+        "showTable": "Show as a table",
+        "selectHint": "Use the arrow keys to step through the actions, Enter to open the log of one.",
+        "capped": "Only the latest {{count}} actions are drawn: choose a shorter period to see them all."
+      },
+      "empty_one": "No action in the last 24 hours.",
+      "empty_other": "No action in the last {{count}} days.",
+      "periodNote_one": "Actions of the last 24 hours.",
+      "periodNote_other": "Actions of the last {{count}} days."
     },
     "pkgdiff": {
       "missing": "not installed",

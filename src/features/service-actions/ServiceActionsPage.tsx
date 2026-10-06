@@ -14,7 +14,7 @@ import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ActionStatus, ActionTargets, ScheduledMark } from "@/components/opensvc/AgentActionParts";
-import type { AgentAction } from "@/components/opensvc/agent-action";
+import { actionDuration, type AgentAction } from "@/components/opensvc/agent-action";
 import { DateTime } from "@/components/ui/DateTime";
 import { formatDuration } from "@/lib/format";
 import {
@@ -157,7 +157,10 @@ const COLUMNS: ListColumn<AgentAction>[] = ACTION_PROPS.map((prop) => ({
     if (prop === "status") return <ActionStatus status={row.status} />;
     if ((prop === "begin" || prop === "end" || prop === "acked_date") && typeof value === "string")
       return <DateTime value={value} locale={locale} />;
-    if (prop === "time" && typeof value === "number") return formatDuration(value, locale);
+    if (prop === "time") {
+      const seconds = actionDuration(row);
+      return seconds === undefined ? null : formatDuration(seconds, locale);
+    }
     if (prop === "cron" || prop === "ack") return <FlagWord value={value} />;
     if (prop === "command" && typeof value === "string")
       return (

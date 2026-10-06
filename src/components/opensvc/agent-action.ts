@@ -32,3 +32,12 @@ export function actionTargets(subset: string | null | undefined, rid: string | n
   const rids = (rid ?? "").split(",").filter((item) => item !== "");
   return [...(subset === null || subset === undefined || subset === "" ? [] : [subset]), ...rids];
 }
+
+/**
+ * The duration of an action, in seconds; undefined until it ends. The API reads a
+ * missing duration as 0, which would say an action still running took no time.
+ */
+export function actionDuration(action: AgentAction): number | undefined {
+  if (action.end === undefined || action.end === null || action.end === "") return undefined;
+  return action.time ?? undefined;
+}

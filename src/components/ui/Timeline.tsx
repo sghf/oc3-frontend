@@ -87,6 +87,7 @@ export function Timeline({
   tableOpen,
   onSelect,
   selected,
+  legendOrder,
 }: {
   tracks: TimelineTrack[];
   now: number;
@@ -104,6 +105,11 @@ export function Timeline({
   onSelect?: (range: TimelineRange, track: TimelineTrack) => void;
   /** Key of the selected period, as `${track.key}/${range.key}`. */
   selected?: string;
+  /**
+   * Labels in the order the legend lists them, whatever ranges come first; the
+   * labels not named follow, in their order of appearance.
+   */
+  legendOrder?: readonly string[];
 }) {
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(600);
@@ -140,11 +146,15 @@ export function Timeline({
   const shown = active === null ? undefined : tracks[active.track]?.ranges[active.range];
   const endText = (r: TimelineRange) =>
     r.ongoing === true ? labels.ongoing : dateTime.format(new Date(r.end * 1000));
+  const rank = (label: string | undefined) => {
+    const index = legendOrder?.indexOf(label ?? "") ?? -1;
+    return index === -1 ? Infinity : index;
+  };
   const legend = [
     ...new Map(
       all.filter((r) => r.label !== undefined).map((r) => [r.label, r.tone ?? "down"] as const),
     ),
-  ];
+  ].sort(([a], [b]) => rank(a) - rank(b));
   const withLabels = legend.length > 0;
 
   function geometry(r: TimelineRange) {
