@@ -74,96 +74,102 @@ export function ColumnFilterPopover<T>({
         }`
       }
     >
-      <div className="flex items-center gap-1.5 px-1.5">
-        <ColumnFamilyIcon family={column.family} />
-        <h2 className="truncate font-semibold">{name}</h2>
-      </div>
+      {(close) => (
+        <>
+          <div className="flex items-center gap-1.5 px-1.5">
+            <ColumnFamilyIcon family={column.family} />
+            <h2 className="truncate font-semibold">{name}</h2>
+          </div>
 
-      {spec.kind === "text" && (
-        <TextFilter
-          value={expr}
-          onChange={onChange}
-          label={t("list.filters.label", { column: name })}
-          invertLabel={t("list.filters.invert")}
-          clearLabel={t("list.filters.clearOne", { column: name })}
-          invalidLabel={(reason) => t("list.filters.invalidRegex", { reason })}
-          placeholder={
-            column.numeric === true ? t("list.filters.numberHint") : t("list.filters.textHint")
-          }
-          operators={{
-            label: t("list.filters.operator"),
-            names: Object.fromEntries(
-              OPERATORS.map((operator) => [operator, t(`list.filters.operators.${operator}`)]),
-            ) as Record<TextOperator, string>,
-          }}
-          showInvert={false}
-          roomy
-        />
+          {spec.kind === "text" && (
+            <TextFilter
+              value={expr}
+              onChange={onChange}
+              label={t("list.filters.label", { column: name })}
+              invertLabel={t("list.filters.invert")}
+              clearLabel={t("list.filters.clearOne", { column: name })}
+              invalidLabel={(reason) => t("list.filters.invalidRegex", { reason })}
+              placeholder={
+                column.numeric === true ? t("list.filters.numberHint") : t("list.filters.textHint")
+              }
+              operators={{
+                label: t("list.filters.operator"),
+                names: Object.fromEntries(
+                  OPERATORS.map((operator) => [operator, t(`list.filters.operators.${operator}`)]),
+                ) as Record<TextOperator, string>,
+              }}
+              showInvert={false}
+              // Enter applies the filter and closes the popover, the focus back on the funnel.
+              onSubmit={close}
+              roomy
+            />
+          )}
+
+          {spec.kind === "enum" && !withValues && (
+            <EnumChecklist
+              value={expr}
+              onChange={onChange}
+              options={options.map((option) => ({
+                value: option.value,
+                label: optionLabel(option, t),
+                render: option.render,
+              }))}
+              label={t("list.filters.label", { column: name })}
+            />
+          )}
+
+          {withValues && (
+            <ColumnValues
+              column={name}
+              expr={expr}
+              onChange={onChange}
+              queryKey={["valueStats", ...scope, column.prop, filtersKey(others)]}
+              narrow={spec.kind === "text" ? narrowing(expr) : undefined}
+              fetchStats={(narrow) =>
+                valueStats(
+                  column.prop,
+                  narrow === undefined ? others : { ...others, [column.prop]: narrow },
+                )
+              }
+              options={spec.kind === "enum" ? options.map((option) => option.value) : undefined}
+              labelOf={(value) => {
+                const option = options.find((candidate) => candidate.value === value);
+                return option === undefined
+                  ? { text: value }
+                  : { text: optionLabel(option, t), render: option.render };
+              }}
+            />
+          )}
+
+          <div className="flex items-center justify-end gap-2 border-t border-line px-1.5 pt-2">
+            <button
+              type="button"
+              disabled={!active}
+              aria-pressed={expr !== undefined && isInverted(expr)}
+              onClick={() => {
+                if (expr !== undefined) onChange(invertFilter(expr));
+              }}
+              title={t("list.filters.invertOne", { column: name })}
+              className="h-7 rounded-(--radius-control) border border-line px-2 disabled:opacity-40 aria-pressed:border-accent aria-pressed:bg-accent-soft"
+            >
+              <span aria-hidden="true" className="font-mono">
+                ≠{" "}
+              </span>
+              {t("list.filters.exclude")}
+            </button>
+            <button
+              type="button"
+              disabled={!active}
+              onClick={() => {
+                onChange(undefined);
+              }}
+              className="h-7 rounded-(--radius-control) border border-line px-2 disabled:opacity-40"
+            >
+              {t("list.filters.clear")}
+            </button>
+          </div>
+        </>
       )}
-
-      {spec.kind === "enum" && !withValues && (
-        <EnumChecklist
-          value={expr}
-          onChange={onChange}
-          options={options.map((option) => ({
-            value: option.value,
-            label: optionLabel(option, t),
-            render: option.render,
-          }))}
-          label={t("list.filters.label", { column: name })}
-        />
-      )}
-
-      {withValues && (
-        <ColumnValues
-          column={name}
-          expr={expr}
-          onChange={onChange}
-          queryKey={["valueStats", ...scope, column.prop, filtersKey(others)]}
-          narrow={spec.kind === "text" ? narrowing(expr) : undefined}
-          fetchStats={(narrow) =>
-            valueStats(
-              column.prop,
-              narrow === undefined ? others : { ...others, [column.prop]: narrow },
-            )
-          }
-          options={spec.kind === "enum" ? options.map((option) => option.value) : undefined}
-          labelOf={(value) => {
-            const option = options.find((candidate) => candidate.value === value);
-            return option === undefined
-              ? { text: value }
-              : { text: optionLabel(option, t), render: option.render };
-          }}
-        />
-      )}
-
-      <div className="flex items-center justify-end gap-2 border-t border-line px-1.5 pt-2">
-        <button
-          type="button"
-          disabled={!active}
-          aria-pressed={expr !== undefined && isInverted(expr)}
-          onClick={() => {
-            if (expr !== undefined) onChange(invertFilter(expr));
-          }}
-          title={t("list.filters.invertOne", { column: name })}
-          className="h-7 rounded-(--radius-control) border border-line px-2 disabled:opacity-40 aria-pressed:border-accent aria-pressed:bg-accent-soft"
-        >
-          <span aria-hidden="true" className="font-mono">
-            ≠{" "}
-          </span>
-          {t("list.filters.exclude")}
-        </button>
-        <button
-          type="button"
-          disabled={!active}
-          onClick={() => {
-            onChange(undefined);
-          }}
-          className="h-7 rounded-(--radius-control) border border-line px-2 disabled:opacity-40"
-        >
-          {t("list.filters.clear")}
-        </button>
-      </div>
     </HoverPopover>
   );
 }

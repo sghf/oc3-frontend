@@ -55,7 +55,11 @@ export function HoverPopover({
   /** Accessible name of the popover. */
   panelLabel: string;
   className?: string;
-  children: ReactNode;
+  /**
+   * The content, or a function of `close`, which closes the popover and gives the
+   * focus back to its button: for a control that finishes the popover's job.
+   */
+  children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -212,7 +216,11 @@ export function HoverPopover({
             }}
             className="fixed z-30 flex w-[22rem] max-w-[calc(100vw-1rem)] flex-col gap-2 overflow-y-auto rounded-(--radius-panel) border border-line bg-surface-raised p-2 text-data font-normal text-ink shadow-lg outline-none"
           >
-            {children}
+            {typeof children === "function"
+              ? children(() => {
+                  hide(true);
+                })
+              : children}
           </div>,
           document.body,
         )}

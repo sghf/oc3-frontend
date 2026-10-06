@@ -66,6 +66,7 @@ export function TextFilter({
   operators,
   showInvert = true,
   roomy = false,
+  onSubmit,
 }: {
   value: string | undefined;
   onChange: (expr: string | undefined) => void;
@@ -86,6 +87,11 @@ export function TextFilter({
   showInvert?: boolean;
   /** Taller, for a popover rather than a table row. */
   roomy?: boolean;
+  /**
+   * Called after Enter applied the filter, to close what holds the field; not when
+   * the text could not be applied (an invalid regular expression stays to be fixed).
+   */
+  onSubmit?: () => void;
 }) {
   const errorId = useId();
   const [draft, setDraft] = useState<TextDraft>(() => toTextDraft(value));
@@ -111,16 +117,18 @@ export function TextFilter({
   const expr = fromTextDraft(draft);
   const error = regexError(expr);
 
-  function commit(next: TextDraft) {
+  /** Applies the draft; false when it cannot be, an invalid regular expression. */
+  function commit(next: TextDraft): boolean {
     clearTimeout(timer.current);
     const nextExpr = fromTextDraft(next);
-    if (regexError(nextExpr) !== null) return;
+    if (regexError(nextExpr) !== null) return false;
     // A typed "!" has flipped the inversion: it moves from the text to the toggle.
     if (nextExpr !== undefined && next.inverted !== isInverted(nextExpr))
       setDraft(toTextDraft(nextExpr));
-    if (nextExpr === value) return;
+    if (nextExpr === value) return true;
     setSent(nextExpr);
     onChange(nextExpr);
+    return true;
   }
 
   function edit(next: TextDraft, delay: number) {
@@ -151,7 +159,7 @@ export function TextFilter({
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            commit(draft);
+            if (commit(draft)) onSubmit?.();
           }
         }}
         aria-label={label}
