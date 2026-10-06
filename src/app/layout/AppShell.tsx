@@ -55,16 +55,19 @@ export function AppShell() {
     });
   }
 
-  // "n", for navigation, moves the focus to the menu, on the entry of the view on display, unfolding
-  // the menu first when it is folded: the focus waits for it to leave `inert`.
+  // "n", for navigation, moves the focus to the menu, in its filter field, ready to type
+  // the name of a view; the arrows go on to the entries. It unfolds the menu first when it
+  // is folded: the focus waits for it to leave `inert`.
   useShortcut("n", () => {
     if (!sidebarOpen) toggleSidebar();
     window.requestAnimationFrame(() => {
       const menu = document.getElementById("app-sidebar");
-      const entry =
-        menu?.querySelector<HTMLElement>('a[aria-current="page"]') ??
-        menu?.querySelector<HTMLElement>("a, button");
-      entry?.focus();
+      const field = menu?.querySelector<HTMLInputElement>('input[type="search"]');
+      if (field !== null && field !== undefined) {
+        field.focus();
+        // A filter left from a previous visit is selected, to be typed over.
+        field.select();
+      } else menu?.querySelector<HTMLElement>("a, button")?.focus();
     });
     return true;
   });

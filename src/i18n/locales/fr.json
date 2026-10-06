@@ -44,7 +44,10 @@
     "statReports": "Rapports",
     "clusters": "Clusters",
     "resources": "Ressources",
-    "serviceActions": "Actions"
+    "serviceActions": "Actions",
+    "filter": "Filtrer le menu",
+    "clearFilter": "Effacer le filtre du menu",
+    "noMatch": "Aucune entrée du menu ne correspond."
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
