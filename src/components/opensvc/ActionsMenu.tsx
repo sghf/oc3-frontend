@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { MenuButton, type MenuItem } from "@/components/ui/MenuButton";
 import { CloseIcon, GearIcon } from "@/components/ui/icons";
-import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
+import { nextNoticeId, noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
 /** An entry of the menu: the action posted to the queue, and its group. */
@@ -103,12 +103,10 @@ export function ActionsMenu({
 }) {
   const { t } = useTranslation();
   const [pending, setPending] = useState<Pending | null>(null);
-  // Each report numbered: a new one starts its time again.
+  // Each report numbered, never twice: a new one starts its time again.
   const [outcome, setOutcomeState] = useState<(Outcome & { id: number }) | null>(null);
   function setOutcome(next: Outcome | null) {
-    setOutcomeState((previous) =>
-      next === null ? null : { ...next, id: (previous?.id ?? 0) + 1 },
-    );
+    setOutcomeState(next === null ? null : { ...next, id: nextNoticeId() });
   }
   // The report leaves after the time to read it, longer when something failed;
   // hovered or focused, it waits.

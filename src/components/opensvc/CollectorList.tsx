@@ -27,6 +27,7 @@ import { invertFilter, isInverted, withFilter, type ColumnFilters } from "@/lib/
 import type { ValueStats } from "@/lib/api/value-stats";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
 import { TransientNotice, type NoticeTone } from "@/components/ui/TransientNotice";
+import { nextNoticeId } from "@/components/ui/use-auto-dismiss";
 import { describeFilter, isFilterable } from "./list-filter-describe";
 import { PAGE_SIZES, visibleProps, type ResolvedListSearch } from "@/lib/list-search";
 import { readProp } from "@/lib/row";
@@ -219,16 +220,14 @@ export function CollectorList<T>({
   const { pathname } = useLocation();
   // Rows read so far by the export under way, or null when none is.
   const [exported, setExported] = useState<number | null>(null);
-  // The report of the last export, numbered: a new one starts its time again.
+  // The report of the last export, numbered, never twice: a new one starts its time again.
   const [exportNotice, setExportNoticeState] = useState<{
     id: number;
     tone: NoticeTone;
     text: string;
   } | null>(null);
   function setExportNotice(next: { tone: NoticeTone; text: string } | null) {
-    setExportNoticeState((previous) =>
-      next === null ? null : { ...next, id: (previous?.id ?? 0) + 1 },
-    );
+    setExportNoticeState(next === null ? null : { ...next, id: nextNoticeId() });
   }
 
   /**

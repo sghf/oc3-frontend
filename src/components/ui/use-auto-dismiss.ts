@@ -16,6 +16,18 @@ export function noticeTime(text: string, serious: boolean): number {
 /** Time left, at least, once a pause ends: a message is not removed under the eyes. */
 const AFTER_PAUSE = 3000;
 
+let lastNoticeId = 0;
+
+/**
+ * A new message id, never given before: a message cleared then shown again must not
+ * reuse the id of the one before, which `useAutoDismiss` would take for the same
+ * message, already faded out.
+ */
+export function nextNoticeId(): number {
+  lastNoticeId += 1;
+  return lastNoticeId;
+}
+
 /** Length of the fade-out a message leaves with, in milliseconds. */
 export const FADE_MS = 400;
 
@@ -56,6 +68,13 @@ export function useAutoDismiss(
   const [focused, setFocused] = useState(false);
   // The message fading out, by its key: a new message starts fully shown.
   const [leavingKey, setLeavingKey] = useState<unknown>(null);
+  // Another message: whatever faded out before, this one starts fully shown, even
+  // under a key already seen.
+  const [seenKey, setSeenKey] = useState<unknown>(key);
+  if (key !== seenKey) {
+    setSeenKey(key);
+    setLeavingKey(null);
+  }
   const left = useRef(duration);
   const dismiss = useRef(onDismiss);
   dismiss.current = onDismiss;
