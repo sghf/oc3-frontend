@@ -33,11 +33,21 @@ export function MenuButton({
   items,
   disabled = false,
   className = "",
+  prominent = false,
+  icon,
 }: {
   label: string;
   items: MenuItem[];
   disabled?: boolean;
   className?: string;
+  /**
+   * A menu the page is used for, such as the actions on the selection: a pill,
+   * outlined and tinted with the accent, filled when hovered or open. The plain one, for a
+   * secondary menu, is muted. A primary button, filled, stays apart from both.
+   */
+  prominent?: boolean;
+  /** Visual placed before the label. */
+  icon?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -140,8 +150,13 @@ export function MenuButton({
           setOpen((previous) => !previous);
         }}
         onKeyDown={onButtonKeyDown}
-        className="flex h-7 items-center gap-1.5 rounded-(--radius-control) border border-line px-2 text-ink-muted hover:border-line-strong hover:text-ink disabled:opacity-60 aria-expanded:text-ink"
+        className={
+          prominent
+            ? "flex h-7 items-center gap-1.5 rounded-(--radius-pill) border border-accent bg-accent-soft pr-2.5 pl-3 font-medium text-ink hover:bg-accent hover:text-accent-ink disabled:opacity-60 aria-expanded:bg-accent aria-expanded:text-accent-ink"
+            : "flex h-7 items-center gap-1.5 rounded-(--radius-control) border border-line px-2 text-ink-muted hover:border-line-strong hover:text-ink disabled:opacity-60 aria-expanded:text-ink"
+        }
       >
+        {icon}
         {label}
         <ChevronDownIcon className="h-3.5 w-3.5" />
       </button>

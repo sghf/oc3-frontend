@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { MenuButton, type MenuItem } from "@/components/ui/MenuButton";
-import { CloseIcon } from "@/components/ui/icons";
+import { CloseIcon, GearIcon } from "@/components/ui/icons";
 import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
@@ -241,7 +241,15 @@ export function ActionsMenu({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {targets.length > 0 && (
-        <MenuButton label={t(`${prefix}.open`)} items={items} disabled={busy} />
+        <MenuButton
+          label={t(`${prefix}.open`)}
+          items={items}
+          disabled={busy}
+          // What a selection is made for: it stands out, with the gear of the
+          // historical actions (`action16`).
+          prominent
+          icon={<GearIcon className="h-3.5 w-3.5" />}
+        />
       )}
 
       {pending !== null && pending.kind === "data" && (

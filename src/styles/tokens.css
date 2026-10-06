@@ -99,6 +99,8 @@
   --row-height: 1.75rem;
   --radius-control: 3px;
   --radius-panel: 6px;
+  /* Fully rounded ends, for a control that stands out by its shape: the actions menu. */
+  --radius-pill: 999px;
 }
 
 .dark {

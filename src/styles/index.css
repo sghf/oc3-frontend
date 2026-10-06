@@ -69,6 +69,7 @@
   --text-title: var(--text-title);
   --radius-control: var(--radius-control);
   --radius-panel: var(--radius-panel);
+  --radius-pill: var(--radius-pill);
 }
 
 @layer base {
