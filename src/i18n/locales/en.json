@@ -525,19 +525,31 @@
       "active": "Filtered",
       "hidden": "hidden column",
       "unknown": "unknown column",
-      "all": "All",
-      "regex": "Regular expression",
       "invert": "Invert: rows that do not match",
-      "invertEnum": "All except the ticked values",
       "invertOne": "Invert the {{column}} filter",
       "not": "not",
-      "except": "All except {{values}}",
       "invalidRegex": "Invalid regular expression: {{reason}}",
       "numberHint": "e.g. >=8",
       "clearOne": "Clear the {{column}} filter",
       "clearAll_one": "Clear filter",
       "clearAll_other": "Clear filters ({{count}})",
-      "noMatch": "No row matches the filters."
+      "noMatch": "No row matches the filters.",
+      "open": "Filter {{column}}",
+      "openActive": "Filter {{column}}: {{filter}}",
+      "operator": "Operator",
+      "operators": {
+        "contains": "contains",
+        "eq": "equals",
+        "ne": "differs from",
+        "regex": "matches (regex)",
+        "gt": ">",
+        "gte": "≥",
+        "lt": "<",
+        "lte": "≤"
+      },
+      "textHint": "Text, or empty for none",
+      "exclude": "Exclude",
+      "clear": "Clear"
     },
     "first": "First",
     "last": "Last",
@@ -547,11 +559,9 @@
     "rangeOf": "{{from}}–{{to}} of {{total}}",
     "pagination": "Pagination",
     "distribution": {
-      "open": "Value distribution of {{column}}",
       "title": "Values of {{column}}",
       "summary_one": "{{values}} value · {{rows}} rows",
       "summary_other": "{{values}} values · {{rows}} rows",
-      "narrow": "Narrow the values…",
       "empty": "(empty)",
       "none": "No row under the other filters.",
       "other_one": "And 1 other value, on {{rows}} rows.",
@@ -560,8 +570,7 @@
       "alsoPicked": "Also picked: {{values}}.",
       "excluding": "The ticked values are excluded.",
       "hint": "Click: only · Ctrl+click: add",
-      "exclude": "Exclude",
-      "clear": "Clear"
+      "values": "Values"
     }
   },
   "detail": {

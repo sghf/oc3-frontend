@@ -525,19 +525,31 @@
       "active": "Filtrée",
       "hidden": "colonne masquée",
       "unknown": "colonne inconnue",
-      "all": "Tous",
-      "regex": "Expression régulière",
       "invert": "Inverser : les lignes qui ne correspondent pas",
-      "invertEnum": "Tout sauf les valeurs cochées",
       "invertOne": "Inverser le filtre {{column}}",
       "not": "sauf",
-      "except": "Tout sauf {{values}}",
       "invalidRegex": "Expression régulière invalide : {{reason}}",
       "numberHint": "ex. >=8",
       "clearOne": "Retirer le filtre {{column}}",
       "clearAll_one": "Retirer le filtre",
       "clearAll_other": "Retirer les filtres ({{count}})",
-      "noMatch": "Aucune ligne ne correspond aux filtres."
+      "noMatch": "Aucune ligne ne correspond aux filtres.",
+      "open": "Filtrer {{column}}",
+      "openActive": "Filtrer {{column}} : {{filter}}",
+      "operator": "Opérateur",
+      "operators": {
+        "contains": "contient",
+        "eq": "égal à",
+        "ne": "différent de",
+        "regex": "correspond (regex)",
+        "gt": ">",
+        "gte": "≥",
+        "lt": "<",
+        "lte": "≤"
+      },
+      "textHint": "Texte, ou vide pour aucun",
+      "exclude": "Exclure",
+      "clear": "Effacer"
     },
     "first": "Première",
     "last": "Dernière",
@@ -547,11 +559,9 @@
     "rangeOf": "{{from}}–{{to}} sur {{total}}",
     "pagination": "Pagination",
     "distribution": {
-      "open": "Répartition des valeurs de {{column}}",
       "title": "Valeurs de {{column}}",
       "summary_one": "{{values}} valeur · {{rows}} lignes",
       "summary_other": "{{values}} valeurs · {{rows}} lignes",
-      "narrow": "Restreindre les valeurs…",
       "empty": "(vide)",
       "none": "Aucune ligne avec les autres filtres.",
       "other_one": "Et 1 autre valeur, sur {{rows}} lignes.",
@@ -560,8 +570,7 @@
       "alsoPicked": "Aussi retenues : {{values}}.",
       "excluding": "Les valeurs cochées sont exclues.",
       "hint": "Clic : seulement · Ctrl+clic : ajouter",
-      "exclude": "Exclure",
-      "clear": "Effacer"
+      "values": "Valeurs"
     }
   },
   "detail": {

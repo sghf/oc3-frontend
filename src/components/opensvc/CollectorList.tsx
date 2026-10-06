@@ -11,7 +11,6 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 import { useLocation } from "@tanstack/react-router";
 import {
   CloseIcon,
@@ -23,20 +22,11 @@ import {
 } from "@/components/ui/icons";
 import type { ListPage } from "@/lib/api/page";
 import { download, toCsv, toXlsx, type ExportFormat } from "@/lib/export/table";
-import { EnumFilter } from "@/components/ui/EnumFilter";
-import { TextFilter } from "@/components/ui/TextFilter";
 import { ColumnFamilyIcon, type ColumnFamily } from "./ColumnFamily";
-import {
-  invertFilter,
-  isInverted,
-  toEnumValues,
-  toTextDraft,
-  withFilter,
-  filtersKey,
-  type ColumnFilters,
-} from "@/lib/column-filters";
+import { invertFilter, isInverted, withFilter, type ColumnFilters } from "@/lib/column-filters";
 import type { ValueStats } from "@/lib/api/value-stats";
-import { ColumnDistribution } from "./ColumnDistribution";
+import { ColumnFilterPopover } from "./ColumnFilterPopover";
+import { describeFilter, isFilterable } from "./list-filter-describe";
 import { PAGE_SIZES, visibleProps, type ResolvedListSearch } from "@/lib/list-search";
 import { readProp } from "@/lib/row";
 import { FlashCell, FlashScope } from "./Flash";
@@ -209,7 +199,7 @@ export function CollectorList<T>({
   /**
    * Counts the values of a column over the selection, with the filters given in
    * place of those of the moment: the view knows its endpoint. With it, the filter
-   * of each column offers the distribution of its values (see ColumnDistribution).
+   * of each column offers the distribution of its values (see ColumnValues).
    */
   valueStats?: (prop: string, filters: ColumnFilters) => Promise<ValueStats>;
 }) {
@@ -810,15 +800,39 @@ export function CollectorList<T>({
                     hidden ? "border-dashed border-line-strong" : "border-line"
                   }`}
                 >
-                  {column !== undefined && <ColumnFamilyIcon family={column.family} />}
-                  <span className="text-ink-muted">{label}</span>
-                  {isInverted(expr) && (
-                    <span className="font-medium text-ink">{t("list.filters.not")}</span>
-                  )}
-                  {column?.filter?.kind === "enum" ? (
-                    <span className="text-ink">{describeFilter(column, expr, t)}</span>
+                  {column === undefined ? (
+                    <>
+                      <span className="text-ink-muted">{label}</span>
+                      <code className="text-data text-ink">{expr}</code>
+                    </>
                   ) : (
-                    <code className="text-data text-ink">{describeFilter(column, expr, t)}</code>
+                    // The chip opens the filter of its column, header shown or not.
+                    <ColumnFilterPopover
+                      column={column}
+                      filters={search.filters}
+                      onChange={(next) => {
+                        setFilter(prop, next);
+                      }}
+                      valueStats={valueStats}
+                      scope={[pathname, search.fset]}
+                      triggerClassName="flex h-full items-center gap-1 hover:text-ink"
+                      trigger={
+                        <>
+                          <ColumnFamilyIcon family={column.family} />
+                          <span className="text-ink-muted">{label}</span>
+                          {isInverted(expr) && (
+                            <span className="font-medium text-ink">{t("list.filters.not")}</span>
+                          )}
+                          {column.filter?.kind === "enum" ? (
+                            <span className="text-ink">{describeFilter(column, expr, t)}</span>
+                          ) : (
+                            <code className="text-data text-ink">
+                              {describeFilter(column, expr, t)}
+                            </code>
+                          )}
+                        </>
+                      }
+                    />
                   )}
                   {hidden && (
                     <span className="text-ink-muted italic">
@@ -930,6 +944,20 @@ export function CollectorList<T>({
                       const meta = getMeta(header.column.columnDef).column;
                       const sorted = header.column.getIsSorted();
                       const label = flexRender(header.column.columnDef.header, header.getContext());
+                      // The funnel of the column's filter, beside its label: it opens
+                      // the filter's popover, and a click on it does not sort.
+                      const filter =
+                        filterable && isFilterable(meta) ? (
+                          <ColumnFilterPopover
+                            column={meta}
+                            filters={search.filters}
+                            onChange={(expr) => {
+                              setFilter(meta.prop, expr);
+                            }}
+                            valueStats={valueStats}
+                            scope={[pathname, search.fset]}
+                          />
+                        ) : null;
                       if (!header.column.getCanSort()) {
                         return (
                           <th
@@ -937,7 +965,12 @@ export function CollectorList<T>({
                             scope="col"
                             className={`px-2 py-1.5 font-medium ${meta.numeric === true ? "text-right" : ""}`}
                           >
-                            {label}
+                            <span
+                              className={`flex items-center gap-1 ${meta.numeric === true ? "justify-end" : ""}`}
+                            >
+                              {label}
+                              {filter}
+                            </span>
                           </th>
                         );
                       }
@@ -954,62 +987,29 @@ export function CollectorList<T>({
                           }
                           className={meta.numeric === true ? "text-right" : undefined}
                         >
-                          <button
-                            type="button"
-                            onClick={header.column.getToggleSortingHandler()}
-                            className="w-full px-2 py-1.5 text-left font-medium hover:text-ink"
+                          <span
+                            className={`flex items-center gap-0.5 pr-1 ${meta.numeric === true ? "justify-end" : ""}`}
                           >
-                            {label}
-                            {sorted !== false && (
-                              <span aria-hidden="true">
-                                {sorted === "asc" ? " ▲" : " ▼"}
-                                {sorting.length > 1 && header.column.getSortIndex() + 1}
-                              </span>
-                            )}
-                          </button>
+                            <button
+                              type="button"
+                              onClick={header.column.getToggleSortingHandler()}
+                              className={`py-1.5 pl-2 font-medium hover:text-ink ${filter === null ? "w-full pr-2 text-left" : "text-left"}`}
+                            >
+                              {label}
+                              {sorted !== false && (
+                                <span aria-hidden="true">
+                                  {sorted === "asc" ? " ▲" : " ▼"}
+                                  {sorting.length > 1 && header.column.getSortIndex() + 1}
+                                </span>
+                              )}
+                            </button>
+                            {filter}
+                          </span>
                         </th>
                       );
                     })}
                   </tr>
                 ))}
-                {filterable && (
-                  <tr className="border-b border-line text-left">
-                    <td className="w-8 px-2">
-                      <span className="sr-only">{t("list.filters.title")}</span>
-                    </td>
-                    {table.getVisibleLeafColumns().map((column) => {
-                      const meta = getMeta(column.columnDef).column;
-                      return (
-                        // The same padding above and below: the control sits in the
-                        // middle of its row, clear of the line under the headers.
-                        <td key={column.id} className="px-2 py-1">
-                          <div className="flex items-center gap-1">
-                            <div className="min-w-0 flex-1">
-                              <ColumnFilterControl
-                                column={meta}
-                                value={search.filters[meta.prop]}
-                                onChange={(expr) => {
-                                  setFilter(meta.prop, expr);
-                                }}
-                              />
-                            </div>
-                            {valueStats !== undefined && hasDistribution(meta) && (
-                              <ColumnValues
-                                column={meta}
-                                filters={search.filters}
-                                scope={[pathname, search.fset]}
-                                valueStats={valueStats}
-                                onChange={(expr) => {
-                                  setFilter(meta.prop, expr);
-                                }}
-                              />
-                            )}
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                )}
               </thead>
               <tbody>
                 {rows.length === 0 && errorMessage === null && (
@@ -1115,128 +1115,4 @@ function signatureOf(value: unknown): string {
 /** Reads the metadata of a column, which TanStack types as `unknown`. */
 function getMeta<T>(columnDef: ColumnDef<T>): ColumnMeta<T> {
   return columnDef.meta as ColumnMeta<T>;
-}
-
-/** Filter control of a column, according to what the column declares. */
-function ColumnFilterControl<T>({
-  column,
-  value,
-  onChange,
-}: {
-  column: ListColumn<T>;
-  value: string | undefined;
-  onChange: (expr: string | undefined) => void;
-}) {
-  const { t } = useTranslation();
-  const label = t("list.filters.label", { column: t(column.labelKey) });
-  const spec = column.filter ?? { kind: "text" };
-  if (spec.kind === "none") return null;
-  if (spec.kind === "enum")
-    return (
-      <EnumFilter
-        value={value}
-        onChange={onChange}
-        options={spec.options.map((option) => ({
-          value: option.value,
-          label: optionLabel(option, t),
-          render: option.render,
-        }))}
-        label={label}
-        allLabel={t("list.filters.all")}
-        invertLabel={t("list.filters.invertEnum")}
-        exceptLabel={(values) => t("list.filters.except", { values })}
-      />
-    );
-  return (
-    <TextFilter
-      value={value}
-      onChange={onChange}
-      label={label}
-      regexLabel={t("list.filters.regex")}
-      invertLabel={t("list.filters.invert")}
-      clearLabel={t("list.filters.clearOne", { column: t(column.labelKey) })}
-      invalidLabel={(reason) => t("list.filters.invalidRegex", { reason })}
-      placeholder={column.numeric === true ? t("list.filters.numberHint") : undefined}
-    />
-  );
-}
-
-/** Whether a column offers the distribution of its values: see ListColumn. */
-function hasDistribution<T>(column: ListColumn<T>): boolean {
-  if (column.filter?.kind === "none") return false;
-  return column.distribution ?? column.family !== "time";
-}
-
-/**
- * The distribution of a column's values under every filter but its own, read with
- * the view's `valueStats`; the values are named as the enumerated filter names them.
- */
-function ColumnValues<T>({
-  column,
-  filters,
-  scope,
-  valueStats,
-  onChange,
-}: {
-  column: ListColumn<T>;
-  filters: ColumnFilters;
-  /** What tells the lists apart in the cache: the page and its filterset. */
-  scope: readonly unknown[];
-  valueStats: (prop: string, filters: ColumnFilters) => Promise<ValueStats>;
-  onChange: (expr: string | undefined) => void;
-}) {
-  const { t } = useTranslation();
-  const others = Object.fromEntries(
-    Object.entries(filters).filter(([prop]) => prop !== column.prop),
-  );
-  const options = column.filter?.kind === "enum" ? column.filter.options : [];
-  return (
-    <ColumnDistribution
-      column={t(column.labelKey)}
-      expr={filters[column.prop]}
-      onChange={onChange}
-      queryKey={["valueStats", ...scope, column.prop, filtersKey(others)]}
-      fetchStats={(narrow) =>
-        valueStats(
-          column.prop,
-          narrow === undefined ? others : { ...others, [column.prop]: narrow },
-        )
-      }
-      labelOf={(value) => {
-        const option = options.find((candidate) => candidate.value === value);
-        return option === undefined
-          ? { text: value }
-          : { text: optionLabel(option, t), render: option.render };
-      }}
-    />
-  );
-}
-
-function optionLabel(option: ColumnFilterOption, t: TFunction): string {
-  return option.labelKey === undefined ? option.value : t(option.labelKey);
-}
-
-/**
- * A filter as the bar of active filters shows it: as it was typed or chosen. The
- * inversion is not part of it: the bar says it in words before the value.
- */
-function describeFilter<T>(column: ListColumn<T> | undefined, expr: string, t: TFunction): string {
-  if (column === undefined) return expr;
-  const spec = column.filter;
-  const draft = toTextDraft(expr);
-  // Values picked from a list, or from the distribution of a text column: named.
-  // A single exact value of a text column keeps its "=", which tells it from a
-  // substring.
-  if (spec?.kind === "enum" || draft.text.startsWith("in:")) {
-    const options = spec?.kind === "enum" ? spec.options : [];
-    const values = toEnumValues(expr);
-    if (values.length > 0)
-      return values
-        .map((value) => {
-          const option = options.find((candidate) => candidate.value === value);
-          return option === undefined ? value : optionLabel(option, t);
-        })
-        .join(", ");
-  }
-  return draft.regex ? `/${draft.text}/` : draft.text;
 }
