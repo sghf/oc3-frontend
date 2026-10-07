@@ -189,8 +189,6 @@ export function AppsPage() {
         rowId={(row) => row.app}
         search={search}
         onChange={update}
-        // The collector's filtersets do not apply to application codes.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

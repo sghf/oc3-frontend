@@ -212,8 +212,6 @@ export function ActionsPage() {
         rowId={(row) => row.id}
         search={search}
         onChange={update}
-        // apicollector has no actions endpoint filtered by filterset.
-        filtersets={[]}
         isPending={loading}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

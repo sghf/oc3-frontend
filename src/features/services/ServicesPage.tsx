@@ -8,7 +8,6 @@ import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
-import { useFiltersets } from "@/lib/api/filtersets";
 import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { FrozenMark } from "@/components/opensvc/FrozenMark";
@@ -232,33 +231,19 @@ async function fetchServices(search: ResolvedListSearch) {
     limit: search.limit + 1,
     filter: filterQuery(search.filters),
   };
-  const response =
-    search.fset === ""
-      ? await api.GET("/services", { params: { query } })
-      : await api.GET("/filtersets/{filterset_id}/services", {
-          params: { path: { filterset_id: search.fset }, query },
-        });
+  const response = await api.GET("/services", { params: { query } });
   if (response.error !== undefined) throw new Error(problemText(response.error));
   const all: ServiceRow[] = Array.isArray(response.data.data) ? response.data.data : [];
   return toPage(all, response.data.meta, search.limit);
 }
 
 /**
- * The distribution of a column's values over the selection: the filterset of
- * `search` and the filters given apply, not the pagination.
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
  */
-async function serviceStats(
-  search: ResolvedListSearch,
-  prop: string,
-  filters: ColumnFilters,
-): Promise<ValueStats> {
+async function serviceStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
   const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
-  const response =
-    search.fset === ""
-      ? await api.GET("/services", { params: { query } })
-      : await api.GET("/filtersets/{filterset_id}/services", {
-          params: { path: { filterset_id: search.fset }, query },
-        });
+  const response = await api.GET("/services", { params: { query } });
   if (response.error !== undefined) throw new Error(problemText(response.error));
   return toValueStats(response.data.data, response.data.meta, prop);
 }
@@ -286,7 +271,6 @@ function useServices(search: ResolvedListSearch) {
       search.sort,
       search.offset,
       search.limit,
-      search.fset,
       search.cols,
       filtersKey(search.filters),
     ],
@@ -306,7 +290,6 @@ export function ServicesPage() {
   );
   const navigate = useNavigate({ from: "/services" });
   const { data, isPending, isError, error, isFetching } = useServices(search);
-  const filtersets = useFiltersets();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   // The services the last deletion removed, unticked from the list.
   const [deleted, setDeleted] = useState<string[]>([]);
@@ -314,15 +297,10 @@ export function ServicesPage() {
   // The selection narrowed from its comparison, ticked in the list.
   const [reselect, setReselect] = useState<string[] | undefined>(undefined);
 
-  /** Ids of the whole selection, filterset and filters included, without pagination. */
+  /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {
     const query = { props: "svc_id", limit: 0, filter: filterQuery(search.filters) };
-    const response =
-      search.fset === ""
-        ? await api.GET("/services", { params: { query } })
-        : await api.GET("/filtersets/{filterset_id}/services", {
-            params: { path: { filterset_id: search.fset }, query },
-          });
+    const response = await api.GET("/services", { params: { query } });
     if (response.error !== undefined) throw new Error(problemText(response.error));
     const rows: ServiceRow[] = Array.isArray(response.data.data) ? response.data.data : [];
     return rows.map((row) => row.svc_id).filter((id): id is string => id !== undefined);
@@ -377,7 +355,6 @@ export function ServicesPage() {
         rowId={(row) => row.svc_id}
         search={search}
         onChange={update}
-        filtersets={filtersets.data ?? []}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}
@@ -389,7 +366,7 @@ export function ServicesPage() {
         selectAllMatching={allIds}
         unselect={deleted}
         reselect={reselect}
-        valueStats={(prop, filters) => serviceStats(search, prop, filters)}
+        valueStats={serviceStats}
         filterable
       />
 

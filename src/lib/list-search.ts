@@ -25,8 +25,6 @@ export interface ListSearch {
   sort?: string;
   offset?: number;
   limit?: number;
-  /** Name of the applied filterset, absent for the full list. */
-  fset?: string;
   /** Id of the row whose detail panel is open. */
   sel?: string;
   /** Props of the visible columns; absent means the view's default columns. */
@@ -62,7 +60,6 @@ export interface ResolvedListSearch {
   sort: string[];
   offset: number;
   limit: number;
-  fset: string;
   sel?: string;
   cols?: string[];
   tab?: string;
@@ -108,7 +105,6 @@ export function parseListSearch(raw: Record<string, unknown>): ListSearch {
     sort: toCommaList(raw.sort),
     offset: toPositiveInt(raw.offset),
     limit: PAGE_SIZES.some((size) => size === limit) ? limit : undefined,
-    fset: toNonEmptyString(raw.fset),
     sel: toNonEmptyString(raw.sel),
     cols: toCommaList(raw.cols),
     tab: toNonEmptyString(raw.tab),
@@ -124,7 +120,6 @@ export function resolveListSearch(search: ListSearch, defaultSort: string[]): Re
     sort: search.sort?.split(",") ?? defaultSort,
     offset: search.offset ?? 0,
     limit: search.limit ?? DEFAULT_LIMIT,
-    fset: search.fset ?? "",
     sel: search.sel,
     cols: search.cols?.split(","),
     tab: search.tab,
@@ -157,7 +152,6 @@ export function toSearchParams(next: Partial<ResolvedListSearch>): Partial<ListS
     out.cols = next.cols === undefined || next.cols.length === 0 ? undefined : next.cols.join(",");
   if ("offset" in next) out.offset = next.offset === 0 ? undefined : next.offset;
   if ("limit" in next) out.limit = next.limit === DEFAULT_LIMIT ? undefined : next.limit;
-  if ("fset" in next) out.fset = next.fset === "" ? undefined : next.fset;
   // One drawer at a time: opening a row panel closes the record a badge had opened,
   // just as the badge closes the row panel.
   if ("sel" in next) {

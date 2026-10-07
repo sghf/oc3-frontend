@@ -253,8 +253,6 @@ export function RulesetsPage() {
         rowId={rowKey}
         search={search}
         onChange={update}
-        // The collector's filtersets select nodes and services, not rulesets.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

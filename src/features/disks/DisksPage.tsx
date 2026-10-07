@@ -227,8 +227,6 @@ export function DisksPage() {
         rowId={(row) => row.disk_id}
         search={search}
         onChange={update}
-        // The collector's filtersets do not apply to disks.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

@@ -487,8 +487,6 @@
     "unavailable": "The collector cannot check your credentials right now, please retry later: {{reason}}"
   },
   "list": {
-    "filterset": "Filterset",
-    "noFilterset": "No filterset",
     "perPage": "Per page",
     "range": "{{from}}–{{to}}",
     "previous": "Previous",

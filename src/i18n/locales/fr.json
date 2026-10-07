@@ -487,8 +487,6 @@
     "unavailable": "Le collector ne peut pas vérifier vos identifiants pour le moment, réessayez plus tard : {{reason}}"
   },
   "list": {
-    "filterset": "Filterset",
-    "noFilterset": "Aucun filterset",
     "perPage": "Par page",
     "range": "{{from}}–{{to}}",
     "previous": "Précédent",

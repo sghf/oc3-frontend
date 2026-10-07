@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
-import { useFiltersets } from "@/lib/api/filtersets";
 import {
   CollectorList,
   type ColumnFilterOption,
@@ -127,7 +126,6 @@ async function fetchLogs(search: ResolvedListSearch) {
         offset: search.offset,
         limit: search.limit + 1,
         filter: filterQuery(search.filters),
-        ...(search.fset === "" ? {} : { fset_id: search.fset }),
       },
     },
   });
@@ -143,7 +141,6 @@ function useLogs(search: ResolvedListSearch) {
       search.sort,
       search.offset,
       search.limit,
-      search.fset,
       search.cols,
       filtersKey(search.filters),
     ],
@@ -163,9 +160,8 @@ export function LogsPage() {
   );
   const navigate = useNavigate({ from: "/logs" });
   const { data, isPending, isError, error, isFetching } = useLogs(search);
-  const filtersets = useFiltersets();
 
-  /** Ids of the whole selection, filterset and filters included, without pagination. */
+  /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {
     const { data, error } = await api.GET("/logs", {
       params: {
@@ -173,7 +169,6 @@ export function LogsPage() {
           props: "id",
           limit: 0,
           filter: filterQuery(search.filters),
-          ...(search.fset === "" ? {} : { fset_id: search.fset }),
         },
       },
     });
@@ -256,7 +251,6 @@ export function LogsPage() {
         rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
         search={search}
         onChange={update}
-        filtersets={filtersets.data ?? []}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

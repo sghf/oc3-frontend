@@ -301,9 +301,6 @@ export function ServiceActionsPage() {
         rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
         search={search}
         onChange={update}
-        // apicollector has no actions endpoint filtered by filterset; the session
-        // filter narrows the list.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

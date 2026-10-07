@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
-import { useFiltersets } from "@/lib/api/filtersets";
 import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
@@ -139,7 +138,6 @@ function useAlerts(search: ResolvedListSearch) {
       search.sort,
       search.offset,
       search.limit,
-      search.fset,
       search.cols,
       filtersKey(search.filters),
     ],
@@ -176,7 +174,6 @@ export function DashboardPage() {
   const navigate = useNavigate({ from: "/" });
   const { data, isPending, isError, error, isFetching } = useAlerts(search);
   const severities = useSeverityCounts();
-  const filtersets = useFiltersets();
 
   /** Ids of the whole selection, without pagination. */
   async function allIds(): Promise<string[]> {
@@ -225,7 +222,6 @@ export function DashboardPage() {
         rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
         search={search}
         onChange={update}
-        filtersets={filtersets.data ?? []}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

@@ -159,8 +159,6 @@ export function TagsPage() {
         rowId={(row) => row.tag_id}
         search={search}
         onChange={update}
-        // The collector's filtersets do not apply to tags.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

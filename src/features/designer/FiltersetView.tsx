@@ -88,20 +88,8 @@ export function FiltersetView({ id }: { id: number }) {
         {matches.isError && <p className="text-state-down">■ {matches.error.message}</p>}
         {matches.data !== undefined && (
           <p className="flex flex-wrap gap-x-4 gap-y-1">
-            <Link
-              to="/nodes"
-              search={{ fset: filterset.name }}
-              className="underline decoration-line underline-offset-2"
-            >
-              {t("filtersets.matches.nodes", { count: matches.data.nodes })}
-            </Link>
-            <Link
-              to="/services"
-              search={{ fset: filterset.name }}
-              className="underline decoration-line underline-offset-2"
-            >
-              {t("filtersets.matches.services", { count: matches.data.services })}
-            </Link>
+            <span>{t("filtersets.matches.nodes", { count: matches.data.nodes })}</span>
+            <span>{t("filtersets.matches.services", { count: matches.data.services })}</span>
           </p>
         )}
       </Section>

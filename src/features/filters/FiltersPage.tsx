@@ -196,8 +196,6 @@ export function FiltersPage() {
         rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
         search={search}
         onChange={update}
-        // A filter is not filtered by a filterset: filtersets are made of filters.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

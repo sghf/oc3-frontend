@@ -221,8 +221,6 @@ export function ModulesetsPage() {
         rowId={rowKey}
         search={search}
         onChange={update}
-        // The collector's filtersets select nodes and services, not modulesets.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

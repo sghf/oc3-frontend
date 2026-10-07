@@ -5,7 +5,6 @@ import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
-import { useFiltersets } from "@/lib/api/filtersets";
 import {
   CollectorList,
   type ColumnFilterOption,
@@ -193,7 +192,6 @@ async function fetchComplianceLogs(search: ResolvedListSearch) {
         offset: search.offset,
         limit: search.limit + 1,
         filter: filterQuery(search.filters),
-        ...(search.fset === "" ? {} : { fset_id: search.fset }),
       },
     },
   });
@@ -210,7 +208,6 @@ function useComplianceLogs(search: ResolvedListSearch) {
       search.sort,
       search.offset,
       search.limit,
-      search.fset,
       search.cols,
       filtersKey(search.filters),
     ],
@@ -235,9 +232,8 @@ export function ComplianceLogsPage() {
   );
   const navigate = useNavigate({ from: "/compliance/logs" });
   const { data, isPending, isError, error, isFetching } = useComplianceLogs(search);
-  const filtersets = useFiltersets();
 
-  /** Ids of the whole selection, filters and filterset included, without pagination. */
+  /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {
     const { data, error } = await api.GET("/compliance/logs", {
       params: {
@@ -245,7 +241,6 @@ export function ComplianceLogsPage() {
           props: "id",
           limit: 0,
           filter: filterQuery(search.filters),
-          ...(search.fset === "" ? {} : { fset_id: search.fset }),
         },
       },
     });
@@ -278,7 +273,6 @@ export function ComplianceLogsPage() {
         rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
         search={search}
         onChange={update}
-        filtersets={filtersets.data ?? []}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

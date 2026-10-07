@@ -368,8 +368,6 @@ export function InstancesPage() {
         rowId={(row) => toInstanceId(row.svc_id, row.node_id, row.mon_vmname)}
         search={search}
         onChange={update}
-        // apicollector has no instances endpoint filtered by filterset.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

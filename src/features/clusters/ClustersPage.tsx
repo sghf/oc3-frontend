@@ -247,8 +247,6 @@ export function ClustersPage() {
         rowId={(row) => row.cluster_id}
         search={search}
         onChange={update}
-        // A filterset selects nodes and services, not clusters.
-        filtersets={[]}
         isPending={isPending}
         isFetching={isFetching}
         errorMessage={isError ? error.message : null}

@@ -131,7 +131,6 @@ export function CollectorList<T>({
   rowId,
   search,
   onChange,
-  filtersets,
   isPending,
   isFetching,
   errorMessage,
@@ -153,7 +152,6 @@ export function CollectorList<T>({
   rowId: (row: T) => string | undefined;
   search: ResolvedListSearch;
   onChange: (next: Partial<ResolvedListSearch>) => void;
-  filtersets: string[];
   isPending: boolean;
   isFetching: boolean;
   errorMessage: string | null;
@@ -490,7 +488,6 @@ export function CollectorList<T>({
     search.limit,
     search.cols,
     search.filters,
-    search.fset,
   ]);
 
   // True once the list has shown its rows: a row mounted afterwards is one the
@@ -564,29 +561,6 @@ export function CollectorList<T>({
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-1 text-ink-muted" htmlFor="list-filterset">
-          {t("list.filterset")}
-          <select
-            id="list-filterset"
-            value={search.fset}
-            onChange={(event) => {
-              // The filter changes the population: what was ticked is not necessarily
-              // part of it any more, and "every page" would no longer speak of the same
-              // whole.
-              table.resetRowSelection();
-              onChange({ fset: event.target.value, offset: 0, sel: undefined });
-            }}
-            className="h-7 rounded-(--radius-control) border border-line bg-surface px-1 text-ink"
-          >
-            <option value="">{t("list.noFilterset")}</option>
-            {filtersets.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </label>
-
         <label className="flex items-center gap-1 text-ink-muted" htmlFor="list-page-size">
           {t("list.perPage")}
           <select
@@ -843,7 +817,7 @@ export function CollectorList<T>({
                         setFilter(prop, next);
                       }}
                       valueStats={valueStats}
-                      scope={[pathname, search.fset]}
+                      scope={[pathname]}
                       triggerClassName="flex h-full items-center gap-1 hover:text-ink"
                       trigger={
                         <>
@@ -987,7 +961,7 @@ export function CollectorList<T>({
                               setFilter(meta.prop, expr);
                             }}
                             valueStats={valueStats}
-                            scope={[pathname, search.fset]}
+                            scope={[pathname]}
                           />
                         ) : null;
                       if (!header.column.getCanSort()) {
