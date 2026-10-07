@@ -13,6 +13,7 @@ import { useShortcut } from "@/lib/shortcuts";
 import { ActionQueueLink } from "@/features/actions/ActionQueueLink";
 import { UserMenu } from "./UserMenu";
 import { ImpersonationBanner } from "./ImpersonationBanner";
+import { NoticeRegion } from "@/components/ui/NoticeRegion";
 import { LiveIndicator } from "./LiveIndicator";
 import { SessionFilter } from "./SessionFilter";
 import { SidebarIcon } from "@/components/ui/icons";
@@ -115,6 +116,7 @@ export function AppShell() {
             </div>
           </header>
           <ImpersonationBanner />
+          <NoticeRegion />
         </div>
 
         <div className="grid min-h-0 grid-cols-[auto_1fr]">

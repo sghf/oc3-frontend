@@ -3,6 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { MenuButton, type MenuItem } from "@/components/ui/MenuButton";
 import { CloseIcon, GearIcon } from "@/components/ui/icons";
+import { NOTICE_CARD, NOTICE_TONES, type NoticeTone } from "@/components/ui/notice-tones";
+import { InNoticeRegion } from "@/components/ui/NoticeRegion";
 import { nextNoticeId, noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
@@ -52,6 +54,12 @@ interface Outcome {
   /** The success message, or null when nothing succeeded. */
   done: string | null;
   failures: string[];
+}
+
+/** The tint of a report: done, failed, or both at once, which a warning says. */
+function outcomeTone(outcome: Outcome): NoticeTone {
+  if (outcome.failures.length === 0) return "success";
+  return outcome.done === null ? "error" : "warning";
 }
 
 /** The action awaiting confirmation: an agent action, or a data action. */
@@ -314,36 +322,46 @@ export function ActionsMenu({
       )}
 
       {outcome !== null && (
-        <div
-          {...dismissal.handlers}
-          className={`flex items-start gap-2 transition-opacity duration-400 motion-reduce:transition-none ${dismissal.leaving ? "opacity-0" : "opacity-100"}`}
-        >
-          <div className="flex flex-col gap-1">
-            {outcome.done !== null && (
-              <span role="status" className="text-ink-muted">
-                {outcome.done}
-              </span>
-            )}
-            {outcome.failures.length > 0 && (
-              <ul role="alert" className="text-state-down">
-                {outcome.failures.map((failure) => (
-                  <li key={failure}>■ {failure}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setOutcome(null);
-            }}
-            aria-label={t("actionsMenu.dismiss")}
-            title={t("actionsMenu.dismiss")}
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface-sunken hover:text-ink"
+        <InNoticeRegion>
+          <div
+            {...dismissal.handlers}
+            className={`${NOTICE_CARD} ${NOTICE_TONES[outcomeTone(outcome)].box} transition-opacity duration-400 motion-reduce:transition-none ${dismissal.leaving ? "opacity-0" : "opacity-100"}`}
           >
-            <CloseIcon className="h-3 w-3" />
-          </button>
-        </div>
+            <div className="flex flex-col gap-1">
+              {outcome.done !== null && (
+                <span role="status">
+                  <span aria-hidden="true" className={NOTICE_TONES.success.markClass}>
+                    {NOTICE_TONES.success.mark}{" "}
+                  </span>
+                  {outcome.done}
+                </span>
+              )}
+              {outcome.failures.length > 0 && (
+                <ul role="alert">
+                  {outcome.failures.map((failure) => (
+                    <li key={failure}>
+                      <span aria-hidden="true" className={NOTICE_TONES.error.markClass}>
+                        {NOTICE_TONES.error.mark}{" "}
+                      </span>
+                      {failure}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setOutcome(null);
+              }}
+              aria-label={t("actionsMenu.dismiss")}
+              title={t("actionsMenu.dismiss")}
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface hover:text-ink"
+            >
+              <CloseIcon className="h-3 w-3" />
+            </button>
+          </div>
+        </InNoticeRegion>
       )}
     </div>
   );

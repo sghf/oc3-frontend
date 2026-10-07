@@ -447,7 +447,7 @@ export function CollectorList<T>({
       download(blob, `${view}-${stamp}.${format}`);
       setExportNotice({
         // Cut short: the user did not get every row, which deserves the time of a warning.
-        tone: truncated ? "warning" : "info",
+        tone: truncated ? "warning" : "success",
         text: truncated
           ? t("list.export.truncated", { count: all.length })
           : t("list.export.done", { count: all.length }),
@@ -895,7 +895,6 @@ export function CollectorList<T>({
           onDismiss={() => {
             setExportNotice(null);
           }}
-          className="mb-2"
         />
       )}
       {selectionError !== null && (

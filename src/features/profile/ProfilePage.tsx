@@ -232,19 +232,22 @@ function SavedSettingsCard() {
               pending={resetViews.isPending}
               onConfirm={resetViews.reset}
             />
-          ) : // Just reset, the report says so for a while, then the state says it.
-          resetViews.doneAt !== null && dismissedReset !== resetViews.doneAt ? (
-            <TransientNotice
-              id={resetViews.doneAt}
-              tone="success"
-              text={t("profile.viewPrefs.done")}
-              dismissLabel={t("actionsMenu.dismiss")}
-              onDismiss={() => {
-                setDismissedReset(resetViews.doneAt);
-              }}
-            />
           ) : (
-            <p className="text-ink-muted">{t("profile.viewPrefs.none")}</p>
+            <>
+              {/* The state in place; the report of the reset floats over the page. */}
+              <p className="text-ink-muted">{t("profile.viewPrefs.none")}</p>
+              {resetViews.doneAt !== null && dismissedReset !== resetViews.doneAt && (
+                <TransientNotice
+                  id={resetViews.doneAt}
+                  tone="success"
+                  text={t("profile.viewPrefs.done")}
+                  dismissLabel={t("actionsMenu.dismiss")}
+                  onDismiss={() => {
+                    setDismissedReset(resetViews.doneAt);
+                  }}
+                />
+              )}
+            </>
           )}
           {resetViews.errorMessage !== null && (
             <p role="alert" className="mt-2 text-state-down">

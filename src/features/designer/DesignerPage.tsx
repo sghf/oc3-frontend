@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
+import { NOTICE_TONES } from "@/components/ui/notice-tones";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { CloseIcon, ResetIcon } from "@/components/ui/icons";
@@ -255,6 +256,7 @@ function NoticeItem({ notice, onDismiss }: { notice: Notice; onDismiss: () => vo
     ...notice.values,
     ...(notice.inner === undefined ? {} : { what: t(notice.inner.key, notice.inner.values) }),
   });
+  const tone = notice.tone === "refused" ? "error" : "success";
   const dismissal = useAutoDismiss(
     notice.id,
     noticeTime(text, notice.tone === "refused"),
@@ -263,11 +265,14 @@ function NoticeItem({ notice, onDismiss }: { notice: Notice; onDismiss: () => vo
   return (
     <div
       {...dismissal.handlers}
-      className={`flex items-start gap-2 rounded-(--radius-control) border bg-surface-raised px-3 py-2 shadow transition-opacity duration-400 motion-reduce:transition-none ${
-        dismissal.leaving ? "opacity-0" : "opacity-100"
-      } ${notice.tone === "refused" ? "border-state-down text-state-down" : "border-line"}`}
+      // Tinted as the other temporary messages: red when refused, green when done.
+      className={`notice-in flex items-start gap-2 rounded-(--radius-panel) border px-3 py-2 font-medium text-ink shadow transition-opacity duration-400 motion-reduce:transition-none ${
+        NOTICE_TONES[tone].box
+      } ${dismissal.leaving ? "opacity-0" : "opacity-100"}`}
     >
-      <span aria-hidden="true">{notice.tone === "refused" ? "■" : "✓"}</span>
+      <span aria-hidden="true" className={NOTICE_TONES[tone].markClass}>
+        {notice.tone === "refused" ? "■" : "✓"}
+      </span>
       <span className="flex-1">{text}</span>
       <button
         type="button"
