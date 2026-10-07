@@ -525,6 +525,29 @@
     "selectingEverything": "Selecting…",
     "selectedEverywhere": "{{count}} selected, every page",
     "selectedEverywhere_other": "{{count}} selected, every page",
+    "saveFilterset": {
+      "label": "Save as filterset…",
+      "name": "Filterset name",
+      "taken": "A filterset already has this name.",
+      "entries": "Entries",
+      "unstorable": {
+        "regex": "A regular expression cannot be stored in a filterset.",
+        "empty": "An empty value cannot be stored in a filterset.",
+        "column": "Filtersets cannot filter on this column.",
+        "length": "Value too long for a filterset (256 characters at most)."
+      },
+      "withSession": "Also apply the session filter ({{name}})",
+      "selects": {
+        "nodes": "Selects the nodes matching these filters, and the services with an instance on them.",
+        "services": "Selects the services matching these filters, and the nodes they run on.",
+        "related": "Selects the nodes and services with a row matching each filter. Each filter is checked on its own: two filters can be met by different rows."
+      },
+      "nothing": "None of these filters can be stored in a filterset.",
+      "create": "Create filterset",
+      "creating": "Creating…",
+      "created": "Filterset “{{name}}” created.",
+      "open": "Open"
+    },
     "filters": {
       "title": "Filters",
       "label": "Filter {{column}}",

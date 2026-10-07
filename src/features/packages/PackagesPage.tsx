@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import type { FiltersetSource } from "@/lib/filterset-entries";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
@@ -136,6 +137,17 @@ function usePackages(search: ResolvedListSearch) {
 }
 
 /**
+ * Filters saved as a filterset (SaveAsFilterset). Packages are rows of the packages
+ * table.
+ */
+const FILTERSET_SOURCE: FiltersetSource = {
+  table: "packages",
+  // Read from pkg_sig_provider, which filtersets cannot filter on.
+  exclude: ["sig_provider"],
+  selects: "related",
+};
+
+/**
  * Packages installed on the nodes the user can see, as their agents report them:
  * one row per node and package, with the provider of the signing key. Read-only;
  * the rows are filtered and sorted by the server.
@@ -192,6 +204,7 @@ export function PackagesPage() {
         total={data?.total}
         selectAllMatching={allIds}
         filterable
+        filtersetSource={FILTERSET_SOURCE}
       />
     </section>
   );

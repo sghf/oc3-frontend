@@ -6,11 +6,12 @@ import { serialiseTrail } from "@/lib/peek-trail";
  * display (see `PeekPanel`). Shared by every badge that names an object, by the
  * bookmarks, by the global search and by the panel title, so that they all behave
  * alike. The panel title then records it in the history (`PanelTitle`); nothing
- * is bookmarked: only the bookmark button of a panel does that.
+ * is bookmarked: only the bookmark button of a panel does that. `tab` opens the
+ * panel on one of its tabs rather than on the properties.
  */
 export function usePeek() {
   const navigate = useNavigate();
-  return (kind: string, id: string) => {
+  return (kind: string, id: string, tab?: string) => {
     void navigate({
       to: ".",
       search: (previous) => ({
@@ -19,7 +20,7 @@ export function usePeek() {
         tab: undefined,
         peek: serialiseTrail([{ kind, id }]),
         peekat: undefined,
-        peektab: undefined,
+        peektab: tab,
       }),
       resetScroll: false,
     });

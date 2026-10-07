@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import type { FiltersetSource } from "@/lib/filterset-entries";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
@@ -183,6 +184,11 @@ function useResources(search: ResolvedListSearch) {
 }
 
 /**
+ * Filters saved as a filterset (SaveAsFilterset). Resources are rows of resmon.
+ */
+const FILTERSET_SOURCE: FiltersetSource = { table: "resmon", selects: "related" };
+
+/**
  * The resources of the service instances, as the agents report them: the
  * historical `view-resources` (`resmon`). A Manager sees them all, the others
  * those of the services of an app their teams are responsible for. Read-only: a
@@ -243,6 +249,7 @@ export function ResourcesPage() {
         total={data?.total}
         selectAllMatching={allIds}
         filterable
+        filtersetSource={FILTERSET_SOURCE}
       />
 
       <ResourceDetailPanel

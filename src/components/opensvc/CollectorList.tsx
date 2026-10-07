@@ -27,6 +27,8 @@ import { invertFilter, isInverted, withFilter, type ColumnFilters } from "@/lib/
 import type { ValueStats } from "@/lib/api/value-stats";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
 import { TransientNotice, type NoticeTone } from "@/components/ui/TransientNotice";
+import type { FiltersetSource } from "@/lib/filterset-entries";
+import { SaveAsFilterset } from "./SaveAsFilterset";
 import { nextNoticeId } from "@/components/ui/use-auto-dismiss";
 import { describeFilter, isFilterable } from "./list-filter-describe";
 import { PAGE_SIZES, visibleProps, type ResolvedListSearch } from "@/lib/list-search";
@@ -144,6 +146,7 @@ export function CollectorList<T>({
   unselect,
   reselect,
   valueStats,
+  filtersetSource,
 }: {
   columns: ListColumn<T>[];
   /** Props shown as long as the user has not chosen their columns. */
@@ -203,6 +206,11 @@ export function CollectorList<T>({
    * of each column offers the distribution of its values (see ColumnValues).
    */
   valueStats?: (prop: string, filters: ColumnFilters) => Promise<ValueStats>;
+  /**
+   * How the columns map onto the tables of a filterset: with it, the filter bar
+   * offers to save the active filters as a filterset (see SaveAsFilterset).
+   */
+  filtersetSource?: FiltersetSource;
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
@@ -883,6 +891,18 @@ export function CollectorList<T>({
             <ResetIcon className="h-3.5 w-3.5" />
             {t("list.filters.clearAll", { count: activeFilters.length })}
           </button>
+          {filtersetSource !== undefined && (
+            <SaveAsFilterset
+              filters={search.filters}
+              source={filtersetSource}
+              describe={(prop, expr) => {
+                const column = columns.find((entry) => entry.prop === prop);
+                if (column === undefined) return `${prop} ${expr}`;
+                const not = isInverted(expr) ? `${t("list.filters.not")} ` : "";
+                return `${t(column.labelKey)} ${not}${describeFilter(column, expr, t)}`;
+              }}
+            />
+          )}
         </div>
       )}
 

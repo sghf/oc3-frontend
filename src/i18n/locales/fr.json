@@ -525,6 +525,29 @@
     "selectingEverything": "Sélection…",
     "selectedEverywhere": "{{count}} sélectionnée, toutes pages",
     "selectedEverywhere_other": "{{count}} sélectionnées, toutes pages",
+    "saveFilterset": {
+      "label": "Enregistrer comme filterset…",
+      "name": "Nom du filterset",
+      "taken": "Un filterset porte déjà ce nom.",
+      "entries": "Entrées",
+      "unstorable": {
+        "regex": "Une expression régulière ne peut pas être enregistrée dans un filterset.",
+        "empty": "Une valeur vide ne peut pas être enregistrée dans un filterset.",
+        "column": "Les filtersets ne peuvent pas filtrer sur cette colonne.",
+        "length": "Valeur trop longue pour un filterset (256 caractères au plus)."
+      },
+      "withSession": "Appliquer aussi le filtre de session ({{name}})",
+      "selects": {
+        "nodes": "Sélectionne les nœuds qui correspondent à ces filtres, et les services qui ont une instance sur eux.",
+        "services": "Sélectionne les services qui correspondent à ces filtres, et les nœuds où ils tournent.",
+        "related": "Sélectionne les nœuds et les services ayant une ligne qui correspond à chaque filtre. Chaque filtre est évalué séparément : deux filtres peuvent être satisfaits par des lignes différentes."
+      },
+      "nothing": "Aucun de ces filtres ne peut être enregistré dans un filterset.",
+      "create": "Créer le filterset",
+      "creating": "Création…",
+      "created": "Filterset « {{name}} » créé.",
+      "open": "Ouvrir"
+    },
     "filters": {
       "title": "Filtres",
       "label": "Filtrer {{column}}",

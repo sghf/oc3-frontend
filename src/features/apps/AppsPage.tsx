@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import type { FiltersetSource } from "@/lib/filterset-entries";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
@@ -116,6 +117,11 @@ function useApps(search: ResolvedListSearch) {
   });
 }
 
+/**
+ * Filters saved as a filterset (SaveAsFilterset). Apps are rows of the apps table.
+ */
+const FILTERSET_SOURCE: FiltersetSource = { table: "apps", selects: "related" };
+
 export function AppsPage() {
   const { t } = useTranslation();
   const prefs = useViewPrefs("apps");
@@ -197,6 +203,7 @@ export function AppsPage() {
         total={data?.total}
         selectAllMatching={allIds}
         filterable
+        filtersetSource={FILTERSET_SOURCE}
       />
 
       <AppDetailPanel

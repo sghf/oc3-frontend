@@ -5250,6 +5250,25 @@ export interface components {
             };
             meta?: components["schemas"]["ListMeta"];
         };
+        /**
+         * @description An entry of a filterset being created: either a filter (f_table, f_field,
+         *     f_op and f_value) or a nested filterset (filterset), joined to the previous
+         *     entries by f_log_op.
+         */
+        FiltersetNewEntry: {
+            /** @description Column of f_table the filter applies to */
+            f_field?: string;
+            /** @enum {string} */
+            f_log_op: "AND" | "AND NOT" | "OR" | "OR NOT";
+            /** @enum {string} */
+            f_op?: "=" | "LIKE" | ">" | ">=" | "<" | "<=" | "IN";
+            /** @description Table the filter applies to */
+            f_table?: string;
+            /** @description Value to compare the column to */
+            f_value?: string;
+            /** @description Record id or name of the filterset to nest */
+            filterset?: string;
+        };
         FiltersetRef: {
             fset_name?: string;
             id: number;
@@ -12673,6 +12692,15 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /**
+                     * @description Entries to create the filterset with, in order: filters, given by
+                     *     their definition, and nested filtersets. Accepted on creation only:
+                     *     with entries, a name already in use is a conflict rather than an
+                     *     update. A filter identical to an existing one reuses it. The
+                     *     filterset, its new filters and its entries are written together, or
+                     *     not at all.
+                     */
+                    entries?: components["schemas"]["FiltersetNewEntry"][];
                     /** @description Name of the filterset to create, or of the filterset to update */
                     fset_name?: string;
                     /**

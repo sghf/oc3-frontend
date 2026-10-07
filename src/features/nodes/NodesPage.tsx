@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import type { FiltersetSource } from "@/lib/filterset-entries";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
@@ -280,6 +281,12 @@ function useNodes(search: ResolvedListSearch) {
   });
 }
 
+/**
+ * Filters saved as a filterset (SaveAsFilterset). Nodes filter on their own columns:
+ * the filterset selects them.
+ */
+const FILTERSET_SOURCE: FiltersetSource = { table: "nodes", selects: "nodes" };
+
 export function NodesPage() {
   const { t } = useTranslation();
   const prefs = useViewPrefs("nodes");
@@ -386,6 +393,7 @@ export function NodesPage() {
         reselect={reselect}
         valueStats={nodeStats}
         filterable
+        filtersetSource={FILTERSET_SOURCE}
       />
 
       <CommonalityPanel

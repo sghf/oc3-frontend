@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import type { FiltersetSource } from "@/lib/filterset-entries";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
@@ -276,6 +277,12 @@ function useInstances(search: ResolvedListSearch) {
   });
 }
 
+/**
+ * Filters saved as a filterset (SaveAsFilterset). Instances are rows of svcmon; their
+ * node and service names are joined columns.
+ */
+const FILTERSET_SOURCE: FiltersetSource = { table: "svcmon", selects: "related" };
+
 export function InstancesPage() {
   const { t } = useTranslation();
   const prefs = useViewPrefs("instances");
@@ -381,6 +388,7 @@ export function InstancesPage() {
         reselect={reselect}
         valueStats={instanceStats}
         filterable
+        filtersetSource={FILTERSET_SOURCE}
       />
 
       <CommonalityPanel
