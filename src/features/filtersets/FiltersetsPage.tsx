@@ -192,7 +192,11 @@ export function FiltersetsPage() {
         filtersetId={creating ? undefined : search.sel}
         label={selected?.fset_name ?? ""}
         onClose={() => {
-          update({ sel: undefined });
+          update({ sel: undefined, tab: undefined });
+        }}
+        tab={search.tab}
+        onTabChange={(tab) => {
+          update({ tab });
         }}
       />
 

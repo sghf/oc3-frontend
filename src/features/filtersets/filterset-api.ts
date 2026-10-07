@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
+import { toPage } from "@/lib/api/page";
 
 type FiltersetRow = components["schemas"]["FiltersetRow"];
 type FiltersetExportEntry = components["schemas"]["FiltersetExportEntry"];
@@ -93,6 +94,66 @@ export function useFiltersetMatches(id: string | undefined) {
         nodes: Array.isArray(nodes.data.data) ? nodes.data.data.length : 0,
         services: Array.isArray(services.data.data) ? services.data.data.length : 0,
       };
+    },
+  });
+}
+
+type NodeRow = components["schemas"]["NodeRow"];
+type ServiceRow = components["schemas"]["ServiceRow"];
+
+/** Objects a filterset tab shows at most: past them, typing narrows the list. */
+export const FILTERSET_OBJECTS_LIMIT = 200;
+
+/**
+ * The nodes a filterset selects, by name, those whose name contains `narrow` when
+ * given. The session filter does not apply: the list of one record is shown whole.
+ */
+export function useFiltersetNodes(id: string | undefined, narrow: string) {
+  return useQuery({
+    queryKey: [FILTERSET_KEY, id, "nodes", narrow],
+    enabled: id !== undefined,
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const { data, error } = await api.GET("/filtersets/{filterset_id}/nodes", {
+        params: {
+          path: { filterset_id: id ?? "" },
+          query: {
+            props: "node_id,nodename,node_frozen,app,node_env,os_concat,status,last_comm",
+            orderby: "nodename",
+            // One more than shown: whether others remain.
+            limit: FILTERSET_OBJECTS_LIMIT + 1,
+            filter: narrow === "" ? undefined : [`nodename:${narrow}`],
+          },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: NodeRow[] = Array.isArray(data.data) ? data.data : [];
+      return toPage(rows, data.meta, FILTERSET_OBJECTS_LIMIT);
+    },
+  });
+}
+
+/** The services a filterset selects, as `useFiltersetNodes`. */
+export function useFiltersetServices(id: string | undefined, narrow: string) {
+  return useQuery({
+    queryKey: [FILTERSET_KEY, id, "services", narrow],
+    enabled: id !== undefined,
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const { data, error } = await api.GET("/filtersets/{filterset_id}/services", {
+        params: {
+          path: { filterset_id: id ?? "" },
+          query: {
+            props: "svc_id,svcname,svc_app,svc_env,svc_status,svc_availstatus",
+            orderby: "svcname",
+            limit: FILTERSET_OBJECTS_LIMIT + 1,
+            filter: narrow === "" ? undefined : [`svcname:${narrow}`],
+          },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: ServiceRow[] = Array.isArray(data.data) ? data.data : [];
+      return toPage(rows, data.meta, FILTERSET_OBJECTS_LIMIT);
     },
   });
 }

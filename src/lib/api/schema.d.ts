@@ -5267,12 +5267,16 @@ export interface components {
             fset_updated?: string;
             id?: number;
         };
+        FiltersetRulesetRef: {
+            id: number;
+            ruleset_name: string;
+        };
         FiltersetUsageResponse: {
             data: {
                 /** @description Filtersets encapsulating this one. */
                 filtersets: components["schemas"]["FiltersetRef"][];
-                /** @description Compliance rulesets restricted by this filterset. The ruleset name is in `fset_name`. */
-                rulesets: components["schemas"]["FiltersetRef"][];
+                /** @description Compliance rulesets restricted by this filterset. */
+                rulesets: components["schemas"]["FiltersetRulesetRef"][];
                 /** @description Check thresholds, as "chk_type.chk_instance:low-high". */
                 thresholds: string[];
             };

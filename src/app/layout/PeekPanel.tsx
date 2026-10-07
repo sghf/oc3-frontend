@@ -118,7 +118,15 @@ export function PeekPanel() {
       case "network":
         return <NetworkDetailPanel ipId={id} label={label} onClose={close} />;
       case "filterset":
-        return <FiltersetDetailPanel filtersetId={id} label={label} onClose={close} />;
+        return (
+          <FiltersetDetailPanel
+            filtersetId={id}
+            label={label}
+            tab={tab}
+            onTabChange={onTabChange}
+            onClose={close}
+          />
+        );
       case "form":
         return (
           <FormDetailPanel

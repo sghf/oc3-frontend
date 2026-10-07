@@ -1573,6 +1573,19 @@
       "choose": "Choose…",
       "add": "Add"
     },
+    "related": {
+      "label": "Filterset details",
+      "nodes": "Nodes",
+      "services": "Services"
+    },
+    "objects": {
+      "findNode": "Find a node…",
+      "findService": "Find a service…",
+      "firstOnly": "The first {{count}} by name. Type a name to narrow the list.",
+      "noNode": "This filterset selects no node.",
+      "noService": "This filterset selects no service.",
+      "noMatch": "No name matches."
+    },
     "matches": {
       "title": "Selection",
       "nodes_one": "{{count}} node",

@@ -1573,6 +1573,19 @@
       "choose": "Choisir…",
       "add": "Ajouter"
     },
+    "related": {
+      "label": "Détail du filterset",
+      "nodes": "Nœuds",
+      "services": "Services"
+    },
+    "objects": {
+      "findNode": "Chercher un nœud…",
+      "findService": "Chercher un service…",
+      "firstOnly": "Les {{count}} premiers par nom. Saisissez un nom pour restreindre la liste.",
+      "noNode": "Ce filterset ne sélectionne aucun nœud.",
+      "noService": "Ce filterset ne sélectionne aucun service.",
+      "noMatch": "Aucun nom ne correspond."
+    },
     "matches": {
       "title": "Sélection",
       "nodes_one": "{{count}} nœud",
