@@ -698,9 +698,12 @@ export function CollectorList<T>({
 
         {selectedCount > 0 && (
           <span className="flex items-center gap-2 text-ink">
-            {allMatching
-              ? t("list.selectedEverywhere", { count: selectedCount })
-              : t("list.selected", { count: selectedCount })}
+            {/* In red: rows are ticked, and an action would apply to them. */}
+            <span className="font-medium text-state-down">
+              {allMatching
+                ? t("list.selectedEverywhere", { count: selectedCount })
+                : t("list.selected", { count: selectedCount })}
+            </span>
             {canSelectEverything && (
               // A second click on the header checkbox does the same, but nothing
               // announces it: this button makes the extension visible.
