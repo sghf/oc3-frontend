@@ -465,6 +465,12 @@
         "thresholds": "Seuils",
         "chk_err": "État"
       },
+      "search": "Chercher dans les checks",
+      "count_one": "{{count}} check",
+      "count_other": "{{count}} checks",
+      "matching_one": "{{count}} check sur {{total}}",
+      "matching_other": "{{count}} checks sur {{total}}",
+      "noMatch": "Aucun check ne correspond à « {{query}} ».",
       "within": "dans les seuils",
       "below": "sous le seuil bas",
       "above": "au-dessus du seuil haut",

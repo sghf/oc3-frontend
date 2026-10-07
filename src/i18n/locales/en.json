@@ -465,6 +465,12 @@
         "thresholds": "Thresholds",
         "chk_err": "State"
       },
+      "search": "Search the checks",
+      "count_one": "{{count}} check",
+      "count_other": "{{count}} checks",
+      "matching_one": "{{count}} of {{total}} checks",
+      "matching_other": "{{count}} of {{total}} checks",
+      "noMatch": "No check matches “{{query}}”.",
       "within": "within thresholds",
       "below": "below the low threshold",
       "above": "above the high threshold",
