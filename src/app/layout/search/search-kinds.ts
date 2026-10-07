@@ -50,6 +50,55 @@ export const KIND_ICON: Record<SearchKind, ObjectKind> = {
   form: "form",
 };
 
+/**
+ * The prefix restricting the search to a kind, `node:dev`, as in the historical
+ * collector (`init/static/js/osvc/search/search.js`), whose prefixes are kept.
+ * Instances and requests, which it did not search, get their own. A scope badge
+ * writes this one.
+ */
+export const KIND_PREFIX: Record<SearchKind, string> = {
+  node: "node",
+  service: "svc",
+  instance: "inst",
+  app: "app",
+  network: "ip",
+  disk: "disk",
+  tag: "tag",
+  user: "user",
+  group: "group",
+  request: "req",
+  moduleset: "modset",
+  ruleset: "rset",
+  filterset: "fset",
+  form: "form",
+};
+
+/** Every prefix understood: those above, and the full names of the kinds. */
+const PREFIX_KIND = new Map<string, SearchKind>([
+  ...SEARCH_KINDS.map((kind): [string, SearchKind] => [KIND_PREFIX[kind], kind]),
+  ...SEARCH_KINDS.map((kind): [string, SearchKind] => [kind, kind]),
+]);
+
+const PREFIX = /^\s*(\w+):\s*/;
+
+/**
+ * The text typed, split into the kind its prefix names and the text to search:
+ * `svc: web` searches "web" among the services. A word that names no kind is
+ * part of the text, so that `fe80:` or `http:` are searched as they are.
+ */
+export function parseSearchInput(input: string): { kind: SearchKind | undefined; text: string } {
+  const match = PREFIX.exec(input);
+  const kind = match?.[1] === undefined ? undefined : PREFIX_KIND.get(match[1].toLowerCase());
+  if (match === null || kind === undefined) return { kind: undefined, text: input };
+  return { kind, text: input.slice(match[0].length) };
+}
+
+/** The text with the prefix of `kind` in place of its own, or with none. */
+export function withKindPrefix(input: string, kind: SearchKind | undefined): string {
+  const { text } = parseSearchInput(input);
+  return kind === undefined ? text : `${KIND_PREFIX[kind]}:${text}`;
+}
+
 /** The list routes a result or a "show in list" link can lead to. */
 type ListRoute =
   | "/nodes"

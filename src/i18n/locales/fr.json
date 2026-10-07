@@ -2378,6 +2378,7 @@
     "all": "Tout",
     "results": "Résultats",
     "hint": "Saisissez au moins 2 caractères. La recherche porte sur les noms, identifiants, adresses, e-mails et numéros de demande.",
+    "prefixHint": "Commencez par un préfixe, comme node:, svc: ou fset:, pour ne chercher qu'un type d'objet ; le survol d'un badge montre son préfixe.",
     "searching": "Recherche…",
     "none": "Rien ne correspond à « {{query}} ».",
     "more": "Voir plus",

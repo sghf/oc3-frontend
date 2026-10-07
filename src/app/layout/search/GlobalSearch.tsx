@@ -19,9 +19,12 @@ import { usePeek } from "@/components/opensvc/use-peek";
 import { CloseIcon, SearchIcon } from "@/components/ui/icons";
 import {
   KIND_ICON,
+  KIND_PREFIX,
   SEARCH_KINDS,
   listOfMatches,
+  parseSearchInput,
   toHit,
+  withKindPrefix,
   type ListTarget,
   type SearchHit,
   type SearchKind,
@@ -144,7 +147,8 @@ function isMac(): boolean {
  * the current view, as a badge does (`usePeek`); the kinds without a record panel
  * open their list, filtered on the object. Up and Down move through the results,
  * Enter opens, Escape closes; a scope narrows the search to one kind and shows
- * more of it.
+ * more of it. The scope is typed as a prefix, `node:dev` or `fset:prd`, as in the
+ * historical collector: its badge lights up, and choosing a badge writes it.
  */
 export function GlobalSearch() {
   const { t } = useTranslation();
@@ -205,13 +209,21 @@ function SearchPalette({ onClose }: { onClose: (restoreFocus: boolean) => void }
   const peek = usePeek();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<Scope>("all");
   const [active, setActive] = useState(0);
   const dialog = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
-  const debounced = useDebounced(query, DEBOUNCE_MS);
-  const search = useGlobalSearch(debounced, scope);
-  const short = Array.from(query.trim()).length < MIN_LENGTH;
+  // The scope is the prefix of the text, `node:dev`: the text alone says what is
+  // searched, a badge only rewrites its prefix.
+  const typed = parseSearchInput(query);
+  const scope: Scope = typed.kind ?? "all";
+  const debounced = parseSearchInput(useDebounced(query, DEBOUNCE_MS));
+  const search = useGlobalSearch(debounced.text, debounced.kind ?? "all");
+  const short = Array.from(typed.text.trim()).length < MIN_LENGTH;
+
+  /** Narrows the search to a kind, or widens it to all, keeping the text. */
+  function setScope(next: Scope) {
+    setQuery((previous) => withKindPrefix(previous, next === "all" ? undefined : next));
+  }
 
   const groups = useMemo(
     () => (short ? [] : (search.data ?? []).filter((g) => g.hits.length > 0 || g.error)),
@@ -283,7 +295,7 @@ function SearchPalette({ onClose }: { onClose: (restoreFocus: boolean) => void }
   }
 
   const scopes: Scope[] = ["all", ...SEARCH_KINDS];
-  const trimmed = debounced.trim();
+  const trimmed = debounced.text.trim();
 
   return (
     <div
@@ -348,6 +360,7 @@ function SearchPalette({ onClose }: { onClose: (restoreFocus: boolean) => void }
               key={value}
               type="button"
               aria-pressed={scope === value}
+              title={value === "all" ? undefined : `${KIND_PREFIX[value]}:`}
               onClick={() => {
                 setScope(value);
                 input.current?.focus();
@@ -371,7 +384,10 @@ function SearchPalette({ onClose }: { onClose: (restoreFocus: boolean) => void }
           className="min-h-0 flex-1 overflow-y-auto py-1"
         >
           {short ? (
-            <p className="px-3 py-6 text-center text-ink-muted">{t("search.hint")}</p>
+            <div className="flex flex-col gap-2 px-3 py-6 text-center text-ink-muted">
+              <p>{t("search.hint")}</p>
+              <p>{t("search.prefixHint")}</p>
+            </div>
           ) : search.isError ? (
             <p role="alert" className="px-3 py-6 text-center text-state-down">
               ■ {search.error.message}

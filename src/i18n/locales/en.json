@@ -2378,6 +2378,7 @@
     "all": "All",
     "results": "Results",
     "hint": "Type at least 2 characters. Names, ids, addresses, e-mails and request numbers are searched.",
+    "prefixHint": "Start with a prefix, such as node:, svc: or fset:, to search a single kind; hovering a badge shows its prefix.",
     "searching": "Searching…",
     "none": "Nothing matches “{{query}}”.",
     "more": "Show more",
