@@ -75,7 +75,16 @@ export function formatRelativeTime(
   if (value === undefined || value === "") return "";
   const parsed = parseCollectorDate(value);
   if (parsed === null) return value;
-  const seconds = (parsed.getTime() - now) / 1000;
+  return formatRelativeInstant(parsed.getTime(), locale, now);
+}
+
+/** `formatRelativeTime` for an instant in milliseconds since the epoch. */
+export function formatRelativeInstant(
+  at: number,
+  locale: string,
+  now: number = Date.now(),
+): string {
+  const seconds = (at - now) / 1000;
   const absolute = Math.abs(seconds);
   const format = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   for (const [unit, size] of RELATIVE_UNITS) {

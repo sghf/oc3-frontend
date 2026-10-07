@@ -395,6 +395,15 @@ export function ClockIcon(props: IconProps) {
   );
 }
 
+/** Kinds of things, as opposed to their order in time (fa-shapes). */
+export function ShapesIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M7 2.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm6.5 1.5c0-.6.4-1 1-1h6c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1h-6a1 1 0 0 1-1-1V4Zm-1.6 8.9c.4-.7 1.4-.7 1.8 0l4.9 7.6c.4.7 0 1.5-.9 1.5H7.9c-.8 0-1.3-.8-.9-1.5l4.9-7.6Z" />
+    </Svg>
+  );
+}
+
 /** Date, in front of a timestamp in the lists (fa-calendar-alt). */
 export function CalendarIcon(props: IconProps) {
   return (

@@ -1,12 +1,35 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CloseIcon, HistoryIcon, TrashIcon } from "@/components/ui/icons";
-import { ObjectIcon } from "./ObjectIcon";
+import { ClockIcon, CloseIcon, HistoryIcon, ShapesIcon, TrashIcon } from "@/components/ui/icons";
+import { formatRelativeInstant } from "@/lib/format";
+import { useHistoryGrouping, type HistoryGrouping } from "@/lib/user-prefs";
+import { ObjectIcon, type ObjectKind } from "./ObjectIcon";
 import { moveHistoryEntries } from "./history-motion";
-import { usePanelHistory, type HistoryEntry } from "./panel-history";
+import { usePanelHistory, type HistoryEntry, type HistoryGroup } from "./panel-history";
 
 const RAIL_BUTTON =
   "flex h-7 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface-raised hover:text-ink";
+
+/** The heading of a kind of record: the name of its list in the menu. */
+const KIND_LABEL: Partial<Record<ObjectKind, string>> = {
+  node: "nav.nodes",
+  cluster: "nav.clusters",
+  service: "nav.services",
+  instance: "nav.instances",
+  network: "nav.networks",
+  disk: "nav.disks",
+  app: "nav.apps",
+  tag: "nav.tags",
+  moduleset: "nav.modulesets",
+  ruleset: "nav.rulesets",
+  user: "nav.users",
+  group: "nav.groups",
+  filterset: "nav.filtersets",
+  form: "nav.forms",
+  metric: "nav.metrics",
+  chart: "nav.charts",
+  report: "nav.reports",
+};
 
 /** As tall as the header of the panel it stands against, so that the two lines meet. */
 const RAIL_HEADER = "flex h-11 shrink-0 items-center gap-1 border-b border-line pr-1 pl-2";
@@ -20,7 +43,8 @@ const RAIL_HEADER = "flex h-11 shrink-0 items-center gap-1 border-b border-line 
  * object elsewhere. The pills are grouped by how long ago their record was shown —
  * now, the last hour, the last day, the last week — the most recent first, and a
  * group without a record is not shown; the groups are worked out again as time
- * passes. The record on display is highlighted where it stands, and scrolled into
+ * passes. The switch of the header groups them by kind instead, in the order of
+ * the menu, each record's age then in its tooltip; the choice follows the account. The record on display is highlighted where it stands, and scrolled into
  * view.
  *
  * Clicking a pill shows its record and leaves it where it stands; shown from
@@ -32,7 +56,8 @@ const RAIL_HEADER = "flex h-11 shrink-0 items-center gap-1 border-b border-line 
  */
 export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
   const { t } = useTranslation();
-  const history = usePanelHistory(currentKey);
+  const grouping = useHistoryGrouping();
+  const history = usePanelHistory(currentKey, grouping.value);
   const list = useRef<HTMLDivElement>(null);
   const signature = history.entries.map((entry) => entry.key).join(",");
 
@@ -58,6 +83,7 @@ export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
       <div className={RAIL_HEADER}>
         <HistoryIcon className="h-4 w-4 shrink-0 text-ink-muted" />
         <span className="min-w-0 flex-1 truncate text-ink-muted">{t("panelHistory.title")}</span>
+        <GroupingSwitch value={grouping.value} onChange={grouping.set} />
         <button
           type="button"
           title={t("panelHistory.clear")}
@@ -70,16 +96,15 @@ export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
       </div>
       {/* Positioned: the entries measure their place from it (`history-motion.ts`). */}
       <div ref={list} className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
-        {history.sections.map((section) => (
-          <section key={section.key} aria-labelledby={`history-${section.key}`}>
-            <h3
-              id={`history-${section.key}`}
-              className="mb-1 text-[0.6875rem] font-medium tracking-wide text-ink-muted uppercase"
-            >
-              {t(`panelHistory.sections.${section.key}`)}
-            </h3>
+        {history.groups.map((group) => (
+          <section key={group.key} aria-labelledby={`history-${group.key}`}>
+            <GroupHeading
+              group={group}
+              id={`history-${group.key}`}
+              className="mb-1 flex items-center gap-1 text-[0.6875rem] font-medium tracking-wide text-ink-muted uppercase"
+            />
             <ol className="flex flex-col gap-1">
-              {section.entries.map((entry) => (
+              {group.entries.map((entry) => (
                 <li
                   key={entry.key}
                   data-entry={entry.key}
@@ -92,6 +117,7 @@ export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
                 >
                   <EntryButton
                     entry={entry}
+                    shownAt={group.by === "kind" ? entry.at : undefined}
                     onOpen={() => {
                       history.open(entry);
                     }}
@@ -124,11 +150,13 @@ export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
 
 /**
  * The panel history as a button of the header opening a list, where the window
- * leaves no room for the rail beside the panel. Same entries and same actions.
+ * leaves no room for the rail beside the panel. Same entries, same groups and same
+ * actions.
  */
 export function PanelHistoryMenu({ currentKey }: { currentKey: string }) {
   const { t } = useTranslation();
-  const history = usePanelHistory(currentKey);
+  const grouping = useHistoryGrouping();
+  const history = usePanelHistory(currentKey, grouping.value);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
@@ -178,33 +206,50 @@ export function PanelHistoryMenu({ currentKey }: { currentKey: string }) {
       </button>
       {open && (
         <div className="absolute top-full left-0 z-20 mt-1 w-64 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg">
-          <ol className="flex flex-col">
-            {history.entries.map((entry) => (
-              <li key={entry.key} className="flex items-center gap-1">
-                <EntryButton
-                  entry={entry}
-                  onOpen={() => {
-                    setOpen(false);
-                    history.open(entry);
-                  }}
-                  className={`flex min-w-0 flex-1 items-center gap-2 rounded-(--radius-control) px-2 py-1 text-left ${
-                    entry.current ? "bg-accent-soft font-medium" : "hover:bg-surface-sunken"
-                  }`}
+          <div className="flex items-center justify-end px-1 pb-1">
+            <GroupingSwitch value={grouping.value} onChange={grouping.set} />
+          </div>
+          <div className="flex max-h-[60vh] flex-col gap-1 overflow-y-auto">
+            {history.groups.map((group) => (
+              <section key={group.key} aria-labelledby={`history-menu-${group.key}`}>
+                <GroupHeading
+                  group={group}
+                  id={`history-menu-${group.key}`}
+                  className="flex items-center gap-1 px-2 pt-1 text-[0.6875rem] font-medium tracking-wide text-ink-muted uppercase"
                 />
-                <button
-                  type="button"
-                  title={t("panelHistory.remove", { name: entry.label })}
-                  onClick={() => {
-                    history.remove(entry);
-                  }}
-                  className="shrink-0 rounded-full p-1 text-ink-muted hover:text-ink"
-                >
-                  <CloseIcon className="h-3 w-3" />
-                  <span className="sr-only">{t("panelHistory.remove", { name: entry.label })}</span>
-                </button>
-              </li>
+                <ol className="flex flex-col">
+                  {group.entries.map((entry) => (
+                    <li key={entry.key} className="flex items-center gap-1">
+                      <EntryButton
+                        entry={entry}
+                        shownAt={group.by === "kind" ? entry.at : undefined}
+                        onOpen={() => {
+                          setOpen(false);
+                          history.open(entry);
+                        }}
+                        className={`flex min-w-0 flex-1 items-center gap-2 rounded-(--radius-control) px-2 py-1 text-left ${
+                          entry.current ? "bg-accent-soft font-medium" : "hover:bg-surface-sunken"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        title={t("panelHistory.remove", { name: entry.label })}
+                        onClick={() => {
+                          history.remove(entry);
+                        }}
+                        className="shrink-0 rounded-full p-1 text-ink-muted hover:text-ink"
+                      >
+                        <CloseIcon className="h-3 w-3" />
+                        <span className="sr-only">
+                          {t("panelHistory.remove", { name: entry.label })}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </section>
             ))}
-          </ol>
+          </div>
           <button
             type="button"
             onClick={() => {
@@ -222,19 +267,94 @@ export function PanelHistoryMenu({ currentKey }: { currentKey: string }) {
   );
 }
 
-/** An entry: the icon of its kind and its name; the one on display is not a link. */
+/**
+ * The switch between the two groupings of the history: by time, by kind. Two
+ * pressed-or-not buttons, an icon each, named by their tooltip.
+ */
+function GroupingSwitch({
+  value,
+  onChange,
+}: {
+  value: HistoryGrouping;
+  onChange: (next: HistoryGrouping) => void;
+}) {
+  const { t } = useTranslation();
+  const options: [HistoryGrouping, typeof ClockIcon][] = [
+    ["time", ClockIcon],
+    ["kind", ShapesIcon],
+  ];
+  return (
+    <div
+      role="group"
+      aria-label={t("panelHistory.grouping.label")}
+      className="flex shrink-0 rounded-(--radius-control) border border-line"
+    >
+      {options.map(([option, Icon]) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={value === option}
+          title={t(`panelHistory.grouping.${option}`)}
+          onClick={() => {
+            onChange(option);
+          }}
+          className="flex h-6 w-6 items-center justify-center text-ink-muted first:rounded-l-(--radius-control) last:rounded-r-(--radius-control) hover:text-ink aria-pressed:bg-accent-soft aria-pressed:text-ink"
+        >
+          <Icon className="h-3.5 w-3.5" />
+          <span className="sr-only">{t(`panelHistory.grouping.${option}`)}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** The heading of a group: its period, or its kind with its icon and count. */
+function GroupHeading({
+  group,
+  id,
+  className,
+}: {
+  group: HistoryGroup;
+  id: string;
+  className: string;
+}) {
+  const { t } = useTranslation();
+  if (group.by === "time")
+    return (
+      <h3 id={id} className={className}>
+        {t(`panelHistory.sections.${group.section}`)}
+      </h3>
+    );
+  const label = KIND_LABEL[group.kind];
+  return (
+    <h3 id={id} className={className}>
+      <ObjectIcon kind={group.kind} className="h-3 w-3" />
+      <span className="min-w-0 truncate">{label === undefined ? group.kind : t(label)}</span>
+      <span className="tabular-nums">{group.entries.length}</span>
+    </h3>
+  );
+}
+
+/**
+ * An entry: the icon of its kind and its name; the one on display is not a link.
+ * With `shownAt`, the tooltip also says when the record was shown, which the
+ * grouping by kind no longer tells.
+ */
 function EntryButton({
   entry,
+  shownAt,
   onOpen,
   className,
   iconClassName = "h-4 w-4",
 }: {
   entry: HistoryEntry;
+  shownAt?: number;
   onOpen: () => void;
   className: string;
   iconClassName?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const when = shownAt === undefined ? undefined : formatRelativeInstant(shownAt, i18n.language);
   const content = (
     <>
       <ObjectIcon kind={entry.step.kind} className={iconClassName} />
@@ -244,14 +364,24 @@ function EntryButton({
   // The record on display: said so, and nothing to open.
   if (entry.current)
     return (
-      <span aria-current="true" title={entry.label} className={className}>
+      <span
+        aria-current="true"
+        title={
+          when === undefined ? entry.label : t("panelHistory.shownAt", { name: entry.label, when })
+        }
+        className={className}
+      >
         {content}
       </span>
     );
   return (
     <button
       type="button"
-      title={t("panelHistory.show", { name: entry.label })}
+      title={
+        when === undefined
+          ? t("panelHistory.show", { name: entry.label })
+          : `${t("panelHistory.show", { name: entry.label })} · ${t("panelHistory.shownWhen", { when })}`
+      }
       onClick={onOpen}
       className={className}
     >

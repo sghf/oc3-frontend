@@ -2465,6 +2465,13 @@
     },
     "show": "Show {{name}}",
     "remove": "Remove {{name}} from the history",
+    "shownAt": "{{name}} · shown {{when}}",
+    "shownWhen": "shown {{when}}",
+    "grouping": {
+      "label": "Group the history",
+      "time": "By time",
+      "kind": "By kind"
+    },
     "clear": "Clear the history",
     "menu_one": "History, 1 record",
     "menu_other": "History, {{count}} records",

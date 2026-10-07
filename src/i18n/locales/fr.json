@@ -2465,6 +2465,13 @@
     },
     "show": "Afficher {{name}}",
     "remove": "Retirer {{name}} de l'historique",
+    "shownAt": "{{name}} · affiché {{when}}",
+    "shownWhen": "affiché {{when}}",
+    "grouping": {
+      "label": "Regrouper l'historique",
+      "time": "Par date",
+      "kind": "Par type"
+    },
     "clear": "Vider l'historique",
     "menu_one": "Historique, 1 fiche",
     "menu_other": "Historique, {{count}} fiches",

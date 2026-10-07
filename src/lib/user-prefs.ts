@@ -85,6 +85,12 @@ export interface UserPrefs {
    * first, by form id. The old interface has neither: the key is ours alone.
    */
   requests?: { favorites?: number[]; recent?: number[] };
+  /**
+   * How the panel history groups its records: "kind" by kind of object; absent, by
+   * how long ago they were shown. Not under `history`, an obsolete key once holding
+   * the history itself. The old interface has no panel history.
+   */
+  historyGrouping?: string;
   [key: string]: unknown;
 }
 
@@ -620,6 +626,34 @@ export function useRequestFormsPref() {
         ...current,
         recent: [id, ...current.recent.filter((r) => r !== id)].slice(0, RECENT_FORMS_SIZE),
       }));
+    },
+  };
+}
+
+/** How the panel history groups its records: by time, the default, or by kind. */
+export type HistoryGrouping = "time" | "kind";
+
+/**
+ * The grouping of the panel history, saved with the account; "time", the default,
+ * is not stored.
+ */
+export function useHistoryGrouping() {
+  const queryClient = useQueryClient();
+  const prefs = useUserPrefs();
+  const stored: HistoryGrouping = prefs.data?.historyGrouping === "kind" ? "kind" : "time";
+  const save = useMutation({
+    mutationFn: (next: HistoryGrouping) =>
+      savePrefs(queryClient, (current) => {
+        const rest = { ...current };
+        delete rest.historyGrouping;
+        return next === "kind" ? { ...rest, historyGrouping: next } : rest;
+      }),
+  });
+  return {
+    // The choice being saved shows at once, rather than when the server confirms it.
+    value: save.isPending ? save.variables : stored,
+    set: (next: HistoryGrouping) => {
+      save.mutate(next);
     },
   };
 }
