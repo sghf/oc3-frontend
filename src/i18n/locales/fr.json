@@ -483,14 +483,32 @@
   },
   "auth": {
     "title": "Connexion",
-    "intro": "Le collector utilise pour l'instant l'authentification HTTP Basic. OIDC viendra ensuite.",
+    "intro": "Connectez-vous avec l'e-mail et le mot de passe de votre compte du collector.",
     "user": "Utilisateur",
     "password": "Mot de passe",
     "signIn": "Se connecter",
     "signingIn": "Connexion…",
     "signOut": "Se déconnecter",
     "rejected": "Le collector a refusé ces identifiants.",
-    "unavailable": "Le collector ne peut pas vérifier vos identifiants pour le moment, réessayez plus tard : {{reason}}"
+    "unavailable": "Le collector ne peut pas vérifier vos identifiants pour le moment, réessayez plus tard : {{reason}}",
+    "oidcSignIn": "Se connecter par authentification unique",
+    "oidcUnavailable": "Le fournisseur d'identité ne répond pas pour le moment. Le bouton revient dès qu'il répond.",
+    "passwordIntro": "Ou, avec un mot de passe du collector :",
+    "noMode": "Aucun mode de connexion n'est activé sur ce collector. Contactez son administrateur.",
+    "checking": "Vérification de votre session…",
+    "expired": "Votre session a pris fin. Reconnectez-vous pour continuer ; la page reste telle quelle.",
+    "signInAgain": "Se reconnecter",
+    "leave": "Quitter",
+    "oidcErrors": {
+      "denied": "La connexion a été annulée ou refusée par le fournisseur d'identité.",
+      "expired": "La connexion a pris trop de temps. Recommencez.",
+      "state": "La connexion n'a pas pu être vérifiée. Recommencez.",
+      "token": "La réponse du fournisseur d'identité n'a pas pu être vérifiée. Recommencez, et contactez l'administrateur si cela persiste.",
+      "not_allowed": "Votre compte chez le fournisseur d'identité n'est pas autorisé à utiliser le collector. Demandez l'accès à un administrateur.",
+      "unknown_user": "Votre identité n'est liée à aucun compte du collector. Demandez à un administrateur de créer ou de lier votre compte.",
+      "locked": "Votre compte du collector est verrouillé. Contactez un administrateur.",
+      "unavailable": "Le collector ne peut pas terminer la connexion pour le moment. Réessayez plus tard."
+    }
   },
   "list": {
     "perPage": "Par page",
@@ -1202,6 +1220,7 @@
       "none": "Aucune vue n'a de colonnes, de tri, de filtres ou de taille de page enregistrés."
     },
     "password": {
+      "managedByProvider": "Votre mot de passe est géré par votre fournisseur d'identité : changez-le là-bas.",
       "title": "Mot de passe",
       "hint_one": "Au moins {{count}} caractère. Il vous connecte à cette interface et au collector historique.",
       "hint_other": "Au moins {{count}} caractères. Il vous connecte à cette interface et au collector historique.",

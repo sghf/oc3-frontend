@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { useCredentials } from "@/lib/api/auth";
+import { useAuthStatus, useCredentials } from "@/lib/api/auth";
 import { useEffectiveUser } from "@/lib/api/impersonation";
 import { SignIn } from "@/features/auth/SignIn";
 import opensvcLogo from "@/assets/opensvc-logo.svg";
@@ -9,6 +9,7 @@ import { Sidebar } from "./Sidebar";
 import { PeekPanel } from "./PeekPanel";
 import { PanelAnchor } from "./PanelAnchor";
 import { PanelSideProvider } from "./PanelSideProvider";
+import { SessionExpiredBanner, SessionProbe } from "./SessionState";
 import { ShortcutsHelp } from "./ShortcutsHelp";
 import { useShortcut } from "@/lib/shortcuts";
 import { ActionQueueLink } from "@/features/actions/ActionQueueLink";
@@ -43,6 +44,7 @@ function readSidebarOpen(): boolean {
 export function AppShell() {
   const { t } = useTranslation();
   const credentials = useCredentials();
+  const status = useAuthStatus();
   const user = useEffectiveUser();
   const [sidebarOpen, setSidebarOpen] = useState(readSidebarOpen);
 
@@ -74,6 +76,10 @@ export function AppShell() {
     });
     return true;
   });
+
+  // At load, an OIDC session may be there: its cookie is HttpOnly, only the server
+  // can tell. Nothing is drawn meanwhile, rather than a sign-in screen flashing by.
+  if (status === "checking") return <SessionProbe />;
 
   // As long as nobody is signed in, no view has data to show: the sign-in screen is
   // displayed instead, without the tools of the interface.
@@ -121,6 +127,7 @@ export function AppShell() {
               </div>
             </header>
             <ImpersonationBanner />
+            {status === "expired" && <SessionExpiredBanner />}
             <NoticeRegion />
           </div>
 

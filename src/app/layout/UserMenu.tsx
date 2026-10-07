@@ -3,7 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { SignOutIcon, UserIcon } from "@/components/ui/icons";
-import { signOut, stopImpersonating } from "@/lib/session";
+import { stopImpersonating } from "@/lib/session";
+import { logOut } from "@/lib/api/session-auth";
 import { useImpersonation } from "@/lib/api/impersonation";
 import { ImpersonateDialog } from "@/features/users/ImpersonateDialog";
 import { useCanImpersonate } from "@/features/users/use-impersonate";
@@ -209,7 +210,15 @@ export function UserMenu({ user }: { user: string }) {
               {t("impersonation.stop")}
             </button>
           )}
-          <button type="button" role="menuitem" tabIndex={-1} onClick={signOut} className={ITEM}>
+          <button
+            type="button"
+            role="menuitem"
+            tabIndex={-1}
+            onClick={() => {
+              void logOut();
+            }}
+            className={ITEM}
+          >
             <SignOutIcon className="text-ink-muted" />
             {t("auth.signOut")}
           </button>

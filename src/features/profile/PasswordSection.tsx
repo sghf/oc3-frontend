@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { TransientNotice } from "@/components/ui/TransientNotice";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
-import { setCredentials, useCredentials } from "@/lib/api/auth";
+import { isSession, setCredentials, useCredentials } from "@/lib/api/auth";
 import { useImpersonation } from "@/lib/api/impersonation";
 import { ProfileCard } from "./ProfileCard";
 
@@ -53,7 +53,9 @@ export function PasswordSection({ email }: { email: string | undefined }) {
       return next;
     },
     onSuccess: (next) => {
-      if (credentials !== null) setCredentials({ ...credentials, password: next });
+      // Basic credentials go on with the new password; a session needs nothing.
+      if (credentials !== null && !isSession(credentials))
+        setCredentials({ ...credentials, password: next });
       close();
     },
   });
@@ -115,6 +117,9 @@ export function PasswordSection({ email }: { email: string | undefined }) {
       {impersonation !== null ? (
         // The server refuses it: a password is changed only by its owner.
         <p className="text-ink-muted">{t("impersonation.noPassword")}</p>
+      ) : isSession(credentials) ? (
+        // Signed in through the identity provider: the password lives there.
+        <p className="text-ink-muted">{t("profile.password.managedByProvider")}</p>
       ) : !open ? (
         <div className="space-y-2">
           <button

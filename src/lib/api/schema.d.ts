@@ -425,6 +425,120 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/backchannel-logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description OpenID Connect Back-Channel Logout 1.0: the provider ends the sessions of a
+         *     user or of one of its sign-ins. The logout token is verified (signature,
+         *     issuer, audience, issue time, event, no nonce), then the sessions it names
+         *     by sid, or else by sub, are deleted. Public: the provider authenticates
+         *     itself by the signature of the token.
+         */
+        post: operations["PostAuthBackchannelLogout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description End of an OpenID Connect sign-in, where the provider sends the browser back.
+         *     The sign-in in progress (cookie) is consumed, the state checked, the code
+         *     exchanged with the PKCE verifier, the ID token verified, the account
+         *     resolved from the (issuer, subject) identity, and a session opened in an
+         *     HttpOnly cookie. Always answers a redirection: to the path the sign-in
+         *     started from, or to it with an auth_error parameter naming the failure
+         *     (state, expired, token, unknown_user, locked, denied, unavailable).
+         */
+        get: operations["GetAuthCallback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The sign-in modes the collector offers, for the sign-in screen, and whether
+         *     the request carries a valid OpenID Connect session. Public.
+         */
+        get: operations["GetAuthInfo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Starts an OpenID Connect sign-in (authorization code flow with PKCE): fresh
+         *     state, nonce and code verifier are kept on the server, a short-lived
+         *     HttpOnly cookie names the sign-in, and the browser is redirected to the
+         *     provider. return_to must be a path of the SPA; anything else is replaced
+         *     by /.
+         */
+        get: operations["GetAuthLogin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Ends the OpenID Connect session of the request and clears its cookie, then
+         *     returns the provider's end-session URL (RP-initiated logout) for the SPA to
+         *     follow, empty when the provider has none. Protected against cross-site
+         *     requests: the X-OC3-CSRF header is required and the Origin must be the
+         *     SPA's.
+         */
+        post: operations["PostAuthLogout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/node": {
         parameters: {
             query?: never;
@@ -4933,6 +5047,19 @@ export interface components {
             id?: number;
             updated?: string;
         };
+        AuthInfo: {
+            /** @description Whether users may sign in with their collector password */
+            basic: boolean;
+            oidc: {
+                enabled: boolean;
+                /** @description Name of the provider (display_name), for messages and logs; the sign-in screen does not show it */
+                name: string;
+                /** @description Whether the provider was discovered and the sign-in can start */
+                ready: boolean;
+            };
+            /** @description Whether the request carries a valid OpenID Connect session */
+            session: boolean;
+        };
         ChartListResponse: {
             data: components["schemas"]["ChartRow"][] | {
                 [key: string]: {
@@ -8117,6 +8244,138 @@ export interface operations {
                 };
             };
             500: components["responses"]["500"];
+        };
+    };
+    PostAuthBackchannelLogout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/x-www-form-urlencoded": {
+                    logout_token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The sessions named by the token are ended. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["400"];
+            /** @description The OpenID Connect provider is not reachable yet. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAuthCallback: {
+        parameters: {
+            query?: {
+                code?: string;
+                state?: string;
+                error?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Back to the SPA. */
+            303: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAuthInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthInfo"];
+                };
+            };
+        };
+    };
+    GetAuthLogin: {
+        parameters: {
+            query?: {
+                /** @description Path of the SPA to come back to once signed in */
+                return_to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description To the provider's authorization endpoint. */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description OpenID Connect is not enabled. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The OpenID Connect provider is not reachable yet. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PostAuthLogout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        logout_url: string;
+                    };
+                };
+            };
+            403: components["responses"]["403"];
         };
     };
     PostAuthNode: {

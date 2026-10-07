@@ -483,14 +483,32 @@
   },
   "auth": {
     "title": "Sign in",
-    "intro": "The collector uses HTTP Basic authentication for now. OIDC comes later.",
+    "intro": "Sign in with your collector email and password.",
     "user": "User",
     "password": "Password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
     "signOut": "Sign out",
     "rejected": "The collector refused these credentials.",
-    "unavailable": "The collector cannot check your credentials right now, please retry later: {{reason}}"
+    "unavailable": "The collector cannot check your credentials right now, please retry later: {{reason}}",
+    "oidcSignIn": "Sign in with single sign-on",
+    "oidcUnavailable": "The identity provider cannot be reached right now. The button comes back as soon as it answers.",
+    "passwordIntro": "Or, with a collector password:",
+    "noMode": "No sign-in mode is enabled on this collector. Contact its administrator.",
+    "checking": "Checking your session…",
+    "expired": "Your session has ended. Sign in again to go on; the page stays as it is.",
+    "signInAgain": "Sign in again",
+    "leave": "Leave",
+    "oidcErrors": {
+      "denied": "The sign-in was cancelled or refused by the identity provider.",
+      "expired": "The sign-in took too long. Please start again.",
+      "state": "The sign-in could not be verified. Please start again.",
+      "token": "The identity provider's answer could not be verified. Please start again, and contact the administrator if it persists.",
+      "not_allowed": "Your account at the identity provider is not allowed to use the collector. Ask an administrator to grant you access.",
+      "unknown_user": "Your identity is not linked to any collector account. Ask an administrator to create or link your account.",
+      "locked": "Your collector account is locked. Contact an administrator.",
+      "unavailable": "The collector cannot complete the sign-in right now. Please retry later."
+    }
   },
   "list": {
     "perPage": "Per page",
@@ -1202,6 +1220,7 @@
       "none": "No view has saved columns, sort order, filters or page size."
     },
     "password": {
+      "managedByProvider": "Your password is managed by your identity provider: change it there.",
       "title": "Password",
       "hint_one": "At least {{count}} character. Signs you in to this interface and to the historical collector.",
       "hint_other": "At least {{count}} characters. Signs you in to this interface and to the historical collector.",
