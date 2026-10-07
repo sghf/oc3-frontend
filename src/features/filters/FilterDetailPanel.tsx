@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { DetailPanel, type DetailGroup } from "@/components/opensvc/DetailPanel";
+import { FilterUsageList, UsageWarning } from "@/components/opensvc/FiltersetUsage";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { PencilIcon, TrashIcon } from "@/components/ui/icons";
 import { problemText } from "@/lib/api/problem";
 import { formatDateTime } from "@/lib/format";
-import { useFilter } from "./use-filter";
+import { useFilter, useFilterUsage } from "./use-filter";
 
 type FilterRow = components["schemas"]["FilterRow"];
 
@@ -54,6 +55,8 @@ export function FilterDetailPanel({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: filter, isPending, isError, error } = useFilter(filterId);
+  const usage = useFilterUsage(filterId);
+  const usedBy = usage.data ?? [];
 
   // The collector also detaches the filter from the filtersets that use it.
   const remove = useMutation({
@@ -65,6 +68,7 @@ export function FilterDetailPanel({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["filters"] });
+      await queryClient.invalidateQueries({ queryKey: ["filterset"] });
       await queryClient.invalidateQueries({ queryKey: ["filtersets"] });
       onClose();
     },
@@ -101,6 +105,31 @@ export function FilterDetailPanel({
               cancelLabel={t("detail.cancel")}
               pendingLabel={t("detail.deleting")}
               pending={remove.isPending}
+              // The uses are read again on arming: the panel may have been open a while.
+              onArm={() => {
+                void usage.refetch();
+              }}
+              blocked={usage.isFetching}
+              details={
+                usage.isFetching ? (
+                  <p className="text-ink-muted">{t("usage.checking")}</p>
+                ) : usage.isError ? (
+                  <p role="alert" className="text-state-down">
+                    ■ {t("usage.error", { message: usage.error.message })}
+                  </p>
+                ) : usedBy.length > 0 ? (
+                  <UsageWarning title={t("usage.filter.warning", { count: usedBy.length })}>
+                    <FilterUsageList filtersets={usedBy} consequences />
+                  </UsageWarning>
+                ) : undefined
+              }
+              acknowledge={
+                usage.isError
+                  ? t("usage.acknowledgeUnknown")
+                  : usedBy.length > 0
+                    ? t("usage.filter.acknowledge", { count: usedBy.length })
+                    : undefined
+              }
               onConfirm={() => {
                 remove.mutate();
               }}

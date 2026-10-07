@@ -1543,7 +1543,7 @@
       "saving": "Saving…"
     },
     "delete": {
-      "question": "Delete the filter {{label}}? It is also removed from the filtersets using it. This cannot be undone."
+      "question": "Delete the filter {{label}}? This cannot be undone."
     },
     "detail": {
       "title": "Filter",
@@ -1624,8 +1624,7 @@
       "thresholds": "Check thresholds"
     },
     "delete": {
-      "question": "Delete the filterset {{name}}? Its composition goes with it. This cannot be undone.",
-      "questionUsed": "Delete the filterset {{name}}? It is used in {{count}} place(s), which lose it. Its composition goes with it. This cannot be undone."
+      "question": "Delete the filterset {{name}}? Its composition goes with it. This cannot be undone."
     }
   },
   "related": {
@@ -2369,6 +2368,47 @@
     "clearAll": "Clear all bookmarks",
     "clearQuestion_one": "Remove the bookmark?",
     "clearQuestion_other": "Remove all {{count}} bookmarks?"
+  },
+  "usage": {
+    "checking": "Checking where it is used…",
+    "error": "Its uses could not be read: {{message}}",
+    "acknowledgeUnknown": "Delete it without knowing where it is used",
+    "emptied": "left with no entry: selects nothing",
+    "filterset": {
+      "warning_one": "Used in {{count}} place. Deleting it also removes it from there:",
+      "warning_other": "Used in {{count}} places. Deleting it also removes it from there:",
+      "acknowledge_one": "I understand that this use is removed with it",
+      "acknowledge_other": "I understand that these {{count}} uses are removed with it",
+      "filtersets_one": "Nested in {{count}} filterset",
+      "filtersets_other": "Nested in {{count}} filtersets",
+      "rulesets_one": "Restricts {{count}} ruleset",
+      "rulesets_other": "Restricts {{count}} rulesets",
+      "users_one": "Session filter of {{count}} user",
+      "users_other": "Session filter of {{count}} users",
+      "sysreportGrants_one": "{{count}} sysreport access grant",
+      "sysreportGrants_other": "{{count}} sysreport access grants",
+      "thresholds_one": "{{count}} check threshold",
+      "thresholds_other": "{{count}} check thresholds",
+      "comparisons_one": "In {{count}} statistics comparison",
+      "comparisons_other": "In {{count}} statistics comparisons"
+    },
+    "filter": {
+      "warning_one": "Used by {{count}} filterset. Deleting it also removes it from there:",
+      "warning_other": "Used by {{count}} filtersets. Deleting it also removes it from there:",
+      "acknowledge_one": "I understand that this filterset changes",
+      "acknowledge_other": "I understand that these {{count}} filtersets change",
+      "filterFiltersets_one": "In {{count}} filterset",
+      "filterFiltersets_other": "In {{count}} filtersets"
+    },
+    "consequences": {
+      "filtersets": "They lose this entry and select other objects, and so does everything that uses them.",
+      "rulesets": "They lose their filterset: a contextual ruleset then applies to no node.",
+      "users": "Their session filter is removed: their lists show every object again.",
+      "sysreportGrants": "These teams lose their access to the sysreports of these nodes.",
+      "thresholds": "Removed: the checks of these nodes fall back to their default thresholds.",
+      "comparisons": "It is removed from these comparisons.",
+      "filterFiltersets": "They lose this filter and select other objects, and so does everything that uses them: rulesets, session filters, thresholds…"
+    }
   },
   "search": {
     "title": "Search the collector",

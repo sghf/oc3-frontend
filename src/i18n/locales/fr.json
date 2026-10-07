@@ -1543,7 +1543,7 @@
       "saving": "Enregistrement…"
     },
     "delete": {
-      "question": "Supprimer le filtre {{label}} ? Il est aussi retiré des filtersets qui l'utilisent. C'est irréversible."
+      "question": "Supprimer le filtre {{label}} ? C'est irréversible."
     },
     "detail": {
       "title": "Filtre",
@@ -1624,8 +1624,7 @@
       "thresholds": "Seuils de check"
     },
     "delete": {
-      "question": "Supprimer le filterset {{name}} ? Sa composition part avec lui. C'est irréversible.",
-      "questionUsed": "Supprimer le filterset {{name}} ? Il est utilisé à {{count}} endroit(s), qui le perdent. Sa composition part avec lui. C'est irréversible."
+      "question": "Supprimer le filterset {{name}} ? Sa composition part avec lui. C'est irréversible."
     }
   },
   "related": {
@@ -2369,6 +2368,47 @@
     "clearAll": "Retirer tous les signets",
     "clearQuestion_one": "Retirer le signet ?",
     "clearQuestion_other": "Retirer les {{count}} signets ?"
+  },
+  "usage": {
+    "checking": "Recherche de ses utilisations…",
+    "error": "Ses utilisations n'ont pas pu être lues : {{message}}",
+    "acknowledgeUnknown": "Le supprimer sans savoir où il est utilisé",
+    "emptied": "laissé sans entrée : ne sélectionne plus rien",
+    "filterset": {
+      "warning_one": "Utilisé à {{count}} endroit. Le supprimer le retire aussi de là :",
+      "warning_other": "Utilisé à {{count}} endroits. Le supprimer le retire aussi de là :",
+      "acknowledge_one": "Je comprends que cette utilisation disparaît avec lui",
+      "acknowledge_other": "Je comprends que ces {{count}} utilisations disparaissent avec lui",
+      "filtersets_one": "Imbriqué dans {{count}} filterset",
+      "filtersets_other": "Imbriqué dans {{count}} filtersets",
+      "rulesets_one": "Restreint {{count}} ruleset",
+      "rulesets_other": "Restreint {{count}} rulesets",
+      "users_one": "Filtre de session de {{count}} utilisateur",
+      "users_other": "Filtre de session de {{count}} utilisateurs",
+      "sysreportGrants_one": "{{count}} autorisation d'accès aux sysreports",
+      "sysreportGrants_other": "{{count}} autorisations d'accès aux sysreports",
+      "thresholds_one": "{{count}} seuil de check",
+      "thresholds_other": "{{count}} seuils de check",
+      "comparisons_one": "Dans {{count}} comparaison de statistiques",
+      "comparisons_other": "Dans {{count}} comparaisons de statistiques"
+    },
+    "filter": {
+      "warning_one": "Utilisé par {{count}} filterset. Le supprimer le retire aussi de là :",
+      "warning_other": "Utilisé par {{count}} filtersets. Le supprimer le retire aussi de là :",
+      "acknowledge_one": "Je comprends que ce filterset change",
+      "acknowledge_other": "Je comprends que ces {{count}} filtersets changent",
+      "filterFiltersets_one": "Dans {{count}} filterset",
+      "filterFiltersets_other": "Dans {{count}} filtersets"
+    },
+    "consequences": {
+      "filtersets": "Ils perdent cette entrée et sélectionnent d'autres objets, de même que tout ce qui les utilise.",
+      "rulesets": "Ils perdent leur filterset : un ruleset contextuel ne s'applique alors plus à aucun nœud.",
+      "users": "Leur filtre de session est retiré : leurs listes montrent de nouveau tous les objets.",
+      "sysreportGrants": "Ces équipes perdent leur accès aux sysreports de ces nœuds.",
+      "thresholds": "Supprimés : les checks de ces nœuds reviennent à leurs seuils par défaut.",
+      "comparisons": "Il est retiré de ces comparaisons.",
+      "filterFiltersets": "Ils perdent ce filtre et sélectionnent d'autres objets, de même que tout ce qui les utilise : rulesets, filtres de session, seuils…"
+    }
   },
   "search": {
     "title": "Rechercher dans le collector",

@@ -20,3 +20,18 @@ export function useFilter(filterId: string | undefined) {
     },
   });
 }
+
+/** The filtersets holding a filter, which lose it when the filter is deleted. */
+export function useFilterUsage(filterId: string | undefined) {
+  return useQuery({
+    queryKey: ["filter", filterId, "usage"],
+    enabled: filterId !== undefined,
+    queryFn: async () => {
+      const { data, error } = await api.GET("/filters/{filter_id}/usage", {
+        params: { path: { filter_id: filterId ?? "" } },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      return data.data.filtersets;
+    },
+  });
+}

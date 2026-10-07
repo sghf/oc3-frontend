@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
-import { CrossLink } from "@/components/opensvc/CrossLink";
+import { FiltersetUsageList, UsageWarning } from "@/components/opensvc/FiltersetUsage";
+import { filtersetUsageCount } from "@/components/opensvc/filterset-usage";
 import { DetailContent, type DetailGroup } from "@/components/opensvc/DetailPanel";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
@@ -98,8 +99,7 @@ export function FiltersetDetailPanel({
   });
 
   const used = usage.data;
-  const usedCount =
-    used === undefined ? 0 : used.filtersets.length + used.rulesets.length + used.thresholds.length;
+  const usedCount = used === undefined ? 0 : filtersetUsageCount(used);
   const name = row?.fset_name ?? "";
 
   return (
@@ -139,55 +139,43 @@ export function FiltersetDetailPanel({
               {used !== undefined && usedCount === 0 && (
                 <p className="text-ink-muted">{t("filtersets.usage.none")}</p>
               )}
-              {used !== undefined && usedCount > 0 && (
-                <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] items-center gap-x-3 gap-y-1.5 text-data">
-                  {used.filtersets.length > 0 && (
-                    <>
-                      <dt className="text-ink-muted">{t("filtersets.usage.filtersets")}</dt>
-                      <dd className="flex flex-wrap gap-1.5">
-                        {used.filtersets.map((ref) => (
-                          <CrossLink key={ref.id} kind="filterset" id={String(ref.id)}>
-                            {ref.fset_name}
-                          </CrossLink>
-                        ))}
-                      </dd>
-                    </>
-                  )}
-                  {used.rulesets.length > 0 && (
-                    <>
-                      <dt className="text-ink-muted">{t("filtersets.usage.rulesets")}</dt>
-                      <dd className="flex flex-wrap gap-1.5">
-                        {used.rulesets.map((ref) => (
-                          <CrossLink key={ref.id} kind="ruleset" id={String(ref.id)}>
-                            {ref.ruleset_name}
-                          </CrossLink>
-                        ))}
-                      </dd>
-                    </>
-                  )}
-                  {used.thresholds.length > 0 && (
-                    <>
-                      <dt className="text-ink-muted">{t("filtersets.usage.thresholds")}</dt>
-                      <dd>{used.thresholds.join(", ")}</dd>
-                    </>
-                  )}
-                </dl>
-              )}
+              {used !== undefined && usedCount > 0 && <FiltersetUsageList usage={used} />}
             </section>
 
             <div className="border-t border-line pt-3">
               <ConfirmButton
                 icon={<TrashIcon />}
                 label={t("detail.delete")}
-                question={
-                  usedCount > 0
-                    ? t("filtersets.delete.questionUsed", { name, count: usedCount })
-                    : t("filtersets.delete.question", { name })
-                }
+                question={t("filtersets.delete.question", { name })}
                 confirmLabel={t("detail.deleteConfirm")}
                 cancelLabel={t("detail.cancel")}
                 pendingLabel={t("detail.deleting")}
                 pending={remove.isPending}
+                // The uses are read again on arming: the panel may have been open a while.
+                onArm={() => {
+                  void usage.refetch();
+                }}
+                blocked={usage.isFetching}
+                details={
+                  usage.isFetching ? (
+                    <p className="text-ink-muted">{t("usage.checking")}</p>
+                  ) : usage.isError ? (
+                    <p role="alert" className="text-state-down">
+                      ■ {t("usage.error", { message: usage.error.message })}
+                    </p>
+                  ) : used !== undefined && usedCount > 0 ? (
+                    <UsageWarning title={t("usage.filterset.warning", { count: usedCount })}>
+                      <FiltersetUsageList usage={used} consequences />
+                    </UsageWarning>
+                  ) : undefined
+                }
+                acknowledge={
+                  usage.isError
+                    ? t("usage.acknowledgeUnknown")
+                    : usedCount > 0
+                      ? t("usage.filterset.acknowledge", { count: usedCount })
+                      : undefined
+                }
                 onConfirm={() => {
                   remove.mutate();
                 }}

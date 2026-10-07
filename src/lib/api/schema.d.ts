@@ -1806,6 +1806,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/filters/{filter_id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Display the filtersets holding a filter. */
+        get: operations["GetFilterUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/filtersets": {
         parameters: {
             query?: never;
@@ -1972,7 +1989,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Display where a filterset is used (encapsulating filtersets, rulesets, check thresholds) */
+        /**
+         * @description Display where a filterset is used: encapsulating filtersets, rulesets, check
+         *     thresholds, session filters, statistics comparisons and sysreport grants.
+         */
         get: operations["GetFiltersetUsage"];
         put?: never;
         post?: never;
@@ -5186,6 +5206,16 @@ export interface components {
             f_value?: string | null;
             id?: number;
         };
+        FilterUsageResponse: {
+            data: {
+                /** @description Filtersets holding this filter, which loses it when the filter is deleted. */
+                filtersets: components["schemas"]["FiltersetUsingRef"][];
+            };
+        };
+        FiltersetComparisonRef: {
+            id: number;
+            name: string;
+        };
         /**
          * @description A filterset and every filterset it encapsulates, recursively, each with its
          *     ordered entries. An entry holds either a filter or the name of an
@@ -5269,10 +5299,6 @@ export interface components {
             /** @description Record id or name of the filterset to nest */
             filterset?: string;
         };
-        FiltersetRef: {
-            fset_name?: string;
-            id: number;
-        };
         /**
          * @description A filterset: an ordered combination of filters and other filtersets that
          *     selects nodes and services. Every property is optional: the `props` query
@@ -5290,15 +5316,45 @@ export interface components {
             id: number;
             ruleset_name: string;
         };
+        FiltersetSysreportGrant: {
+            id: number;
+            pattern: string;
+            role: string;
+        };
         FiltersetUsageResponse: {
+            /**
+             * @description What uses a filterset, all of it removed with the filterset when it is
+             *     deleted. The teams responsible for the filterset itself are not uses.
+             */
             data: {
-                /** @description Filtersets encapsulating this one. */
-                filtersets: components["schemas"]["FiltersetRef"][];
+                /** @description Statistics comparisons including this filterset. */
+                comparisons: components["schemas"]["FiltersetComparisonRef"][];
+                /** @description Filtersets nesting this one. */
+                filtersets: components["schemas"]["FiltersetUsingRef"][];
                 /** @description Compliance rulesets restricted by this filterset. */
                 rulesets: components["schemas"]["FiltersetRulesetRef"][];
+                /** @description Sysreport access granted to teams on the nodes of this filterset. */
+                sysreport_grants: components["schemas"]["FiltersetSysreportGrant"][];
                 /** @description Check thresholds, as "chk_type.chk_instance:low-high". */
                 thresholds: string[];
+                /** @description Users whose session filter is this filterset. */
+                users: components["schemas"]["FiltersetUserRef"][];
             };
+        };
+        FiltersetUserRef: {
+            email: string;
+            id: number;
+            name: string;
+        };
+        /**
+         * @description A filterset holding the object looked up, with the logical operator of that
+         *     entry and its number of entries.
+         */
+        FiltersetUsingRef: {
+            entries: number;
+            f_log_op: string;
+            fset_name: string;
+            id: number;
         };
         FormListResponse: {
             data: components["schemas"]["FormRow"][] | {
@@ -12608,6 +12664,31 @@ export interface operations {
             };
             401: components["responses"]["401"];
             403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetFilterUsage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Filter identifier (gen_filters.id or f_label) */
+                filter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterUsageResponse"];
+                };
+            };
             404: components["responses"]["404"];
             500: components["responses"]["500"];
         };
