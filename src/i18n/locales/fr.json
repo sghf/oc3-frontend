@@ -1175,10 +1175,11 @@
     "title": "Mon profil",
     "palette": {
       "title": "Thème",
-      "hint": "Le contraste élevé emploie un texte noir ou blanc, des bordures marquées et des couleurs saturées, en mode clair comme en mode sombre.",
+      "hint": "Le contraste élevé utilise un texte noir ou blanc, des bordures visibles et des couleurs saturées. Le thème adapté au daltonisme montre les états en bleu, or et cramoisi plutôt qu'en vert et rouge. Les deux s'appliquent en mode clair comme en mode sombre.",
       "options": {
         "standard": "Standard",
-        "contrast": "Contraste élevé"
+        "contrast": "Contraste élevé",
+        "colorblind": "Adapté au daltonisme"
       }
     },
     "theme": {

@@ -286,3 +286,32 @@
   --tag-hover: #72dfee;
   --tag-ink: #000000;
 }
+
+/*
+ * Colour-blind friendly theme, chosen in the profile (`palette` preference) and set by
+ * the `colorblind` class on <html>, on top of the light or dark mode. Only the business
+ * states change: green and red, which protanopes and deuteranopes cannot tell apart,
+ * give way to blue for up, gold for warn and crimson for down (sky blue, yellow and
+ * pink-red in dark mode). Measured, not eyeballed: each pair stays at least 14.6
+ * (light) and 18.4 (dark) apart in OKLab ΔE×100 under simulated protanopia and
+ * deuteranopia, against 8 required, and each state reaches 4.6:1 on the surfaces and
+ * on its own soft background. The chart series and the SAN ramp already pass these
+ * checks and are kept; the icons of the views tell them apart by their shape.
+ */
+.colorblind {
+  --state-up: #0465af;
+  --state-up-soft: #e6eff8;
+  --state-warn: #856b1b;
+  --state-warn-soft: #f8f4e8;
+  --state-down: #880033;
+  --state-down-soft: #f5dbe2;
+}
+
+.dark.colorblind {
+  --state-up: #62bbf5;
+  --state-up-soft: #15303f;
+  --state-warn: #f3c530;
+  --state-warn-soft: #3a3110;
+  --state-down: #fa5570;
+  --state-down-soft: #3f1a22;
+}

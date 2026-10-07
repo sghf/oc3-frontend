@@ -1175,10 +1175,11 @@
     "title": "My profile",
     "palette": {
       "title": "Theme",
-      "hint": "High contrast uses black or white text, visible borders and saturated colours, in light as in dark mode.",
+      "hint": "High contrast uses black or white text, visible borders and saturated colours. Colour-blind friendly shows the states in blue, gold and crimson rather than green and red. Both apply in light as in dark mode.",
       "options": {
         "standard": "Standard",
-        "contrast": "High contrast"
+        "contrast": "High contrast",
+        "colorblind": "Colour-blind friendly"
       }
     },
     "theme": {

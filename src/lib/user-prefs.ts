@@ -382,7 +382,7 @@ export function useThemePref() {
   return useAppearanceChoice("theme", theme, applyTheme);
 }
 
-/** Colour palette chosen by the account: standard or high contrast. */
+/** Colour palette chosen by the account: standard, high contrast or colour-blind friendly. */
 export function usePalettePref() {
   const { palette } = currentAppearance(useUserPrefs());
   return useAppearanceChoice("palette", palette, applyPalette);

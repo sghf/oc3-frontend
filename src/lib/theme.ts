@@ -1,10 +1,11 @@
 /**
  * Appearance of the interface, on two independent axes: the light or dark mode
  * (`Theme`: the system one, or an explicit choice), and the colour palette
- * (`Palette`: standard, or high contrast).
+ * (`Palette`: standard, high contrast, or colour-blind friendly).
  *
  * The dark tokens live under the `dark` class, the high-contrast ones under the
- * `contrast` class (`src/styles/tokens.css`), both set here on `<html>`. Both choices
+ * `contrast` class and the colour-blind friendly ones under the `colorblind` class
+ * (`src/styles/tokens.css`), all set here on `<html>`. Both choices
  * follow the account, in the user preferences (`theme` and `palette`), but they are
  * also kept in local storage: preferences arrive after the first render, and without
  * that cache the page would briefly show the other appearance on every load.
@@ -57,7 +58,7 @@ export function watchSystemTheme(current: () => Theme): () => void {
   };
 }
 
-export const PALETTES = ["standard", "contrast"] as const;
+export const PALETTES = ["standard", "contrast", "colorblind"] as const;
 
 export type Palette = (typeof PALETTES)[number];
 
@@ -79,6 +80,7 @@ export function cachedPalette(): Palette {
 
 export function applyPalette(palette: Palette): void {
   document.documentElement.classList.toggle("contrast", palette === "contrast");
+  document.documentElement.classList.toggle("colorblind", palette === "colorblind");
   try {
     localStorage.setItem(PALETTE_STORAGE_KEY, palette);
   } catch {
