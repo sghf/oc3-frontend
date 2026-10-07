@@ -24,6 +24,7 @@
     "instances": "Service Instances",
     "obsolescence": "Obsolescence",
     "logs": "Logs",
+    "claimMappings": "Claim mappings",
     "filters": "Filters",
     "filtersets": "Filtersets",
     "metrics": "Metrics",
@@ -2442,6 +2443,65 @@
       "thresholds": "Removed: the checks of these nodes fall back to their default thresholds.",
       "comparisons": "It is removed from these comparisons.",
       "filterFiltersets": "They lose this filter and select other objects, and so does everything that uses them: rulesets, session filters, thresholds…"
+    }
+  },
+  "claimMappings": {
+    "title": "Claim mappings",
+    "intro": "Rules translating the claims your identity provider sends at sign-in into access to the collector and teams. A rule matches when the claim equals the value, or, for a list such as groups, contains it. Once a rule allows signing in, only the identities matching one may sign in through the provider, and those may have their account created at their first sign-in. The teams a rule names follow the claims at every sign-in; the others are managed in Teams. Signing in with a collector password is not affected.",
+    "fields": {
+      "claim": "Claim",
+      "value": "Value",
+      "allow_access": "Allows signing in",
+      "author": "Changed by",
+      "updated": "Changed",
+      "id": "Rule id",
+      "group_roles": "Grants the teams",
+      "group_ids": "Team ids"
+    },
+    "access": {
+      "yes": "Allows signing in",
+      "no": "No"
+    },
+    "detail": {
+      "yes": "Yes",
+      "no": "No",
+      "title": "Claim rule",
+      "groups": {
+        "rule": "Rule",
+        "record": "Record"
+      }
+    },
+    "current": {
+      "title": "Claims of your current sign-in",
+      "intro": "What your identity provider sent when you signed in. Click a value to start a rule from it.",
+      "notOidc": "You signed in with a collector password: there are no claims to show. Sign in through the identity provider to see the claims it sends.",
+      "none": "Your sign-in carries no claim a rule could use.",
+      "map": "Create a rule for {{claim}} = {{value}}"
+    },
+    "form": {
+      "open": "New rule",
+      "createTitle": "New claim rule",
+      "editTitle": "Edit the claim rule",
+      "edit": "Edit",
+      "intro": "The rule applies at the next sign-in of each account, and at once to the Bearer tokens of scripts.",
+      "claimHint": "The claim name as the provider sends it (groups, email, roles…), or a dotted path into a nested claim (realm_access.roles).",
+      "valueHint": "Compared exactly, case included. For a list, the rule matches when the list contains this value.",
+      "effects": "What the rule does",
+      "accessHint": "Once at least one rule allows signing in, the identities matching none are refused, even with an existing account.",
+      "noTeam": "No team",
+      "teamHint": "As many teams as needed: privilege teams (Manager, NodeManager…) and organisation teams alike. Everybody and the private teams of the users cannot be granted.",
+      "noEffect": "Choose at least one effect: allow signing in, or grant teams.",
+      "saving": "Saving…",
+      "saveCreate": "Create the rule",
+      "saveEdit": "Save the rule",
+      "addTeam": "Add a team",
+      "removeTeam": "Remove {{team}}",
+      "teamWarning_one": "{{teams}} will follow the claims: at their next sign-in through the provider, the accounts matching no rule granting it leave it, even if they were added by hand.",
+      "teamWarning_other": "{{teams}} will follow the claims: at their next sign-in through the provider, the accounts matching no rule granting one of them leave it, even if they were added by hand."
+    },
+    "delete": {
+      "question": "Delete the rule {{rule}}?",
+      "consequence": "The memberships it granted stay until the next sign-in of each account. A team no rule names any more is managed by hand again."
     }
   },
   "search": {

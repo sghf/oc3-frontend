@@ -23,6 +23,7 @@ import {
   UsersIcon,
   ClusterIcon,
   HashIcon,
+  KeyIcon,
 } from "@/components/ui/icons";
 
 /** Collector object kinds that have a visual identity of their own. */
@@ -55,7 +56,8 @@ export type ObjectKind =
   | "moduleset"
   | "ruleset"
   | "complianceLog"
-  | "designer";
+  | "designer"
+  | "claimMapping";
 
 /**
  * Pictogram and tint of an object kind. The same vocabulary in the menu, in panel
@@ -114,6 +116,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   complianceLog: { Icon: HistoryIcon, className: "text-icon-compliance" },
   // The puzzle piece of the historical designer (`designer16`), in the compliance crimson.
   designer: { Icon: PuzzleIcon, className: "text-icon-compliance" },
+  // A key in the tint of users and teams: who gets in, and with which teams.
+  claimMapping: { Icon: KeyIcon, className: "text-icon-group" },
 };
 
 export function ObjectIcon({ kind, className }: { kind: ObjectKind; className?: string }) {

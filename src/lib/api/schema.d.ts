@@ -473,6 +473,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The claims of the OpenID Connect sign-in of the request, those a claim rule
+         *     may use (the claims that only serve to verify the token are left out), so
+         *     that whoever writes the rules sees what the provider sends. Empty for a
+         *     request authenticated otherwise.
+         */
+        get: operations["GetAuthClaims"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/info": {
         parameters: {
             query?: never;
@@ -3694,6 +3716,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/oidc_mappings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List the rules translating the claims of an OpenID Connect identity into
+         *     access and teams. Manager only: a rule may grant any team, Manager included.
+         */
+        get: operations["GetOidcMappings"];
+        put?: never;
+        /**
+         * @description Create a claim rule: one per claim and value, which allows signing in,
+         *     grants teams (as many as needed), or both. The Everybody team and the
+         *     private teams of the users cannot be granted: the teams a rule names follow
+         *     the claims at every sign-in, which would remove them from the accounts that
+         *     do not match. Manager only.
+         */
+        post: operations["PostOidcMappings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oidc_mappings/{mapping_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A claim rule. Manager only. */
+        get: operations["GetOidcMapping"];
+        put?: never;
+        /** @description Change a claim rule, under the same checks as its creation. Manager only. */
+        post: operations["PostOidcMapping"];
+        /**
+         * @description Delete a claim rule. The memberships it granted stay until the next sign-in
+         *     of each account; a team no rule names any more is managed by hand again.
+         *     Manager only.
+         */
+        delete: operations["DeleteOidcMapping"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/openapi.json": {
         parameters: {
             query?: never;
@@ -6027,6 +6099,40 @@ export interface components {
             obs_warn_date_updated?: string;
             obs_warn_date_updated_by?: string;
         };
+        OidcMappingInput: {
+            allow_access?: boolean;
+            claim: string;
+            /** @description The teams the rule grants, as many as needed */
+            group_ids?: number[];
+            value: string;
+        };
+        OidcMappingListResponse: {
+            data: components["schemas"]["OidcMappingRow"][] | {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            meta?: components["schemas"]["ListMeta"];
+        };
+        /**
+         * @description A rule translating a claim value into access and a team. Every property is
+         *     optional: the props query parameter selects which columns the server returns.
+         */
+        OidcMappingRow: {
+            /** @description T when the matching identities may sign in, F otherwise */
+            allow_access?: string;
+            author?: string;
+            /** @description Claim name, or dotted path into a nested claim */
+            claim?: string;
+            /** @description Ids of the teams granted to the matching identities, comma separated, in the order of their names; empty when the rule grants none */
+            group_ids?: string;
+            /** @description Names of those teams, comma and space separated */
+            group_roles?: string;
+            id?: number;
+            updated?: string;
+            /** @description Value the claim must equal, or contain for a list */
+            value?: string;
+        };
         PackageDiffNode: {
             node_id: string;
             nodename: string;
@@ -8297,6 +8403,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    GetAuthClaims: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        claims: {
+                            [key: string]: unknown;
+                        };
+                        /** @description How the request was authenticated (session, bearer, basic) */
+                        source: string;
+                    };
+                };
             };
         };
     };
@@ -18930,6 +19062,184 @@ export interface operations {
             403: components["responses"]["403"];
             404: components["responses"]["404"];
             500: components["responses"]["500"];
+        };
+    };
+    GetOidcMappings: {
+        parameters: {
+            query?: {
+                /** @description A list of properties to include in each data dictionnary. */
+                props?: components["parameters"]["inQueryProps"];
+                /** @description The maximum number of entries to return. 0 means no limit. */
+                limit?: components["parameters"]["inQueryLimit"];
+                /** @description Skip the first entries of the data cursor. */
+                offset?: components["parameters"]["inQueryOffset"];
+                /**
+                 * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+                 *     the meta field. The metadata of a list carries its total number of rows
+                 *     without pagination (total), as well as the rows returned (count), the offset
+                 *     and the limit.
+                 */
+                meta?: components["parameters"]["inQueryMeta"];
+                /**
+                 * @description With "1" or "true", the response counts the distinct values of each
+                 *     selected property instead of listing the rows: `data` maps each property
+                 *     to an object of value → number of rows ("empty" for a null or blank
+                 *     value), over the whole selection (access control, filters and session
+                 *     filterset applied, `offset` ignored). `limit`, when given, caps the
+                 *     number of values returned per property, the most frequent first; without
+                 *     it every value is returned. `meta.total` is the number of rows,
+                 *     `meta.distinct` the number of distinct values of each property, and
+                 *     `meta.other` the number of rows whose value was left out by the limit.
+                 *     A count taking longer than 5 seconds is refused with a 400, asking to
+                 *     narrow the selection.
+                 */
+                stats?: components["parameters"]["inQueryStats"];
+                /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+                orderby?: components["parameters"]["inQueryOrderby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
+                /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+                groupby?: components["parameters"]["inQueryGroupby"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcMappingListResponse"];
+                };
+            };
+            403: components["responses"]["403"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostOidcMappings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OidcMappingInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcMappingListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            403: components["responses"]["403"];
+            409: components["responses"]["409"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetOidcMapping: {
+        parameters: {
+            query?: {
+                /** @description A list of properties to include in each data dictionnary. */
+                props?: components["parameters"]["inQueryProps"];
+            };
+            header?: never;
+            path: {
+                mapping_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcMappingListResponse"];
+                };
+            };
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+        };
+    };
+    PostOidcMapping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mapping_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OidcMappingInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcMappingListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            409: components["responses"]["409"];
+        };
+    };
+    DeleteOidcMapping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mapping_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
         };
     };
     GetSwagger: {

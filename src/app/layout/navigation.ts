@@ -30,6 +30,7 @@ export interface NavEntry {
     | "/obsolescence"
     | "/logs"
     | "/filters"
+    | "/claim-mappings"
     | "/metrics"
     | "/reports"
     | "/stats/reports"
@@ -160,6 +161,14 @@ export const NAV_CATEGORIES: NavCategory[] = [
       // Groups follow the users they gather. The historical menu kept them under Data
       // Management (`dm-add-group`); moved here on request.
       { to: "/groups", labelKey: "nav.groups", icon: "group", privileges: ["GroupManager"] },
+      // Who may sign in through the identity provider, and with which teams. A rule
+      // may grant any team, Manager included: Manager only. No historical equivalent.
+      {
+        to: "/claim-mappings",
+        labelKey: "nav.claimMappings",
+        icon: "claimMapping",
+        privileges: ["Manager"],
+      },
       // `adm-obs` in the historical menu.
       {
         to: "/obsolescence",

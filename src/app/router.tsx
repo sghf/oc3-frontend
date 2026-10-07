@@ -17,6 +17,7 @@ import { ClustersPage } from "@/features/clusters/ClustersPage";
 import { ResourcesPage } from "@/features/resources/ResourcesPage";
 import { ServiceActionsPage } from "@/features/service-actions/ServiceActionsPage";
 import { FiltersPage } from "@/features/filters/FiltersPage";
+import { ClaimMappingsPage } from "@/features/claim-mappings/ClaimMappingsPage";
 import { FiltersetsPage } from "@/features/filtersets/FiltersetsPage";
 import { FormsPage } from "@/features/forms/FormsPage";
 import { NewRequestPage } from "@/features/requests/NewRequestPage";
@@ -223,6 +224,13 @@ const filtersRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+const claimMappingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/claim-mappings",
+  component: ClaimMappingsPage,
+  validateSearch: parseListSearch,
+});
+
 const filtersetsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/filtersets",
@@ -344,6 +352,7 @@ const routeTree = rootRoute.addChildren([
   obsolescenceRoute,
   logsRoute,
   filtersRoute,
+  claimMappingsRoute,
   filtersetsRoute,
   formsRoute,
   requestsRoute,

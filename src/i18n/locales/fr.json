@@ -24,6 +24,7 @@
     "instances": "Instances de service",
     "obsolescence": "Obsolescence",
     "logs": "Journaux",
+    "claimMappings": "Revendications OIDC",
     "filters": "Filtres",
     "filtersets": "Filtersets",
     "metrics": "Métriques",
@@ -2442,6 +2443,65 @@
       "thresholds": "Supprimés : les checks de ces nœuds reviennent à leurs seuils par défaut.",
       "comparisons": "Il est retiré de ces comparaisons.",
       "filterFiltersets": "Ils perdent ce filtre et sélectionnent d'autres objets, de même que tout ce qui les utilise : rulesets, filtres de session, seuils…"
+    }
+  },
+  "claimMappings": {
+    "title": "Revendications OIDC",
+    "intro": "Règles qui traduisent les revendications envoyées par votre fournisseur d'identité à la connexion en accès au collector et en équipes. Une règle s'applique quand la revendication vaut la valeur ou, pour une liste comme groups, la contient. Dès qu'une règle autorise la connexion, seules les identités qui correspondent à l'une d'elles peuvent se connecter par le fournisseur, et celles-ci peuvent voir leur compte créé à leur première connexion. Les équipes nommées par une règle suivent les revendications à chaque connexion ; les autres se gèrent dans Équipes. La connexion par mot de passe du collector n'est pas concernée.",
+    "fields": {
+      "claim": "Revendication",
+      "value": "Valeur",
+      "allow_access": "Autorise la connexion",
+      "author": "Modifiée par",
+      "updated": "Modifiée",
+      "id": "Id de la règle",
+      "group_roles": "Donne les équipes",
+      "group_ids": "Ids des équipes"
+    },
+    "access": {
+      "yes": "Autorise la connexion",
+      "no": "Non"
+    },
+    "detail": {
+      "yes": "Oui",
+      "no": "Non",
+      "title": "Règle de revendication",
+      "groups": {
+        "rule": "Règle",
+        "record": "Enregistrement"
+      }
+    },
+    "current": {
+      "title": "Revendications de votre connexion actuelle",
+      "intro": "Ce que votre fournisseur d'identité a envoyé à votre connexion. Cliquez sur une valeur pour en faire une règle.",
+      "notOidc": "Vous êtes connecté avec un mot de passe du collector : aucune revendication à montrer. Connectez-vous par le fournisseur d'identité pour voir celles qu'il envoie.",
+      "none": "Votre connexion ne porte aucune revendication utilisable par une règle.",
+      "map": "Créer une règle pour {{claim}} = {{value}}"
+    },
+    "form": {
+      "open": "Nouvelle règle",
+      "createTitle": "Nouvelle règle de revendication",
+      "editTitle": "Modifier la règle de revendication",
+      "edit": "Modifier",
+      "intro": "La règle s'applique à la prochaine connexion de chaque compte, et tout de suite aux jetons Bearer des scripts.",
+      "claimHint": "Le nom de la revendication tel que l'envoie le fournisseur (groups, email, roles…), ou un chemin pointé vers une revendication imbriquée (realm_access.roles).",
+      "valueHint": "Comparée exactement, casse comprise. Pour une liste, la règle s'applique quand la liste contient cette valeur.",
+      "effects": "Ce que fait la règle",
+      "accessHint": "Dès qu'au moins une règle autorise la connexion, les identités qui ne correspondent à aucune sont refusées, même avec un compte existant.",
+      "noTeam": "Aucune équipe",
+      "teamHint": "Autant d'équipes que nécessaire : équipes de privilèges (Manager, NodeManager…) comme d'organisation. Everybody et les équipes privées des utilisateurs ne peuvent pas être données.",
+      "noEffect": "Choisissez au moins un effet : autoriser la connexion, ou donner des équipes.",
+      "saving": "Enregistrement…",
+      "saveCreate": "Créer la règle",
+      "saveEdit": "Enregistrer la règle",
+      "addTeam": "Ajouter une équipe",
+      "removeTeam": "Retirer {{team}}",
+      "teamWarning_one": "{{teams}} suivra les revendications : à leur prochaine connexion par le fournisseur, les comptes qui ne correspondent à aucune règle la donnant la quittent, même s'ils y ont été ajoutés à la main.",
+      "teamWarning_other": "{{teams}} suivront les revendications : à leur prochaine connexion par le fournisseur, les comptes qui ne correspondent à aucune règle donnant l'une d'elles la quittent, même s'ils y ont été ajoutés à la main."
+    },
+    "delete": {
+      "question": "Supprimer la règle {{rule}} ?",
+      "consequence": "Les appartenances qu'elle a données restent jusqu'à la prochaine connexion de chaque compte. Une équipe qu'aucune règle ne nomme plus redevient gérée à la main."
     }
   },
   "search": {
