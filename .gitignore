@@ -7,6 +7,7 @@ dist
 
 # Markdown files are ignored unless whitelisted below.
 *.md
+!/README.md
 !src/assets/**/README.md
 
 # Local env files: Vite loads .env.development.local, .env.production.local… by mode.
