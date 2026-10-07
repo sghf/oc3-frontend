@@ -395,6 +395,19 @@ export function ClockIcon(props: IconProps) {
   );
 }
 
+/** A window with a side panel against its left or right edge. */
+export function PanelSideIcon({ side, ...props }: IconProps & { side: "left" | "right" }) {
+  return (
+    <Svg {...props}>
+      <path
+        fillRule="evenodd"
+        d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2Zm0 2v12h16V6H4Z"
+      />
+      <path d={side === "left" ? "M5 7h6v10H5z" : "M13 7h6v10h-6z"} />
+    </Svg>
+  );
+}
+
 /** Kinds of things, as opposed to their order in time (fa-shapes). */
 export function ShapesIcon(props: IconProps) {
   return (

@@ -1228,6 +1228,14 @@
       "hint": "Your name and email are yours to change; the other properties are managed by an administrator.",
       "editHint": "Hover a field to change it. The email is also your sign-in name: you sign in with the new one from now on."
     },
+    "panelSide": {
+      "title": "Detail panels",
+      "options": {
+        "right": "On the right",
+        "left": "On the left"
+      },
+      "hint": "The edge of the window the detail panels and their history open against. The button in the header of a panel switches it too."
+    },
     "language": {
       "title": "Language",
       "system": "System ({{language}})",
@@ -2453,6 +2461,10 @@
       "filterset": "Filtersets",
       "form": "Forms"
     }
+  },
+  "panelSide": {
+    "toLeft": "Move the panels to the left",
+    "toRight": "Move the panels to the right"
   },
   "panelHistory": {
     "label": "History of the records shown",

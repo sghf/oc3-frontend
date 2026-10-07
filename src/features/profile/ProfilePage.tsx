@@ -14,6 +14,8 @@ import {
   useResetViewPrefs,
   useThemePref,
   useLanguagePref,
+  usePanelSidePref,
+  PANEL_SIDES,
   useUserPrefs,
 } from "@/lib/user-prefs";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
@@ -152,12 +154,16 @@ function initials(fullName: string, email: string | null | undefined): string {
   return (email ?? "?").slice(0, 1).toUpperCase();
 }
 
-/** Theme and light or dark mode, the two sides of how the interface looks, and its language. */
+/**
+ * Theme and light or dark mode, the two sides of how the interface looks, its
+ * language, and the edge the detail panels open against.
+ */
 function AppearanceCard() {
   const { t } = useTranslation();
   const theme = useThemePref();
   const palette = usePalettePref();
   const language = useLanguagePref();
+  const panelSide = usePanelSidePref();
   return (
     <ProfileCard
       title={t("profile.appearance.title")}
@@ -202,6 +208,17 @@ function AppearanceCard() {
             choice={language}
           />
           <p className="mt-1 text-ink-muted">{t("profile.language.hint")}</p>
+        </div>
+        <div>
+          <p className="mb-1 font-medium">{t("profile.panelSide.title")}</p>
+          <ChoiceGroup
+            name="panelSide"
+            label={t("profile.panelSide.title")}
+            options={PANEL_SIDES}
+            optionLabel={(value) => t(`profile.panelSide.options.${value}`)}
+            choice={panelSide}
+          />
+          <p className="mt-1 text-ink-muted">{t("profile.panelSide.hint")}</p>
         </div>
       </div>
     </ProfileCard>

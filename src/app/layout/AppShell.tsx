@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useCredentials } from "@/lib/api/auth";
@@ -8,12 +8,14 @@ import opensvcLogo from "@/assets/opensvc-logo.svg";
 import { Sidebar } from "./Sidebar";
 import { PeekPanel } from "./PeekPanel";
 import { PanelAnchor } from "./PanelAnchor";
+import { PanelSideProvider } from "./PanelSideProvider";
 import { ShortcutsHelp } from "./ShortcutsHelp";
 import { useShortcut } from "@/lib/shortcuts";
 import { ActionQueueLink } from "@/features/actions/ActionQueueLink";
 import { UserMenu } from "./UserMenu";
 import { ImpersonationBanner } from "./ImpersonationBanner";
 import { NoticeRegion } from "@/components/ui/NoticeRegion";
+import { usePanelSide } from "@/components/ui/panel-side";
 import { LiveIndicator } from "./LiveIndicator";
 import { SessionFilter } from "./SessionFilter";
 import { SidebarIcon } from "@/components/ui/icons";
@@ -85,54 +87,58 @@ export function AppShell() {
 
   return (
     <BookmarksProvider>
-      <div className="grid min-h-dvh grid-rows-[auto_1fr_auto] bg-surface text-ink">
-        <AccountAppearance />
-        <div>
-          <header className="flex h-11 items-center gap-4 border-b border-line bg-surface-raised px-3">
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              aria-expanded={sidebarOpen}
-              aria-controls="app-sidebar"
-              title={`${sidebarOpen ? t("nav.hideMenu") : t("nav.showMenu")}\n${t("nav.menuShortcut")}`}
-              className="flex h-7 w-7 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface-sunken hover:text-ink"
-            >
-              <SidebarIcon open={sidebarOpen} className="h-4.5 w-4.5" />
-              <span className="sr-only">{sidebarOpen ? t("nav.hideMenu") : t("nav.showMenu")}</span>
-            </button>
+      <PanelSideProvider>
+        <div className="grid min-h-dvh grid-rows-[auto_1fr_auto] bg-surface text-ink">
+          <AccountAppearance />
+          <div>
+            <header className="flex h-11 items-center gap-4 border-b border-line bg-surface-raised px-3">
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-expanded={sidebarOpen}
+                aria-controls="app-sidebar"
+                title={`${sidebarOpen ? t("nav.hideMenu") : t("nav.showMenu")}\n${t("nav.menuShortcut")}`}
+                className="flex h-7 w-7 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface-sunken hover:text-ink"
+              >
+                <SidebarIcon open={sidebarOpen} className="h-4.5 w-4.5" />
+                <span className="sr-only">
+                  {sidebarOpen ? t("nav.hideMenu") : t("nav.showMenu")}
+                </span>
+              </button>
 
-            <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              {/* Decorative: the title that follows already names the link. */}
-              <img src={opensvcLogo} alt="" width={24} height={24} className="h-6 w-6" />
-              OpenSVC Collector
-            </Link>
+              <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
+                {/* Decorative: the title that follows already names the link. */}
+                <img src={opensvcLogo} alt="" width={24} height={24} className="h-6 w-6" />
+                OpenSVC Collector
+              </Link>
 
-            <div className="ml-auto flex items-center gap-3">
-              <SessionFilter />
-              <ActionQueueLink />
-              <GlobalSearch />
-              <LiveIndicator />
-              <UserMenu user={user ?? credentials.user} />
-            </div>
-          </header>
-          <ImpersonationBanner />
-          <NoticeRegion />
+              <div className="ml-auto flex items-center gap-3">
+                <SessionFilter />
+                <ActionQueueLink />
+                <GlobalSearch />
+                <LiveIndicator />
+                <UserMenu user={user ?? credentials.user} />
+              </div>
+            </header>
+            <ImpersonationBanner />
+            <NoticeRegion />
+          </div>
+
+          <div className="grid min-h-0 grid-cols-[auto_1fr]">
+            <Sidebar open={sidebarOpen} />
+            <MainArea>
+              <Outlet />
+              {/* Record of an object opened from a badge, whatever the view. */}
+              <PeekPanel />
+              {/* What brings the panels back once they are closed. */}
+              <PanelAnchor />
+              <ShortcutsHelp />
+            </MainArea>
+          </div>
+          {/* The records the user bookmarked, at the foot of every view. */}
+          <BookmarksBar />
         </div>
-
-        <div className="grid min-h-0 grid-cols-[auto_1fr]">
-          <Sidebar open={sidebarOpen} />
-          <main className="min-w-0 p-4">
-            <Outlet />
-            {/* Record of an object opened from a badge, whatever the view. */}
-            <PeekPanel />
-            {/* What brings the panels back once they are closed. */}
-            <PanelAnchor />
-            <ShortcutsHelp />
-          </main>
-        </div>
-        {/* The records the user bookmarked, at the foot of every view. */}
-        <BookmarksBar />
-      </div>
+      </PanelSideProvider>
     </BookmarksProvider>
   );
 }
@@ -145,4 +151,14 @@ export function AppShell() {
 function AccountAppearance() {
   useAppearance();
   return null;
+}
+
+/**
+ * The area of the views. With the panels on the left, its gutter on that side is
+ * as wide as the anchor that brings them back, which stands there (`PanelAnchor`)
+ * without covering the start of the view.
+ */
+function MainArea({ children }: { children: ReactNode }) {
+  const { side } = usePanelSide();
+  return <main className={`min-w-0 p-4 ${side === "left" ? "pl-12" : ""}`}>{children}</main>;
 }

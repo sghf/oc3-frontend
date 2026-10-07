@@ -91,6 +91,11 @@ export interface UserPrefs {
    * the history itself. The old interface has no panel history.
    */
   historyGrouping?: string;
+  /**
+   * The edge of the window the detail panels open against: "left"; absent, the
+   * right one. The old interface has no such choice.
+   */
+  panelSide?: string;
   [key: string]: unknown;
 }
 
@@ -655,5 +660,36 @@ export function useHistoryGrouping() {
     set: (next: HistoryGrouping) => {
       save.mutate(next);
     },
+  };
+}
+
+/** The edges of the window the detail panels can stand against, the default first. */
+export const PANEL_SIDES = ["right", "left"] as const;
+export type PanelSideChoice = (typeof PANEL_SIDES)[number];
+
+/**
+ * The edge the detail panels and their history open against, saved with the
+ * account; "right", the default, is not stored.
+ */
+export function usePanelSidePref() {
+  const queryClient = useQueryClient();
+  const prefs = useUserPrefs();
+  const stored: PanelSideChoice = prefs.data?.panelSide === "left" ? "left" : "right";
+  const save = useMutation({
+    mutationFn: (next: PanelSideChoice) =>
+      savePrefs(queryClient, (current) => {
+        const rest = { ...current };
+        delete rest.panelSide;
+        return next === "left" ? { ...rest, panelSide: next } : rest;
+      }),
+  });
+  return {
+    // The choice being saved shows at once, rather than when the server confirms it.
+    value: save.isPending ? save.variables : stored,
+    set: (next: PanelSideChoice) => {
+      save.mutate(next);
+    },
+    isSaving: save.isPending,
+    errorMessage: save.isError ? save.error.message : null,
   };
 }

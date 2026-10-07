@@ -1228,6 +1228,14 @@
       "hint": "Votre nom et votre e-mail sont modifiables ; les autres propriétés sont gérées par un administrateur.",
       "editHint": "Survolez un champ pour le modifier. L'e-mail est aussi votre identifiant : vous vous connectez désormais avec le nouveau."
     },
+    "panelSide": {
+      "title": "Panneaux de détail",
+      "options": {
+        "right": "À droite",
+        "left": "À gauche"
+      },
+      "hint": "Le bord de la fenêtre contre lequel s'ouvrent les panneaux de détail et leur historique. Le bouton de l'en-tête d'un panneau le change aussi."
+    },
     "language": {
       "title": "Langue",
       "system": "Système ({{language}})",
@@ -2453,6 +2461,10 @@
       "filterset": "Filtersets",
       "form": "Formulaires"
     }
+  },
+  "panelSide": {
+    "toLeft": "Déplacer les panneaux à gauche",
+    "toRight": "Déplacer les panneaux à droite"
   },
   "panelHistory": {
     "label": "Historique des fiches affichées",

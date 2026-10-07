@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ClockIcon, CloseIcon, HistoryIcon, ShapesIcon, TrashIcon } from "@/components/ui/icons";
+import { usePanelSide } from "@/components/ui/panel-side";
 import { formatRelativeInstant } from "@/lib/format";
 import { useHistoryGrouping, type HistoryGrouping } from "@/lib/user-prefs";
 import { ObjectIcon, type ObjectKind } from "./ObjectIcon";
@@ -58,6 +59,7 @@ export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
   const { t } = useTranslation();
   const grouping = useHistoryGrouping();
   const history = usePanelHistory(currentKey, grouping.value);
+  const { side } = usePanelSide();
   const list = useRef<HTMLDivElement>(null);
   const signature = history.entries.map((entry) => entry.key).join(",");
 
@@ -78,7 +80,10 @@ export function PanelHistoryRail({ currentKey }: { currentKey: string }) {
     <nav
       aria-label={t("panelHistory.label")}
       // Sunken, against the raised record zone: two zones of one panel.
-      className="flex h-full w-44 flex-col border-l border-line-strong bg-surface-sunken"
+      // The border faces the record, whichever edge of the window the panel stands on.
+      className={`flex h-full w-44 flex-col border-line-strong bg-surface-sunken ${
+        side === "left" ? "border-r" : "border-l"
+      }`}
     >
       <div className={RAIL_HEADER}>
         <HistoryIcon className="h-4 w-4 shrink-0 text-ink-muted" />
