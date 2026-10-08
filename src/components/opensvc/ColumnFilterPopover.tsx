@@ -43,7 +43,7 @@ export function ColumnFilterPopover<T>({
   trigger?: ReactNode;
   triggerClassName?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const name = t(column.labelKey);
   const expr = filters[column.prop];
   const active = expr !== undefined;
@@ -138,9 +138,9 @@ export function ColumnFilterPopover<T>({
               options={spec.kind === "enum" ? options.map((option) => option.value) : undefined}
               labelOf={(value) => {
                 const option = options.find((candidate) => candidate.value === value);
-                return option === undefined
-                  ? { text: value }
-                  : { text: optionLabel(option, t), render: option.render };
+                if (option !== undefined)
+                  return { text: optionLabel(option, t), render: option.render };
+                return { text: column.formatValue?.(value, i18n.language) ?? value };
               }}
             />
           )}
