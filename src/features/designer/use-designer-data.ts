@@ -8,8 +8,9 @@ type GroupRow = components["schemas"]["GroupRow"];
 
 /**
  * The rulesets and modulesets the designer starts from, read from the export
- * endpoints: every object with its content and relations, in two requests. Read
- * only: the designer never writes back.
+ * endpoints: every object with its content and relations, in two requests. The
+ * designer writes back only by committing its sandbox (`commit.ts`), after which
+ * this is read again.
  */
 export function useDesignerDraft() {
   return useQuery({

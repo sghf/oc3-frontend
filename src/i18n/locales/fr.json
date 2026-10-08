@@ -2311,14 +2311,22 @@
     },
     "sandbox": {
       "title": "Bac à sable",
-      "text": "Les modifications restent dans cet onglet et ne sont jamais enregistrées dans le collector.",
+      "text": "Les modifications restent dans cet onglet jusqu'à ce que vous les enregistriez dans le collector.",
       "changes_one": "{{count}} modification",
       "changes_other": "{{count}} modifications",
       "undo": "Annuler",
       "undoHint": "Annuler la dernière modification (Ctrl+Z)",
       "reset": "Réinitialiser",
       "resetQuestion_one": "Abandonner {{count}} modification ?",
-      "resetQuestion_other": "Abandonner {{count}} modifications ?"
+      "resetQuestion_other": "Abandonner {{count}} modifications ?",
+      "commit": "Enregistrer",
+      "commitQuestion_one": "Enregistrer {{count}} modification dans le collector ?",
+      "commitQuestion_other": "Enregistrer {{count}} modifications dans le collector ?",
+      "commitDetails": "Elles sont appliquées dans l'ordre où elles ont été faites. Si le collector en refuse une, celles d'avant sont enregistrées et elle reste dans le bac à sable avec les suivantes.",
+      "committing": "Enregistrement… {{done}}/{{total}}",
+      "committed_one": "{{count}} modification enregistrée dans le collector.",
+      "committed_other": "{{count}} modifications enregistrées dans le collector.",
+      "commitFailed": "{{saved}} modifications sur {{total}} enregistrées. Le collector a refusé « {{change}} » : {{message}}. Elle et les suivantes restent dans le bac à sable."
     },
     "welcome": {
       "missing": "L'objet sélectionné n'est plus dans le brouillon.",

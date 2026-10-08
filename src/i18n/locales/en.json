@@ -2311,14 +2311,22 @@
     },
     "sandbox": {
       "title": "Sandbox",
-      "text": "Changes stay in this browser tab and are never saved to the collector.",
+      "text": "Changes stay in this browser tab until you commit them to the collector.",
       "changes_one": "{{count}} change",
       "changes_other": "{{count}} changes",
       "undo": "Undo",
       "undoHint": "Undo the last change (Ctrl+Z)",
       "reset": "Reset",
       "resetQuestion_one": "Discard {{count}} change?",
-      "resetQuestion_other": "Discard {{count}} changes?"
+      "resetQuestion_other": "Discard {{count}} changes?",
+      "commit": "Commit",
+      "commitQuestion_one": "Save {{count}} change to the collector?",
+      "commitQuestion_other": "Save {{count}} changes to the collector?",
+      "commitDetails": "They are applied in the order they were made. If the collector refuses one, the changes before it are saved and it stays in the sandbox with the ones after it.",
+      "committing": "Saving… {{done}}/{{total}}",
+      "committed_one": "{{count}} change saved to the collector.",
+      "committed_other": "{{count}} changes saved to the collector.",
+      "commitFailed": "{{saved}} of {{total}} changes saved. The collector refused “{{change}}”: {{message}}. It and the following changes are still in the sandbox."
     },
     "welcome": {
       "missing": "The selected object is not in the draft anymore.",

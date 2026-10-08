@@ -1,20 +1,25 @@
 import { useCallback, useMemo, useReducer, useState, type ReactNode } from "react";
 import { DesignerContext, type Designer, type Notice } from "./designer-context";
+import { commitAll, type CommitResult } from "./commit";
 import { apply, describe, refusal, type Draft, type LogLine, type Operation } from "./model";
 
 /**
  * The state of the designer sandbox: the draft as loaded, the draft as edited, and
- * the history of the operations applied to it, for the change log and for undo.
- * Nothing leaves the browser tab.
+ * the history of the operations applied to it, for the change log, for undo and
+ * for the commit, which replays them against the collector. Nothing leaves the
+ * browser tab until then.
  */
 interface State {
   original: Draft;
   draft: Draft;
-  history: { before: Draft; line: LogLine }[];
+  history: { before: Draft; operation: Operation; line: LogLine }[];
 }
 
 type Action =
-  { type: "apply"; operation: Operation; author: string } | { type: "undo" } | { type: "reset" };
+  | { type: "apply"; operation: Operation; author: string }
+  | { type: "undo" }
+  | { type: "reset" }
+  | { type: "committed"; count: number };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -25,7 +30,11 @@ function reducer(state: State, action: Action): State {
         author: action.author,
         now: localTimestamp(new Date()),
       });
-      return { ...state, draft, history: [...state.history, { before: state.draft, line }] };
+      return {
+        ...state,
+        draft,
+        history: [...state.history, { before: state.draft, operation: action.operation, line }],
+      };
     }
     case "undo": {
       const last = state.history.at(-1);
@@ -34,6 +43,12 @@ function reducer(state: State, action: Action): State {
     }
     case "reset":
       return { ...state, draft: state.original, history: [] };
+    case "committed": {
+      // The operations saved leave the sandbox: the collector now holds the draft
+      // the first one left pending started from. The draft itself is unchanged.
+      const pending = state.history.slice(action.count);
+      return { ...state, original: pending[0]?.before ?? state.draft, history: pending };
+    }
   }
 }
 
@@ -48,11 +63,14 @@ let noticeId = 0;
 export function DesignerProvider({
   original,
   author,
+  onCommitted,
   children,
 }: {
   original: Draft;
   /** The name stamped on the variables changed in the draft. */
   author: string;
+  /** Called with their number once every pending change is saved: the page reads the collector again. */
+  onCommitted: (count: number) => void;
   children: ReactNode;
 }) {
   const [state, dispatch] = useReducer(reducer, { original, draft: original, history: [] });
@@ -96,6 +114,16 @@ export function DesignerProvider({
     [state.draft, run, notify],
   );
 
+  const commit = useCallback(
+    async (onProgress: (done: number) => void): Promise<CommitResult> => {
+      const result = await commitAll(state.history, onProgress);
+      if (result.saved > 0) dispatch({ type: "committed", count: result.saved });
+      if (result.failure === undefined) onCommitted(result.saved);
+      return result;
+    },
+    [state.history, onCommitted],
+  );
+
   const value = useMemo<Designer>(
     () => ({
       original: state.original,
@@ -113,11 +141,12 @@ export function DesignerProvider({
       reset: () => {
         dispatch({ type: "reset" });
       },
+      commit,
       notices,
       notify,
       dismiss,
     }),
-    [state, run, runAndTell, notices, notify, dismiss],
+    [state, run, runAndTell, commit, notices, notify, dismiss],
   );
 
   return <DesignerContext.Provider value={value}>{children}</DesignerContext.Provider>;

@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { NOTICE_TONES } from "@/components/ui/notice-tones";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { TransientNotice } from "@/components/ui/TransientNotice";
 import { CloseIcon, ResetIcon } from "@/components/ui/icons";
 import { useFormUser } from "@/features/forms/use-form-user";
 import { useDesigner, type Notice } from "./designer-context";
 import { DragHint, DragProvider } from "./dnd";
 import { ModulesetEditor } from "./ModulesetEditor";
-import type { Operation } from "./model";
+import type { ObjectKind, Operation } from "./model";
 import { Navigator } from "./Navigator";
 import { RulesetEditor } from "./RulesetEditor";
 import { DesignerProvider } from "./store";
@@ -38,13 +40,24 @@ function parseSel(sel: string | undefined): Selection | null {
 
 /**
  * The compliance designer: the rulesets and modulesets, their content, relations
- * and teams, shaped by pickers or by drag and drop. A sandbox for now: the
- * changes stay in the browser tab, the collector's data is only read.
+ * and teams, shaped by pickers or by drag and drop, in a sandbox: the changes
+ * stay in the browser tab until committed, then are saved to the collector, and
+ * the designer starts again from what the collector holds.
  */
 export function DesignerPage() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const draft = useDesignerDraft();
   const user = useFormUser();
+  // The changes the last complete commit saved, told once the designer is read again.
+  const [committed, setCommitted] = useState<{ at: number; count: number } | null>(null);
+  // The object open when the commit started, found again by name in the new
+  // sandbox: one the sandbox created had a temporary id, the collector gave another.
+  const [reselect, setReselect] = useState<Reselect | null>(null);
+  // The sandbox in use: it starts again, from the collector's data, only after a
+  // commit saved everything. The live updates read the data again in the
+  // background without touching the pending changes.
+  const [generation, setGeneration] = useState(0);
   return (
     <section className="flex h-[calc(100dvh-2.75rem-2rem)] flex-col gap-3">
       <h1 className="flex items-center gap-2 text-title font-semibold">
@@ -56,17 +69,72 @@ export function DesignerPage() {
       ) : draft.isError ? (
         <p className="text-state-down">■ {draft.error.message}</p>
       ) : (
-        <DesignerProvider original={draft.data} author={user.data?.name.trim() ?? ""}>
+        <DesignerProvider
+          key={generation}
+          original={draft.data}
+          author={user.data?.name.trim() ?? ""}
+          onCommitted={(count) => {
+            // The collector's data read again, then a new sandbox starts from it.
+            void queryClient.refetchQueries({ queryKey: ["designer", "exports"] }).then(() => {
+              setCommitted({ at: Date.now(), count });
+              setGeneration((g) => g + 1);
+            });
+            // Everything else shown from the collector may have changed too.
+            void queryClient.invalidateQueries({
+              predicate: (query) => query.queryKey[0] !== "designer",
+            });
+          }}
+        >
           <DragProvider>
-            <Workspace />
+            <Workspace
+              generation={generation}
+              reselect={reselect}
+              onCommitStart={(open) => {
+                setReselect(open === null ? null : { ...open, from: generation });
+              }}
+              onReselected={() => {
+                setReselect(null);
+              }}
+            />
           </DragProvider>
         </DesignerProvider>
+      )}
+      {committed !== null && (
+        <TransientNotice
+          id={committed.at}
+          tone="success"
+          text={t("designer.sandbox.committed", { count: committed.count })}
+          dismissLabel={t("actionsMenu.dismiss")}
+          onDismiss={() => {
+            setCommitted(null);
+          }}
+        />
       )}
     </section>
   );
 }
 
-function Workspace() {
+/**
+ * The object to open again once the collector is read after a commit: by kind and
+ * name, and the sandbox the commit was made from, which it waits past.
+ */
+interface Reselect {
+  kind: ObjectKind;
+  name: string;
+  from: number;
+}
+
+function Workspace({
+  generation,
+  reselect,
+  onCommitStart,
+  onReselected,
+}: {
+  generation: number;
+  reselect: Reselect | null;
+  onCommitStart: (open: { kind: ObjectKind; name: string } | null) => void;
+  onReselected: () => void;
+}) {
   const designer = useDesigner();
   const search = useSearch({ from: "/compliance/designer" });
   const navigate = useNavigate({ from: "/compliance/designer" });
@@ -113,13 +181,32 @@ function Workspace() {
       : selected.kind === "ruleset"
         ? designer.draft.rulesets[selected.id]
         : designer.draft.modulesets[selected.id];
+  // After a commit, the object that was open, by its name in the collector's data.
+  useEffect(() => {
+    // Not in the sandbox the commit was made from: in the one read after it.
+    if (reselect === null || reselect.from === generation) return;
+    const objects =
+      reselect.kind === "ruleset"
+        ? Object.values(designer.draft.rulesets)
+        : Object.values(designer.draft.modulesets);
+    const found = objects.find((o) => o.name === reselect.name);
+    if (found !== undefined) select({ kind: reselect.kind, id: found.id });
+    onReselected();
+    // Once, on the sandbox read again after the commit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reselect, generation]);
+
   const onVariableDrop = (operation: CopyVariable, at: { x: number; y: number }) => {
     setVariableDrop({ operation, at });
   };
 
   return (
     <SelectContext.Provider value={select}>
-      <SandboxBar />
+      <SandboxBar
+        onCommitStart={() => {
+          onCommitStart(obj === undefined ? null : { kind: obj.kind, name: obj.name });
+        }}
+      />
       <Notices />
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[18rem_1fr]">
         <Navigator selected={selected} onVariableDrop={onVariableDrop} />
@@ -166,12 +253,47 @@ function Workspace() {
   );
 }
 
-/** The reminder that nothing is saved, with the changes made, undo and reset. */
-function SandboxBar() {
+/**
+ * The reminder that nothing is saved yet, with the changes made, undo, reset and
+ * the commit that saves them, its progress, and the change the collector refused.
+ */
+function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
   const { t } = useTranslation();
   const designer = useDesigner();
   const [showLog, setShowLog] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [failure, setFailure] = useState<{
+    saved: number;
+    total: number;
+    change: string;
+    message: string;
+  } | null>(null);
+  // Each commit attempt: the button starts again unarmed after a refusal.
+  const [attempt, setAttempt] = useState(0);
   const count = designer.log.length;
+  const committing = progress !== null;
+
+  async function commit() {
+    // The log as committed: the refused change is named from it.
+    const lines = designer.log;
+    onCommitStart();
+    setFailure(null);
+    setProgress({ done: 0, total: lines.length });
+    const result = await designer.commit((done) => {
+      setProgress({ done, total: lines.length });
+    });
+    setProgress(null);
+    setAttempt((a) => a + 1);
+    if (result.failure !== undefined) {
+      const line = lines[result.failure.index];
+      setFailure({
+        saved: result.saved,
+        total: result.total,
+        change: line === undefined ? "" : t(line.key, line.values),
+        message: result.failure.message,
+      });
+    }
+  }
   return (
     <div className="rounded-(--radius-panel) border border-state-warn bg-state-warn-soft px-3 py-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -191,7 +313,7 @@ function SandboxBar() {
           </button>
           <button
             type="button"
-            disabled={count === 0}
+            disabled={count === 0 || committing}
             className={BUTTON}
             title={t("designer.sandbox.undoHint")}
             onClick={designer.undo}
@@ -199,7 +321,7 @@ function SandboxBar() {
             <ResetIcon className="h-3.5 w-3.5" />
             {t("designer.sandbox.undo")}
           </button>
-          {count > 0 && (
+          {count > 0 && !committing && (
             <ConfirmButton
               label={t("designer.sandbox.reset")}
               question={t("designer.sandbox.resetQuestion", { count })}
@@ -209,11 +331,41 @@ function SandboxBar() {
               onConfirm={() => {
                 designer.reset();
                 setShowLog(false);
+                setFailure(null);
+              }}
+            />
+          )}
+          {count > 0 && (
+            <ConfirmButton
+              key={attempt}
+              label={t("designer.sandbox.commit")}
+              question={t("designer.sandbox.commitQuestion", { count })}
+              details={<p>{t("designer.sandbox.commitDetails")}</p>}
+              confirmLabel={t("designer.sandbox.commit")}
+              cancelLabel={t("designer.cancel")}
+              pendingLabel={t("designer.sandbox.committing", {
+                done: progress?.done ?? 0,
+                total: progress?.total ?? count,
+              })}
+              pending={committing}
+              onConfirm={() => {
+                void commit();
               }}
             />
           )}
         </div>
       </div>
+      {failure !== null && (
+        <p role="alert" className="mt-2 text-state-down">
+          ■{" "}
+          {t("designer.sandbox.commitFailed", {
+            saved: failure.saved,
+            total: failure.total,
+            change: failure.change,
+            message: failure.message,
+          })}
+        </p>
+      )}
       {showLog && count > 0 && (
         <ol className="mt-2 max-h-40 list-decimal space-y-0.5 overflow-y-auto pl-6">
           {designer.log.map((line, i) => (

@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { CommitResult } from "./commit";
 import type { Draft, LogLine, ObjectRef, Operation, Refusal } from "./model";
 
 /** A message of the designer: a translation key with its values, and its tone. */
@@ -26,6 +27,11 @@ export interface Designer {
   describe: (operation: Operation) => LogLine;
   undo: () => void;
   reset: () => void;
+  /**
+   * Saves the pending changes to the collector, in order, up to the first it
+   * refuses; those saved leave the sandbox, the others stay pending.
+   */
+  commit: (onProgress: (done: number) => void) => Promise<CommitResult>;
   notices: Notice[];
   notify: (notice: Omit<Notice, "id">) => void;
   dismiss: (id: number) => void;

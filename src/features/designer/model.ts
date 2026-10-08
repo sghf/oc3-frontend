@@ -403,7 +403,7 @@ function withObject(
 }
 
 /** A name not yet taken, "<name>_clone" as the collector clones, numbered if needed. */
-function cloneName(draft: Draft, kind: ObjectKind, name: string): string {
+export function cloneName(draft: Draft, kind: ObjectKind, name: string): string {
   let candidate = `${name}_clone`;
   for (let i = 2; nameTaken(draft, kind, candidate); i++) candidate = `${name}_clone${String(i)}`;
   return candidate;
