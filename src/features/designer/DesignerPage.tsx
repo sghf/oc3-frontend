@@ -7,9 +7,8 @@ import i18n from "@/i18n";
 import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { NOTICE_TONES } from "@/components/ui/notice-tones";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
-import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TransientNotice } from "@/components/ui/TransientNotice";
-import { CloseIcon, HistoryIcon, ResetIcon } from "@/components/ui/icons";
+import { ChevronDownIcon, CloseIcon, HistoryIcon, ResetIcon } from "@/components/ui/icons";
 import { useFormUser } from "@/features/forms/use-form-user";
 import type { RecordedVersion } from "./commit";
 import { useDesigner, type Notice } from "./designer-context";
@@ -328,6 +327,9 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
   const { t } = useTranslation();
   const designer = useDesigner();
   const [showLog, setShowLog] = useState(false);
+  // The action waiting for its confirmation, asked in a row of its own under the
+  // toolbar rather than in it: the buttons stay where they are.
+  const [confirming, setConfirming] = useState<"commit" | "reset" | null>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [failure, setFailure] = useState<{
     saved: number;
@@ -336,15 +338,19 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
     message: string;
     version: string;
   } | null>(null);
-  // Each commit attempt: the button starts again unarmed after a refusal.
-  const [attempt, setAttempt] = useState(0);
   const count = designer.log.length;
   const committing = progress !== null;
+  // The confirmation opens on its safe choice, for the keyboard.
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (confirming !== null) cancelRef.current?.focus();
+  }, [confirming]);
 
   async function commit() {
     // The log as committed: the refused change is named from it.
     const lines = designer.log;
     onCommitStart();
+    setConfirming(null);
     setFailure(null);
     setProgress({ done: 0, total: lines.length });
     const result = await designer.commit(
@@ -355,7 +361,6 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
       i18n.getFixedT("en")("designer.history.baseline"),
     );
     setProgress(null);
-    setAttempt((a) => a + 1);
     if (result.failure !== undefined) {
       const line = lines[result.failure.index];
       setFailure({
@@ -367,73 +372,133 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
       });
     }
   }
+
+  const ROW = "mt-2 border-t border-state-warn/30 pt-2";
   return (
     <div className="rounded-(--radius-panel) border border-state-warn bg-state-warn-soft px-3 py-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-semibold text-state-warn">▲ {t("designer.sandbox.title")}</span>
-        <span>
-          {designer.restoredFrom === undefined
-            ? t("designer.sandbox.text")
-            : t("designer.sandbox.restoring", { commit: designer.restoredFrom.slice(0, 7) })}
-        </span>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            aria-expanded={showLog}
-            disabled={count === 0}
-            className={BUTTON}
-            onClick={() => {
-              setShowLog(!showLog);
-            }}
-          >
-            {t("designer.sandbox.changes", { count })}
-          </button>
-          <button
-            type="button"
-            disabled={count === 0 || committing}
-            className={BUTTON}
-            title={t("designer.sandbox.undoHint")}
-            onClick={designer.undo}
-          >
-            <ResetIcon className="h-3.5 w-3.5" />
-            {t("designer.sandbox.undo")}
-          </button>
-          {count > 0 && !committing && (
-            <ConfirmButton
-              label={t("designer.sandbox.reset")}
-              question={t("designer.sandbox.resetQuestion", { count })}
-              confirmLabel={t("designer.sandbox.reset")}
-              cancelLabel={t("designer.cancel")}
-              pendingLabel={t("designer.sandbox.reset")}
-              onConfirm={() => {
-                designer.reset();
-                setShowLog(false);
-                setFailure(null);
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <p className="min-w-0 flex-1">
+          <span className="mr-2 font-semibold text-state-warn">
+            <span aria-hidden="true">▲</span> {t("designer.sandbox.title")}
+          </span>
+          <span className="text-ink-muted">
+            {designer.restoredFrom === undefined
+              ? t("designer.sandbox.text")
+              : t("designer.sandbox.restoring", { commit: designer.restoredFrom.slice(0, 7) })}
+          </span>
+        </p>
+        {count === 0 ? (
+          <span className="text-ink-muted">{t("designer.sandbox.none")}</span>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              aria-expanded={showLog}
+              className={BUTTON}
+              onClick={() => {
+                setShowLog(!showLog);
               }}
-            />
-          )}
-          {count > 0 && (
-            <ConfirmButton
-              key={attempt}
-              label={t("designer.sandbox.commit")}
-              question={t("designer.sandbox.commitQuestion", { count })}
-              details={<p>{t("designer.sandbox.commitDetails")}</p>}
-              confirmLabel={t("designer.sandbox.commit")}
-              cancelLabel={t("designer.cancel")}
-              pendingLabel={t("designer.sandbox.committing", {
-                done: progress?.done ?? 0,
-                total: progress?.total ?? count,
-              })}
-              pending={committing}
-              onConfirm={() => {
-                void commit();
+            >
+              {t("designer.sandbox.changes", { count })}
+              <ChevronDownIcon
+                className={`h-3 w-3 transition-transform ${showLog ? "rotate-180" : ""}`}
+              />
+            </button>
+            <button
+              type="button"
+              disabled={committing}
+              className={BUTTON}
+              title={t("designer.sandbox.undoHint")}
+              onClick={designer.undo}
+            >
+              <ResetIcon className="h-3.5 w-3.5" />
+              {t("designer.sandbox.undo")}
+            </button>
+            <span aria-hidden="true" className="mx-1 h-5 w-px bg-state-warn/30" />
+            <button
+              type="button"
+              disabled={committing}
+              aria-expanded={confirming === "reset"}
+              className={`${BUTTON} hover:text-state-down`}
+              onClick={() => {
+                setConfirming(confirming === "reset" ? null : "reset");
               }}
-            />
-          )}
-        </div>
+            >
+              {t("designer.sandbox.reset")}
+            </button>
+            <button
+              type="button"
+              disabled={committing}
+              aria-expanded={confirming === "commit"}
+              className="h-7 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink disabled:opacity-60"
+              onClick={() => {
+                setConfirming(confirming === "commit" ? null : "commit");
+              }}
+            >
+              {committing
+                ? t("designer.sandbox.committing", {
+                    done: progress.done,
+                    total: progress.total,
+                  })
+                : t("designer.sandbox.commit")}
+            </button>
+          </div>
+        )}
       </div>
+
+      {confirming !== null && count > 0 && (
+        <div className={`${ROW} flex flex-wrap items-center gap-x-4 gap-y-2`}>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium">
+              {confirming === "commit"
+                ? t("designer.sandbox.commitQuestion", { count })
+                : t("designer.sandbox.resetQuestion", { count })}
+            </p>
+            {confirming === "commit" && (
+              <p className="text-ink-muted">{t("designer.sandbox.commitDetails")}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              ref={cancelRef}
+              type="button"
+              className={BUTTON}
+              onClick={() => {
+                setConfirming(null);
+              }}
+            >
+              {t("designer.cancel")}
+            </button>
+            {confirming === "commit" ? (
+              <button
+                type="button"
+                className="h-7 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink"
+                onClick={() => {
+                  void commit();
+                }}
+              >
+                {t("designer.sandbox.commitConfirm", { count })}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="h-7 rounded-(--radius-control) bg-state-down px-3 font-medium text-surface-raised"
+                onClick={() => {
+                  designer.reset();
+                  setConfirming(null);
+                  setShowLog(false);
+                  setFailure(null);
+                }}
+              >
+                {t("designer.sandbox.resetConfirm", { count })}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {failure !== null && (
-        <p role="alert" className="mt-2 text-state-down">
+        <p role="alert" className={`${ROW} text-state-down`}>
           ■{" "}
           {t("designer.sandbox.commitFailed", {
             saved: failure.saved,
@@ -444,8 +509,9 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
           {failure.version !== "" && ` ${failure.version}`}
         </p>
       )}
+
       {showLog && count > 0 && (
-        <ol className="mt-2 max-h-40 list-decimal space-y-0.5 overflow-y-auto pl-6">
+        <ol className={`${ROW} max-h-40 list-decimal space-y-0.5 overflow-y-auto pl-6`}>
           {designer.log.map((line, i) => (
             <li key={i}>{t(line.key, line.values)}</li>
           ))}

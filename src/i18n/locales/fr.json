@@ -2327,7 +2327,12 @@
       "committed_one": "{{count}} modification enregistrée dans le collector.",
       "committed_other": "{{count}} modifications enregistrées dans le collector.",
       "commitFailed": "{{saved}} modifications sur {{total}} enregistrées. Le collector a refusé « {{change}} » : {{message}}. Elle et les suivantes restent dans le bac à sable.",
-      "restoring": "Restauration de la version {{commit}} : relisez les modifications en attente, puis enregistrez-les dans le collector."
+      "restoring": "Restauration de la version {{commit}} : relisez les modifications en attente, puis enregistrez-les dans le collector.",
+      "none": "Aucune modification en attente.",
+      "commitConfirm_one": "Enregistrer {{count}} modification",
+      "commitConfirm_other": "Enregistrer {{count}} modifications",
+      "resetConfirm_one": "Abandonner {{count}} modification",
+      "resetConfirm_other": "Abandonner {{count}} modifications"
     },
     "welcome": {
       "missing": "L'objet sélectionné n'est plus dans le brouillon.",

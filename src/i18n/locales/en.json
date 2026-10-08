@@ -2327,7 +2327,12 @@
       "committed_one": "{{count}} change saved to the collector.",
       "committed_other": "{{count}} changes saved to the collector.",
       "commitFailed": "{{saved}} of {{total}} changes saved. The collector refused “{{change}}”: {{message}}. It and the following changes are still in the sandbox.",
-      "restoring": "Restoring version {{commit}}: review the pending changes, then commit them to the collector."
+      "restoring": "Restoring version {{commit}}: review the pending changes, then commit them to the collector.",
+      "none": "No pending change.",
+      "commitConfirm_one": "Commit {{count}} change",
+      "commitConfirm_other": "Commit {{count}} changes",
+      "resetConfirm_one": "Discard {{count}} change",
+      "resetConfirm_other": "Discard {{count}} changes"
     },
     "welcome": {
       "missing": "The selected object is not in the draft anymore.",
