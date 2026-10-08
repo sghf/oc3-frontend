@@ -2326,7 +2326,8 @@
       "committing": "Saving… {{done}}/{{total}}",
       "committed_one": "{{count}} change saved to the collector.",
       "committed_other": "{{count}} changes saved to the collector.",
-      "commitFailed": "{{saved}} of {{total}} changes saved. The collector refused “{{change}}”: {{message}}. It and the following changes are still in the sandbox."
+      "commitFailed": "{{saved}} of {{total}} changes saved. The collector refused “{{change}}”: {{message}}. It and the following changes are still in the sandbox.",
+      "restoring": "Restoring version {{commit}}: review the pending changes, then commit them to the collector."
     },
     "welcome": {
       "missing": "The selected object is not in the draft anymore.",
@@ -2422,7 +2423,8 @@
       "subjectPartial_other": "{{count}} of {{total}} changes from the compliance designer, stopped at a refusal",
       "recorded": "Recorded in the compliance history as version {{commit}}.",
       "failed": "The compliance history could not record this version: {{message}}.",
-      "baseline": "Compliance export as found before a designer commit: the changes made elsewhere since the last version"
+      "baseline": "Compliance export as found before a designer commit: the changes made elsewhere since the last version",
+      "restoreSubject": "Restore version {{commit}}: {{subject}}"
     },
     "historyPanel": {
       "open": "History",
@@ -2473,6 +2475,20 @@
         "publications": "Published to",
         "responsibles": "Responsible",
         "filters": "Filters"
+      },
+      "restore": {
+        "title": "Restore",
+        "pending": "Commit or reset the pending changes first: a restore starts from the configuration the collector holds.",
+        "current": "This is the current configuration: nothing to restore.",
+        "hint": "Brings the rulesets and modulesets back to this version, as pending changes in the sandbox, to review and commit.",
+        "action": "Restore this version",
+        "confirm": "Restore",
+        "question_one": "Restore version {{commit}}? {{count}} change will be added to the sandbox.",
+        "question_other": "Restore version {{commit}}? {{count}} changes will be added to the sandbox.",
+        "details": "Review them in the change log, then Commit to save them; Reset drops them. The definitions of the filtersets are not restored: they are managed in the Filtersets view.",
+        "skipped_one": "{{count}} change cannot be made:",
+        "skipped_other": "{{count}} changes cannot be made:",
+        "staged": "Version {{commit}}: {{count}} changes added to the sandbox. Review them, then commit."
       }
     }
   },

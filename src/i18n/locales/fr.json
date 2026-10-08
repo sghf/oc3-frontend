@@ -2326,7 +2326,8 @@
       "committing": "Enregistrement… {{done}}/{{total}}",
       "committed_one": "{{count}} modification enregistrée dans le collector.",
       "committed_other": "{{count}} modifications enregistrées dans le collector.",
-      "commitFailed": "{{saved}} modifications sur {{total}} enregistrées. Le collector a refusé « {{change}} » : {{message}}. Elle et les suivantes restent dans le bac à sable."
+      "commitFailed": "{{saved}} modifications sur {{total}} enregistrées. Le collector a refusé « {{change}} » : {{message}}. Elle et les suivantes restent dans le bac à sable.",
+      "restoring": "Restauration de la version {{commit}} : relisez les modifications en attente, puis enregistrez-les dans le collector."
     },
     "welcome": {
       "missing": "L'objet sélectionné n'est plus dans le brouillon.",
@@ -2422,7 +2423,8 @@
       "subjectPartial_other": "{{count}} modifications sur {{total}} depuis le designer de conformité, arrêté à un refus",
       "recorded": "Enregistrées dans l'historique de conformité comme version {{commit}}.",
       "failed": "L'historique de conformité n'a pas pu enregistrer cette version : {{message}}.",
-      "baseline": "Export de conformité tel que trouvé avant un enregistrement du designer : les modifications faites ailleurs depuis la dernière version"
+      "baseline": "Export de conformité tel que trouvé avant un enregistrement du designer : les modifications faites ailleurs depuis la dernière version",
+      "restoreSubject": "Restore version {{commit}}: {{subject}}"
     },
     "historyPanel": {
       "open": "Historique",
@@ -2473,6 +2475,20 @@
         "publications": "Publié à",
         "responsibles": "Responsables",
         "filters": "Filtres"
+      },
+      "restore": {
+        "title": "Restaurer",
+        "pending": "Enregistrez ou réinitialisez d'abord les modifications en attente : une restauration part de la configuration du collector.",
+        "current": "C'est la configuration actuelle : rien à restaurer.",
+        "hint": "Ramène les rulesets et les modulesets à cette version, sous forme de modifications en attente dans le bac à sable, à relire puis enregistrer.",
+        "action": "Restaurer cette version",
+        "confirm": "Restaurer",
+        "question_one": "Restaurer la version {{commit}} ? {{count}} modification sera ajoutée au bac à sable.",
+        "question_other": "Restaurer la version {{commit}} ? {{count}} modifications seront ajoutées au bac à sable.",
+        "details": "Relisez-les dans le journal des modifications, puis Enregistrer pour les appliquer ; Réinitialiser les abandonne. La définition des filtersets n'est pas restaurée : elle se gère dans la vue Filtersets.",
+        "skipped_one": "{{count}} modification ne peut pas être faite :",
+        "skipped_other": "{{count}} modifications ne peuvent pas être faites :",
+        "staged": "Version {{commit}} : {{count}} modifications ajoutées au bac à sable. Relisez-les, puis enregistrez."
       }
     }
   },

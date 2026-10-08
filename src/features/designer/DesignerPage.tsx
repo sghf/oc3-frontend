@@ -351,7 +351,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
       (done) => {
         setProgress({ done, total: lines.length });
       },
-      (saved, total) => historyMessage(saved, total),
+      (saved, total) => historyMessage(saved, total, designer.restoredFrom),
       i18n.getFixedT("en")("designer.history.baseline"),
     );
     setProgress(null);
@@ -371,7 +371,11 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
     <div className="rounded-(--radius-panel) border border-state-warn bg-state-warn-soft px-3 py-2">
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-semibold text-state-warn">▲ {t("designer.sandbox.title")}</span>
-        <span>{t("designer.sandbox.text")}</span>
+        <span>
+          {designer.restoredFrom === undefined
+            ? t("designer.sandbox.text")
+            : t("designer.sandbox.restoring", { commit: designer.restoredFrom.slice(0, 7) })}
+        </span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -608,12 +612,17 @@ function Welcome({ missing }: { missing: boolean }) {
  * language of the page: the history is shared. The subject counts the changes,
  * the body lists them, one per line.
  */
-function historyMessage(saved: LogLine[], total: number): string {
+function historyMessage(saved: LogLine[], total: number, restoredFrom?: string): string {
   const en = i18n.getFixedT("en");
-  const subject =
+  const base =
     saved.length === total
       ? en("designer.history.subject", { count: saved.length })
       : en("designer.history.subjectPartial", { count: saved.length, total });
+  // A restore says which version it brings back.
+  const subject =
+    restoredFrom === undefined
+      ? base
+      : en("designer.history.restoreSubject", { commit: restoredFrom.slice(0, 7), subject: base });
   return [subject, "", ...saved.map((line) => `- ${en(line.key, line.values)}`)].join("\n");
 }
 

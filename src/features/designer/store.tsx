@@ -13,13 +13,16 @@ interface State {
   original: Draft;
   draft: Draft;
   history: { before: Draft; operation: Operation; line: LogLine }[];
+  /** The version of the compliance history the pending changes restore, if they do. */
+  restoredFrom?: string;
 }
 
 type Action =
   | { type: "apply"; operation: Operation; author: string }
   | { type: "undo" }
   | { type: "reset" }
-  | { type: "committed"; count: number };
+  | { type: "committed"; count: number }
+  | { type: "restore"; operations: Operation[]; author: string; commit: string };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -39,15 +42,34 @@ function reducer(state: State, action: Action): State {
     case "undo": {
       const last = state.history.at(-1);
       if (last === undefined) return state;
-      return { ...state, draft: last.before, history: state.history.slice(0, -1) };
+      const history = state.history.slice(0, -1);
+      // Every change undone, nothing is being restored any more.
+      return {
+        ...state,
+        draft: last.before,
+        history,
+        restoredFrom: history.length === 0 ? undefined : state.restoredFrom,
+      };
     }
     case "reset":
-      return { ...state, draft: state.original, history: [] };
+      return { ...state, draft: state.original, history: [], restoredFrom: undefined };
+    case "restore": {
+      // The plan's operations, applied in turn as they were planned.
+      let next: State = state;
+      for (const operation of action.operations)
+        next = reducer(next, { type: "apply", operation, author: action.author });
+      return { ...next, restoredFrom: action.commit };
+    }
     case "committed": {
       // The operations saved leave the sandbox: the collector now holds the draft
       // the first one left pending started from. The draft itself is unchanged.
       const pending = state.history.slice(action.count);
-      return { ...state, original: pending[0]?.before ?? state.draft, history: pending };
+      return {
+        ...state,
+        original: pending[0]?.before ?? state.draft,
+        history: pending,
+        restoredFrom: pending.length === 0 ? undefined : state.restoredFrom,
+      };
     }
   }
 }
@@ -158,11 +180,16 @@ export function DesignerProvider({
         dispatch({ type: "reset" });
       },
       commit,
+      restoredFrom: state.restoredFrom,
+      restore: (commit: string, operations: Operation[]) => {
+        dispatch({ type: "restore", operations, author, commit });
+      },
+      author,
       notices,
       notify,
       dismiss,
     }),
-    [state, run, runAndTell, commit, notices, notify, dismiss],
+    [state, run, runAndTell, commit, author, notices, notify, dismiss],
   );
 
   return <DesignerContext.Provider value={value}>{children}</DesignerContext.Provider>;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SlideOver } from "@/components/ui/SlideOver";
 import { UnifiedDiff } from "@/components/ui/UnifiedDiff";
@@ -18,6 +18,9 @@ import {
   type ComplianceVersion,
   type HistoryObject,
 } from "./use-compliance-history";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { useDesigner } from "./designer-context";
+import { planRestore } from "./restore";
 import { BUTTON } from "./ui";
 
 /** Versions read at first, and added by "show older". */
@@ -82,6 +85,10 @@ export function HistoryPanel({
           }}
           canOpen={canOpen}
           onOpen={onOpen}
+          onRestored={() => {
+            setSelected(null);
+            onClose();
+          }}
         />
       ) : (
         <div className="space-y-3">
@@ -263,15 +270,27 @@ function VersionView({
   onBack,
   canOpen,
   onOpen,
+  onRestored,
 }: {
   commit: string;
   onBack: () => void;
   canOpen: (change: ObjectChange) => boolean;
   onOpen: (change: ObjectChange) => void;
+  /** The restore is staged in the sandbox: the panel gives way to it. */
+  onRestored: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const designer = useDesigner();
   const detail = useComplianceVersion(commit);
   const [raw, setRaw] = useState(false);
+  // What restoring the version would change in the designer, as it is now.
+  const plan = useMemo(
+    () =>
+      detail.data === undefined
+        ? null
+        : planRestore(designer.draft, detail.data.export, { author: designer.author, now: "" }),
+    [detail.data, designer.draft, designer.author],
+  );
   const back = (
     <button type="button" className={BUTTON} onClick={onBack}>
       <ArrowLeftIcon className="h-3.5 w-3.5" />
@@ -370,6 +389,66 @@ function VersionView({
           </ul>
         )}
       </section>
+
+      {plan !== null && (
+        <section className="rounded-(--radius-panel) border border-line p-3">
+          <h3 className="mb-1 font-semibold">{t("designer.historyPanel.restore.title")}</h3>
+          {designer.log.length > 0 ? (
+            <p className="text-ink-muted">{t("designer.historyPanel.restore.pending")}</p>
+          ) : plan.operations.length === 0 && plan.skipped.length === 0 ? (
+            <p className="text-ink-muted">{t("designer.historyPanel.restore.current")}</p>
+          ) : (
+            <>
+              <p className="mb-2 text-ink-muted">{t("designer.historyPanel.restore.hint")}</p>
+              <ConfirmButton
+                label={t("designer.historyPanel.restore.action")}
+                question={t("designer.historyPanel.restore.question", {
+                  commit: version.id.slice(0, 7),
+                  count: plan.operations.length,
+                })}
+                details={
+                  <div className="space-y-1">
+                    <p>{t("designer.historyPanel.restore.details")}</p>
+                    {plan.skipped.length > 0 && (
+                      <>
+                        <p className="text-state-warn">
+                          ▲{" "}
+                          {t("designer.historyPanel.restore.skipped", {
+                            count: plan.skipped.length,
+                          })}
+                        </p>
+                        <ul className="list-disc pl-5">
+                          {plan.skipped.map((s, i) => (
+                            <li key={i}>
+                              {t(s.line.key, s.line.values)} — {t(s.refusal.key, s.refusal.values)}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                }
+                blocked={plan.operations.length === 0}
+                confirmLabel={t("designer.historyPanel.restore.confirm")}
+                cancelLabel={t("designer.cancel")}
+                pendingLabel={t("designer.historyPanel.restore.confirm")}
+                onConfirm={() => {
+                  designer.restore(version.id, plan.operations);
+                  designer.notify({
+                    key: "designer.historyPanel.restore.staged",
+                    values: {
+                      commit: version.id.slice(0, 7),
+                      count: String(plan.operations.length),
+                    },
+                    tone: "done",
+                  });
+                  onRestored();
+                }}
+              />
+            </>
+          )}
+        </section>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <button

@@ -39,6 +39,12 @@ export interface Designer {
     /** The message of the version of the export as found before saving, if it changed. */
     baselineMessage: string,
   ) => Promise<CommitResult>;
+  /** The version of the compliance history the pending changes restore, if they do. */
+  restoredFrom: string | undefined;
+  /** Adds the operations restoring a version to the pending changes. */
+  restore: (commit: string, operations: Operation[]) => void;
+  /** The name stamped on the variables changed in the draft. */
+  author: string;
   notices: Notice[];
   notify: (notice: Omit<Notice, "id">) => void;
   dismiss: (id: number) => void;
