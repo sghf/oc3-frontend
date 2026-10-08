@@ -270,11 +270,23 @@
         "hw_description": "Description",
         "hw_driver": "Pilote"
       },
-      "openView": "Ouvrir dans la vue Matériel des nœuds"
+      "openView": "Ouvrir dans la vue Matériel des nœuds",
+      "search": "Chercher un composant",
+      "count_one": "{{count}} composant",
+      "count_other": "{{count}} composants",
+      "matching_one": "{{count}} composant sur {{total}}",
+      "matching_other": "{{count}} composants sur {{total}}",
+      "noMatch": "Aucun composant ne correspond à la recherche."
     },
     "alerts": {
       "open": "Ouvrir dans le dashboard",
-      "empty": "Aucune alerte sur ce nœud."
+      "empty": "Aucune alerte sur ce nœud.",
+      "search": "Chercher une alerte",
+      "count_one": "{{count}} alerte",
+      "count_other": "{{count}} alertes",
+      "matching_one": "{{count}} alerte sur {{total}}",
+      "matching_other": "{{count}} alertes sur {{total}}",
+      "noMatch": "Aucune alerte ne correspond à la recherche."
     },
     "stats": {
       "period": "Période",
@@ -348,7 +360,13 @@
         "net_name": "Réseau",
         "net_gateway": "Passerelle",
         "flag_deprecated": "État"
-      }
+      },
+      "search": "Chercher une adresse ou une interface",
+      "count_one": "{{count}} adresse",
+      "count_other": "{{count}} adresses",
+      "matching_one": "{{count}} adresse sur {{total}}",
+      "matching_other": "{{count}} adresses sur {{total}}",
+      "noMatch": "Aucune adresse ne correspond à la recherche."
     },
     "packages": {
       "search": "Rechercher un paquet ou une version",
@@ -485,6 +503,10 @@
       "empty": "Aucun contrôle : l'agent n'en a remonté aucun pour ce nœud.",
       "outOfBoundsCount_one": "{{count}} contrôle hors seuils",
       "outOfBoundsCount_other": "{{count}} contrôles hors seuils"
+    },
+    "storage": {
+      "search": "Chercher un disque ou un adaptateur",
+      "matching": "Correspondent : {{disks}} disques sur {{totalDisks}}, {{hbas}} adaptateurs sur {{totalHbas}}"
     }
   },
   "auth": {
@@ -1724,7 +1746,8 @@
         "hba_id": "Identifiant",
         "hba_type": "Type",
         "updated": "Remonté"
-      }
+      },
+      "noMatch": "Aucun adaptateur ne correspond à la recherche."
     },
     "disks": {
       "title": "Disques",
@@ -1739,7 +1762,8 @@
         "disk_used": "Utilisé",
         "disk_model": "Fabricant et modèle",
         "disk_dg": "Groupe de disques"
-      }
+      },
+      "noMatch": "Aucun disque ne correspond à la recherche."
     }
   },
   "objectTags": {

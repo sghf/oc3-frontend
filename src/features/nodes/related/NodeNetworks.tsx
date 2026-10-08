@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { FlashScope } from "@/components/opensvc/Flash";
 import type { components } from "@/lib/api/schema";
 import { RelatedTable, type RelatedColumn } from "@/components/opensvc/RelatedTable";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { matchesSearch } from "@/lib/search-match";
 import { useNodeIps } from "./queries";
 
 type IpRow = components["schemas"]["IpRow"];
@@ -15,6 +19,11 @@ function compareIps(a: IpRow, b: IpRow): number {
   return family(a) - family(b) || collator.compare(a.addr ?? "", b.addr ?? "");
 }
 
+/**
+ * Network addresses of the node, grouped by interface. A search narrows them as it
+ * is typed, on the address, interface, MAC, type, network and gateway; the
+ * interfaces left empty go.
+ */
 export function NodeNetworks({
   nodeId,
   headerTop,
@@ -25,7 +34,21 @@ export function NodeNetworks({
 }) {
   const { t } = useTranslation();
   const ips = useNodeIps(nodeId);
-  const rows = ips.data ?? [];
+  const [query, setQuery] = useState("");
+  const all = ips.data ?? [];
+  const needle = query.trim().toLowerCase();
+  const rows = all.filter((row) =>
+    matchesSearch(
+      needle,
+      row.addr,
+      row.intf,
+      row.mac,
+      row.type,
+      row.net_name,
+      row.net_network,
+      row.net_gateway,
+    ),
+  );
 
   // Grouped by interface: this is how the network configuration of a host reads.
   const interfaces = [...new Set(rows.map((row) => row.intf ?? ""))].sort(collator.compare);
@@ -96,15 +119,30 @@ export function NodeNetworks({
   ];
 
   return (
-    <RelatedTable
-      columns={columns}
-      groups={groups}
-      rowKey={(row) => String(row.id ?? `${row.intf ?? ""}:${row.addr ?? ""}`)}
-      isPending={ips.isPending}
-      errorMessage={ips.isError ? ips.error.message : null}
-      empty={t("nodes.networks.empty")}
-      caption={t("nodes.related.networks")}
-      headerTop={headerTop}
-    />
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <SearchBox value={query} onChange={setQuery} label={t("nodes.networks.search")} />
+        {ips.isSuccess && (
+          <p role="status" className="text-ink-muted tabular-nums">
+            {needle === ""
+              ? t("nodes.networks.count", { count: all.length })
+              : t("nodes.networks.matching", { count: rows.length, total: all.length })}
+          </p>
+        )}
+      </div>
+      {/* Rows a search brings back are no live update: they do not flash. */}
+      <FlashScope subject={needle}>
+        <RelatedTable
+          columns={columns}
+          groups={groups}
+          rowKey={(row) => String(row.id ?? `${row.intf ?? ""}:${row.addr ?? ""}`)}
+          isPending={ips.isPending}
+          errorMessage={ips.isError ? ips.error.message : null}
+          empty={needle === "" ? t("nodes.networks.empty") : t("nodes.networks.noMatch")}
+          caption={t("nodes.related.networks")}
+          headerTop={headerTop}
+        />
+      </FlashScope>
+    </div>
   );
 }

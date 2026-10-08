@@ -270,11 +270,23 @@
         "hw_description": "Description",
         "hw_driver": "Driver"
       },
-      "openView": "Open in the Nodes Hardware view"
+      "openView": "Open in the Nodes Hardware view",
+      "search": "Search a component",
+      "count_one": "{{count}} component",
+      "count_other": "{{count}} components",
+      "matching_one": "{{count}} of {{total}} component",
+      "matching_other": "{{count}} of {{total}} components",
+      "noMatch": "No component matches the search."
     },
     "alerts": {
       "open": "Open in the dashboard",
-      "empty": "No alert on this node."
+      "empty": "No alert on this node.",
+      "search": "Search an alert",
+      "count_one": "{{count}} alert",
+      "count_other": "{{count}} alerts",
+      "matching_one": "{{count}} of {{total}} alert",
+      "matching_other": "{{count}} of {{total}} alerts",
+      "noMatch": "No alert matches the search."
     },
     "stats": {
       "period": "Period",
@@ -348,7 +360,13 @@
         "net_name": "Network",
         "net_gateway": "Gateway",
         "flag_deprecated": "State"
-      }
+      },
+      "search": "Search an address or interface",
+      "count_one": "{{count}} address",
+      "count_other": "{{count}} addresses",
+      "matching_one": "{{count}} of {{total}} address",
+      "matching_other": "{{count}} of {{total}} addresses",
+      "noMatch": "No address matches the search."
     },
     "packages": {
       "search": "Search a package or version",
@@ -485,6 +503,10 @@
       "empty": "No check: the agent has not reported any for this node.",
       "outOfBoundsCount_one": "{{count}} check out of bounds",
       "outOfBoundsCount_other": "{{count}} checks out of bounds"
+    },
+    "storage": {
+      "search": "Search a disk or adapter",
+      "matching": "Matching: {{disks}} of {{totalDisks}} disks, {{hbas}} of {{totalHbas}} adapters"
     }
   },
   "auth": {
@@ -1724,7 +1746,8 @@
         "hba_id": "Identifier",
         "hba_type": "Type",
         "updated": "Reported"
-      }
+      },
+      "noMatch": "No adapter matches the search."
     },
     "disks": {
       "title": "Disks",
@@ -1739,7 +1762,8 @@
         "disk_used": "Used",
         "disk_model": "Vendor and model",
         "disk_dg": "Disk group"
-      }
+      },
+      "noMatch": "No disk matches the search."
     }
   },
   "objectTags": {

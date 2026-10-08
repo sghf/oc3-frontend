@@ -39,10 +39,13 @@ export function StorageSections({
   disks,
   locale,
   headerTop,
+  searching = false,
 }: {
   hbas: Loaded<HbaRow>;
   disks: Loaded<DiskRow>;
   locale: string;
+  /** The rows are narrowed by a search: an empty section says that none matches. */
+  searching?: boolean;
   /** Where the table headers stick, see `RelatedTable`. */
   headerTop?: string;
 }) {
@@ -132,7 +135,7 @@ export function StorageSections({
           rowKey={(row) => `${row.node_id ?? ""}:${row.hba_id ?? ""}`}
           isPending={hbas.isPending}
           errorMessage={hbas.errorMessage}
-          empty={t("storage.hbas.empty")}
+          empty={searching ? t("storage.hbas.noMatch") : t("storage.hbas.empty")}
           caption={t("storage.hbas.title")}
         />
       </section>
@@ -160,7 +163,7 @@ export function StorageSections({
           rowKey={(row) => `${row.disk_id ?? ""}:${row.node_id ?? ""}:${row.svc_id ?? ""}`}
           isPending={disks.isPending}
           errorMessage={disks.errorMessage}
-          empty={t("storage.disks.empty")}
+          empty={searching ? t("storage.disks.noMatch") : t("storage.disks.empty")}
           caption={t("storage.disks.title")}
         />
       </section>

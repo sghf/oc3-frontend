@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FlashScope } from "@/components/opensvc/Flash";
 import { ColumnFamilyIcon } from "@/components/opensvc/ColumnFamily";
 import { SanDiagram } from "@/components/opensvc/SanDiagram";
 import { StorageSections } from "@/components/opensvc/StorageSections";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { matchesSearch } from "@/lib/search-match";
 import { useNodeDisks, useNodeHbas, useNodeSan } from "./queries";
 
 /**
  * Storage of a node: the diagram of its SAN wiring, then its host bus adapters and
- * its disks, in the order of the historical storage tab.
+ * its disks, in the order of the historical storage tab. A search narrows the
+ * adapters and the disks as it is typed (id and type of an adapter; id, vendor,
+ * model, disk group and service of a disk); the diagram stays whole.
  */
 
 export function NodeStorage({
@@ -23,7 +29,22 @@ export function NodeStorage({
   const disks = useNodeDisks(nodeId);
   const hbas = useNodeHbas(nodeId);
   const san = useNodeSan(nodeId);
-  const rows = disks.data ?? [];
+  const [query, setQuery] = useState("");
+  const needle = query.trim().toLowerCase();
+  const allDisks = disks.data ?? [];
+  const allHbas = hbas.data ?? [];
+  const rows = allDisks.filter((row) =>
+    matchesSearch(
+      needle,
+      row.disk_id,
+      row.disk_vendor,
+      row.disk_model,
+      row.disk_dg,
+      row.svcname,
+      row.disk_name,
+    ),
+  );
+  const hbaRows = allHbas.filter((row) => matchesSearch(needle, row.hba_id, row.hba_type));
 
   // Disks grouped by service: those a service uses, then those of the node alone.
   const services = [...new Set(rows.map((row) => row.svcname ?? ""))].sort((a, b) =>
@@ -47,24 +68,41 @@ export function NodeStorage({
           <SanDiagram topology={san.data} />
         )}
       </section>
-      <StorageSections
-        locale={locale}
-        headerTop={headerTop}
-        hbas={{
-          groups: [{ key: "all", label: "", rows: hbas.data ?? [] }],
-          isPending: hbas.isPending,
-          errorMessage: hbas.isError ? hbas.error.message : null,
-        }}
-        disks={{
-          groups: services.map((svcname) => ({
-            key: svcname === "" ? "-" : svcname,
-            label: svcname === "" ? t("storage.disks.unassigned") : svcname,
-            rows: rows.filter((row) => (row.svcname ?? "") === svcname),
-          })),
-          isPending: disks.isPending,
-          errorMessage: disks.isError ? disks.error.message : null,
-        }}
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <SearchBox value={query} onChange={setQuery} label={t("nodes.storage.search")} />
+        {needle !== "" && disks.isSuccess && hbas.isSuccess && (
+          <p role="status" className="text-ink-muted tabular-nums">
+            {t("nodes.storage.matching", {
+              disks: rows.length,
+              totalDisks: allDisks.length,
+              hbas: hbaRows.length,
+              totalHbas: allHbas.length,
+            })}
+          </p>
+        )}
+      </div>
+      {/* Rows a search brings back are no live update: they do not flash. */}
+      <FlashScope subject={needle}>
+        <StorageSections
+          searching={needle !== ""}
+          locale={locale}
+          headerTop={headerTop}
+          hbas={{
+            groups: [{ key: "all", label: "", rows: hbaRows }],
+            isPending: hbas.isPending,
+            errorMessage: hbas.isError ? hbas.error.message : null,
+          }}
+          disks={{
+            groups: services.map((svcname) => ({
+              key: svcname === "" ? "-" : svcname,
+              label: svcname === "" ? t("storage.disks.unassigned") : svcname,
+              rows: rows.filter((row) => (row.svcname ?? "") === svcname),
+            })),
+            isPending: disks.isPending,
+            errorMessage: disks.isError ? disks.error.message : null,
+          }}
+        />
+      </FlashScope>
     </div>
   );
 }

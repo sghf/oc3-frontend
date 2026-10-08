@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { FlashScope } from "@/components/opensvc/Flash";
 import type { components } from "@/lib/api/schema";
 import { RelatedTable, type RelatedColumn } from "@/components/opensvc/RelatedTable";
 import { DateTime } from "@/components/ui/DateTime";
 import { RelativeTime } from "@/components/ui/RelativeTime";
-import { SearchIcon } from "@/components/ui/icons";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { matchesSearch } from "@/lib/search-match";
 import { useNodePackages } from "./queries";
 
 type PackageRow = components["schemas"]["PackageRow"];
@@ -31,14 +33,7 @@ export function NodePackages({
   const [query, setQuery] = useState("");
   const all = packages.data ?? [];
   const needle = query.trim().toLowerCase();
-  const rows =
-    needle === ""
-      ? all
-      : all.filter(
-          (row) =>
-            (row.pkg_name ?? "").toLowerCase().includes(needle) ||
-            (row.pkg_version ?? "").toLowerCase().includes(needle),
-        );
+  const rows = all.filter((row) => matchesSearch(needle, row.pkg_name, row.pkg_version));
 
   const columns: RelatedColumn<PackageRow>[] = [
     {
@@ -90,19 +85,7 @@ export function NodePackages({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex h-8 w-64 items-center gap-1.5 rounded-(--radius-control) border border-line bg-surface px-2 text-ink-muted">
-          <SearchIcon />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-            }}
-            placeholder={t("nodes.packages.search")}
-            aria-label={t("nodes.packages.search")}
-            className="w-full bg-transparent text-ink outline-none placeholder:text-ink-muted"
-          />
-        </div>
+        <SearchBox value={query} onChange={setQuery} label={t("nodes.packages.search")} />
         {packages.isSuccess && (
           <p role="status" className="text-ink-muted tabular-nums">
             {needle === ""
@@ -123,16 +106,19 @@ export function NodePackages({
           {t("nodes.packages.reported")} <RelativeTime value={updated} locale={locale} />
         </p>
       )}
-      <RelatedTable
-        columns={columns}
-        groups={[{ key: "packages", label: t("nodes.related.packages"), rows }]}
-        rowKey={(row) => String(row.id ?? `${row.pkg_name ?? ""}:${row.pkg_arch ?? ""}`)}
-        isPending={packages.isPending}
-        errorMessage={packages.isError ? packages.error.message : null}
-        empty={needle === "" ? t("nodes.packages.empty") : t("nodes.packages.noMatch")}
-        caption={t("nodes.related.packages")}
-        headerTop={headerTop}
-      />
+      {/* Rows a search brings back are no live update: they do not flash. */}
+      <FlashScope subject={needle}>
+        <RelatedTable
+          columns={columns}
+          groups={[{ key: "packages", label: t("nodes.related.packages"), rows }]}
+          rowKey={(row) => String(row.id ?? `${row.pkg_name ?? ""}:${row.pkg_arch ?? ""}`)}
+          isPending={packages.isPending}
+          errorMessage={packages.isError ? packages.error.message : null}
+          empty={needle === "" ? t("nodes.packages.empty") : t("nodes.packages.noMatch")}
+          caption={t("nodes.related.packages")}
+          headerTop={headerTop}
+        />
+      </FlashScope>
     </div>
   );
 }
