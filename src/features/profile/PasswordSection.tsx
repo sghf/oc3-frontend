@@ -112,7 +112,9 @@ export function PasswordSection({ email }: { email: string | undefined }) {
     <ProfileCard
       title={t("profile.password.title")}
       family="security"
-      hint={t("profile.password.hint", { count: MIN_LENGTH })}
+      // The rules of a collector password say nothing to whoever signs in through
+      // the identity provider, whose password lives there.
+      hint={isSession(credentials) ? undefined : t("profile.password.hint", { count: MIN_LENGTH })}
     >
       {impersonation !== null ? (
         // The server refuses it: a password is changed only by its owner.
