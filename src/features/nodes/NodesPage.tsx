@@ -17,7 +17,9 @@ import { frozenFilterOptions } from "@/components/opensvc/filter-options";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { OsLogo } from "@/components/opensvc/OsLogo";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
-import { RelativeTime } from "@/components/ui/RelativeTime";
+import { LastReport } from "@/components/opensvc/LastReport";
+import { isOutdated, REPORTING_TICK_MS } from "@/components/opensvc/reporting";
+import { useNow } from "@/lib/use-now";
 import { formatSizeMiB } from "@/lib/format";
 import {
   resolveListSearch,
@@ -193,8 +195,16 @@ const COLUMNS: ListColumn<NodeRow>[] = NODE_PROPS.map((prop) => ({
         </span>
       );
     // What one reads from the last contact is its age: a full date would have to be
-    // subtracted mentally to spot a node that has stopped speaking.
-    if (prop === "last_comm") return <RelativeTime value={row.last_comm} locale={locale} />;
+    // subtracted mentally to spot a node that has stopped speaking, tinted past 15
+    // minutes like the last report of a service.
+    if (prop === "last_comm")
+      return (
+        <LastReport
+          value={row.last_comm}
+          locale={locale}
+          outdated={isOutdated(row.last_comm, Date.now())}
+        />
+      );
     if (DATE_PROPS.has(prop) && typeof value === "string")
       return <DateTime value={value} locale={locale} />;
     return value;
@@ -296,6 +306,8 @@ export function NodesPage() {
   );
   const navigate = useNavigate({ from: "/nodes" });
   const { data, isPending, isError, error, isFetching } = useNodes(search);
+  // Nodes age without the data changing: the outdated contacts are worked out again.
+  useNow(REPORTING_TICK_MS);
   const [creating, setCreating] = useState(false);
   // Selection held by the list; the page keeps only its ids, for the actions menu.
   // The names come from the page on display, hence the fallback to the id.

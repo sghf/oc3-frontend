@@ -18,6 +18,12 @@ export function optionLabel(option: ColumnFilterOption, t: TFunction): string {
 }
 
 /**
+ * A comparison with a date relative to now, as apicollector reads it: `>=-15m`
+ * for "15 minutes ago or later". The operator and the age, without the "-".
+ */
+const RELATIVE_DATE = /^(>=|>|<=|<)-((?:\d+w)?(?:\d+d)?(?:\d+h)?(?:\d+m)?(?:\d+s)?)$/;
+
+/**
  * A filter as the bar of active filters shows it: as it was typed or chosen. The
  * inversion is not part of it: the bar says it in words before the value.
  */
@@ -42,6 +48,14 @@ export function describeFilter<T>(
           return option === undefined ? value : optionLabel(option, t);
         })
         .join(", ");
+  }
+  // A date relative to now, in words: "less than 15m ago".
+  const relative = draft.regex ? null : RELATIVE_DATE.exec(draft.text);
+  if (relative !== null && relative[2] !== "") {
+    const recent = relative[1] === ">=" || relative[1] === ">";
+    return t(recent ? "list.filters.lessThanAgo" : "list.filters.moreThanAgo", {
+      age: relative[2],
+    });
   }
   return draft.regex ? `/${draft.text}/` : draft.text;
 }

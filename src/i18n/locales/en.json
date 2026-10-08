@@ -87,6 +87,11 @@
     "thawed": "Not frozen",
     "frozenMixed": "Partly frozen"
   },
+  "reporting": {
+    "outdated": "No report for more than {{minutes}} minutes: the statuses shown are the last ones received",
+    "lastKnown": "Last status reported, too long ago to be current",
+    "never": "never"
+  },
   "nodes": {
     "title": "Nodes",
     "fields": {
@@ -584,6 +589,9 @@
       "not": "not",
       "invalidRegex": "Invalid regular expression: {{reason}}",
       "numberHint": "e.g. >=8",
+      "dateHint": "e.g. <-15m: more than 15 minutes ago",
+      "lessThanAgo": "less than {{age}} ago",
+      "moreThanAgo": "more than {{age}} ago",
       "clearOne": "Clear the {{column}} filter",
       "clearAll_one": "Clear filter",
       "clearAll_other": "Clear filters ({{count}})",

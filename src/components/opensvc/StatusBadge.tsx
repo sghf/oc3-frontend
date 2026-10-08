@@ -19,23 +19,30 @@ const styles: Record<ObjectState, { ink: string; glyph: string }> = {
  * line up as a regular block, glyphs included, whatever the state. `label` replaces
  * the label of the state when the agent's value is more precise, such as "stdby up"
  * shown with the shape of "up".
+ *
+ * `outdated` greys the badge, its shape and label kept: the state is the last one
+ * reported, too long ago to be taken as the current one. The row says so with a
+ * mark of its own (`OutdatedMark`), and the badge with a tooltip.
  */
 export function StatusBadge({
   state,
   label,
+  outdated = false,
   className,
 }: {
   state: ObjectState;
   label?: string;
+  outdated?: boolean;
   className?: string;
 }) {
   const { t } = useTranslation();
   const s = styles[state];
   return (
     <span
+      title={outdated ? t("reporting.lastKnown") : undefined}
       className={cn(
         "inline-flex w-[6.5rem] items-center gap-1 text-data leading-5 font-medium whitespace-nowrap",
-        s.ink,
+        outdated ? "text-ink-muted" : s.ink,
         className,
       )}
     >

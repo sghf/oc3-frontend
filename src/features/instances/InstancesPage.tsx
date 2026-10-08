@@ -14,7 +14,6 @@ import { StatusBadge } from "@/components/opensvc/StatusBadge";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
 import { statusBadge } from "@/components/opensvc/status";
 import { DateTime } from "@/components/ui/DateTime";
-import { RelativeTime } from "@/components/ui/RelativeTime";
 import {
   resolveListSearch,
   resetsScroll,
@@ -32,6 +31,9 @@ import { FrozenMark } from "@/components/opensvc/FrozenMark";
 import { frozenFilterOptions, STATUS_FILTER_OPTIONS } from "@/components/opensvc/filter-options";
 import { InstanceActionsMenu } from "./InstanceActionsMenu";
 import { fromInstanceId, instanceName, toInstanceId } from "./instance-id";
+import { useNow } from "@/lib/use-now";
+import { isOutdated, REPORTING_TICK_MS } from "@/components/opensvc/reporting";
+import { LastReport } from "@/components/opensvc/LastReport";
 
 type InstanceRow = components["schemas"]["InstanceRow"];
 
@@ -165,10 +167,18 @@ const COLUMNS: ListColumn<InstanceRow>[] = INSTANCE_PROPS.map((prop) => ({
         </CrossLink>
       );
     if (STATUS_PROPS.has(prop) && typeof value === "string")
-      return <StatusBadge {...statusBadge(value)} />;
+      return (
+        <StatusBadge {...statusBadge(value)} outdated={isOutdated(row.mon_updated, Date.now())} />
+      );
     // Last report of the agent for this instance: its age reads better as a distance.
-    if (prop === "mon_updated" && typeof value === "string")
-      return <RelativeTime value={value} locale={locale} />;
+    if (prop === "mon_updated")
+      return (
+        <LastReport
+          value={row.mon_updated}
+          locale={locale}
+          outdated={isOutdated(row.mon_updated, Date.now())}
+        />
+      );
     if (DATE_PROPS.has(prop) && typeof value === "string")
       return <DateTime value={value} locale={locale} />;
     return value;
@@ -184,11 +194,20 @@ const ALL_PROPS = COLUMNS.map((column) => column.prop);
 function queryProps(cols: string[] | undefined): string {
   const shown = visibleProps(cols, DEFAULT_COLS, ALL_PROPS);
   const extra: string[] = [];
-  // `mon_frozen` always requested: freezing is marked even with the column hidden.
+  // `mon_frozen` and `mon_updated` always requested: freezing and an outdated status
+  // are marked even with their columns hidden.
   // mon_vmname completes the id of an encapsulated instance, one row per container.
-  return [...new Set(["svc_id", "node_id", "mon_vmname", "mon_frozen", ...shown, ...extra])].join(
-    ",",
-  );
+  return [
+    ...new Set([
+      "svc_id",
+      "node_id",
+      "mon_vmname",
+      "mon_frozen",
+      "mon_updated",
+      ...shown,
+      ...extra,
+    ]),
+  ].join(",");
 }
 
 /**
@@ -292,6 +311,8 @@ export function InstancesPage() {
   );
   const navigate = useNavigate({ from: "/instances" });
   const { data, isPending, isError, error, isFetching } = useInstances(search);
+  // Rows age without the data changing: the outdated statuses are worked out again.
+  useNow(REPORTING_TICK_MS);
 
   /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {

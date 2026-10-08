@@ -3753,12 +3753,17 @@ export interface paths {
         /** @description A claim rule. Manager only. */
         get: operations["GetOidcMapping"];
         put?: never;
-        /** @description Change a claim rule, under the same checks as its creation. Manager only. */
+        /**
+         * @description Change a claim rule, under the same checks as its creation. The accounts
+         *     the rules had put in a team no rule names any more leave it at once, those
+         *     added by hand stay. Manager only.
+         */
         post: operations["PostOidcMapping"];
         /**
-         * @description Delete a claim rule. The memberships it granted stay until the next sign-in
-         *     of each account; a team no rule names any more is managed by hand again.
-         *     Manager only.
+         * @description Delete a claim rule. The accounts the rules had put in a team no rule
+         *     names any more leave it at once, those added by hand stay, and the team is
+         *     managed by hand again. The teams other rules still name follow the claims
+         *     at the next sign-in of each account. Manager only.
          */
         delete: operations["DeleteOidcMapping"];
         options?: never;
@@ -6861,6 +6866,9 @@ export interface components {
          *       - `in:a,b,c`: one of the listed values;
          *       - `eq:v`, `ne:v`: equal, not equal;
          *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
          *       - `empty`: no value;
          *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
          *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -6948,6 +6956,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -7223,6 +7234,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -7530,6 +7544,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -8594,6 +8611,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -8767,6 +8787,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -8904,6 +8927,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -9006,6 +9032,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -9324,6 +9353,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -9403,6 +9435,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -9507,6 +9542,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -9787,6 +9825,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -9864,6 +9905,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -10003,6 +10047,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -10206,6 +10253,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -10317,6 +10367,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -10683,6 +10736,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11009,6 +11065,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11088,6 +11147,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11254,6 +11316,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11331,6 +11396,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11470,6 +11538,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11675,6 +11746,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -11780,6 +11854,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -12336,6 +12413,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -12445,6 +12525,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -12611,6 +12694,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -12838,6 +12924,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -13137,6 +13226,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -13691,6 +13783,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -13765,6 +13860,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -14091,6 +14189,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -14229,6 +14330,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -14461,6 +14565,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -14597,6 +14704,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -14949,6 +15059,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -15021,6 +15134,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -15096,6 +15212,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -15168,6 +15287,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -15324,6 +15446,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -16068,6 +16193,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -16260,6 +16388,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -16421,6 +16552,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -16665,6 +16799,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -16825,6 +16962,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -17033,6 +17173,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -18852,6 +18995,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -19115,6 +19261,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -19316,6 +19465,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -19446,6 +19598,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -19620,6 +19775,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -19721,6 +19879,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -19827,6 +19988,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -20130,6 +20294,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -21630,6 +21797,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -21731,6 +21901,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -22002,6 +22175,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -22725,6 +22901,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -23066,6 +23245,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
@@ -23326,6 +23508,9 @@ export interface operations {
                  *       - `in:a,b,c`: one of the listed values;
                  *       - `eq:v`, `ne:v`: equal, not equal;
                  *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
                  *       - `empty`: no value;
                  *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
                  *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,

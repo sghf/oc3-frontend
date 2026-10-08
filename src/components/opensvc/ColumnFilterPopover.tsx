@@ -90,7 +90,11 @@ export function ColumnFilterPopover<T>({
               clearLabel={t("list.filters.clearOne", { column: name })}
               invalidLabel={(reason) => t("list.filters.invalidRegex", { reason })}
               placeholder={
-                column.numeric === true ? t("list.filters.numberHint") : t("list.filters.textHint")
+                column.numeric === true
+                  ? t("list.filters.numberHint")
+                  : column.family === "time"
+                    ? t("list.filters.dateHint")
+                    : t("list.filters.textHint")
               }
               operators={{
                 label: t("list.filters.operator"),

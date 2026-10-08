@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { DateTime } from "@/components/ui/DateTime";
-import { RelativeTime } from "@/components/ui/RelativeTime";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
@@ -33,6 +32,9 @@ import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { ServiceDetailPanel } from "./ServiceDetailPanel";
 import { AvailabilityRate } from "@/components/opensvc/AvailabilityRate";
 import { formatPercent } from "@/lib/format";
+import { useNow } from "@/lib/use-now";
+import { isOutdated, REPORTING_TICK_MS } from "@/components/opensvc/reporting";
+import { LastReport } from "@/components/opensvc/LastReport";
 
 type ServiceRow = components["schemas"]["ServiceRow"];
 
@@ -191,7 +193,12 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
         </CrossLink>
       );
     if (STATUS_PROPS.has(prop) && typeof value === "string") {
-      return <StatusBadge {...statusBadge(value)} />;
+      return (
+        <StatusBadge
+          {...statusBadge(value)}
+          outdated={isOutdated(row.svc_status_updated, Date.now())}
+        />
+      );
     }
     if (prop === "svc_sla")
       return typeof value === "number" ? formatPercent(value, locale, 3) : null;
@@ -200,8 +207,14 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
         <AvailabilityRate rate={value} sla={row.svc_sla} locale={locale} />
       ) : null;
     // Like the last contact of a node: what counts is the age of the status.
-    if (prop === "svc_status_updated" && typeof value === "string")
-      return <RelativeTime value={value} locale={locale} />;
+    if (prop === "svc_status_updated")
+      return (
+        <LastReport
+          value={row.svc_status_updated}
+          locale={locale}
+          outdated={isOutdated(row.svc_status_updated, Date.now())}
+        />
+      );
     if (DATE_PROPS.has(prop) && typeof value === "string")
       return <DateTime value={value} locale={locale} />;
     return value;
@@ -211,12 +224,17 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
 const ALL_PROPS = COLUMNS.map((column) => column.prop);
 
 /** Ask only for the columns shown: apicollector pushes the selection down to the database. */
-/** `svc_frozen` is always requested: freezing is marked even with the column hidden. */
+/**
+ * `svc_frozen` and `svc_status_updated` are always requested: freezing and an
+ * outdated status are marked even with their columns hidden.
+ */
 function queryProps(cols: string[] | undefined): string {
   const shown = visibleProps(cols, DEFAULT_COLS, ALL_PROPS);
   // The SLA goes with the availability, which is flagged against it.
   const withSla = shown.includes("svc_availability") ? ["svc_sla"] : [];
-  return [...new Set(["svc_id", "svc_frozen", ...withSla, ...shown])].join(",");
+  return [...new Set(["svc_id", "svc_frozen", "svc_status_updated", ...withSla, ...shown])].join(
+    ",",
+  );
 }
 
 /**
@@ -297,6 +315,8 @@ export function ServicesPage() {
   );
   const navigate = useNavigate({ from: "/services" });
   const { data, isPending, isError, error, isFetching } = useServices(search);
+  // Rows age without the data changing: the outdated statuses are worked out again.
+  useNow(REPORTING_TICK_MS);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   // The services the last deletion removed, unticked from the list.
   const [deleted, setDeleted] = useState<string[]>([]);

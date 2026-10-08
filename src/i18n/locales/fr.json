@@ -87,6 +87,11 @@
     "thawed": "Non gelé",
     "frozenMixed": "Partiellement gelé"
   },
+  "reporting": {
+    "outdated": "Aucun rapport depuis plus de {{minutes}} minutes : les états affichés sont les derniers reçus",
+    "lastKnown": "Dernier état rapporté, trop ancien pour être tenu pour actuel",
+    "never": "jamais"
+  },
   "nodes": {
     "title": "Nœuds",
     "fields": {
@@ -584,6 +589,9 @@
       "not": "sauf",
       "invalidRegex": "Expression régulière invalide : {{reason}}",
       "numberHint": "ex. >=8",
+      "dateHint": "ex. <-15m : il y a plus de 15 minutes",
+      "lessThanAgo": "il y a moins de {{age}}",
+      "moreThanAgo": "il y a plus de {{age}}",
       "clearOne": "Retirer le filtre {{column}}",
       "clearAll_one": "Retirer le filtre",
       "clearAll_other": "Retirer les filtres ({{count}})",

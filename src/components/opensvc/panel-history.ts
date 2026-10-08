@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useNow } from "@/lib/use-now";
 import type { PeekStep } from "@/lib/peek-trail";
 import { useRecordHistory } from "@/lib/record-history";
 import type { ObjectKind } from "./ObjectIcon";
@@ -70,20 +70,6 @@ export type HistoryGroup =
 /** How often the sections are worked out again while the history is on screen. */
 const TICK_MS = 30 * 1000;
 
-/** The time it is, refreshed every `TICK_MS`: records age from a section to the next. */
-function useNow(): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setNow(Date.now());
-    }, TICK_MS);
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, []);
-  return now;
-}
-
 /**
  * The record last picked in the history itself. The panel title, which records
  * every record shown, leaves that one where it stands (`openedFromHistory`): the
@@ -120,7 +106,7 @@ export interface HistoryEntry {
 export function usePanelHistory(currentKey: string, grouping: "time" | "kind" = "time") {
   const history = useRecordHistory();
   const peek = usePeek();
-  const now = useNow();
+  const now = useNow(TICK_MS);
   const records = history.entries.filter((record): record is typeof record & { kind: ObjectKind } =>
     isPeekStep(record),
   );
