@@ -1105,6 +1105,14 @@
     },
     "delete": {
       "question": "Supprimer le groupe {{role}} ? Ses appartenances, ses responsabilités et ses publications partent avec lui. C'est irréversible."
+    },
+    "members": {
+      "title": "Membres",
+      "filter": "Filtrer les membres",
+      "loading": "Lecture des membres…",
+      "none": "Aucun utilisateur n'est membre de ce groupe.",
+      "noMatch": "Aucun membre ne correspond.",
+      "hint": "Les appartenances se changent depuis le panneau de chaque utilisateur."
     }
   },
   "tags": {

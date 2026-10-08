@@ -1105,6 +1105,14 @@
     },
     "delete": {
       "question": "Delete the group {{role}}? Its memberships, responsibilities and publications go with it. This cannot be undone."
+    },
+    "members": {
+      "title": "Members",
+      "filter": "Filter the members",
+      "loading": "Reading the members…",
+      "none": "No user is member of this group.",
+      "noMatch": "No member matches.",
+      "hint": "Memberships are changed from the panel of each user."
     }
   },
   "tags": {

@@ -6,6 +6,7 @@ import { DetailPanel, type DetailGroup } from "@/components/opensvc/DetailPanel"
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TrashIcon } from "@/components/ui/icons";
 import { problemText } from "@/lib/api/problem";
+import { GroupMembers } from "./GroupMembers";
 
 type GroupRow = components["schemas"]["GroupRow"];
 
@@ -81,7 +82,8 @@ export function GroupDetailPanel({
       isPending={isPending}
       errorMessage={isError ? error.message : null}
       actions={
-        <>
+        <div className="space-y-3">
+          {groupId !== undefined && <GroupMembers groupId={groupId} />}
           <ConfirmButton
             icon={<TrashIcon />}
             label={t("detail.delete")}
@@ -99,7 +101,7 @@ export function GroupDetailPanel({
               ■ {remove.error.message}
             </p>
           )}
-        </>
+        </div>
       }
     />
   );
