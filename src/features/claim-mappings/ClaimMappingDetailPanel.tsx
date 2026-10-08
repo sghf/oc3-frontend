@@ -7,6 +7,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { PencilIcon, TrashIcon } from "@/components/ui/icons";
 import { formatDateTime } from "@/lib/format";
 import { useClaimMapping, type ClaimMappingRow } from "./claim-mapping-api";
+import { TeamBadges } from "./TeamBadges";
 
 const text = (prop: keyof ClaimMappingRow) => (row: ClaimMappingRow) => {
   const value = row[prop];
@@ -15,8 +16,9 @@ const text = (prop: keyof ClaimMappingRow) => (row: ClaimMappingRow) => {
 
 /**
  * A claim rule: the claim and the value it matches, what it does, who changed it
- * last. Editing opens the form; deleting asks first, and says that the teams it
- * granted stay until the next sign-in of each account.
+ * last, the privilege groups and the organizational groups it grants apart, as in
+ * the list. Editing opens the form; deleting asks first, and says what becomes of
+ * the memberships the rule granted.
  */
 export function ClaimMappingDetailPanel({
   mappingId,
@@ -45,12 +47,33 @@ export function ClaimMappingDetailPanel({
           format: (row) =>
             row.allow_access === "T" ? t("claimMappings.detail.yes") : t("claimMappings.detail.no"),
         },
+        // The privileges and the organizational groups apart, with the badges of
+        // the list, each opening its group.
         {
-          prop: "group_roles",
+          prop: "privilege_roles",
           format: (row) =>
-            row.group_roles === undefined || row.group_roles === ""
-              ? t("claimMappings.form.noTeam")
-              : row.group_roles,
+            row.privilege_roles === undefined || row.privilege_roles === ""
+              ? t("claimMappings.detail.noPrivilege")
+              : row.privilege_roles,
+          render: (row) =>
+            row.privilege_roles === undefined || row.privilege_roles === "" ? (
+              t("claimMappings.detail.noPrivilege")
+            ) : (
+              <TeamBadges row={row} kind="privilege" />
+            ),
+        },
+        {
+          prop: "org_roles",
+          format: (row) =>
+            row.org_roles === undefined || row.org_roles === ""
+              ? t("claimMappings.detail.noOrg")
+              : row.org_roles,
+          render: (row) =>
+            row.org_roles === undefined || row.org_roles === "" ? (
+              t("claimMappings.detail.noOrg")
+            ) : (
+              <TeamBadges row={row} kind="org" />
+            ),
         },
       ],
     },

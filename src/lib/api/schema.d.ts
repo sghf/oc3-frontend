@@ -6144,6 +6144,14 @@ export interface components {
             /** @description Names of those teams, comma and space separated */
             group_roles?: string;
             id?: number;
+            /** @description Ids of the organizational teams among them, comma separated, in the order of their names */
+            org_ids?: string;
+            /** @description Names of the organizational teams among them, comma and space separated */
+            org_roles?: string;
+            /** @description Ids of the privilege teams among them, comma separated, in the order of their names */
+            privilege_ids?: string;
+            /** @description Names of the privilege teams among them, comma and space separated */
+            privilege_roles?: string;
             updated?: string;
             /** @description Value the claim must equal, or contain for a list */
             value?: string;

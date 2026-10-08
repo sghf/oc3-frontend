@@ -9,7 +9,6 @@ import {
   type ColumnFilterOption,
   type ListColumn,
 } from "@/components/opensvc/CollectorList";
-import { CrossLink } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
 import { DateTime } from "@/components/ui/DateTime";
@@ -22,9 +21,10 @@ import {
 } from "@/lib/list-search";
 import { filterQuery, filtersKey } from "@/lib/column-filters";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
-import { teamsOf, useClaimMapping, type ClaimMappingRow } from "./claim-mapping-api";
+import { teamsOf, useClaimMapping, type ClaimMappingRow, type TeamKind } from "./claim-mapping-api";
 import { ClaimMappingDetailPanel } from "./ClaimMappingDetailPanel";
 import { ClaimMappingFormPanel } from "./ClaimMappingFormPanel";
+import { TeamBadges } from "./TeamBadges";
 import type { ClaimMappingDraft } from "./claim-mapping-draft";
 import { CurrentClaims } from "./CurrentClaims";
 
@@ -35,18 +35,24 @@ const PROPS = [
   "claim",
   "value",
   "allow_access",
+  "privilege_roles",
+  "org_roles",
   "group_roles",
   "author",
   "updated",
   "id",
   "group_ids",
+  "privilege_ids",
+  "org_ids",
 ] as const satisfies readonly (keyof ClaimMappingRow)[];
 
+/** The privileges and the organizational groups a rule grants, in two columns. */
 const DEFAULT_COLS: string[] = [
   "claim",
   "value",
   "allow_access",
-  "group_roles",
+  "privilege_roles",
+  "org_roles",
   "author",
   "updated",
 ];
@@ -57,11 +63,22 @@ const FAMILY: Record<string, ColumnFamily> = {
   claim: "state",
   value: "state",
   allow_access: "security",
+  privilege_roles: "security",
+  org_roles: "team",
   group_roles: "team",
   author: "team",
   updated: "time",
   id: "state",
   group_ids: "team",
+  privilege_ids: "security",
+  org_ids: "team",
+};
+
+/** The columns of team names, with the kind of teams each one lists. */
+const TEAM_COLUMNS: Partial<Record<keyof ClaimMappingRow, TeamKind>> = {
+  group_roles: "all",
+  privilege_roles: "privilege",
+  org_roles: "org",
 };
 
 /** Whether the rule allows signing in, said with a mark and a word. */
@@ -97,18 +114,9 @@ const COLUMNS: ListColumn<ClaimMappingRow>[] = PROPS.map((prop) => ({
     if (prop === "claim" || prop === "value")
       return <code className="whitespace-pre">{row[prop]}</code>;
     // One badge per team, each opening its record.
-    if (prop === "group_roles") {
-      const teams = teamsOf(row);
-      return teams.length === 0 ? undefined : (
-        <span className="flex flex-wrap gap-1">
-          {teams.map((team) => (
-            <CrossLink key={team.id} kind="group" id={String(team.id)}>
-              {team.role}
-            </CrossLink>
-          ))}
-        </span>
-      );
-    }
+    const kind = TEAM_COLUMNS[prop];
+    if (kind !== undefined)
+      return teamsOf(row, kind).length === 0 ? undefined : <TeamBadges row={row} kind={kind} />;
     const value = row[prop];
     return value === null ? undefined : value;
   },
@@ -118,9 +126,15 @@ const ALL_PROPS = COLUMNS.map((column) => column.prop);
 
 function queryProps(cols: string[] | undefined): string {
   // The team badges need the teams' ids.
-  return [...new Set(["id", "group_ids", ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)])].join(
-    ",",
-  );
+  return [
+    ...new Set([
+      "id",
+      "group_ids",
+      "privilege_ids",
+      "org_ids",
+      ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS),
+    ]),
+  ].join(",");
 }
 
 /** One page of the rules, with the sort, filters and columns of `search`. */

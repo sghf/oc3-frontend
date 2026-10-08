@@ -5,7 +5,8 @@ import { problemText } from "@/lib/api/problem";
 
 export type ClaimMappingRow = components["schemas"]["OidcMappingRow"];
 
-export const MAPPING_PROPS = "id,claim,value,allow_access,group_ids,group_roles,author,updated";
+export const MAPPING_PROPS =
+  "id,claim,value,allow_access,group_ids,group_roles,privilege_ids,privilege_roles,org_ids,org_roles,author,updated";
 
 /** A claim rule, for its detail and its edit form. */
 export function useClaimMapping(id: string | undefined) {
@@ -26,15 +27,27 @@ export function useClaimMapping(id: string | undefined) {
 export interface Team {
   id: number;
   role: string;
+  /** A privilege group (Manager, NodeManager…), rather than an organizational one. */
+  privilege?: boolean;
 }
 
+/** Which of the teams a rule grants: all of them, or one kind only. */
+export type TeamKind = "all" | "privilege" | "org";
+
+const TEAM_PROPS = {
+  all: ["group_ids", "group_roles"],
+  privilege: ["privilege_ids", "privilege_roles"],
+  org: ["org_ids", "org_roles"],
+} as const satisfies Record<TeamKind, readonly [keyof ClaimMappingRow, keyof ClaimMappingRow]>;
+
 /**
- * The teams a rule grants, from the two lists the API gives in the same order:
- * the ids, comma separated, and the names, comma and space separated.
+ * The teams a rule grants, of one kind, from the two lists the API gives in the
+ * same order: the ids, comma separated, and the names, comma and space separated.
  */
-export function teamsOf(row: ClaimMappingRow): Team[] {
-  const ids = (row.group_ids ?? "").split(",").filter((id) => id !== "");
-  const roles = (row.group_roles ?? "").split(", ");
+export function teamsOf(row: ClaimMappingRow, kind: TeamKind = "all"): Team[] {
+  const [idsProp, rolesProp] = TEAM_PROPS[kind];
+  const ids = (row[idsProp] ?? "").split(",").filter((id) => id !== "");
+  const roles = (row[rolesProp] ?? "").split(", ");
   return ids.map((id, index) => ({ id: Number(id), role: roles[index] ?? id }));
 }
 
@@ -47,14 +60,14 @@ export function useGrantableTeams() {
     queryKey: ["groups", "grantable"],
     queryFn: async () => {
       const { data, error } = await api.GET("/groups", {
-        params: { query: { props: "id,role", orderby: "role", limit: 0 } },
+        params: { query: { props: "id,role,privilege", orderby: "role", limit: 0 } },
       });
       if (error !== undefined) throw new Error(problemText(error));
       const rows = Array.isArray(data.data) ? data.data : [];
       return rows
         .flatMap((row): Team[] =>
           typeof row.id === "number" && typeof row.role === "string"
-            ? [{ id: row.id, role: row.role }]
+            ? [{ id: row.id, role: row.role, privilege: row.privilege === "T" }]
             : [],
         )
         .filter((team) => team.role !== "Everybody" && !team.role.startsWith("user_"));

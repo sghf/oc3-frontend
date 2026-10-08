@@ -9,6 +9,7 @@ import { CloseIcon } from "@/components/ui/icons";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import {
   flattenClaims,
+  teamsOf,
   useCurrentClaims,
   useGrantableTeams,
   type ClaimMappingRow,
@@ -92,7 +93,71 @@ export function ClaimMappingFormPanel({
     (groupId) =>
       teams.data?.find((entry) => entry.id === groupId) ?? { id: groupId, role: String(groupId) },
   );
-  const offered = (teams.data ?? []).filter((entry) => !draft.groupIds.includes(entry.id));
+  // The kind of a team: from the list of grantable teams, else, while it loads,
+  // from the rule being edited.
+  const privilegeIds = new Set(editing ? teamsOf(mapping, "privilege").map((team) => team.id) : []);
+  const isPrivilege = (id: number) =>
+    teams.data?.find((entry) => entry.id === id)?.privilege ?? privilegeIds.has(id);
+
+  /**
+   * The privilege groups or the organizational groups of the rule, apart: the
+   * chosen ones as removable badges, and a list offering the others of that kind.
+   */
+  const teamPicker = (kind: "privilege" | "org") => {
+    const wanted = kind === "privilege";
+    const label = t(`claimMappings.fields.${kind}_roles`);
+    const mine = chosen.filter((entry) => isPrivilege(entry.id) === wanted);
+    const offered = (teams.data ?? []).filter(
+      (entry) => entry.privilege === wanted && !draft.groupIds.includes(entry.id),
+    );
+    return (
+      <div>
+        <p className="mb-1 font-medium">{label}</p>
+        {mine.length > 0 && (
+          <ul aria-label={label} className="mb-2 flex flex-wrap gap-1.5">
+            {mine.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex h-6 items-center gap-1 rounded-full border border-line bg-surface pr-0.5 pl-2"
+              >
+                {entry.role}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft({
+                      ...draft,
+                      groupIds: draft.groupIds.filter((groupId) => groupId !== entry.id),
+                    });
+                  }}
+                  title={t("claimMappings.form.removeTeam", { team: entry.role })}
+                  className="rounded-full p-0.5 text-ink-muted hover:bg-surface-sunken hover:text-ink"
+                >
+                  <CloseIcon className="h-3 w-3" />
+                  <span className="sr-only">
+                    {t("claimMappings.form.removeTeam", { team: entry.role })}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Combobox
+          options={offered.map((entry) => ({ value: String(entry.id), label: entry.role }))}
+          // Picking a team adds it: the field is ready for the next one.
+          value=""
+          onChange={(value) => {
+            if (value === "") return;
+            setDraft({ ...draft, groupIds: [...draft.groupIds, Number(value)] });
+          }}
+          label={t(`claimMappings.form.add.${kind}`)}
+          placeholder={t(`claimMappings.form.add.${kind}`)}
+          emptyText={t("compEditor.noMatch")}
+          className="w-64"
+        />
+        <p className="mt-1 text-ink-muted">{t(`claimMappings.form.kindHint.${kind}`)}</p>
+      </div>
+    );
+  };
 
   return (
     <SlideOver
@@ -172,54 +237,9 @@ export function ClaimMappingFormPanel({
             </span>
           </label>
 
-          <div>
-            <p className="mb-1 font-medium">{t("claimMappings.fields.group_roles")}</p>
-            {chosen.length > 0 && (
-              <ul
-                aria-label={t("claimMappings.fields.group_roles")}
-                className="mb-2 flex flex-wrap gap-1.5"
-              >
-                {chosen.map((entry) => (
-                  <li
-                    key={entry.id}
-                    className="flex h-6 items-center gap-1 rounded-full border border-line bg-surface pr-0.5 pl-2"
-                  >
-                    {entry.role}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDraft({
-                          ...draft,
-                          groupIds: draft.groupIds.filter((groupId) => groupId !== entry.id),
-                        });
-                      }}
-                      title={t("claimMappings.form.removeTeam", { team: entry.role })}
-                      className="rounded-full p-0.5 text-ink-muted hover:bg-surface-sunken hover:text-ink"
-                    >
-                      <CloseIcon className="h-3 w-3" />
-                      <span className="sr-only">
-                        {t("claimMappings.form.removeTeam", { team: entry.role })}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Combobox
-              options={offered.map((entry) => ({ value: String(entry.id), label: entry.role }))}
-              // Picking a team adds it: the field is ready for the next one.
-              value=""
-              onChange={(value) => {
-                if (value === "") return;
-                setDraft({ ...draft, groupIds: [...draft.groupIds, Number(value)] });
-              }}
-              label={t("claimMappings.form.addTeam")}
-              placeholder={t("claimMappings.form.addTeam")}
-              emptyText={t("compEditor.noMatch")}
-              className="w-64"
-            />
-            <p className="mt-1 text-ink-muted">{t("claimMappings.form.teamHint")}</p>
-          </div>
+          {teamPicker("privilege")}
+          {teamPicker("org")}
+          <p className="text-ink-muted">{t("claimMappings.form.teamHint")}</p>
         </fieldset>
 
         {chosen.length > 0 && (

@@ -2473,8 +2473,12 @@
       "author": "Changed by",
       "updated": "Changed",
       "id": "Rule id",
-      "group_roles": "Grants the teams",
-      "group_ids": "Team ids"
+      "group_roles": "All groups granted",
+      "group_ids": "Team ids",
+      "privilege_roles": "Privilege groups granted",
+      "org_roles": "Organizational groups granted",
+      "privilege_ids": "Privilege group ids",
+      "org_ids": "Organizational group ids"
     },
     "access": {
       "yes": "Allows signing in",
@@ -2487,7 +2491,9 @@
       "groups": {
         "rule": "Rule",
         "record": "Record"
-      }
+      },
+      "noPrivilege": "No privilege group",
+      "noOrg": "No organizational group"
     },
     "current": {
       "title": "Claims of your current sign-in",
@@ -2507,15 +2513,22 @@
       "effects": "What the rule does",
       "accessHint": "Once at least one rule allows signing in, the identities matching none are refused, even with an existing account.",
       "noTeam": "No team",
-      "teamHint": "As many teams as needed: privilege teams (Manager, NodeManager…) and organisation teams alike. Everybody and the private teams of the users cannot be granted.",
+      "teamHint": "As many groups as needed. Everybody and the private groups of the users cannot be granted.",
       "noEffect": "Choose at least one effect: allow signing in, or grant teams.",
       "saving": "Saving…",
       "saveCreate": "Create the rule",
       "saveEdit": "Save the rule",
-      "addTeam": "Add a team",
       "removeTeam": "Remove {{team}}",
       "teamWarning_one": "{{teams}} will follow the claims: at their next sign-in through the provider, the accounts matching no rule granting it leave it, even if they were added by hand.",
-      "teamWarning_other": "{{teams}} will follow the claims: at their next sign-in through the provider, the accounts matching no rule granting one of them leave it, even if they were added by hand."
+      "teamWarning_other": "{{teams}} will follow the claims: at their next sign-in through the provider, the accounts matching no rule granting one of them leave it, even if they were added by hand.",
+      "add": {
+        "privilege": "Add a privilege group",
+        "org": "Add an organizational group"
+      },
+      "kindHint": {
+        "privilege": "What the matching accounts may do: Manager, NodeManager…",
+        "org": "What the matching accounts see: the nodes, services and applications of these groups."
+      }
     },
     "delete": {
       "question": "Delete the rule {{rule}}?",

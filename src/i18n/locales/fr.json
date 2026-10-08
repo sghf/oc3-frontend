@@ -2473,8 +2473,12 @@
       "author": "Modifiée par",
       "updated": "Modifiée",
       "id": "Id de la règle",
-      "group_roles": "Donne les équipes",
-      "group_ids": "Ids des équipes"
+      "group_roles": "Tous les groupes donnés",
+      "group_ids": "Ids des équipes",
+      "privilege_roles": "Groupes de privilèges donnés",
+      "org_roles": "Groupes d'organisation donnés",
+      "privilege_ids": "Ids des groupes de privilèges",
+      "org_ids": "Ids des groupes d'organisation"
     },
     "access": {
       "yes": "Autorise la connexion",
@@ -2487,7 +2491,9 @@
       "groups": {
         "rule": "Règle",
         "record": "Enregistrement"
-      }
+      },
+      "noPrivilege": "Aucun groupe de privilèges",
+      "noOrg": "Aucun groupe d'organisation"
     },
     "current": {
       "title": "Revendications de votre connexion actuelle",
@@ -2507,15 +2513,22 @@
       "effects": "Ce que fait la règle",
       "accessHint": "Dès qu'au moins une règle autorise la connexion, les identités qui ne correspondent à aucune sont refusées, même avec un compte existant.",
       "noTeam": "Aucune équipe",
-      "teamHint": "Autant d'équipes que nécessaire : équipes de privilèges (Manager, NodeManager…) comme d'organisation. Everybody et les équipes privées des utilisateurs ne peuvent pas être données.",
+      "teamHint": "Autant de groupes que nécessaire. Everybody et les groupes privés des utilisateurs ne peuvent pas être donnés.",
       "noEffect": "Choisissez au moins un effet : autoriser la connexion, ou donner des équipes.",
       "saving": "Enregistrement…",
       "saveCreate": "Créer la règle",
       "saveEdit": "Enregistrer la règle",
-      "addTeam": "Ajouter une équipe",
       "removeTeam": "Retirer {{team}}",
       "teamWarning_one": "{{teams}} suivra les revendications : à leur prochaine connexion par le fournisseur, les comptes qui ne correspondent à aucune règle la donnant la quittent, même s'ils y ont été ajoutés à la main.",
-      "teamWarning_other": "{{teams}} suivront les revendications : à leur prochaine connexion par le fournisseur, les comptes qui ne correspondent à aucune règle donnant l'une d'elles la quittent, même s'ils y ont été ajoutés à la main."
+      "teamWarning_other": "{{teams}} suivront les revendications : à leur prochaine connexion par le fournisseur, les comptes qui ne correspondent à aucune règle donnant l'une d'elles la quittent, même s'ils y ont été ajoutés à la main.",
+      "add": {
+        "privilege": "Ajouter un groupe de privilèges",
+        "org": "Ajouter un groupe d'organisation"
+      },
+      "kindHint": {
+        "privilege": "Ce que les comptes correspondants peuvent faire : Manager, NodeManager…",
+        "org": "Ce que les comptes correspondants voient : les nœuds, services et applications de ces groupes."
+      }
     },
     "delete": {
       "question": "Supprimer la règle {{rule}} ?",
