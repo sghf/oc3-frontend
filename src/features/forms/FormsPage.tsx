@@ -13,7 +13,8 @@ import {
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
 import { DateTime } from "@/components/ui/DateTime";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import {
   resolveListSearch,
   resetsScroll,
@@ -64,6 +65,13 @@ const TYPE_OPTIONS: ColumnFilterOption[] = FORM_TYPES.map((value) => ({
   labelKey: `forms.types.${value}`,
 }));
 
+/**
+ * Columns whose distribution says nothing, one value per form: the record id, the
+ * name, unique, and the definition, the text filter of which stays to find the
+ * forms holding a word. The dates have none, as in every list.
+ */
+const NO_DISTRIBUTION = new Set<string>(["id", "form_name", "form_yaml"]);
+
 /** Lines of the definition shown in its cell. */
 const PREVIEW_LINES = 5;
 
@@ -98,9 +106,7 @@ const COLUMNS: ListColumn<FormRow>[] = FORM_PROPS.map((prop) => ({
   numeric: prop === "id",
   family: FAMILY[prop] ?? "state",
   filter: prop === "form_type" ? { kind: "enum" as const, options: TYPE_OPTIONS } : undefined,
-  // Every definition is its own: a distribution would list each form once. The
-  // text filter stays, to find the forms whose definition holds a word.
-  distribution: prop === "form_yaml" ? false : undefined,
+  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   render: (row: FormRow, locale: string) => {
     if (prop === "form_created") return <DateTime value={row.form_created} locale={locale} />;
     if (prop === "form_folder") return <code>{row.form_folder}</code>;
@@ -115,6 +121,17 @@ function queryProps(cols: string[] | undefined): string {
   return [...new Set(["id", "form_name", ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)])].join(
     ",",
   );
+}
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
+ */
+async function formStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/forms", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 /**
@@ -236,6 +253,7 @@ export function FormsPage() {
         exportPage={(page) => fetchForms({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={formStats}
         filterable
       />
 
