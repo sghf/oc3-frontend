@@ -35,6 +35,7 @@ const FORM_PROPS = [
   "form_folder",
   "form_author",
   "form_created",
+  "form_yaml",
   "id",
 ] as const satisfies readonly (keyof FormRow)[];
 
@@ -52,6 +53,8 @@ const FAMILY: Record<string, ColumnFamily> = {
   form_folder: "state",
   form_author: "team",
   form_created: "time",
+  // The cog of the historical column (`action16`).
+  form_yaml: "action",
   id: "state",
 };
 
@@ -61,15 +64,47 @@ const TYPE_OPTIONS: ColumnFilterOption[] = FORM_TYPES.map((value) => ({
   labelKey: `forms.types.${value}`,
 }));
 
+/** Lines of the definition shown in its cell. */
+const PREVIEW_LINES = 5;
+
+/**
+ * The definition of a form in its cell, as the historical table showed it, without
+ * scrolling: its first lines, the blank ones left out, each cut at the width of
+ * the column with its indentation kept, and how many more lines follow. The whole
+ * of it is in the detail.
+ */
+function DefinitionPreview({ yaml }: { yaml: string | undefined }) {
+  const { t } = useTranslation();
+  if (yaml === undefined || yaml.trim() === "") return null;
+  const lines = yaml.split("\n").filter((line) => line.trim() !== "");
+  const more = lines.length - PREVIEW_LINES;
+  return (
+    <div className="max-w-xl py-0.5 font-mono text-data leading-snug">
+      {lines.slice(0, PREVIEW_LINES).map((line, i) => (
+        <div key={i} className="overflow-hidden text-ellipsis whitespace-pre">
+          {line}
+        </div>
+      ))}
+      {more > 0 && (
+        <div className="font-sans text-ink-muted">{t("forms.definitionMore", { count: more })}</div>
+      )}
+    </div>
+  );
+}
+
 const COLUMNS: ListColumn<FormRow>[] = FORM_PROPS.map((prop) => ({
   prop,
   labelKey: `forms.fields.${prop}`,
   numeric: prop === "id",
   family: FAMILY[prop] ?? "state",
   filter: prop === "form_type" ? { kind: "enum" as const, options: TYPE_OPTIONS } : undefined,
+  // Every definition is its own: a distribution would list each form once. The
+  // text filter stays, to find the forms whose definition holds a word.
+  distribution: prop === "form_yaml" ? false : undefined,
   render: (row: FormRow, locale: string) => {
     if (prop === "form_created") return <DateTime value={row.form_created} locale={locale} />;
     if (prop === "form_folder") return <code>{row.form_folder}</code>;
+    if (prop === "form_yaml") return <DefinitionPreview yaml={row.form_yaml} />;
     return row[prop];
   },
 }));

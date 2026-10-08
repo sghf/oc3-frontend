@@ -1891,7 +1891,9 @@
       "toggleAll": "Tout cocher",
       "subFormMissing": "Le sous-formulaire n'est pas nommé.",
       "subFormNotFound": "Sous-formulaire {{name}} introuvable."
-    }
+    },
+    "definitionMore_one": "+{{count}} ligne",
+    "definitionMore_other": "+{{count}} lignes"
   },
   "requests": {
     "title": "Nouvelle demande",

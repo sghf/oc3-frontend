@@ -56,7 +56,8 @@ export type ColumnFamily =
   | "package"
   | "moduleset"
   | "ruleset"
-  | "filterset";
+  | "filterset"
+  | "action";
 
 /**
  * The collector colours by domain rather than by family: everything about the node is
@@ -96,6 +97,9 @@ const FAMILIES: Record<ColumnFamily, { Icon: typeof ServerIcon; className: strin
   ruleset: { Icon: TargetIcon, className: "text-icon-compliance" },
   // `filter16`, in the tint of the Filtersets view.
   filterset: { Icon: FilterIcon, className: "text-icon-dashboard" },
+  // The cog of the historical `action16` outside of compliance, in its own tint
+  // (`legacy-css.ts`): the definition of a form, for one.
+  action: { Icon: GearIcon, className: "text-icon-service" },
 };
 
 export function ColumnFamilyIcon({ family }: { family: ColumnFamily }) {
