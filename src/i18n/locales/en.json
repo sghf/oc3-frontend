@@ -1204,6 +1204,11 @@
     }
   },
   "profile": {
+    "groups": {
+      "title": "Groups and privileges",
+      "hint": "Your organizational groups decide which nodes, services and applications you see; your privilege groups decide what you may change. A GroupManager changes them from the Users view; when you sign in through your identity provider, some may follow its claims.",
+      "manager": "Manager grants every privilege: the other privilege groups add nothing to it."
+    },
     "title": "My profile",
     "palette": {
       "title": "Theme",

@@ -22,6 +22,8 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { ResetIcon } from "@/components/ui/icons";
 import { PALETTES, THEMES } from "@/lib/theme";
 import { LANGUAGES, browserLanguage } from "@/lib/language";
+import { UserGroupsParts } from "@/features/users/UserGroupsParts";
+import { useUserGroups } from "@/features/users/use-user-groups";
 import { PasswordSection } from "./PasswordSection";
 import { ProfileCard } from "./ProfileCard";
 
@@ -35,13 +37,14 @@ const IDENTITY_GROUP = EDITABLE_USER_GROUPS.find((g) => g.key === "identity");
  *
  * `GET /users/self` names the caller server side: no need to know their id, and the
  * page stays right if the sign-in email changes case. The historical collector also
- * showed the groups, the application codes and the default filterset; the API does
- * not expose them per user yet, see notes.md.
+ * showed the application codes and the default filterset; the API does not expose
+ * them per user yet, see notes.md.
  *
  * A header saying who is signed in, then cards of related settings, on two columns
  * where the screen allows: the account, whose name and email the user may change,
  * and its notifications, read only since the API offers no way to change them; the
- * password; the appearance; what the account remembers of the lists and of the menu.
+ * password; the groups and privileges of the account, read only, across both
+ * columns; the appearance; what the account remembers of the lists and of the menu.
  */
 export function ProfilePage() {
   const { t } = useTranslation();
@@ -131,6 +134,7 @@ export function ProfilePage() {
           />
         </ProfileCard>
         <PasswordSection email={data?.email ?? undefined} />
+        <GroupsCard />
         {detailCard("notifications")}
         <AppearanceCard />
         {detailCard("restrictions")}
@@ -152,6 +156,29 @@ function initials(fullName: string, email: string | null | undefined): string {
       .map((w) => w[0]?.toUpperCase() ?? "")
       .join("");
   return (email ?? "?").slice(0, 1).toUpperCase();
+}
+
+/**
+ * The organisational groups of the account, which decide the nodes and services
+ * it sees, and its privilege groups, which decide what it may change: read only,
+ * a GroupManager changing them from the Users view. Manager says it grants every
+ * privilege, since the other privilege groups then add nothing.
+ */
+function GroupsCard() {
+  const { t } = useTranslation();
+  const groups = useUserGroups("self");
+  const isManager = groups.data?.some((g) => g.role === "Manager") ?? false;
+  return (
+    <ProfileCard
+      title={t("profile.groups.title")}
+      family="team"
+      hint={t("profile.groups.hint")}
+      className="lg:col-span-2"
+    >
+      <UserGroupsParts userId="self" readOnly />
+      {isManager && <p className="mt-3 text-ink-muted">{t("profile.groups.manager")}</p>}
+    </ProfileCard>
+  );
 }
 
 /**

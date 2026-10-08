@@ -17,12 +17,21 @@ import {
  * lists of the historical user properties (`user_org_membership`,
  * `user_priv_membership` in tags.js). A GroupManager adds and removes them in
  * place, each change written at once; a GroupManager who is not a Manager is
- * offered, and may attach, only the groups they are member of.
+ * offered, and may attach, only the groups they are member of. `readOnly` only
+ * lists them, whatever the privileges of the caller: the profile page shows the
+ * caller's own groups, which are not changed from there.
  */
-export function UserGroupsParts({ userId }: { userId: string }) {
+export function UserGroupsParts({
+  userId,
+  readOnly = false,
+}: {
+  userId: string;
+  readOnly?: boolean;
+}) {
   const { t } = useTranslation();
   const groups = useUserGroups(userId);
-  const editable = useCanManageMemberships();
+  const canManage = useCanManageMemberships();
+  const editable = canManage && !readOnly;
   const candidates = useAttachableGroups(editable);
   const changed = useMembershipChanged();
   const { outcome, busy, change, dismiss } = useChanges(() => changed(userId));

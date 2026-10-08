@@ -1204,6 +1204,11 @@
     }
   },
   "profile": {
+    "groups": {
+      "title": "Groupes et privilèges",
+      "hint": "Vos groupes d'organisation décident des nœuds, services et applications que vous voyez ; vos groupes de privilèges, de ce que vous pouvez modifier. Un GroupManager les change depuis la vue Utilisateurs ; quand vous vous connectez par votre fournisseur d'identité, certains peuvent suivre ses revendications.",
+      "manager": "Manager donne tous les privilèges : les autres groupes de privilèges n'y ajoutent rien."
+    },
     "title": "Mon profil",
     "palette": {
       "title": "Thème",
