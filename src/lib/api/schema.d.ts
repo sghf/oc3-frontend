@@ -684,6 +684,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/compliance/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The versions of the compliance export, newest first: each commit of the
+         *     compliance designer records the whole export (every filterset, ruleset and
+         *     moduleset, whoever they are published to) in a git repository. Requires the
+         *     CompManager privilege.
+         */
+        get: operations["GetComplianceHistory"];
+        put?: never;
+        /**
+         * @description Record the current compliance export as a new version in the git repository
+         *     of the compliance history (`server.directories.compliance`), authored by the
+         *     user, with the message given: the compliance designer calls it once its
+         *     changes are saved. The export holds every filterset, ruleset and moduleset,
+         *     whoever they are published to, sorted by name, in the format of the import.
+         *     When nothing changed since the last version, none is recorded and changed is
+         *     false. Requires the CompManager privilege.
+         */
+        post: operations["PostComplianceHistory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/history/{commit}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description A version of the compliance export: its commit, the export it recorded and
+         *     the one of the version before, from which the changes are worked out, and
+         *     the git diff between the two. Requires the CompManager privilege.
+         */
+        get: operations["GetComplianceVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/compliance/import": {
         parameters: {
             query?: never;
@@ -5307,6 +5359,12 @@ export interface components {
             filtersets?: components["schemas"]["FiltersetExportItem"][];
             rulesets?: components["schemas"]["CompExportRuleset"][];
         };
+        /** @description The compliance export a version recorded, in the format of the import. */
+        ComplianceExport: {
+            filtersets: components["schemas"]["FiltersetExportItem"][];
+            modulesets: components["schemas"]["CompExportModuleset"][];
+            rulesets: components["schemas"]["CompExportRuleset"][];
+        };
         ComplianceLogListResponse: {
             data: components["schemas"]["ComplianceLogRow"][] | {
                 [key: string]: {
@@ -5360,6 +5418,34 @@ export interface components {
             run_module?: string;
             run_status?: number;
             svc_id?: string;
+        };
+        /** @description A version of the compliance export, a commit of its git repository. */
+        ComplianceVersion: {
+            /** @description "First Last <email>" of the user who committed. */
+            author: string;
+            /** @description The rest of the message, the changes saved, one per line. */
+            body: string;
+            /** @description The date of the commit, ISO 8601. */
+            date: string;
+            /** @description The commit id. */
+            id: string;
+            /**
+             * @description What the version records, as given when it was recorded; empty when not said.
+             * @enum {string}
+             */
+            source: "designer" | "elsewhere" | "";
+            /** @description The first line of the message. */
+            subject: string;
+        };
+        ComplianceVersionDetail: {
+            /** @description The git diff of the export from the version before, unified. */
+            diff: string;
+            export: components["schemas"]["ComplianceExport"];
+            /** @description The export of the version before, absent for the first one. */
+            previous?: components["schemas"]["ComplianceExport"];
+            /** @description The commit id of the version before, absent for the first one. */
+            previous_id?: string;
+            version: components["schemas"]["ComplianceVersion"];
         };
         DiskListResponse: {
             data: components["schemas"]["DiskRow"][] | {
@@ -8856,6 +8942,111 @@ export interface operations {
                 };
             };
             401: components["responses"]["401"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetComplianceHistory: {
+        parameters: {
+            query?: {
+                /** @description Versions returned, 50 by default, 300 at most. */
+                limit?: number;
+                /**
+                 * @description Only the versions in which this object changed (created, changed or
+                 *     deleted), named by kind and id as `ruleset:12`, `moduleset:3` or
+                 *     `filterset:7`: the id follows the object through its renames. The last
+                 *     300 versions are looked through.
+                 */
+                object?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ComplianceVersion"][];
+                    };
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostComplianceHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The commit message, its first line a summary. */
+                    message: string;
+                    /**
+                     * @description What the version records: the changes of a designer commit, or
+                     *     the export as found before one, holding the changes made
+                     *     elsewhere. Kept as a trailer of the commit, returned as source.
+                     * @enum {string}
+                     */
+                    source?: "designer" | "elsewhere";
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Whether a new version was recorded. */
+                        changed: boolean;
+                        /** @description The id of the version recorded, or of the last one when nothing changed. */
+                        commit: string;
+                    };
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetComplianceVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The commit id, whole or abbreviated. */
+                commit: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceVersionDetail"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
             404: components["responses"]["404"];
             500: components["responses"]["500"];
         };

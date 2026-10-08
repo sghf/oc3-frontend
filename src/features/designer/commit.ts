@@ -398,11 +398,15 @@ export async function commitOperation(
   }
 }
 
-/** The outcome of a commit: how many operations were saved, and the refusal that stopped it. */
+/**
+ * The outcome of a commit: how many operations were saved, the refusal that
+ * stopped it, and the version of the compliance export recording what was saved.
+ */
 export interface CommitResult {
   saved: number;
   total: number;
   failure?: { index: number; message: string };
+  version?: RecordedVersion;
 }
 
 /**
@@ -427,4 +431,25 @@ export async function commitAll(
     onProgress(index + 1);
   }
   return { saved: history.length, total: history.length };
+}
+
+/** The version of the compliance export a commit recorded, or why none was. */
+export type RecordedVersion = { commit: string; changed: boolean } | { error: string };
+
+/**
+ * Records the compliance export, as the collector now holds it, as a new version
+ * of the compliance history (a git commit on the collector), with `message`. A
+ * failure is returned rather than thrown: the changes are saved all the same.
+ */
+export async function recordVersion(
+  message: string,
+  source: "designer" | "elsewhere",
+): Promise<RecordedVersion> {
+  try {
+    const { data, error } = await api.POST("/compliance/history", { body: { message, source } });
+    if (error !== undefined) return { error: problemText(error) };
+    return { commit: data.commit, changed: data.changed };
+  } catch (failure) {
+    return { error: failure instanceof Error ? failure.message : String(failure) };
+  }
 }

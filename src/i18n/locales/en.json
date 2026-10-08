@@ -2414,7 +2414,67 @@
     "groupReadOnly": "Read only here: the designer gives groups a role on rulesets and modulesets, the group itself is managed in the Groups view.",
     "groupResponsibleFor": "Responsible for",
     "groupPublishedTo": "Published to it",
-    "contextualTitle": "Contextual: {{filterset}}"
+    "contextualTitle": "Contextual: {{filterset}}",
+    "history": {
+      "subject_one": "{{count}} change from the compliance designer",
+      "subject_other": "{{count}} changes from the compliance designer",
+      "subjectPartial_one": "{{count}} of {{total}} changes from the compliance designer, stopped at a refusal",
+      "subjectPartial_other": "{{count}} of {{total}} changes from the compliance designer, stopped at a refusal",
+      "recorded": "Recorded in the compliance history as version {{commit}}.",
+      "failed": "The compliance history could not record this version: {{message}}.",
+      "baseline": "Compliance export as found before a designer commit: the changes made elsewhere since the last version"
+    },
+    "historyPanel": {
+      "open": "History",
+      "title": "Compliance history",
+      "objectHint": "The versions in which {{name}} changed",
+      "onlyObject": "Only the versions in which this changed:",
+      "allObjects": "Show every version",
+      "kindFilter": "Kind of version",
+      "source": {
+        "all": "All",
+        "designer": "Designer commits",
+        "elsewhere": "Changes made elsewhere"
+      },
+      "textFilter": "Search the messages",
+      "loading": "Reading the history…",
+      "empty": "No version yet: the history starts with the first commit of the designer.",
+      "noMatch": "No version matches.",
+      "older": "Show older versions",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "elsewhere": "Changes made elsewhere",
+      "back": "All versions",
+      "message": "Message",
+      "changes": "What changed, compared with {{commit}}",
+      "firstVersion": "First version",
+      "firstVersionHint": "The history starts here: {{rulesets}} rulesets, {{modulesets}} modulesets and {{filtersets}} filtersets.",
+      "noChange": "Nothing changed in the export.",
+      "rawDiff": "Raw diff",
+      "download": "Download this version",
+      "openObject": "Open it in the designer",
+      "status": {
+        "created": "created",
+        "deleted": "deleted",
+        "modified": "modified"
+      },
+      "fromTo": "{{from}} → {{to}}",
+      "changedItems": "changed: {{items}}",
+      "changedField": "changed",
+      "fields": {
+        "name": "Name",
+        "type": "Type",
+        "public": "Public",
+        "filterset": "Filterset",
+        "variables": "Variables",
+        "modules": "Modules",
+        "rulesets": "Rulesets",
+        "modulesets": "Modulesets",
+        "publications": "Published to",
+        "responsibles": "Responsible",
+        "filters": "Filters"
+      }
+    }
   },
   "bookmarks": {
     "title": "Bookmarks",

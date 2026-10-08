@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
-import { TrashIcon } from "@/components/ui/icons";
+import { HistoryIcon, TrashIcon } from "@/components/ui/icons";
 import { useDesigner } from "./designer-context";
 import { isModified, objectOf, parentsOf, type Draft, type ObjectRef } from "./model";
 import { InlineName, ObjectLink, Section } from "./parts";
-import { BUTTON } from "./ui";
+import { BUTTON, OpenHistoryContext } from "./ui";
 
 /**
  * The top of an editor: the object's name, renamed in place, whether the draft
@@ -27,6 +27,7 @@ export function EditorHeader({
 }) {
   const { t } = useTranslation();
   const designer = useDesigner();
+  const openHistory = useContext(OpenHistoryContext);
   const [json, setJson] = useState(false);
   const obj = objectOf(designer.draft, refTo);
   const usage = useRemoteUsage(refTo);
@@ -58,6 +59,21 @@ export function EditorHeader({
           </span>
         )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
+          {/* Only an object the collector holds has a history: one created in the
+              sandbox has none yet. */}
+          {refTo.id > 0 && (
+            <button
+              type="button"
+              className={BUTTON}
+              title={t("designer.historyPanel.objectHint", { name: obj.name })}
+              onClick={() => {
+                openHistory({ kind: refTo.kind, id: refTo.id, name: obj.name });
+              }}
+            >
+              <HistoryIcon className="h-3.5 w-3.5" />
+              {t("designer.historyPanel.open")}
+            </button>
+          )}
           <button
             type="button"
             className={BUTTON}

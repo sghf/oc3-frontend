@@ -2414,7 +2414,67 @@
     "groupReadOnly": "En lecture seule ici : le concepteur donne aux groupes un rôle sur les rulesets et les modulesets, le groupe lui-même se gère dans la vue Groupes.",
     "groupResponsibleFor": "Responsable de",
     "groupPublishedTo": "Publiés à ce groupe",
-    "contextualTitle": "Contextuel : {{filterset}}"
+    "contextualTitle": "Contextuel : {{filterset}}",
+    "history": {
+      "subject_one": "{{count}} modification depuis le designer de conformité",
+      "subject_other": "{{count}} modifications depuis le designer de conformité",
+      "subjectPartial_one": "{{count}} modification sur {{total}} depuis le designer de conformité, arrêté à un refus",
+      "subjectPartial_other": "{{count}} modifications sur {{total}} depuis le designer de conformité, arrêté à un refus",
+      "recorded": "Enregistrées dans l'historique de conformité comme version {{commit}}.",
+      "failed": "L'historique de conformité n'a pas pu enregistrer cette version : {{message}}.",
+      "baseline": "Export de conformité tel que trouvé avant un enregistrement du designer : les modifications faites ailleurs depuis la dernière version"
+    },
+    "historyPanel": {
+      "open": "Historique",
+      "title": "Historique de conformité",
+      "objectHint": "Les versions où {{name}} a changé",
+      "onlyObject": "Seulement les versions où ceci a changé :",
+      "allObjects": "Afficher toutes les versions",
+      "kindFilter": "Sorte de version",
+      "source": {
+        "all": "Toutes",
+        "designer": "Enregistrements du designer",
+        "elsewhere": "Modifications faites ailleurs"
+      },
+      "textFilter": "Chercher dans les messages",
+      "loading": "Lecture de l'historique…",
+      "empty": "Aucune version encore : l'historique commence au premier enregistrement du designer.",
+      "noMatch": "Aucune version ne correspond.",
+      "older": "Afficher les versions plus anciennes",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "elsewhere": "Modifications faites ailleurs",
+      "back": "Toutes les versions",
+      "message": "Message",
+      "changes": "Ce qui a changé, par rapport à {{commit}}",
+      "firstVersion": "Première version",
+      "firstVersionHint": "L'historique commence ici : {{rulesets}} rulesets, {{modulesets}} modulesets et {{filtersets}} filtersets.",
+      "noChange": "Rien n'a changé dans l'export.",
+      "rawDiff": "Diff brut",
+      "download": "Télécharger cette version",
+      "openObject": "L'ouvrir dans le designer",
+      "status": {
+        "created": "créé",
+        "deleted": "supprimé",
+        "modified": "modifié"
+      },
+      "fromTo": "{{from}} → {{to}}",
+      "changedItems": "modifiés : {{items}}",
+      "changedField": "modifiés",
+      "fields": {
+        "name": "Nom",
+        "type": "Type",
+        "public": "Public",
+        "filterset": "Filterset",
+        "variables": "Variables",
+        "modules": "Modules",
+        "rulesets": "Rulesets",
+        "modulesets": "Modulesets",
+        "publications": "Publié à",
+        "responsibles": "Responsables",
+        "filters": "Filtres"
+      }
+    }
   },
   "bookmarks": {
     "title": "Signets",

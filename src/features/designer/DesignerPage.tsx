@@ -2,23 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import i18n from "@/i18n";
 import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { NOTICE_TONES } from "@/components/ui/notice-tones";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TransientNotice } from "@/components/ui/TransientNotice";
-import { CloseIcon, ResetIcon } from "@/components/ui/icons";
+import { CloseIcon, HistoryIcon, ResetIcon } from "@/components/ui/icons";
 import { useFormUser } from "@/features/forms/use-form-user";
+import type { RecordedVersion } from "./commit";
 import { useDesigner, type Notice } from "./designer-context";
 import { DragHint, DragProvider } from "./dnd";
 import { ModulesetEditor } from "./ModulesetEditor";
-import type { ObjectKind, Operation } from "./model";
+import type { LogLine, ObjectKind, Operation } from "./model";
 import { Navigator } from "./Navigator";
 import { RulesetEditor } from "./RulesetEditor";
 import { DesignerProvider } from "./store";
 import { FiltersetView } from "./FiltersetView";
 import { GroupView } from "./GroupView";
-import { BUTTON, SelectContext, type Selection } from "./ui";
+import { BUTTON, OpenHistoryContext, SelectContext, type Selection } from "./ui";
+import { HistoryPanel } from "./HistoryPanel";
+import type { HistoryObject } from "./use-compliance-history";
 import { useDesignerDraft } from "./use-designer-data";
 
 type CopyVariable = Extract<Operation, { op: "copyVariable" }>;
@@ -50,7 +55,11 @@ export function DesignerPage() {
   const draft = useDesignerDraft();
   const user = useFormUser();
   // The changes the last complete commit saved, told once the designer is read again.
-  const [committed, setCommitted] = useState<{ at: number; count: number } | null>(null);
+  const [committed, setCommitted] = useState<{
+    at: number;
+    count: number;
+    version: RecordedVersion | undefined;
+  } | null>(null);
   // The object open when the commit started, found again by name in the new
   // sandbox: one the sandbox created had a temporary id, the collector gave another.
   const [reselect, setReselect] = useState<Reselect | null>(null);
@@ -58,12 +67,29 @@ export function DesignerPage() {
   // commit saved everything. The live updates read the data again in the
   // background without touching the pending changes.
   const [generation, setGeneration] = useState(0);
+  // The compliance history, open on everything or on one object; closed when null.
+  const [history, setHistory] = useState<{ object: HistoryObject | null } | null>(null);
   return (
     <section className="flex h-[calc(100dvh-2.75rem-2rem)] flex-col gap-3">
-      <h1 className="flex items-center gap-2 text-title font-semibold">
-        <ObjectIcon kind="designer" className="h-5 w-5" />
-        {t("designer.title")}
-      </h1>
+      <div className="flex items-center gap-3">
+        <h1 className="flex items-center gap-2 text-title font-semibold">
+          <ObjectIcon kind="designer" className="h-5 w-5" />
+          {t("designer.title")}
+        </h1>
+        <button
+          type="button"
+          aria-expanded={history !== null}
+          // Beside the title, as the actions of the other pages: the right edge is
+          // where the anchor reopening the last panel floats (`PanelAnchor`).
+          className={BUTTON}
+          onClick={() => {
+            setHistory(history === null ? { object: null } : null);
+          }}
+        >
+          <HistoryIcon className="h-3.5 w-3.5" />
+          {t("designer.historyPanel.open")}
+        </button>
+      </div>
       {draft.isPending ? (
         <p className="text-ink-muted">{t("designer.loading")}</p>
       ) : draft.isError ? (
@@ -73,10 +99,10 @@ export function DesignerPage() {
           key={generation}
           original={draft.data}
           author={user.data?.name.trim() ?? ""}
-          onCommitted={(count) => {
+          onCommitted={(count, version) => {
             // The collector's data read again, then a new sandbox starts from it.
             void queryClient.refetchQueries({ queryKey: ["designer", "exports"] }).then(() => {
-              setCommitted({ at: Date.now(), count });
+              setCommitted({ at: Date.now(), count, version });
               setGeneration((g) => g + 1);
             });
             // Everything else shown from the collector may have changed too.
@@ -87,6 +113,8 @@ export function DesignerPage() {
         >
           <DragProvider>
             <Workspace
+              history={history}
+              onHistory={setHistory}
               generation={generation}
               reselect={reselect}
               onCommitStart={(open) => {
@@ -102,8 +130,15 @@ export function DesignerPage() {
       {committed !== null && (
         <TransientNotice
           id={committed.at}
-          tone="success"
-          text={t("designer.sandbox.committed", { count: committed.count })}
+          tone={
+            committed.version !== undefined && "error" in committed.version ? "warning" : "success"
+          }
+          text={[
+            t("designer.sandbox.committed", { count: committed.count }),
+            versionText(t, committed.version),
+          ]
+            .filter((part) => part !== "")
+            .join(" ")}
           dismissLabel={t("actionsMenu.dismiss")}
           onDismiss={() => {
             setCommitted(null);
@@ -125,11 +160,15 @@ interface Reselect {
 }
 
 function Workspace({
+  history,
+  onHistory,
   generation,
   reselect,
   onCommitStart,
   onReselected,
 }: {
+  history: { object: HistoryObject | null } | null;
+  onHistory: (history: { object: HistoryObject | null } | null) => void;
   generation: number;
   reselect: Reselect | null;
   onCommitStart: (open: { kind: ObjectKind; name: string } | null) => void;
@@ -202,53 +241,81 @@ function Workspace({
 
   return (
     <SelectContext.Provider value={select}>
-      <SandboxBar
-        onCommitStart={() => {
-          onCommitStart(obj === undefined ? null : { kind: obj.kind, name: obj.name });
+      <OpenHistoryContext.Provider
+        value={(object) => {
+          onHistory({ object });
         }}
-      />
-      <Notices />
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[18rem_1fr]">
-        <Navigator selected={selected} onVariableDrop={onVariableDrop} />
-        <div className="min-h-0 overflow-y-auto pr-1">
-          {selected?.kind === "group" ? (
-            <GroupView key={`g${String(selected.id)}`} id={selected.id} />
-          ) : selected?.kind === "filterset" ? (
-            <FiltersetView key={`f${String(selected.id)}`} id={selected.id} />
-          ) : obj === undefined ? (
-            <Welcome missing={selected !== null} />
-          ) : obj.kind === "ruleset" ? (
-            <RulesetEditor
-              key={`r${String(obj.id)}`}
-              ruleset={obj}
-              onSelect={select}
-              onDeleted={() => {
-                select(null);
-              }}
-              onVariableDrop={onVariableDrop}
-            />
-          ) : (
-            <ModulesetEditor
-              key={`m${String(obj.id)}`}
-              moduleset={obj}
-              onSelect={select}
-              onDeleted={() => {
-                select(null);
-              }}
-            />
-          )}
-        </div>
-      </div>
-      {variableDrop !== null && (
-        <VariableDropMenu
-          operation={variableDrop.operation}
-          at={variableDrop.at}
-          onClose={() => {
-            setVariableDrop(null);
+      >
+        <SandboxBar
+          onCommitStart={() => {
+            onCommitStart(obj === undefined ? null : { kind: obj.kind, name: obj.name });
           }}
         />
-      )}
-      <DragHint />
+        <Notices />
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[18rem_1fr]">
+          <Navigator selected={selected} onVariableDrop={onVariableDrop} />
+          <div className="min-h-0 overflow-y-auto pr-1">
+            {selected?.kind === "group" ? (
+              <GroupView key={`g${String(selected.id)}`} id={selected.id} />
+            ) : selected?.kind === "filterset" ? (
+              <FiltersetView key={`f${String(selected.id)}`} id={selected.id} />
+            ) : obj === undefined ? (
+              <Welcome missing={selected !== null} />
+            ) : obj.kind === "ruleset" ? (
+              <RulesetEditor
+                key={`r${String(obj.id)}`}
+                ruleset={obj}
+                onSelect={select}
+                onDeleted={() => {
+                  select(null);
+                }}
+                onVariableDrop={onVariableDrop}
+              />
+            ) : (
+              <ModulesetEditor
+                key={`m${String(obj.id)}`}
+                moduleset={obj}
+                onSelect={select}
+                onDeleted={() => {
+                  select(null);
+                }}
+              />
+            )}
+          </div>
+        </div>
+        {variableDrop !== null && (
+          <VariableDropMenu
+            operation={variableDrop.operation}
+            at={variableDrop.at}
+            onClose={() => {
+              setVariableDrop(null);
+            }}
+          />
+        )}
+        <DragHint />
+        <HistoryPanel
+          // Another object starts the history again: its own filters and page.
+          key={history?.object ? `${history.object.kind}:${String(history.object.id)}` : "all"}
+          open={history !== null}
+          object={history?.object ?? null}
+          onClose={() => {
+            onHistory(null);
+          }}
+          onClearObject={() => {
+            onHistory({ object: null });
+          }}
+          canOpen={(change) =>
+            change.kind === "ruleset"
+              ? designer.draft.rulesets[change.id] !== undefined
+              : change.kind === "moduleset"
+                ? designer.draft.modulesets[change.id] !== undefined
+                : true
+          }
+          onOpen={(change) => {
+            select({ kind: change.kind, id: change.id });
+          }}
+        />
+      </OpenHistoryContext.Provider>
     </SelectContext.Provider>
   );
 }
@@ -267,6 +334,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
     total: number;
     change: string;
     message: string;
+    version: string;
   } | null>(null);
   // Each commit attempt: the button starts again unarmed after a refusal.
   const [attempt, setAttempt] = useState(0);
@@ -279,9 +347,13 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
     onCommitStart();
     setFailure(null);
     setProgress({ done: 0, total: lines.length });
-    const result = await designer.commit((done) => {
-      setProgress({ done, total: lines.length });
-    });
+    const result = await designer.commit(
+      (done) => {
+        setProgress({ done, total: lines.length });
+      },
+      (saved, total) => historyMessage(saved, total),
+      i18n.getFixedT("en")("designer.history.baseline"),
+    );
     setProgress(null);
     setAttempt((a) => a + 1);
     if (result.failure !== undefined) {
@@ -291,6 +363,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
         total: result.total,
         change: line === undefined ? "" : t(line.key, line.values),
         message: result.failure.message,
+        version: versionText(t, result.version),
       });
     }
   }
@@ -364,6 +437,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
             change: failure.change,
             message: failure.message,
           })}
+          {failure.version !== "" && ` ${failure.version}`}
         </p>
       )}
       {showLog && count > 0 && (
@@ -527,4 +601,27 @@ function Welcome({ missing }: { missing: boolean }) {
       </ul>
     </div>
   );
+}
+
+/**
+ * The message of the version recording a commit, in English whatever the
+ * language of the page: the history is shared. The subject counts the changes,
+ * the body lists them, one per line.
+ */
+function historyMessage(saved: LogLine[], total: number): string {
+  const en = i18n.getFixedT("en");
+  const subject =
+    saved.length === total
+      ? en("designer.history.subject", { count: saved.length })
+      : en("designer.history.subjectPartial", { count: saved.length, total });
+  return [subject, "", ...saved.map((line) => `- ${en(line.key, line.values)}`)].join("\n");
+}
+
+/** What the commit's notice says of the version recorded, empty when nothing changed. */
+function versionText(t: TFunction, version: RecordedVersion | undefined): string {
+  if (version === undefined) return "";
+  if ("error" in version) return t("designer.history.failed", { message: version.error });
+  return version.changed
+    ? t("designer.history.recorded", { commit: version.commit.slice(0, 7) })
+    : "";
 }

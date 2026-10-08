@@ -29,9 +29,16 @@ export interface Designer {
   reset: () => void;
   /**
    * Saves the pending changes to the collector, in order, up to the first it
-   * refuses; those saved leave the sandbox, the others stay pending.
+   * refuses; those saved leave the sandbox, the others stay pending, and the
+   * compliance export is recorded as a version of its git history.
    */
-  commit: (onProgress: (done: number) => void) => Promise<CommitResult>;
+  commit: (
+    onProgress: (done: number) => void,
+    /** The message of the version recording the changes saved, out of `total`. */
+    historyMessage: (saved: LogLine[], total: number) => string,
+    /** The message of the version of the export as found before saving, if it changed. */
+    baselineMessage: string,
+  ) => Promise<CommitResult>;
   notices: Notice[];
   notify: (notice: Omit<Notice, "id">) => void;
   dismiss: (id: number) => void;

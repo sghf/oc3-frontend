@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useReducer, useState, type ReactNode } from "react";
 import { DesignerContext, type Designer, type Notice } from "./designer-context";
-import { commitAll, type CommitResult } from "./commit";
+import { commitAll, recordVersion, type CommitResult, type RecordedVersion } from "./commit";
 import { apply, describe, refusal, type Draft, type LogLine, type Operation } from "./model";
 
 /**
@@ -69,8 +69,11 @@ export function DesignerProvider({
   original: Draft;
   /** The name stamped on the variables changed in the draft. */
   author: string;
-  /** Called with their number once every pending change is saved: the page reads the collector again. */
-  onCommitted: (count: number) => void;
+  /**
+   * Called once every pending change is saved, with their number and the version
+   * of the compliance export recording them: the page reads the collector again.
+   */
+  onCommitted: (count: number, version: RecordedVersion | undefined) => void;
   children: ReactNode;
 }) {
   const [state, dispatch] = useReducer(reducer, { original, draft: original, history: [] });
@@ -115,11 +118,24 @@ export function DesignerProvider({
   );
 
   const commit = useCallback(
-    async (onProgress: (done: number) => void): Promise<CommitResult> => {
+    async (
+      onProgress: (done: number) => void,
+      historyMessage: (saved: LogLine[], total: number) => string,
+      baselineMessage: string,
+    ): Promise<CommitResult> => {
+      // The export as found first: what changed since the last version came from
+      // elsewhere (another view, an import), and must not be counted as this
+      // commit's. The collector records nothing when nothing changed.
+      await recordVersion(baselineMessage, "elsewhere");
       const result = await commitAll(state.history, onProgress);
-      if (result.saved > 0) dispatch({ type: "committed", count: result.saved });
-      if (result.failure === undefined) onCommitted(result.saved);
-      return result;
+      if (result.saved === 0) return result;
+      // What was saved becomes a version of the compliance export, even when a
+      // refusal stopped the commit: the collector holds those changes.
+      const saved = state.history.slice(0, result.saved).map((h) => h.line);
+      const version = await recordVersion(historyMessage(saved, result.total), "designer");
+      dispatch({ type: "committed", count: result.saved });
+      if (result.failure === undefined) onCommitted(result.saved, version);
+      return { ...result, version };
     },
     [state.history, onCommitted],
   );
