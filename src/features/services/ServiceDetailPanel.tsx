@@ -200,15 +200,16 @@ export function ServiceDetailPanel({
       onTabChange={onTabChange}
       propertiesFamily="service"
       label={t("services.related.label")}
-    >
-      {tagEdit.allowed && (
-        <div className="mb-4">
+      titleActions={
+        tagEdit.allowed && svcId !== undefined ? (
           <ServiceActionsMenu
-            services={svcId === undefined ? [] : [{ id: svcId, name: service?.svcname ?? svcId }]}
+            services={[{ id: svcId, name: service?.svcname ?? svcId }]}
             onDeleted={onClose}
+            confirm="popover"
           />
-        </div>
-      )}
+        ) : undefined
+      }
+    >
       <ObjectTags
         tags={tags.data}
         isPending={open && tags.isPending}

@@ -184,15 +184,16 @@ export function InstanceDetailPanel({
       onTabChange={onTabChange}
       propertiesFamily="service"
       label={t("instances.detail.tabs")}
-    >
-      {tagEdit.allowed && (
-        <div className="mb-4">
+      titleActions={
+        tagEdit.allowed && instanceId !== undefined ? (
           <InstanceActionsMenu
-            instances={instanceId === undefined ? [] : [{ id: instanceId, name: title }]}
+            instances={[{ id: instanceId, name: title }]}
             onDeleted={onClose}
+            confirm="popover"
           />
-        </div>
-      )}
+        ) : undefined
+      }
+    >
       <ObjectTags
         tags={tags.data}
         isPending={svcId !== undefined && tags.isPending}

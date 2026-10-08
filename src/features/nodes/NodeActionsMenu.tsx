@@ -49,10 +49,13 @@ export function NodeActionsMenu({
   nodes,
   onDeleted,
   onCompare,
+  confirm,
 }: {
   nodes: ActionTarget[];
   /** Opens the comparison of the selection, see ActionsMenu. */
   onCompare?: () => void;
+  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
+  confirm?: "inline" | "popover";
   onDeleted?: (ids: string[]) => void;
 }) {
   const queryClient = useQueryClient();
@@ -81,6 +84,7 @@ export function NodeActionsMenu({
       actions={ACTIONS}
       dataActions={dataActions}
       onCompare={onCompare}
+      confirm={confirm}
       prefix="nodes.actions"
       queue={async (target, action) => {
         // `node_id` alone targets the node, as in the historical collector.

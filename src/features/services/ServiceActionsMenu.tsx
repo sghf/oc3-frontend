@@ -40,10 +40,13 @@ export function ServiceActionsMenu({
   services,
   onDeleted,
   onCompare,
+  confirm,
 }: {
   services: ActionTarget[];
   /** Opens the comparison of the selection, see ActionsMenu. */
   onCompare?: () => void;
+  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
+  confirm?: "inline" | "popover";
   onDeleted?: (ids: string[]) => void;
 }) {
   const queryClient = useQueryClient();
@@ -73,6 +76,7 @@ export function ServiceActionsMenu({
       actions={SERVICE_ACTIONS}
       dataActions={dataActions}
       onCompare={onCompare}
+      confirm={confirm}
       prefix="services.actions"
       queue={async (target, action) => {
         // `svc_id` alone targets the whole service, as in the historical collector.

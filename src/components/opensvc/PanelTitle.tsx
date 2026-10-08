@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { PeekStep } from "@/lib/peek-trail";
 import { useRecordHistory } from "@/lib/record-history";
 import { RAIL_FALLBACK, type SlideOverSize } from "@/components/ui/slide-over-layout";
@@ -25,6 +25,7 @@ export function PanelTitle({
   recordId,
   open,
   size = "default",
+  actions,
 }: {
   kind: ObjectKind;
   title: string;
@@ -32,6 +33,8 @@ export function PanelTitle({
   open: boolean;
   /** Size of the panel: decides where the rail gives way to the list button. */
   size?: SlideOverSize;
+  /** What is done on the record, right after its title: shown whatever the tab. */
+  actions?: ReactNode;
 }) {
   const history = useRecordHistory();
   const currentKey = recordKey(kind, recordId);
@@ -52,6 +55,7 @@ export function PanelTitle({
     <div className="flex min-w-0 flex-1 items-center gap-2">
       <ObjectIcon kind={kind} />
       <h2 className="truncate text-title font-semibold">{title}</h2>
+      {actions !== undefined && <div className="shrink-0">{actions}</div>}
       {open && (
         <div className={RAIL_FALLBACK[size]}>
           <PanelHistoryMenu currentKey={currentKey} />

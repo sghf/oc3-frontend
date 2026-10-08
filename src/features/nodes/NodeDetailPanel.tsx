@@ -319,15 +319,16 @@ export function NodeDetailPanel({
       onTabChange={onTabChange}
       propertiesFamily="node"
       label={t("nodes.related.label")}
-    >
-      {tagEdit.allowed && (
-        <div className="mb-4">
+      titleActions={
+        tagEdit.allowed && nodeId !== undefined ? (
           <NodeActionsMenu
-            nodes={nodeId === undefined ? [] : [{ id: nodeId, name: node?.nodename ?? nodeId }]}
+            nodes={[{ id: nodeId, name: node?.nodename ?? nodeId }]}
             onDeleted={onClose}
+            confirm="popover"
           />
-        </div>
-      )}
+        ) : undefined
+      }
+    >
       <ObjectTags
         tags={tags.data}
         isPending={open && tags.isPending}

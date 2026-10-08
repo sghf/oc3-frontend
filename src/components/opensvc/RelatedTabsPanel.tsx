@@ -30,6 +30,7 @@ export function RelatedTabsPanel({
   onTabChange,
   propertiesFamily,
   label,
+  titleActions,
   children,
 }: {
   open: boolean;
@@ -45,6 +46,8 @@ export function RelatedTabsPanel({
   propertiesFamily: ColumnFamily;
   /** Accessible name of the tab bar. */
   label: string;
+  /** The actions on the object, beside its title in the header, whatever the tab. */
+  titleActions?: ReactNode;
   /** Content of the properties tab. */
   children: ReactNode;
 }) {
@@ -78,7 +81,14 @@ export function RelatedTabsPanel({
       closeLabel={t("detail.close")}
       resizeLabel={t("detail.resize")}
       heading={
-        <PanelTitle kind={kind} title={title} recordId={objectId} open={open} size="wider" />
+        <PanelTitle
+          kind={kind}
+          title={title}
+          recordId={objectId}
+          open={open}
+          size="wider"
+          actions={titleActions}
+        />
       }
       rail={<PanelHistoryRail currentKey={recordKey(kind, objectId)} />}
       actions={

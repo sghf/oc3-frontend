@@ -62,6 +62,10 @@ function outcomeTone(outcome: Outcome): NoticeTone {
   return outcome.done === null ? "error" : "warning";
 }
 
+/** The confirmation in a header: a card anchored under the button, over the panel. */
+const CONFIRM_CARD =
+  "absolute top-full left-0 z-30 mt-2 flex w-max max-w-[min(32rem,calc(100vw-2rem))] flex-wrap items-center gap-2 rounded-(--radius-panel) border border-line bg-surface-raised p-3 shadow-lg";
+
 /** The action awaiting confirmation: an agent action, or a data action. */
 type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataActionEntry };
 
@@ -87,6 +91,10 @@ type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataAc
  * on the collector at once and cannot be undone: their confirmation names the
  * objects and its button says what it does. An entry the user's privileges do not
  * allow is not shown, nor the submenu when none is left.
+ *
+ * In a toolbar the confirmation follows the button on its row; in a panel header,
+ * `confirm="popover"`, it opens as a card anchored under the button, the header
+ * keeping its single line.
  */
 export function ActionsMenu({
   targets,
@@ -95,6 +103,7 @@ export function ActionsMenu({
   queue: queueOne,
   dataActions = [],
   onCompare,
+  confirm = "inline",
 }: {
   targets: ActionTarget[];
   actions: readonly ActionEntry[];
@@ -108,6 +117,8 @@ export function ActionsMenu({
    * actions, which change something, as it only reads.
    */
   onCompare?: () => void;
+  /** Where the confirmation of an action shows: on the row, or in a card under the button. */
+  confirm?: "inline" | "popover";
 }) {
   const { t } = useTranslation();
   const [pending, setPending] = useState<Pending | null>(null);
@@ -245,7 +256,11 @@ export function ActionsMenu({
     pending === null || pending.kind !== "queue" ? "" : t(`${prefix}.items.${pending.action}`);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      className={
+        confirm === "popover" ? "relative flex items-center" : "flex flex-wrap items-center gap-2"
+      }
+    >
       {targets.length > 0 && (
         <MenuButton
           label={t(`${prefix}.open`)}
@@ -258,66 +273,72 @@ export function ActionsMenu({
         />
       )}
 
-      {pending !== null && pending.kind === "data" && (
-        <DataConfirm
-          question={t(`${prefix}.data.${pending.entry.key}.question`, { count: targets.length })}
-          names={targets.map((target) => target.name)}
-          confirmLabel={
-            data.isPending
-              ? t(`${prefix}.data.${pending.entry.key}.running`)
-              : t(`${prefix}.data.${pending.entry.key}.confirm`, { count: targets.length })
-          }
-          busy={data.isPending}
-          onConfirm={() => {
-            data.mutate(pending.entry, {
-              onSettled: () => {
+      {pending !== null && (
+        <div className={confirm === "popover" ? CONFIRM_CARD : "contents"}>
+          {pending !== null && pending.kind === "data" && (
+            <DataConfirm
+              question={t(`${prefix}.data.${pending.entry.key}.question`, {
+                count: targets.length,
+              })}
+              names={targets.map((target) => target.name)}
+              confirmLabel={
+                data.isPending
+                  ? t(`${prefix}.data.${pending.entry.key}.running`)
+                  : t(`${prefix}.data.${pending.entry.key}.confirm`, { count: targets.length })
+              }
+              busy={data.isPending}
+              onConfirm={() => {
+                data.mutate(pending.entry, {
+                  onSettled: () => {
+                    setPending(null);
+                  },
+                });
+              }}
+              onCancel={() => {
                 setPending(null);
-              },
-            });
-          }}
-          onCancel={() => {
-            setPending(null);
-          }}
-        />
-      )}
+              }}
+            />
+          )}
 
-      {pending !== null && pending.kind === "queue" && (
-        <div
-          role="group"
-          aria-label={t(`${prefix}.question`, { action: label, count: targets.length })}
-          className="flex flex-wrap items-center gap-2"
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.stopPropagation();
-              setPending(null);
-            }
-          }}
-        >
-          <p>{t(`${prefix}.question`, { action: label, count: targets.length })}</p>
-          <button
-            type="button"
-            autoFocus
-            disabled={queue.isPending}
-            onClick={() => {
-              queue.mutate(pending.action, {
-                onSettled: () => {
+          {pending !== null && pending.kind === "queue" && (
+            <div
+              role="group"
+              aria-label={t(`${prefix}.question`, { action: label, count: targets.length })}
+              className="flex flex-wrap items-center gap-2"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.stopPropagation();
                   setPending(null);
-                },
-              });
-            }}
-            className="h-7 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink disabled:opacity-60"
-          >
-            {queue.isPending ? t(`${prefix}.queueing`) : t(`${prefix}.confirm`)}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setPending(null);
-            }}
-            className="h-7 rounded-(--radius-control) border border-line px-3"
-          >
-            {t("detail.cancel")}
-          </button>
+                }
+              }}
+            >
+              <p>{t(`${prefix}.question`, { action: label, count: targets.length })}</p>
+              <button
+                type="button"
+                autoFocus
+                disabled={queue.isPending}
+                onClick={() => {
+                  queue.mutate(pending.action, {
+                    onSettled: () => {
+                      setPending(null);
+                    },
+                  });
+                }}
+                className="h-7 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink disabled:opacity-60"
+              >
+                {queue.isPending ? t(`${prefix}.queueing`) : t(`${prefix}.confirm`)}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPending(null);
+                }}
+                className="h-7 rounded-(--radius-control) border border-line px-3"
+              >
+                {t("detail.cancel")}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
