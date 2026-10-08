@@ -4912,7 +4912,9 @@ export interface paths {
          * @description Change the password of the signed-in user, who gives the current one. The new
          *     password must be at least 12 characters long and differ from the current one;
          *     it is stored as a web2py hash, accepted by both collectors. The change is
-         *     logged, without the password. Requires user authentication, no privilege.
+         *     logged, without the password. Requires user authentication, no privilege; a
+         *     user signed in through the identity provider (OIDC session or Bearer token)
+         *     is refused with 403, the provider managing their password.
          */
         post: operations["PostUserSelfPassword"];
         delete?: never;
@@ -4937,8 +4939,10 @@ export interface paths {
         put?: never;
         /**
          * @description Change the first name, last name or email of a user. Any signed-in user may
-         *     change their own, as the profile form of the historical collector allows;
-         *     another user's requires the UserManager privilege (or Manager), else 403.
+         *     change their own, as the profile form of the historical collector allows,
+         *     unless signed in through the identity provider (OIDC session or Bearer token):
+         *     their profile is the provider's, 403. Another user's requires the
+         *     UserManager privilege (or Manager), else 403.
          *     Only the keys given are changed; names are trimmed, at most 128
          *     characters, and may be empty. The email must be a valid address, at most 512
          *     characters, not used by another user (409): it is the sign-in name, so the

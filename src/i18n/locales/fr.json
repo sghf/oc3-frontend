@@ -1301,7 +1301,8 @@
     },
     "identity": {
       "hint": "Votre nom et votre e-mail sont modifiables ; les autres propriétés sont gérées par un administrateur.",
-      "editHint": "Survolez un champ pour le modifier. L'e-mail est aussi votre identifiant : vous vous connectez désormais avec le nouveau."
+      "editHint": "Survolez un champ pour le modifier. L'e-mail est aussi votre identifiant : vous vous connectez désormais avec le nouveau.",
+      "managedHint": "Votre nom et votre e-mail viennent de votre fournisseur d'identité : changez-les là-bas. Le collector les reprend à chaque connexion."
     },
     "panelSide": {
       "title": "Panneaux de détail",

@@ -24,6 +24,8 @@ import { PALETTES, THEMES } from "@/lib/theme";
 import { LANGUAGES, browserLanguage } from "@/lib/language";
 import { UserGroupsParts } from "@/features/users/UserGroupsParts";
 import { useUserGroups } from "@/features/users/use-user-groups";
+import { isSession, useCredentials } from "@/lib/api/auth";
+import { useImpersonation } from "@/lib/api/impersonation";
 import { PasswordSection } from "./PasswordSection";
 import { ProfileCard } from "./ProfileCard";
 
@@ -64,6 +66,12 @@ export function ProfilePage() {
     .filter((part) => part !== undefined && part !== "")
     .join(" ");
   const saveIdentity = useSaveUser("self", true);
+  // Signed in through the identity provider, the name and email are the provider's:
+  // the collector refuses to change them, and takes the name again at each sign-in.
+  // Acting as another user, the profile shown is that user's.
+  const credentials = useCredentials();
+  const impersonation = useImpersonation();
+  const managedByProvider = isSession(credentials) && impersonation === null;
 
   /** A group of the account's properties, in a card of its own titled like it. */
   const detailCard = (key: string) => {
@@ -118,7 +126,7 @@ export function ProfilePage() {
         <ProfileCard
           title={t("users.detail.groups.identity")}
           family={IDENTITY_GROUP?.family}
-          hint={t("profile.identity.hint")}
+          hint={managedByProvider ? t("profile.identity.managedHint") : t("profile.identity.hint")}
         >
           <DetailContent
             groups={IDENTITY_GROUP === undefined ? [] : [IDENTITY_GROUP]}
@@ -129,8 +137,8 @@ export function ProfilePage() {
             errorMessage={isError ? error.message : null}
             groupTitles={false}
             labelWidth={LABEL_WIDTH}
-            onSave={saveIdentity}
-            editHint={t("profile.identity.editHint")}
+            onSave={managedByProvider ? undefined : saveIdentity}
+            editHint={managedByProvider ? undefined : t("profile.identity.editHint")}
           />
         </ProfileCard>
         <PasswordSection email={data?.email ?? undefined} />

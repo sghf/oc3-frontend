@@ -1301,7 +1301,8 @@
     },
     "identity": {
       "hint": "Your name and email are yours to change; the other properties are managed by an administrator.",
-      "editHint": "Hover a field to change it. The email is also your sign-in name: you sign in with the new one from now on."
+      "editHint": "Hover a field to change it. The email is also your sign-in name: you sign in with the new one from now on.",
+      "managedHint": "Your name and email come from your identity provider: change them there. The collector takes them again at each sign-in."
     },
     "panelSide": {
       "title": "Detail panels",
