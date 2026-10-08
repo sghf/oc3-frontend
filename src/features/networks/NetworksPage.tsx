@@ -7,7 +7,8 @@ import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { toPage } from "@/lib/api/page";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import {
   CollectorList,
   type ColumnFilterSpec,
@@ -118,12 +119,21 @@ const FILTERS: Partial<Record<string, ColumnFilterSpec>> = {
   },
 };
 
+/**
+ * Columns whose distribution says nothing: the record id, one value per row; the
+ * ids of the node and of the network, whose names have it. The dates have none,
+ * as in every list. The addresses and MACs keep theirs: one held by several rows
+ * is worth spotting.
+ */
+const NO_DISTRIBUTION = new Set<string>(["id", "node_id", "net_id"]);
+
 const COLUMNS: ListColumn<IpRow>[] = IP_PROPS.map((prop) => ({
   prop,
   labelKey: `networks.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
   filter: FILTERS[prop],
+  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   render: (row: IpRow, locale: string) => {
     const value = row[prop];
     if (prop === "nodename")
@@ -148,6 +158,17 @@ function queryProps(cols: string[] | undefined): string {
   const shown = visibleProps(cols, DEFAULT_COLS, ALL_PROPS);
   const extra = shown.includes("nodename") ? ["node_id"] : [];
   return [...new Set(["id", ...shown, ...extra])].join(",");
+}
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
+ */
+async function ipStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/ips", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 /**
@@ -278,6 +299,7 @@ export function NetworksPage() {
         exportPage={(page) => fetchIps({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={ipStats}
         filterable
       />
 
