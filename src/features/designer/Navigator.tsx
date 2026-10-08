@@ -121,11 +121,7 @@ export function Navigator({
           className="h-8 w-full rounded-(--radius-control) border border-line bg-surface pr-2 pl-7"
         />
       </div>
-      <div
-        className="flex flex-wrap items-center gap-1"
-        role="group"
-        aria-label={t("designer.quickFilters")}
-      >
+      <div className="flex items-center gap-1" role="group" aria-label={t("designer.quickFilters")}>
         <FilterIcon className="h-3.5 w-3.5 text-ink-muted" />
         {QUICK_FILTERS.map((f) => (
           <button
@@ -138,7 +134,9 @@ export function Navigator({
               else next.add(f);
               setFilters(next);
             }}
-            className="h-6 rounded-full border border-line px-2 text-ink-muted hover:text-ink aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-ink"
+            // Data size and tight padding: the four fit on one row beside the icon,
+            // in the width of the list (19rem, `DesignerPage`), French labels included.
+            className="h-6 rounded-full border border-line px-1.5 text-data whitespace-nowrap text-ink-muted hover:text-ink aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-ink"
           >
             {t(`designer.quick.${f}`)}
           </button>

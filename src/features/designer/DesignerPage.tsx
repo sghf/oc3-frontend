@@ -252,7 +252,7 @@ function Workspace({
           }}
         />
         <Notices />
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[18rem_1fr]">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[19rem_1fr]">
           <Navigator selected={selected} onVariableDrop={onVariableDrop} />
           <div className="min-h-0 overflow-y-auto pr-1">
             {selected?.kind === "group" ? (
