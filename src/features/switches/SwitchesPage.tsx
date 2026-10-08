@@ -18,10 +18,18 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 
 type SwitchPortRow = components["schemas"]["SwitchPortRow"];
+
+/**
+ * Columns whose distribution says nothing: the record id, one value per row, and
+ * the id of the node, unreadable here, no name standing beside it. The dates have
+ * none, as in every list.
+ */
+const NO_DISTRIBUTION = new Set<string>(["id", "node_id"]);
 
 /** By switch, then port index, then port state, as the historical table. */
 const DEFAULT_SORT = ["sw_name", "sw_index", "sw_portstate"];
@@ -104,6 +112,7 @@ function renderCell(prop: SwitchProp, row: SwitchPortRow, locale: string) {
 const COLUMNS: ListColumn<SwitchPortRow>[] = SWITCH_PROPS.map((prop) => ({
   prop,
   labelKey: `switches.fields.${prop}`,
+  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   numeric: NUMERIC_PROPS.includes(prop),
   family: prop === "sw_updated" ? "time" : prop === "node_id" ? "node" : "network",
   filter: prop === "sw_portnego" ? { kind: "enum", options: FLAG_FILTER_OPTIONS } : undefined,
@@ -115,6 +124,17 @@ const ALL_PROPS: string[] = [...SWITCH_PROPS];
 /** Columns shown, plus the row id and the node id the remote name links with. */
 function queryProps(cols: string[] | undefined): string {
   return [...new Set(["id", "node_id", ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)])].join(",");
+}
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
+ */
+async function switchPortStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/san-switches", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 /**
@@ -212,6 +232,7 @@ export function SwitchesPage() {
         exportPage={(page) => fetchSwitchPorts({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={switchPortStats}
         filterable
       />
     </section>

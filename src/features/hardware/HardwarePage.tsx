@@ -21,10 +21,18 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 
 type NodeHardwareRow = components["schemas"]["NodeHardwareRow"];
+
+/**
+ * Columns whose distribution says nothing: the record id, one value per row, and
+ * the id of the node, whose name has it. The dates have none, as in every list.
+ * The PCI path keeps its own: one shared by the nodes tells a common layout.
+ */
+const NO_DISTRIBUTION = new Set<string>(["id", "node_id"]);
 
 /** By node, then component family, then address, as the historical table. */
 const DEFAULT_SORT = ["nodes.nodename", "hw_type", "hw_path"];
@@ -82,6 +90,7 @@ function columns(t: (key: string) => string, has: (key: string) => boolean) {
   return HARDWARE_PROPS.map((prop): ListColumn<NodeHardwareRow> => ({
     prop,
     labelKey: `hardware.fields.${prop}`,
+    distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
     numeric: prop === "id",
     family: FAMILY[prop] ?? "cpu",
     filter: prop === "hw_type" ? { kind: "enum", options: TYPE_OPTIONS } : undefined,
@@ -109,6 +118,17 @@ const ALL_PROPS: string[] = [...HARDWARE_PROPS];
 /** Columns shown, plus the row id and the node id the node name links with. */
 function queryProps(cols: string[] | undefined): string {
   return [...new Set(["id", "node_id", ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)])].join(",");
+}
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
+ */
+async function hardwareStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/nodes/hardware", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 /**
@@ -205,6 +225,7 @@ export function HardwarePage() {
         exportPage={(page) => fetchHardware({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={hardwareStats}
         filterable
       />
     </section>
