@@ -3996,7 +3996,8 @@ export interface paths {
         /**
          * @description Search the main kinds of objects for the text, as the historical collector's
          *     search: nodes, services, instances, applications, node addresses, disks, tags,
-         *     users, teams, requests, modulesets, rulesets, filtersets and forms. For each
+         *     users, organizational groups (group), privilege groups (privilege), requests,
+         *     modulesets, rulesets, filtersets and forms. For each
          *     kind, the objects whose name or another identifying prop contains the text,
          *     case-insensitively, are read through the kind's own list and its access
          *     control. A request also matches by its number. Then come, while `limit` leaves
@@ -6419,7 +6420,8 @@ export interface components {
              *     mask, mac, intf, node_id, nodename, net_name for a node address; disk_id,
              *     disk_name, disk_size, disk_arrayid, nodename, svcname for a disk; tag_id,
              *     tag_name, tag_exclude for a tag; id, email, first_name, last_name, username
-             *     for a user; id, role, privilege, description for a team; id, form_name,
+             *     for a user; id, role, privilege, description for an organizational group
+             *     or a privilege group; id, form_name,
              *     last_form_name, status, creator, last_update for a request; id,
              *     modset_name, modset_author for a moduleset; id, ruleset_name, ruleset_type,
              *     ruleset_public for a ruleset; id, fset_name, fset_author for a filterset;
@@ -6429,7 +6431,7 @@ export interface components {
                 [key: string]: unknown;
             }[];
             /** @enum {string} */
-            kind: "node" | "service" | "instance" | "app" | "network" | "disk" | "tag" | "user" | "group" | "request" | "moduleset" | "ruleset" | "filterset" | "form";
+            kind: "node" | "service" | "instance" | "app" | "network" | "disk" | "tag" | "user" | "group" | "privilege" | "request" | "moduleset" | "ruleset" | "filterset" | "form";
             /** @description Other objects of the kind match beyond those returned. */
             more: boolean;
         };
@@ -19928,8 +19930,8 @@ export interface operations {
                 q: string;
                 /**
                  * @description Comma-separated kinds to search, all by default: node, service, instance,
-                 *     app, network, disk, tag, user, group, request, moduleset, ruleset,
-                 *     filterset, form.
+                 *     app, network, disk, tag, user, group, privilege, request, moduleset,
+                 *     ruleset, filterset, form.
                  */
                 kinds?: string;
                 /** @description Hits returned per kind, 5 by default, 20 at most. */

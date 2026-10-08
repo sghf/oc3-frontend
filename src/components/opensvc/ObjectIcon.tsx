@@ -24,6 +24,7 @@ import {
   ClusterIcon,
   HashIcon,
   KeyIcon,
+  FirewallIcon,
 } from "@/components/ui/icons";
 
 /** Collector object kinds that have a visual identity of their own. */
@@ -41,6 +42,7 @@ export type ObjectKind =
   | "tag"
   | "tags"
   | "group"
+  | "privilege"
   | "user"
   | "obsolescence"
   | "log"
@@ -85,6 +87,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   tag: { Icon: TagIcon, className: "text-icon-tag" },
   tags: { Icon: TagsIcon, className: "text-icon-tag" },
   group: { Icon: UsersIcon, className: "text-icon-group" },
+  // A privilege group, told from an organizational one where both are listed.
+  privilege: { Icon: FirewallIcon, className: "text-icon-group" },
   // Same tint as groups: the historical collector paints `guy16` and `guys16` in the
   // same salmon, both speak of people.
   user: { Icon: UserIcon, className: "text-icon-group" },

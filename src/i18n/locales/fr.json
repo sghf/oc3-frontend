@@ -2555,7 +2555,6 @@
     "instanceLabel": "{{service}} sur {{node}}",
     "container": "conteneur {{name}}",
     "tagExclude": "exclut {{pattern}}",
-    "privilege": "privilège",
     "public": "public",
     "keys": {
       "move": "pour se déplacer",
@@ -2571,7 +2570,8 @@
       "disk": "Disques",
       "tag": "Tags",
       "user": "Utilisateurs",
-      "group": "Équipes",
+      "group": "Groupes",
+      "privilege": "Privilèges",
       "request": "Demandes",
       "moduleset": "Modulesets",
       "ruleset": "Rulesets",

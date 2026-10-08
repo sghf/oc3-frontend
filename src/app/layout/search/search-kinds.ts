@@ -24,6 +24,7 @@ export const SEARCH_KINDS: readonly SearchKind[] = [
   "tag",
   "user",
   "group",
+  "privilege",
   "request",
   "moduleset",
   "ruleset",
@@ -42,6 +43,7 @@ export const KIND_ICON: Record<SearchKind, ObjectKind> = {
   tag: "tag",
   user: "user",
   group: "group",
+  privilege: "privilege",
   // The requests are form submissions: the menu gives them the form mark.
   request: "form",
   moduleset: "moduleset",
@@ -53,8 +55,8 @@ export const KIND_ICON: Record<SearchKind, ObjectKind> = {
 /**
  * The prefix restricting the search to a kind, `node:dev`, as in the historical
  * collector (`init/static/js/osvc/search/search.js`), whose prefixes are kept.
- * Instances and requests, which it did not search, get their own. A scope badge
- * writes this one.
+ * Instances, requests and privilege groups, which it did not search apart, get
+ * their own. A scope badge writes this one.
  */
 export const KIND_PREFIX: Record<SearchKind, string> = {
   node: "node",
@@ -66,6 +68,7 @@ export const KIND_PREFIX: Record<SearchKind, string> = {
   tag: "tag",
   user: "user",
   group: "group",
+  privilege: "priv",
   request: "req",
   moduleset: "modset",
   ruleset: "rset",
@@ -278,17 +281,19 @@ export function toHit(
         `#${id}`,
       );
     }
-    case "group": {
+    case "group":
+    case "privilege": {
+      // Organizational and privilege groups alike open the record of the group.
       const id = text(item, "id");
-      return peek(
-        id,
-        text(item, "role"),
-        facts(
-          text(item, "privilege") === "T" ? t("search.privilege") : "",
-          text(item, "description"),
-        ),
-        `#${id}`,
-      );
+      if (id === "") return null;
+      return {
+        key: `${kind}:${id}`,
+        kind,
+        label: text(item, "role"),
+        context: facts(text(item, "description")),
+        ref: `#${id}`,
+        target: { peek: { kind: "group", id } },
+      };
     }
     case "request": {
       const id = text(item, "id");
