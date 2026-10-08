@@ -1128,6 +1128,11 @@
     }
   },
   "users": {
+    "delete": {
+      "label": "Supprimer l'utilisateur",
+      "question": "Supprimer l'utilisateur {{email}} ?",
+      "consequence": "Ses appartenances aux équipes, son équipe privée, ses liens avec le fournisseur d'identité, son filtre de session et ses préférences partent avec le compte ; le journal d'audit et l'historique de ses actions restent. Il ne pourra plus se connecter. C'est irréversible."
+    },
     "title": "Utilisateurs",
     "fields": {
       "id": "Identifiant",

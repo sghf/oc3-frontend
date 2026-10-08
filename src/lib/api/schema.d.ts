@@ -4888,7 +4888,17 @@ export interface paths {
          *     changed. Requires user authentication. Returns the user.
          */
         post: operations["PostUser"];
-        delete?: never;
+        /**
+         * @description Delete a user, as the historical rest_delete_user does, then clean up what
+         *     belongs to the account alone: its team memberships, its private team
+         *     (user_<id>, and what references it), its OpenID Connect identities, its
+         *     session filter, its preferences, its report and comparison selections and
+         *     its read marks of the log. What records history stays: the audit log, the
+         *     action queue, the alerts sent. UserManager privilege required. Refused for
+         *     one's own account, for the account of a Manager unless the caller is a
+         *     Manager, and for the last member of the Manager team.
+         */
+        delete: operations["DeleteUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -22984,6 +22994,31 @@ export interface operations {
             };
             400: components["responses"]["400"];
             401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            409: components["responses"]["409"];
+            500: components["responses"]["500"];
+        };
+    };
+    DeleteUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User identifier, auth_user.id or the user email. */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             403: components["responses"]["403"];
             404: components["responses"]["404"];
             409: components["responses"]["409"];

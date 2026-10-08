@@ -1128,6 +1128,11 @@
     }
   },
   "users": {
+    "delete": {
+      "label": "Delete the user",
+      "question": "Delete the user {{email}}?",
+      "consequence": "Their team memberships, private team, identity provider links, session filter and preferences go with the account; the audit log and the history of their actions stay. They can no longer sign in. This cannot be undone."
+    },
     "title": "Users",
     "fields": {
       "id": "Record id",
