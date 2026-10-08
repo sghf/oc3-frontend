@@ -22,7 +22,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { ResourceDetailPanel } from "./ResourceDetailPanel";
 import { resourceFlag, resourceName } from "./resource-format";
@@ -81,11 +82,19 @@ const FAMILY: Record<string, ColumnFamily> = {
   updated: "time",
 };
 
+/**
+ * Columns whose distribution says nothing: the record id, one value per row; the
+ * ids of the service and the node, whose names have it; the log of the agent,
+ * free text all but unique. The dates have none, as in every list.
+ */
+const NO_DISTRIBUTION = new Set<string>(["id", "svc_id", "node_id", "res_log"]);
+
 const COLUMNS: ListColumn<ResourceRow>[] = RESOURCE_PROPS.map((prop) => ({
   prop,
   labelKey: `resources.fields.${prop}`,
   numeric: prop === "id",
   family: FAMILY[prop] ?? "resource",
+  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   filter:
     prop === "res_status"
       ? { kind: "enum" as const, options: STATUS_FILTER_OPTIONS }
@@ -164,6 +173,17 @@ async function fetchResources(search: ResolvedListSearch) {
   if (error !== undefined) throw new Error(problemText(error));
   const all: ResourceRow[] = Array.isArray(data.data) ? data.data : [];
   return toPage(all, data.meta, search.limit);
+}
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination. Joined columns too: `services.svcname`, `nodes.nodename`.
+ */
+async function resourceStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/resources", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 function useResources(search: ResolvedListSearch) {
@@ -248,6 +268,7 @@ export function ResourcesPage() {
         exportPage={(page) => fetchResources({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={resourceStats}
         filterable
         filtersetSource={FILTERSET_SOURCE}
       />
