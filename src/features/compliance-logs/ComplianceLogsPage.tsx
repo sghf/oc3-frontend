@@ -22,7 +22,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 
 type ComplianceLogRow = components["schemas"]["ComplianceLogRow"];
@@ -150,9 +151,17 @@ function renderCell(prop: LogProp, row: ComplianceLogRow, locale: string) {
   }
 }
 
+/**
+ * Columns whose distribution says nothing: the record id; the ids of the node and
+ * the service, whose names have it; the output of the module, free text; and the
+ * checksum of the rulesets, unreadable. The dates have none, as in every list.
+ */
+const NO_DISTRIBUTION = new Set<string>(["id", "node_id", "svc_id", "run_log", "rset_md5"]);
+
 const COLUMNS: ListColumn<ComplianceLogRow>[] = LOG_PROPS.map((prop) => ({
   prop,
   labelKey: `complianceLogs.fields.${prop}`,
+  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   numeric: prop === "id",
   family: FAMILY[prop],
   // `orderby` only accepts the columns of the main table.
@@ -176,6 +185,17 @@ function queryProps(cols: string[] | undefined): string {
     ...(shown.includes("services.svcname") ? ["svc_id"] : []),
   ];
   return [...new Set(["id", ...shown, ...extra])].join(",");
+}
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
+ */
+async function complianceLogStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/compliance/logs", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 /**
@@ -280,6 +300,7 @@ export function ComplianceLogsPage() {
         exportPage={(page) => fetchComplianceLogs({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={complianceLogStats}
         filterable
       />
     </section>

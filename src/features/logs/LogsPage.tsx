@@ -3,6 +3,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
+import { problemText } from "@/lib/api/problem";
 import { toPage } from "@/lib/api/page";
 import {
   CollectorList,
@@ -21,7 +22,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { LogDetailPanel } from "./LogDetailPanel";
 import { formatLogMessage, logLevelState } from "./log-message";
@@ -113,6 +115,33 @@ function queryProps(cols: string[] | undefined): string {
 }
 
 /**
+ * Columns whose distribution says nothing or misleads: the ids of the entry, the
+ * service, the node and the action; the data filling the message, all but unique;
+ * and the message itself, whose filter matches the format and that data together,
+ * so that a format picked from a distribution would select nothing (the action
+ * tells the kind of event). The dates have none, as in every list.
+ */
+const NO_DISTRIBUTION = new Set<string>([
+  "id",
+  "svc_id",
+  "node_id",
+  "log_entry_id",
+  "log_dict",
+  "log_fmt",
+]);
+
+/**
+ * The distribution of a column's values over the selection: the filters given
+ * apply, not the pagination.
+ */
+async function logStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/logs", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
+}
+
+/**
  * One page of the list, read with the sort, the filters and the columns of `search`.
  * The view reads the page on display with it, and the export every page in turn.
  */
@@ -193,6 +222,7 @@ export function LogsPage() {
   const columns: ListColumn<LogRow>[] = LOG_PROPS.map((prop) => ({
     prop,
     labelKey: `logs.fields.${prop}`,
+    distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
     numeric: NUMERIC_PROPS.has(prop),
     family: FAMILY[prop] ?? "state",
     // The message filters on the format and the values filling it together (the
@@ -258,6 +288,7 @@ export function LogsPage() {
         exportPage={(page) => fetchLogs({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        valueStats={logStats}
         filterable
       />
 
