@@ -2506,7 +2506,7 @@
     },
     "delete": {
       "question": "Supprimer la règle {{rule}} ?",
-      "consequence": "Les appartenances qu'elle a données restent jusqu'à la prochaine connexion de chaque compte. Une équipe qu'aucune règle ne nomme plus redevient gérée à la main."
+      "consequence": "Les comptes que les règles ont mis dans une équipe qu'aucune autre règle ne nomme la quittent aussitôt ; ceux ajoutés à la main restent, et l'équipe redevient gérée à la main. Les équipes que d'autres règles nomment encore suivent les revendications à la prochaine connexion de chaque compte."
     }
   },
   "search": {

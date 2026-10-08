@@ -2506,7 +2506,7 @@
     },
     "delete": {
       "question": "Delete the rule {{rule}}?",
-      "consequence": "The memberships it granted stay until the next sign-in of each account. A team no rule names any more is managed by hand again."
+      "consequence": "The accounts the rules put in a team no other rule names leave it at once; those added by hand stay, and the team is managed by hand again. The teams other rules still name follow the claims at the next sign-in of each account."
     }
   },
   "search": {
