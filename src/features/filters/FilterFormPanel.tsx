@@ -6,12 +6,9 @@ import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { SlideOver } from "@/components/ui/SlideOver";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
-import {
-  FILTER_OPERATORS,
-  FILTER_TABLES,
-  isFilterOperator,
-  type FilterDefinition,
-} from "./filter-definition";
+import { isFilterOperator, type FilterDefinition } from "./filter-definition";
+import { FilterFields } from "./FilterFields";
+import { useFilterDefinitions } from "./use-filter-definitions";
 
 type FilterRow = components["schemas"]["FilterRow"];
 
@@ -26,8 +23,6 @@ function fromRow(row: FilterRow | null | undefined): FilterDefinition {
     f_value: row.f_value ?? "",
   };
 }
-
-const INPUT = "h-8 w-full rounded-(--radius-control) border border-line bg-surface px-2";
 
 /**
  * Creating or editing a filter, in a single form.
@@ -88,11 +83,8 @@ export function FilterFormPanel({
     save.mutate();
   }
 
-  function set<K extends keyof FilterDefinition>(key: K, value: FilterDefinition[K]) {
-    setDefinition((previous) => ({ ...previous, [key]: value }));
-  }
-
   const prefix = editing ? "edit-filter" : "create-filter";
+  const fieldSuggestions = useFilterDefinitions(open).fieldsOf(definition.f_table);
 
   return (
     <SlideOver
@@ -111,84 +103,12 @@ export function FilterFormPanel({
       </p>
 
       <form onSubmit={onSubmit}>
-        <div className="mb-3">
-          <label className="mb-1 block font-medium" htmlFor={`${prefix}-table`}>
-            {t("filters.fields.f_table")}
-          </label>
-          <select
-            id={`${prefix}-table`}
-            value={definition.f_table}
-            onChange={(event) => {
-              set("f_table", event.target.value);
-            }}
-            className={INPUT}
-          >
-            {FILTER_TABLES.map((table) => (
-              <option key={table} value={table}>
-                {table}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-3">
-          <label className="mb-1 block font-medium" htmlFor={`${prefix}-field`}>
-            {t("filters.fields.f_field")}
-          </label>
-          <input
-            id={`${prefix}-field`}
-            required
-            value={definition.f_field}
-            onChange={(event) => {
-              set("f_field", event.target.value);
-            }}
-            placeholder={t("filters.form.fieldPlaceholder")}
-            className={INPUT}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="mb-1 block font-medium" htmlFor={`${prefix}-op`}>
-            {t("filters.fields.f_op")}
-          </label>
-          <select
-            id={`${prefix}-op`}
-            value={definition.f_op}
-            onChange={(event) => {
-              if (isFilterOperator(event.target.value)) set("f_op", event.target.value);
-            }}
-            className={INPUT}
-          >
-            {FILTER_OPERATORS.map((op) => (
-              <option key={op} value={op}>
-                {op}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-3">
-          <label className="mb-1 block font-medium" htmlFor={`${prefix}-value`}>
-            {t("filters.fields.f_value")}
-          </label>
-          <input
-            id={`${prefix}-value`}
-            required
-            value={definition.f_value}
-            onChange={(event) => {
-              set("f_value", event.target.value);
-            }}
-            className={INPUT}
-          />
-          <p className="mt-1 text-ink-muted">{t("filters.form.valueHint")}</p>
-        </div>
-
-        <p className="mb-3 text-ink-muted">
-          {t("filters.form.preview")}{" "}
-          <code className="text-ink">
-            {definition.f_table}.{definition.f_field} {definition.f_op} {definition.f_value}
-          </code>
-        </p>
+        <FilterFields
+          definition={definition}
+          onChange={setDefinition}
+          idPrefix={prefix}
+          fieldSuggestions={fieldSuggestions}
+        />
 
         {save.isError && (
           <p role="alert" className="mb-3 text-state-down">

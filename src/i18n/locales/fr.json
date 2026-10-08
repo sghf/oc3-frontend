@@ -1677,7 +1677,8 @@
       "kindFilter": "Filtre",
       "kindFilterset": "Filterset",
       "choose": "Choisir…",
-      "add": "Ajouter"
+      "add": "Ajouter",
+      "kindNewFilter": "Nouveau filtre…"
     },
     "related": {
       "label": "Détail du filterset",
@@ -1708,6 +1709,13 @@
     },
     "delete": {
       "question": "Supprimer le filterset {{name}} ? Sa composition part avec lui. C'est irréversible."
+    },
+    "newFilter": {
+      "title": "Nouveau filtre",
+      "existing": "Ce filtre existe déjà : il sera réutilisé.",
+      "create": "Créer et ajouter",
+      "reuse": "Ajouter le filtre existant",
+      "noId": "Le collector n'a pas renvoyé l'id du nouveau filtre."
     }
   },
   "related": {
