@@ -6,14 +6,16 @@ import { Switch } from "@/components/ui/Switch";
  * read-only switch whose state is also announced. The flag is stored as `T`/`F`, or
  * as the integer 1/0 of a column such as `svc_ha`. Any other value, such as the
  * empty one of a row without the flagged record, shows nothing. `labelKey` names the
- * flag for assistive technologies.
+ * flag for assistive technologies. Sized for a table row; `size="md"` outside one.
  */
 export function FlagSwitch({
   value,
   labelKey,
+  size = "sm",
 }: {
   value: string | number | undefined;
   labelKey: string;
+  size?: "md" | "sm";
 }) {
   const { t } = useTranslation();
   const on = value === "T" || value === 1;
@@ -24,6 +26,7 @@ export function FlagSwitch({
       label={t(labelKey)}
       stateLabel={t(on ? "detail.yes" : "detail.no")}
       disabled
+      size={size}
     />
   );
 }

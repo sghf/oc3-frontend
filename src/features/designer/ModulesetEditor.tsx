@@ -70,6 +70,7 @@ export function ModulesetEditor({
                   <td className="py-1 pr-3">
                     <Switch
                       checked={mod.autofix}
+                      size="sm"
                       label={t("designer.autofixOf", { name: mod.name })}
                       stateLabel={t(mod.autofix ? "detail.yes" : "detail.no")}
                       onChange={(autofix) => {

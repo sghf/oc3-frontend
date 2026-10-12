@@ -23,7 +23,11 @@ const GROUPS: DetailGroup<MetricRow>[] = [
         prop: "metric_historize",
         format: text("metric_historize"),
         render: (row) => (
-          <FlagSwitch value={row.metric_historize} labelKey="metrics.fields.metric_historize" />
+          <FlagSwitch
+            value={row.metric_historize}
+            labelKey="metrics.fields.metric_historize"
+            size="md"
+          />
         ),
       },
       {
