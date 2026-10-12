@@ -5770,6 +5770,11 @@ export interface components {
          *     come from joined tables; `nodes.` ones are null when the node row is missing.
          */
         InstanceRow: {
+            /**
+             * @description Unacknowledged action errors of the instance in the last day, 0 when
+             *     none, as the "err" column of the historical collector.
+             */
+            err?: number;
             mon_appstatus?: string;
             mon_availstatus?: string;
             mon_changed?: string;
@@ -5794,8 +5799,15 @@ export interface components {
             mon_vmname?: string;
             mon_vmtype?: string;
             node_id?: string;
+            "nodes.node_env"?: string | null;
             "nodes.nodename"?: string | null;
             "nodes.os_name"?: string | null;
+            "services.svc_app"?: string | null;
+            "services.svc_availstatus"?: string | null;
+            "services.svc_env"?: string | null;
+            "services.svc_ha"?: number | null;
+            "services.svc_status"?: string | null;
+            "services.svc_topology"?: string | null;
             "services.svcname"?: string | null;
             svc_id?: string;
         };

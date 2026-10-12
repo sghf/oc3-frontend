@@ -1352,7 +1352,15 @@
       "mon_vcpus": "vCPUs",
       "mon_vmem": "VM memory",
       "mon_updated": "Updated",
-      "mon_changed": "Changed"
+      "mon_changed": "Changed",
+      "err": "Action errors",
+      "services.svc_ha": "High availability",
+      "services.svc_availstatus": "Service availability",
+      "services.svc_status": "Service status",
+      "services.svc_app": "App",
+      "services.svc_env": "Service environment",
+      "services.svc_topology": "Topology",
+      "nodes.node_env": "Node environment"
     },
     "detail": {
       "title": "Service instance",
@@ -1418,7 +1426,9 @@
     "compare": {
       "noun_one": "1 instance",
       "noun_other": "{{count}} instances"
-    }
+    },
+    "actionErrors_one": "{{count}} unacknowledged action error in the last day",
+    "actionErrors_other": "{{count}} unacknowledged action errors in the last day"
   },
   "obsolescence": {
     "title": "Obsolescence",

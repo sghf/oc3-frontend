@@ -28,7 +28,12 @@ import { CommonalityPanel } from "@/components/opensvc/CommonalityPanel";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { InstanceDetailPanel } from "./InstanceDetailPanel";
 import { FrozenMark } from "@/components/opensvc/FrozenMark";
-import { frozenFilterOptions, STATUS_FILTER_OPTIONS } from "@/components/opensvc/filter-options";
+import {
+  BIT_FLAG_FILTER_OPTIONS,
+  frozenFilterOptions,
+  STATUS_FILTER_OPTIONS,
+} from "@/components/opensvc/filter-options";
+import { FlagSwitch } from "@/components/opensvc/FlagSwitch";
 import { InstanceActionsMenu } from "./InstanceActionsMenu";
 import { fromInstanceId, instanceName, toInstanceId } from "./instance-id";
 import { useNow } from "@/lib/use-now";
@@ -41,54 +46,75 @@ type InstanceRow = components["schemas"]["InstanceRow"];
 const DEFAULT_SORT = ["services.svcname", "nodes.nodename"];
 
 /**
- * Instance properties exposed by apicollector: the joined names first, then the order
- * of `meta.available_props`. `satisfies` confronts them with the generated schema.
+ * Instance properties exposed by apicollector, in the column order of the
+ * historical collector's instances table (`table_service_instances` in
+ * `tables.js`): the service and its state first, the containers, the node, then the
+ * instance's states. The props it did not have sit next to their kin. `services.`
+ * and `nodes.` props come from the joined tables. `satisfies` confronts them with
+ * the generated schema.
  */
 const INSTANCE_PROPS = [
-  "services.svcname",
-  "nodes.nodename",
   "svc_id",
-  "node_id",
+  "services.svcname",
+  "err",
+  "services.svc_ha",
+  "services.svc_availstatus",
+  "services.svc_status",
+  "services.svc_app",
+  "services.svc_env",
+  "services.svc_topology",
   "mon_svctype",
-  "mon_availstatus",
-  "mon_overallstatus",
+  "mon_vmtype",
+  "mon_vmname",
+  "mon_vcpus",
+  "mon_vmem",
+  "mon_guestos",
+  "nodes.node_env",
+  "node_id",
+  "nodes.nodename",
   "mon_smon_status",
   "mon_smon_global_expect",
+  "mon_availstatus",
+  "mon_overallstatus",
+  "mon_frozen",
+  "mon_frozen_at",
+  "mon_encap_frozen_at",
+  "mon_containerstatus",
   "mon_ipstatus",
   "mon_fsstatus",
   "mon_diskstatus",
-  "mon_containerstatus",
   "mon_sharestatus",
   "mon_syncstatus",
   "mon_appstatus",
   "mon_hbstatus",
-  "mon_frozen",
-  "mon_frozen_at",
-  "mon_encap_frozen_at",
-  "mon_vmname",
-  "mon_vmtype",
-  "mon_guestos",
-  "mon_vcpus",
-  "mon_vmem",
   "mon_updated",
   "mon_changed",
 ] as const satisfies readonly (keyof InstanceRow)[];
 
 /**
- * Default columns: which instance, in which state, seen when. The container name
- * tells apart the rows of an encapsulated service, one per container on a node.
+ * Columns shown by default, those of the historical collector's instances table
+ * (`default_columns` of `table_service_instances`), in the order of INSTANCE_PROPS.
  */
 const DEFAULT_COLS: string[] = [
   "services.svcname",
-  "nodes.nodename",
+  "err",
+  "services.svc_ha",
+  "services.svc_availstatus",
+  "services.svc_status",
+  "services.svc_app",
+  "services.svc_env",
+  "services.svc_topology",
+  "mon_vmtype",
   "mon_vmname",
+  "nodes.node_env",
+  "nodes.nodename",
+  "mon_smon_status",
   "mon_availstatus",
   "mon_overallstatus",
-  "mon_smon_status",
   "mon_updated",
 ];
 
-const NUMERIC_PROPS = new Set<string>(["mon_vcpus", "mon_vmem"]);
+const NUMERIC_PROPS = new Set<string>(["err", "mon_vcpus", "mon_vmem"]);
 
 const DATE_PROPS = new Set<string>([
   "mon_frozen_at",
@@ -99,6 +125,8 @@ const DATE_PROPS = new Set<string>([
 
 /** Statuses rendered as badges, standby states included: see `statusBadge`. */
 const STATUS_PROPS = new Set<string>([
+  "services.svc_availstatus",
+  "services.svc_status",
   "mon_availstatus",
   "mon_overallstatus",
   "mon_ipstatus",
@@ -113,7 +141,15 @@ const STATUS_PROPS = new Set<string>([
 
 const FAMILY: Record<string, ColumnFamily> = {
   "services.svcname": "service",
+  "services.svc_ha": "cluster",
+  "services.svc_availstatus": "state",
+  "services.svc_status": "state",
+  "services.svc_app": "app",
+  "services.svc_env": "env",
+  "services.svc_topology": "cluster",
   "nodes.nodename": "node",
+  "nodes.node_env": "env",
+  err: "action",
   svc_id: "service",
   node_id: "node",
   mon_svctype: "env",
@@ -141,6 +177,21 @@ const FAMILY: Record<string, ColumnFamily> = {
   mon_changed: "time",
 };
 
+/**
+ * The unacknowledged action errors of the instance, in the colour of an error with
+ * the mark of one, as the historical collector's "err" column; nothing when none.
+ */
+function ActionErrors({ count }: { count: number | undefined }) {
+  const { t } = useTranslation();
+  if (count === undefined || count === 0) return null;
+  return (
+    <span className="font-medium text-state-down" title={t("instances.actionErrors", { count })}>
+      <span aria-hidden="true">■ </span>
+      {count}
+    </span>
+  );
+}
+
 /** The joined names are sortable: `orderby` resolves them through the mapping joins. */
 const COLUMNS: ListColumn<InstanceRow>[] = INSTANCE_PROPS.map((prop) => ({
   prop,
@@ -151,7 +202,9 @@ const COLUMNS: ListColumn<InstanceRow>[] = INSTANCE_PROPS.map((prop) => ({
     ? { kind: "enum" as const, options: STATUS_FILTER_OPTIONS }
     : prop === "mon_frozen"
       ? { kind: "enum" as const, options: frozenFilterOptions("1", "0") }
-      : undefined,
+      : prop === "services.svc_ha"
+        ? { kind: "enum" as const, options: BIT_FLAG_FILTER_OPTIONS }
+        : undefined,
   render: (row: InstanceRow, locale: string) => {
     const value = row[prop];
     if (prop === "nodes.nodename")
@@ -166,6 +219,23 @@ const COLUMNS: ListColumn<InstanceRow>[] = INSTANCE_PROPS.map((prop) => ({
           {value}
         </CrossLink>
       );
+    if (prop === "services.svc_app")
+      return (
+        <CrossLink kind="app" id={typeof value === "string" ? value : undefined}>
+          {value}
+        </CrossLink>
+      );
+    if (prop === "services.svc_ha")
+      return (
+        <FlagSwitch
+          value={row["services.svc_ha"] ?? undefined}
+          labelKey="instances.fields.services.svc_ha"
+        />
+      );
+    if (prop === "err") return <ActionErrors count={row.err} />;
+    // The service's own statuses say nothing of the agent's last report on this node.
+    if (prop === "services.svc_availstatus" || prop === "services.svc_status")
+      return typeof value === "string" ? <StatusBadge {...statusBadge(value)} /> : null;
     if (STATUS_PROPS.has(prop) && typeof value === "string")
       return (
         <StatusBadge {...statusBadge(value)} outdated={isOutdated(row.mon_updated, Date.now())} />

@@ -1352,7 +1352,15 @@
       "mon_vcpus": "vCPU",
       "mon_vmem": "Mémoire de VM",
       "mon_updated": "Mise à jour",
-      "mon_changed": "Changement"
+      "mon_changed": "Changement",
+      "err": "Erreurs d'action",
+      "services.svc_ha": "Haute disponibilité",
+      "services.svc_availstatus": "Disponibilité du service",
+      "services.svc_status": "Statut du service",
+      "services.svc_app": "Application",
+      "services.svc_env": "Environnement du service",
+      "services.svc_topology": "Topologie",
+      "nodes.node_env": "Environnement du nœud"
     },
     "detail": {
       "title": "Instance de service",
@@ -1418,7 +1426,9 @@
     "compare": {
       "noun_one": "1 instance",
       "noun_other": "{{count}} instances"
-    }
+    },
+    "actionErrors_one": "{{count}} erreur d'action non acquittée sur le dernier jour",
+    "actionErrors_other": "{{count}} erreurs d'action non acquittées sur le dernier jour"
   },
   "obsolescence": {
     "title": "Obsolescence",
