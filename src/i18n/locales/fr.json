@@ -376,7 +376,14 @@
     "logs": {
       "empty": "Aucune entrée de journal pour ce nœud.",
       "latest": "Les {{count}} dernières entrées sur {{total}}.",
-      "open": "Ouvrir dans la vue Journal"
+      "open": "Ouvrir dans la vue Journal",
+      "search": "Chercher une entrée",
+      "count_one": "{{count}} entrée",
+      "count_other": "{{count}} entrées",
+      "matching_one": "{{count}} entrée sur {{total}}",
+      "matching_other": "{{count}} entrées sur {{total}}",
+      "noMatch": "Aucune entrée ne correspond à la recherche.",
+      "searchLatest": "La recherche porte sur les {{count}} dernières entrées sur {{total}}."
     },
     "networks": {
       "empty": "Aucune adresse IP remontée pour ce nœud.",
@@ -915,7 +922,13 @@
       "otherCount_other": "{{count}} autres ressources"
     },
     "logs": {
-      "empty": "Aucune entrée de journal pour ce service."
+      "empty": "Aucune entrée de journal pour ce service.",
+      "search": "Chercher une entrée",
+      "count_one": "{{count}} entrée",
+      "count_other": "{{count}} entrées",
+      "matching_one": "{{count}} entrée sur {{total}}",
+      "matching_other": "{{count}} entrées sur {{total}}",
+      "noMatch": "Aucune entrée ne correspond à la recherche."
     },
     "compare": {
       "noun_one": "1 service",

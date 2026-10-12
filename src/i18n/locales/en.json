@@ -376,7 +376,14 @@
     "logs": {
       "empty": "No log entry for this node.",
       "latest": "The latest {{count}} of {{total}} entries.",
-      "open": "Open in the Logs view"
+      "open": "Open in the Logs view",
+      "search": "Search a log entry",
+      "count_one": "{{count}} entry",
+      "count_other": "{{count}} entries",
+      "matching_one": "{{count}} of {{total}} entry",
+      "matching_other": "{{count}} of {{total}} entries",
+      "noMatch": "No log entry matches the search.",
+      "searchLatest": "The search covers the latest {{count}} of {{total}} entries."
     },
     "networks": {
       "empty": "No IP address reported for this node.",
@@ -915,7 +922,13 @@
       "otherCount_other": "{{count}} other resources"
     },
     "logs": {
-      "empty": "No log entry for this service."
+      "empty": "No log entry for this service.",
+      "search": "Search a log entry",
+      "count_one": "{{count}} entry",
+      "count_other": "{{count}} entries",
+      "matching_one": "{{count}} of {{total}} entry",
+      "matching_other": "{{count}} of {{total}} entries",
+      "noMatch": "No log entry matches the search."
     },
     "compare": {
       "noun_one": "1 service",
