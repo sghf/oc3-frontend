@@ -1,5 +1,6 @@
 import {
   AlertTriangleIcon,
+  DashboardIcon,
   AsteriskIcon,
   CheckIcon,
   CodeIcon,
@@ -31,6 +32,7 @@ import {
 /** Collector object kinds that have a visual identity of their own. */
 export type ObjectKind =
   | "dashboard"
+  | "dashboardView"
   | "node"
   | "cluster"
   | "service"
@@ -72,6 +74,9 @@ export type ObjectKind =
  */
 const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> = {
   dashboard: { Icon: AlertTriangleIcon, className: "text-icon-dashboard" },
+  // The Dashboard view itself, in the menu and its page: the tiles of a dashboard.
+  // Its alerts keep the triangle ("dashboard"), which also keys their bookmarks.
+  dashboardView: { Icon: DashboardIcon, className: "text-icon-dashboard" },
   node: { Icon: ServerIcon, className: "text-icon-node" },
   // The tint of the nodes it groups, as the cluster column family.
   cluster: { Icon: ClusterIcon, className: "text-icon-node" },

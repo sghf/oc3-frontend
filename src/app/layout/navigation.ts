@@ -76,7 +76,7 @@ export interface NavCategory {
 
 /** Entries outside any category, at the top of the operator menu. */
 export const NAV_TOP: NavEntry[] = [
-  { to: "/", labelKey: "nav.dashboard", icon: "dashboard", exact: true },
+  { to: "/", labelKey: "nav.dashboard", icon: "dashboardView", exact: true },
 ];
 
 /**

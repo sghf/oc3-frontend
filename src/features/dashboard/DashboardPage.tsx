@@ -204,7 +204,7 @@ export function DashboardPage() {
     <section>
       <div className="mb-3 flex flex-wrap items-baseline gap-3">
         <h1 className="flex items-center gap-2 text-title font-semibold">
-          <ObjectIcon kind="dashboard" className="h-5 w-5" />
+          <ObjectIcon kind="dashboardView" className="h-5 w-5" />
           {t("dashboard.title")}
         </h1>
         {(severities.data ?? []).map((entry) => (

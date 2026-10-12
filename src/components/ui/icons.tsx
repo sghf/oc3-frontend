@@ -748,3 +748,15 @@ export function SlidersIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** The dashboard view: four tiles of a dashboard layout. */
+export function DashboardIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="3" width="8" height="10" rx="1.6" />
+      <rect x="13" y="3" width="8" height="6" rx="1.6" />
+      <rect x="13" y="11" width="8" height="10" rx="1.6" />
+      <rect x="3" y="15" width="8" height="6" rx="1.6" />
+    </Svg>
+  );
+}
