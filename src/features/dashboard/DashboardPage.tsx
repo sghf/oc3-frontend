@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { DateTime } from "@/components/ui/DateTime";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -19,17 +20,14 @@ import {
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { filterQuery, filtersKey } from "@/lib/column-filters";
 import type { ColumnFilterOption } from "@/components/opensvc/CollectorList";
+import { AlertActionsMenu } from "./AlertActionsMenu";
+import { alertName, objectName } from "./alert-name";
 import { AlertDetailPanel } from "./AlertDetailPanel";
 
 type AlertRow = components["schemas"]["AlertRow"];
 
 /** The historical dashboard sorts by decreasing severity, then by type. */
 const DEFAULT_SORT = ["-dash_severity", "dash_type"];
-
-/** Name of the object aimed at: an entry carries either a service or a node. */
-function objectName(row: AlertRow): string {
-  return row["services.svcname"] ?? row["nodes.nodename"] ?? "";
-}
 
 /** The severities the collector raises, from the lowest, each with its badge. */
 const SEVERITY_OPTIONS: ColumnFilterOption[] = [0, 1, 2, 3, 4, 5].map((severity) => ({
@@ -174,6 +172,8 @@ export function DashboardPage() {
   const navigate = useNavigate({ from: "/" });
   const { data, isPending, isError, error, isFetching } = useAlerts(search);
   const severities = useSeverityCounts();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleted, setDeleted] = useState<string[]>([]);
 
   /** Ids of the whole selection, without pagination. */
   async function allIds(): Promise<string[]> {
@@ -199,14 +199,32 @@ export function DashboardPage() {
   }
 
   const selected = data?.rows.find((row) => String(row.id) === search.sel);
+  // Names from the page on display: a selection extended to the following pages does
+  // not have them all, so the id then serves as a fallback in the messages.
+  const alertNames = Object.fromEntries(
+    (data?.rows ?? []).map((row) => [String(row.id), alertName(row)]),
+  );
 
   return (
     <section>
-      <div className="mb-3 flex flex-wrap items-baseline gap-3">
+      {/* As tall as the Actions button from the start: checking a row must not push the list down. */}
+      <div className="mb-3 flex min-h-7 items-center gap-3">
         <h1 className="flex items-center gap-2 text-title font-semibold">
           <ObjectIcon kind="dashboardView" className="h-5 w-5" />
           {t("dashboard.title")}
         </h1>
+        {/* On the rows checked in the list; nothing checked, no menu. */}
+        <AlertActionsMenu
+          alerts={selectedIds.map((id) => ({ id, name: alertNames[id] ?? id }))}
+          onDeleted={(ids) => {
+            setDeleted(ids);
+            // The detail of a deleted alert has nothing left to show.
+            if (search.sel !== undefined && ids.includes(search.sel)) update({ sel: undefined });
+          }}
+        />
+      </div>
+      {/* The count of alerts by severity, over every alert: a line of its own under the title. */}
+      <div className="mb-3 flex flex-wrap items-center gap-3">
         {(severities.data ?? []).map((entry) => (
           <span key={entry.severity} className="flex items-center gap-1 text-ink-muted">
             <SeverityBadge severity={entry.severity} />
@@ -229,12 +247,17 @@ export function DashboardPage() {
         exportPage={(page) => fetchAlerts({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        onSelectionChange={setSelectedIds}
+        unselect={deleted}
         filterable
       />
 
       <AlertDetailPanel
         alertId={search.sel}
         label={selected === undefined ? "" : (selected.dash_type ?? "")}
+        onDeleted={(id) => {
+          setDeleted([id]);
+        }}
         onClose={() => {
           update({ sel: undefined });
         }}

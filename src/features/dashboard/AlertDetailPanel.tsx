@@ -7,6 +7,8 @@ import { severityField } from "@/components/opensvc/status-field";
 import { linkedField } from "@/components/opensvc/linked-field";
 import { formatDateTime } from "@/lib/format";
 import { AlertTimeline } from "./AlertTimeline";
+import { AlertActionsMenu } from "./AlertActionsMenu";
+import { alertName } from "./alert-name";
 
 type AlertRow = components["schemas"]["AlertRow"];
 
@@ -68,10 +70,13 @@ export function AlertDetailPanel({
   alertId,
   label,
   onClose,
+  onDeleted,
 }: {
   alertId: string | undefined;
   label: string;
   onClose: () => void;
+  /** After the alert was deleted from its menu; the panel closes by itself. */
+  onDeleted?: (id: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const {
@@ -98,6 +103,18 @@ export function AlertDetailPanel({
       open={alertId !== undefined}
       title={alert?.dash_type ?? (label === "" ? t("dashboard.detail.title") : label)}
       onClose={onClose}
+      titleActions={
+        alertId !== undefined && alert !== null && alert !== undefined ? (
+          <AlertActionsMenu
+            alerts={[{ id: alertId, name: alertName(alert) }]}
+            onDeleted={() => {
+              onDeleted?.(alertId);
+              onClose();
+            }}
+            confirm="popover"
+          />
+        ) : undefined
+      }
       groups={GROUPS}
       row={alert}
       labelPrefix="alerts.fields"

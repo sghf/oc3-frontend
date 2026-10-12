@@ -74,6 +74,9 @@ function outcomeTone(outcome: Outcome): NoticeTone {
 const CONFIRM_CARD =
   "absolute top-full left-0 z-30 mt-2 flex w-max max-w-[min(32rem,calc(100vw-2rem))] flex-wrap items-center gap-2 rounded-(--radius-panel) border border-line bg-surface-raised p-3 shadow-lg";
 
+/** The queue of a menu without agent actions, never called. */
+const noQueue = (): Promise<string | null> => Promise.resolve(null);
+
 /** The action awaiting confirmation: an agent action, or a data action. */
 type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataActionEntry };
 
@@ -106,19 +109,20 @@ type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataAc
  */
 export function ActionsMenu({
   targets,
-  actions,
+  actions = [],
   prefix,
-  queue: queueOne,
+  queue: queueOne = noQueue,
   dataActions = [],
   onCompare,
   confirm = "inline",
 }: {
   targets: ActionTarget[];
-  actions: readonly ActionEntry[];
+  /** Agent actions; none for an object the agents do not act on, such as an alert. */
+  actions?: readonly ActionEntry[];
   /** Prefix of the translation keys, for example `nodes.actions`. */
   prefix: string;
   /** Queues the action on one object; returns the API error message, or null. */
-  queue: (target: ActionTarget, action: string) => Promise<string | null>;
+  queue?: (target: ActionTarget, action: string) => Promise<string | null>;
   dataActions?: readonly DataActionEntry[];
   /**
    * Opens the comparison of the targets: offered from two of them, apart from the
@@ -263,6 +267,9 @@ export function ActionsMenu({
         },
       })),
     });
+
+  // Nothing the user may do here, or not known yet: no menu, rather than an empty one.
+  if (items.length === 0 && pending === null && outcome === null) return null;
 
   const label =
     pending === null || pending.kind !== "queue" ? "" : t(`${prefix}.items.${pending.action}`);

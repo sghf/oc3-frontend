@@ -993,6 +993,22 @@
       "end": "Ended",
       "duration": "Lasted",
       "showTable": "Show the occurrences"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete from the collector",
+          "question_one": "Delete this alert from the collector? The check that raised it raises it again at its next run if the cause remains. This cannot be undone.",
+          "question_other": "Delete these {{count}} alerts from the collector? The checks that raised them raise them again at their next run if the cause remains. This cannot be undone.",
+          "confirm_one": "Delete the alert",
+          "confirm_other": "Delete {{count}} alerts",
+          "running": "Deleting…",
+          "done_one": "1 alert deleted.",
+          "done_other": "{{count}} alerts deleted."
+        }
+      }
     }
   },
   "apps": {

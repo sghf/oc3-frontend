@@ -461,6 +461,7 @@ export function DetailPanel<T>({
   before,
   after,
   recordId,
+  titleActions,
   ...content
 }: DetailContentProps<T> & {
   open: boolean;
@@ -474,6 +475,8 @@ export function DetailPanel<T>({
   after?: ReactNode;
   /** Id of the object, for the bookmark button when a bookmark can reopen it. */
   recordId?: string;
+  /** Next to the title, such as the actions menu of the object. */
+  titleActions?: ReactNode;
 }) {
   const { t } = useTranslation();
   const bookmarkable = recordId !== undefined && recordId !== "" && BOOKMARK_KINDS.has(kind);
@@ -484,7 +487,15 @@ export function DetailPanel<T>({
       onClose={onClose}
       closeLabel={t("detail.close")}
       resizeLabel={t("detail.resize")}
-      heading={<PanelTitle kind={kind} title={title} recordId={recordId} open={open} />}
+      heading={
+        <PanelTitle
+          kind={kind}
+          title={title}
+          recordId={recordId}
+          open={open}
+          actions={titleActions}
+        />
+      }
       rail={<PanelHistoryRail currentKey={recordKey(kind, recordId)} />}
       actions={bookmarkable ? <BookmarkButton kind={kind} id={recordId} /> : undefined}
     >

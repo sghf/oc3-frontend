@@ -993,6 +993,22 @@
       "end": "Fin",
       "duration": "Durée",
       "showTable": "Afficher les occurrences"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer du collector",
+          "question_one": "Supprimer cette alerte du collector ? Le contrôle qui l'a levée la lèvera de nouveau à sa prochaine exécution si la cause demeure. Cette opération est irréversible.",
+          "question_other": "Supprimer ces {{count}} alertes du collector ? Les contrôles qui les ont levées les lèveront de nouveau à leur prochaine exécution si la cause demeure. Cette opération est irréversible.",
+          "confirm_one": "Supprimer l'alerte",
+          "confirm_other": "Supprimer {{count}} alertes",
+          "running": "Suppression…",
+          "done_one": "1 alerte supprimée.",
+          "done_other": "{{count}} alertes supprimées."
+        }
+      }
     }
   },
   "apps": {
