@@ -11,7 +11,12 @@ import { problemText } from "@/lib/api/problem";
 import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { FrozenMark } from "@/components/opensvc/FrozenMark";
-import { frozenFilterOptions, STATUS_FILTER_OPTIONS } from "@/components/opensvc/filter-options";
+import {
+  BIT_FLAG_FILTER_OPTIONS,
+  frozenFilterOptions,
+  STATUS_FILTER_OPTIONS,
+} from "@/components/opensvc/filter-options";
+import { FlagSwitch } from "@/components/opensvc/FlagSwitch";
 import { ServiceActionsMenu } from "./ServiceActionsMenu";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
@@ -111,7 +116,6 @@ const NUMERIC_PROPS = new Set<string>([
   "id",
   "svc_sla",
   "svc_availability",
-  "svc_ha",
   "svc_wave",
   "svc_flex_min_nodes",
   "svc_flex_max_nodes",
@@ -191,7 +195,9 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
     ? { kind: "enum" as const, options: STATUS_FILTER_OPTIONS }
     : prop === "svc_frozen"
       ? { kind: "enum" as const, options: frozenFilterOptions("frozen", "unfrozen", "mixed") }
-      : undefined,
+      : prop === "svc_ha"
+        ? { kind: "enum" as const, options: BIT_FLAG_FILTER_OPTIONS }
+        : undefined,
   render: (row: ServiceRow, locale: string) => {
     const value = row[prop];
     if (prop === "svc_app")
@@ -208,6 +214,8 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
         />
       );
     }
+    if (prop === "svc_ha")
+      return <FlagSwitch value={row.svc_ha} labelKey="services.fields.svc_ha" />;
     if (prop === "svc_sla")
       return typeof value === "number" ? formatPercent(value, locale, 3) : null;
     if (prop === "svc_availability")

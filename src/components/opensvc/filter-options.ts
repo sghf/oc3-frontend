@@ -39,3 +39,9 @@ export const FLAG_FILTER_OPTIONS: ColumnFilterOption[] = [
   { value: "T", labelKey: "detail.yes" },
   { value: "F", labelKey: "detail.no" },
 ];
+
+/** A flag stored as the integer 1 or 0, such as `svc_ha`, shown by `FlagSwitch`. */
+export const BIT_FLAG_FILTER_OPTIONS: ColumnFilterOption[] = [
+  { value: "1", labelKey: "detail.yes" },
+  { value: "0", labelKey: "detail.no" },
+];
