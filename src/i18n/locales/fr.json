@@ -1194,8 +1194,7 @@
       "required": "obligatoire",
       "excludeHint": "Expression régulière des noms de tags qui ne peuvent pas être attachés en même temps que celui-ci. Facultatif.",
       "excludeInvalid": "Ce n'est pas une expression régulière valide.",
-      "dataHint": "Données libres attachées au tag, en JSON. Facultatif.",
-      "dataInvalid": "Ce n'est pas du JSON valide.",
+      "dataHint": "Données libres attachées au tag : du JSON, ou du texte. Facultatif.",
       "save": "Créer le tag",
       "saving": "Création…",
       "formHelp": {
@@ -1214,7 +1213,8 @@
         "dataHint": "Partagées par tous les nœuds et services qui portent le tag. Facultatives : écrivez-les ici en JSON, ou après la création du tag, dans son panneau, avec le formulaire {{form}}.",
         "pattern": "<formulaire>::<nom>",
         "namingThen": "Les données du tag se présentent et se saisissent alors avec ce formulaire, au lieu de s'écrire en JSON."
-      }
+      },
+      "dataAsText": "Ce n'est pas du JSON : ce sera enregistré comme du texte."
     },
     "data": {
       "title": "Données",

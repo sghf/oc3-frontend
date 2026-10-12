@@ -1194,8 +1194,7 @@
       "required": "required",
       "excludeHint": "Regular expression of the tag names that cannot be attached along with this one. Optional.",
       "excludeInvalid": "This is not a valid regular expression.",
-      "dataHint": "Free data attached to the tag, in JSON. Optional.",
-      "dataInvalid": "This is not valid JSON.",
+      "dataHint": "Free data attached to the tag: JSON, or plain text. Optional.",
       "save": "Create the tag",
       "saving": "Creating…",
       "formHelp": {
@@ -1214,7 +1213,8 @@
         "dataHint": "Shared by every node and service carrying the tag. Optional: write it here in JSON, or after creating the tag, in its panel, through the form {{form}}.",
         "pattern": "<form>::<name>",
         "namingThen": "The tag's data is then laid out and filled in with that form, rather than written in JSON."
-      }
+      },
+      "dataAsText": "Not JSON: it will be stored as plain text."
     },
     "data": {
       "title": "Data",

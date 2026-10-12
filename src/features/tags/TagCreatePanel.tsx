@@ -21,8 +21,12 @@ const EMPTY: TagFields = { tag_name: "", tag_exclude: "", tag_data: "" };
 
 const INPUT = "h-8 w-full rounded-(--radius-control) border bg-surface px-2 font-mono";
 
-/** The optional fields refused before sending: an invalid expression, data not JSON. */
-function problems(fields: TagFields): { exclude: boolean; data: boolean } {
+/**
+ * What the optional fields are: an invalid exclusion expression, refused before
+ * sending; data that is not JSON, accepted and stored as text, as both collectors
+ * do (`POST /tags` keeps it as it is, the lists decode it when they can).
+ */
+function problems(fields: TagFields): { exclude: boolean; dataAsText: boolean } {
   let exclude = false;
   if (fields.tag_exclude.trim() !== "") {
     try {
@@ -31,24 +35,25 @@ function problems(fields: TagFields): { exclude: boolean; data: boolean } {
       exclude = true;
     }
   }
-  let data = false;
+  let dataAsText = false;
   if (fields.tag_data.trim() !== "") {
     try {
       JSON.parse(fields.tag_data);
     } catch {
-      data = true;
+      dataAsText = true;
     }
   }
-  return { exclude, data };
+  return { exclude, dataAsText };
 }
 
 /**
  * Creating a tag: its name, and optionally the regular expression of the tags it
- * cannot be attached along with, and free JSON data, as `POST /tags` takes them.
+ * cannot be attached along with, and free data, JSON or text, as `POST /tags`
+ * takes them.
  *
  * The API requires the TagManager privilege and refuses a name already taken; its
- * message is shown as it is. The data is checked to be JSON before sending: the
- * collector decodes it when listing tags.
+ * message is shown as it is. Data that is not JSON is not refused: the hint says
+ * it will be stored as text, as the historical collector stores it.
  *
  * Contextual help explains form-based tags, `<form>::<name>`, whose data a form
  * describes: a section to unfold, with a picker starting the name with a form,
@@ -111,7 +116,7 @@ export function TagCreatePanel({
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (invalid.exclude || invalid.data) return;
+    if (invalid.exclude) return;
     create.mutate();
   }
 
@@ -245,24 +250,21 @@ export function TagCreatePanel({
             rows={6}
             spellCheck={false}
             autoComplete="off"
-            aria-invalid={invalid.data}
             aria-describedby="create-tag-data-hint"
             onChange={(event) => {
               set("tag_data", event.target.value);
             }}
-            className={`w-full rounded-(--radius-control) border bg-surface p-2 font-mono text-data ${invalid.data ? "border-state-down" : "border-line"}`}
+            className="w-full rounded-(--radius-control) border border-line bg-surface p-2 font-mono text-data"
           />
           <p id="create-tag-data-hint" className="mt-1 text-ink-muted">
-            {invalid.data ? (
-              <span className="text-state-down">■ {t("tags.create.dataInvalid")}</span>
-            ) : (
-              t(
-                formName === null || missingForm
-                  ? "tags.create.dataHint"
-                  : "tags.create.formHelp.dataHint",
-                { form: formName },
-              )
-            )}
+            {invalid.dataAsText
+              ? t("tags.create.dataAsText")
+              : t(
+                  formName === null || missingForm
+                    ? "tags.create.dataHint"
+                    : "tags.create.formHelp.dataHint",
+                  { form: formName },
+                )}
           </p>
         </div>
 
@@ -274,9 +276,7 @@ export function TagCreatePanel({
 
         <button
           type="submit"
-          disabled={
-            create.isPending || fields.tag_name.trim() === "" || invalid.exclude || invalid.data
-          }
+          disabled={create.isPending || fields.tag_name.trim() === "" || invalid.exclude}
           className="h-8 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink disabled:opacity-60"
         >
           {create.isPending ? t("tags.create.saving") : t("tags.create.save")}
