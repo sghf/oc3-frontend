@@ -18021,23 +18021,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["ModulesetListResponse"];
                 };
             };
-            /** @description Node not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     GetNodeComplianceCandidateRulesets: {
@@ -18090,23 +18078,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["RulesetListResponse"];
                 };
             };
-            /** @description Node not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     GetNodeComplianceLogs: {
@@ -18219,20 +18195,8 @@ export interface operations {
                     "application/json": components["schemas"]["ModulesetListResponse"];
                 };
             };
-            /** @description Node not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     PostNodeComplianceModuleset: {
@@ -18247,11 +18211,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Moduleset attached */
             202: {
@@ -18287,20 +18247,8 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Node or moduleset not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     GetNodeComplianceRulesets: {
@@ -18356,20 +18304,8 @@ export interface operations {
                     "application/json": components["schemas"]["RulesetListResponse"];
                 };
             };
-            /** @description Node not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     PostNodeComplianceRuleset: {
@@ -18384,11 +18320,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Ruleset attached */
             202: {
@@ -18424,20 +18356,8 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Node or ruleset not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     GetNodeComplianceStatus: {
@@ -18493,20 +18413,8 @@ export interface operations {
                     "application/json": components["schemas"]["ComplianceStatusListResponse"];
                 };
             };
-            /** @description Node not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
         };
     };
     GetNodeDisks: {
@@ -20906,7 +20814,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["ModulesetListResponse"];
                 };
             };
             404: components["responses"]["404"];
@@ -20965,7 +20873,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["RulesetListResponse"];
                 };
             };
             404: components["responses"]["404"];
@@ -21081,7 +20989,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["ModulesetListResponse"];
                 };
             };
             404: components["responses"]["404"];
@@ -21204,7 +21112,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["RulesetListResponse"];
                 };
             };
             404: components["responses"]["404"];
@@ -21325,7 +21233,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["ComplianceStatusListResponse"];
                 };
             };
             404: components["responses"]["404"];

@@ -10,7 +10,9 @@ import { NodeLogs } from "./NodeLogs";
 import { NodeStats } from "./NodeStats";
 import { LineChartIcon } from "@/components/ui/icons";
 import { NodeSysreport } from "./NodeSysreport";
+import { NodeCompliance } from "./NodeCompliance";
 import { useNodeAlerts, useNodeChecks, useNodeLogs, useNodeSysreport } from "./queries";
+import { nokCount, useCompStatus } from "@/lib/api/object-compliance";
 import { periodBegin } from "./sysreport-period";
 
 /**
@@ -95,6 +97,31 @@ export const NODE_RELATED_TABS: RelatedTab[] = [
       };
     },
     render: (nodeId, locale) => <NodeChecks nodeId={nodeId} locale={locale} />,
+  },
+  {
+    key: "compliance",
+    labelKey: "nodes.related.compliance",
+    icon: <ColumnFamilyIcon family="moduleset" />,
+    // The modules whose last check failed stand out from the others.
+    useSummary: (nodeId) => {
+      const { t } = useTranslation();
+      const rows = useCompStatus(
+        nodeId === undefined ? undefined : { kind: "node", id: nodeId },
+      ).data;
+      const count = nokCount(rows);
+      return {
+        count: rows?.length,
+        parts: [
+          {
+            key: "nok",
+            count,
+            box: "bg-state-down-soft text-state-down",
+            label: t("objectCompliance.status.nokCount", { count }),
+          },
+        ],
+      };
+    },
+    render: (nodeId, locale) => <NodeCompliance nodeId={nodeId} locale={locale} />,
   },
   {
     key: "logs",

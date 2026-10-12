@@ -202,6 +202,7 @@
       "packages": "Packages",
       "inventory": "Inventory",
       "sysreport": "Sysreport",
+      "compliance": "Compliance",
       "logs": "Logs",
       "stats": "Stats",
       "checks": "Checks"
@@ -2213,6 +2214,34 @@
       "rulesetIncluded": "Ruleset {{name}} included.",
       "rulesetExcluded": "Ruleset {{name}} no longer included."
     }
+  },
+  "objectCompliance": {
+    "status": {
+      "title": "Last checks",
+      "nodeRuns": "Node",
+      "none": "No module has been checked on this node.",
+      "nokCount_one": "{{count}} module not ok",
+      "nokCount_other": "{{count}} modules not ok"
+    },
+    "modulesets": {
+      "title": "Modulesets",
+      "none": "No moduleset attached.",
+      "attach": "Attach a moduleset",
+      "detach": "Detach the moduleset {{name}}",
+      "attached": "Moduleset {{name}} attached.",
+      "detached": "Moduleset {{name}} detached.",
+      "encapTitle": "Modulesets of the containers"
+    },
+    "rulesets": {
+      "title": "Rulesets",
+      "none": "No ruleset attached.",
+      "attach": "Attach a ruleset",
+      "detach": "Detach the ruleset {{name}}",
+      "attached": "Ruleset {{name}} attached.",
+      "detached": "Ruleset {{name}} detached.",
+      "encapTitle": "Rulesets of the containers"
+    },
+    "instanceHint": "Attached to the service: they apply to all its instances, and change in its panel."
   },
   "complianceStatus": {
     "title": "Compliance status",

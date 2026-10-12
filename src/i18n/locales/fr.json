@@ -202,6 +202,7 @@
       "packages": "Paquets",
       "inventory": "Inventaire",
       "sysreport": "Sysreport",
+      "compliance": "Conformité",
       "logs": "Journal",
       "stats": "Statistiques",
       "checks": "Contrôles"
@@ -2213,6 +2214,34 @@
       "rulesetIncluded": "Ruleset {{name}} inclus.",
       "rulesetExcluded": "Ruleset {{name}} n'est plus inclus."
     }
+  },
+  "objectCompliance": {
+    "status": {
+      "title": "Dernières vérifications",
+      "nodeRuns": "Nœud",
+      "none": "Aucun module n'a été vérifié sur ce nœud.",
+      "nokCount_one": "{{count}} module non conforme",
+      "nokCount_other": "{{count}} modules non conformes"
+    },
+    "modulesets": {
+      "title": "Modulesets",
+      "none": "Aucun moduleset attaché.",
+      "attach": "Attacher un moduleset",
+      "detach": "Détacher le moduleset {{name}}",
+      "attached": "Moduleset {{name}} attaché.",
+      "detached": "Moduleset {{name}} détaché.",
+      "encapTitle": "Modulesets des conteneurs"
+    },
+    "rulesets": {
+      "title": "Rulesets",
+      "none": "Aucun ruleset attaché.",
+      "attach": "Attacher un ruleset",
+      "detach": "Détacher le ruleset {{name}}",
+      "attached": "Ruleset {{name}} attaché.",
+      "detached": "Ruleset {{name}} détaché.",
+      "encapTitle": "Rulesets des conteneurs"
+    },
+    "instanceHint": "Attachés au service : ils s'appliquent à toutes ses instances et se changent dans son panneau."
   },
   "complianceStatus": {
     "title": "Statut de conformité",

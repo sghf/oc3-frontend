@@ -3,7 +3,9 @@ import { GearIcon } from "@/components/ui/icons";
 import type { RelatedTab } from "@/components/opensvc/related-tabs";
 import { useTranslation } from "react-i18next";
 import { ServiceActions } from "./ServiceActions";
+import { ServiceCompliance } from "./ServiceCompliance";
 import { ServiceLogs } from "./ServiceLogs";
+import { nokCount, useCompStatus } from "@/lib/api/object-compliance";
 import { ServiceNodesDiff } from "./ServiceNodesDiff";
 import { ServiceResources } from "./ServiceResources";
 import { resourceStatusSummary } from "./resource-status";
@@ -65,6 +67,31 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
       return actionStatusSummary(useServiceActionStats(svcId).data, t);
     },
     render: (svcId, locale) => <ServiceActions svcId={svcId} locale={locale} />,
+  },
+  {
+    key: "compliance",
+    labelKey: "nodes.related.compliance",
+    icon: <ColumnFamilyIcon family="moduleset" />,
+    // The modules whose last check failed, on any node, stand out from the others.
+    useSummary: (svcId) => {
+      const { t } = useTranslation();
+      const rows = useCompStatus(
+        svcId === undefined ? undefined : { kind: "service", id: svcId },
+      ).data;
+      const count = nokCount(rows);
+      return {
+        count: rows?.length,
+        parts: [
+          {
+            key: "nok",
+            count,
+            box: "bg-state-down-soft text-state-down",
+            label: t("objectCompliance.status.nokCount", { count }),
+          },
+        ],
+      };
+    },
+    render: (svcId, locale) => <ServiceCompliance svcId={svcId} locale={locale} />,
   },
   {
     key: "logs",
