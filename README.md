@@ -17,7 +17,7 @@
 oc3-frontend is a single-page application that replaces the web2py + jQuery interface of
 the legacy collector ([opensvc/collector](https://github.com/opensvc/collector)). It talks
 exclusively to the oc3 REST API, typed from its OpenAPI specification, and receives
-changes in real time over the websocket of the oc3 messenger. 
+changes in real time over the websocket of the oc3 messenger.
 
 ## Contents
 
@@ -149,19 +149,58 @@ A few principles hold it together:
 
 ## Deployment
 
+The application and the oc3 API must share **one HTTPS origin**: the sign-in cookies are
+`Secure` and `__Host-` prefixed, and oc3 refuses session requests coming from another
+origin. Terminate TLS in front of the frontend, on the public host name — the one
+`server.oidc.redirect_url` names when OpenID Connect sign-in is enabled.
+
+### Container image
+
+The `Dockerfile` builds the application and serves it with an unprivileged nginx
+(uid 101, port 8080), which also proxies `/api` and `/realtime` to oc3:
+
+```sh
+docker build \
+  --build-arg VERSION="$(git describe --tags --always)" \
+  --build-arg BUILDTIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  -t opensvc/oc3-frontend .
+
+docker run -d -p 8080:8080 \
+  -e OC3_API_UPSTREAM=http://oc3-server:8081 \
+  -e OC3_REALTIME_UPSTREAM=http://oc3-messenger:8889 \
+  opensvc/oc3-frontend
+```
+
+| Variable                | Purpose                                                    | Default                     |
+| ----------------------- | ---------------------------------------------------------- | --------------------------- |
+| `OC3_API_UPSTREAM`      | oc3 server that `/api` is proxied to, path kept            | `http://oc3-server:8081`    |
+| `OC3_REALTIME_UPSTREAM` | oc3 messenger that the `/realtime` websocket is proxied to | `http://oc3-messenger:8889` |
+| `OC3_LISTEN_PORT`       | Port nginx listens on inside the container                 | `8080`                      |
+| `OC3_MAX_BODY_SIZE`     | Largest request body accepted for `/api`                   | `32m`                       |
+
+The nginx configuration lives in `deploy/nginx/`. Besides the proxying, it:
+
+- returns `index.html` for any path that is not a file, since the application does its
+  own routing;
+- caches the hashed files of `assets/` for a year, and never caches `index.html`, so a new
+  release is picked up at the next page load;
+- sets a strict Content-Security-Policy (everything from this origin only), along with
+  `X-Frame-Options`, `X-Content-Type-Options` and `Referrer-Policy`;
+- forwards `X-Forwarded-Proto` from the TLS gateway, or sets it from its own scheme;
+- answers `GET /healthz`, used by the image's `HEALTHCHECK`.
+
+nginx resolves the upstream host names when it starts: they must exist by then.
+
+### Other web servers
+
 ```sh
 npm ci
 npm run build
 ```
 
-`dist/` holds static files that any web server can serve. On the same origin, that server
-must:
-
-- proxy `/api` to the oc3 API and `/realtime` (websocket) to the oc3 messenger;
-- return `index.html` for any other unknown path, since the application handles its own
-  routing.
-
-Authentication currently uses HTTP Basic against oc3; OpenID Connect sign-in is planned.
+`dist/` holds static files. Serve them on the same origin as above, with the same rules
+as `deploy/nginx/default.conf.template`: `/api` to the oc3 API, `/realtime` (websocket) to
+the oc3 messenger, `index.html` for any other unknown path.
 
 ## Contributing
 

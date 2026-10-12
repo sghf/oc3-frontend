@@ -1,0 +1,18 @@
+# Only what the build needs goes into the context: sources, configs, lockfile.
+node_modules
+dist
+.git
+.claude
+.vscode
+.idea
+.env
+.env.*
+*.log
+*.tsbuildinfo
+coverage
+test-results
+playwright-report
+user-guide
+*.md
+Dockerfile
+.dockerignore
