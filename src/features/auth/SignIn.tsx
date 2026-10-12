@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api/client";
 import {
@@ -9,6 +8,7 @@ import {
   loginUrl,
   setCredentials,
 } from "@/lib/api/auth";
+import { useAuthInfo } from "@/lib/api/auth-info";
 import { problemText } from "@/lib/api/problem";
 import opensvcLogo from "@/assets/opensvc-logo.svg";
 
@@ -23,21 +23,6 @@ const AUTH_ERRORS = new Set([
   "locked",
   "unavailable",
 ]);
-
-/** The sign-in modes the collector offers (`GET /auth/info`). */
-function useAuthInfo() {
-  return useQuery({
-    queryKey: ["auth", "info"],
-    queryFn: async () => {
-      const { data, error } = await api.GET("/auth/info");
-      if (error !== undefined) throw new Error(problemText(error));
-      return data;
-    },
-    // The provider may become reachable while the screen is open.
-    refetchInterval: (query) =>
-      query.state.data?.oidc.enabled === true && !query.state.data.oidc.ready ? 10_000 : false,
-  });
-}
 
 /**
  * Sign-in screen.

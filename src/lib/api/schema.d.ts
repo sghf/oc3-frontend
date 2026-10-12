@@ -4858,7 +4858,9 @@ export interface paths {
         /**
          * @description Create a user, with its private group "user_<id>". Requires the UserManager
          *     privilege. An email or username already in use is refused with a 409. Without
-         *     a password the account exists but cannot sign in.
+         *     a password the account exists but cannot sign in with one. A password is
+         *     refused with a 400 when password sign-in is disabled (server.auth.basic_users
+         *     false).
          */
         post: operations["PostUsers"];
         delete?: never;
@@ -4914,7 +4916,8 @@ export interface paths {
          *     it is stored as a web2py hash, accepted by both collectors. The change is
          *     logged, without the password. Requires user authentication, no privilege; a
          *     user signed in through the identity provider (OIDC session or Bearer token)
-         *     is refused with 403, the provider managing their password.
+         *     is refused with 403, the provider managing their password, and so is anyone
+         *     when password sign-in is disabled (server.auth.basic_users false).
          */
         post: operations["PostUserSelfPassword"];
         delete?: never;
@@ -5192,7 +5195,11 @@ export interface components {
             updated?: string;
         };
         AuthInfo: {
-            /** @description Whether users may sign in with their collector password */
+            /**
+             * @description Whether users may sign in with their collector password
+             *     (server.auth.basic_users). When false, the collector also refuses to set
+             *     passwords, at user creation and on the profile.
+             */
             basic: boolean;
             oidc: {
                 enabled: boolean;

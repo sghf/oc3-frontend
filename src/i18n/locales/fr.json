@@ -1224,6 +1224,7 @@
       "password": "Mot de passe",
       "confirm": "Confirmation du mot de passe",
       "noPassword": "Sans mot de passe, le compte existe mais ne peut pas se connecter.",
+      "passwordsDisabled": "La connexion par mot de passe est désactivée sur ce collector : l'utilisateur se connecte par le fournisseur d'identité.",
       "passwordHint_one": "Au moins {{count}} caractère.",
       "passwordHint_other": "Au moins {{count}} caractères.",
       "tooShort_one": "Au moins {{count}} caractère.",

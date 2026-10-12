@@ -1224,6 +1224,7 @@
       "password": "Password",
       "confirm": "Confirm password",
       "noPassword": "Without a password the account exists but cannot sign in.",
+      "passwordsDisabled": "Password sign-in is disabled on this collector: the user signs in through the identity provider.",
       "passwordHint_one": "At least {{count}} character.",
       "passwordHint_other": "At least {{count}} characters.",
       "tooShort_one": "At least {{count}} character.",

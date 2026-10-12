@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api/client";
+import { useAuthInfo } from "@/lib/api/auth-info";
 import { problemText } from "@/lib/api/problem";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { SlideOver } from "@/components/ui/SlideOver";
@@ -19,7 +20,9 @@ function optional(value: string): string | undefined {
 /**
  * Creating a user. The collector also creates their private group `user_<id>`.
  * Without a password the account exists but cannot sign in, as in the historical
- * collector: the form says so rather than forbidding it.
+ * collector: the form says so rather than forbidding it. With password sign-in
+ * turned off (`basic` of `GET /auth/info`), the form asks for none: the user
+ * signs in through the identity provider.
  */
 export function CreateUserPanel({
   open,
@@ -39,6 +42,9 @@ export function CreateUserPanel({
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  // Offered until the collector says otherwise: it refuses a password it would
+  // not accept at sign-in.
+  const passwords = useAuthInfo().data?.basic !== false;
 
   const tooShort = password !== "" && password.length < MIN_PASSWORD;
   const mismatch = confirm !== "" && confirm !== password;
@@ -52,7 +58,7 @@ export function CreateUserPanel({
           last_name: optional(lastName),
           username: optional(username),
           phone_work: optional(phone),
-          password: password === "" ? undefined : password,
+          password: !passwords || password === "" ? undefined : password,
         },
       });
       if (error !== undefined) throw new Error(problemText(error));
@@ -137,25 +143,33 @@ export function CreateUserPanel({
           })}
         </div>
 
-        {/* new-password: the browser does not offer the password of the current session. */}
-        {text("create-user-password", t("users.create.password"), password, setPassword, {
-          type: "password",
-          autoComplete: "new-password",
-          minLength: MIN_PASSWORD,
-        })}
-        {text("create-user-confirm", t("users.create.confirm"), confirm, setConfirm, {
-          type: "password",
-          autoComplete: "new-password",
-        })}
-        <p className={`-mt-2 mb-3 ${tooShort || mismatch ? "text-state-warn" : "text-ink-muted"}`}>
-          {tooShort
-            ? `▲ ${t("users.create.tooShort", { count: MIN_PASSWORD })}`
-            : mismatch
-              ? `▲ ${t("users.create.mismatch")}`
-              : password === ""
-                ? t("users.create.noPassword")
-                : t("users.create.passwordHint", { count: MIN_PASSWORD })}
-        </p>
+        {passwords ? (
+          <>
+            {/* new-password: the browser does not offer the password of the current session. */}
+            {text("create-user-password", t("users.create.password"), password, setPassword, {
+              type: "password",
+              autoComplete: "new-password",
+              minLength: MIN_PASSWORD,
+            })}
+            {text("create-user-confirm", t("users.create.confirm"), confirm, setConfirm, {
+              type: "password",
+              autoComplete: "new-password",
+            })}
+            <p
+              className={`-mt-2 mb-3 ${tooShort || mismatch ? "text-state-warn" : "text-ink-muted"}`}
+            >
+              {tooShort
+                ? `▲ ${t("users.create.tooShort", { count: MIN_PASSWORD })}`
+                : mismatch
+                  ? `▲ ${t("users.create.mismatch")}`
+                  : password === ""
+                    ? t("users.create.noPassword")
+                    : t("users.create.passwordHint", { count: MIN_PASSWORD })}
+            </p>
+          </>
+        ) : (
+          <p className="mb-3 text-ink-muted">{t("users.create.passwordsDisabled")}</p>
+        )}
 
         {create.isError && (
           <p role="alert" className="mb-3 text-state-down">
