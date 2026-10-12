@@ -53,6 +53,10 @@ const RESOURCE_PROPS = [
   "updated",
 ] as const satisfies readonly (keyof ResourceRow)[];
 
+/**
+ * Columns shown by default, those of the historical collector's resources table
+ * (`default_columns` of `table_resources`), in the order of RESOURCE_PROPS.
+ */
 const DEFAULT_COLS: string[] = [
   "services.svcname",
   "nodes.nodename",
@@ -61,6 +65,7 @@ const DEFAULT_COLS: string[] = [
   "res_type",
   "res_status",
   "res_desc",
+  "res_log",
   "res_monitor",
   "res_disable",
   "res_optional",
