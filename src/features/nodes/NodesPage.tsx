@@ -176,10 +176,10 @@ const FAMILY: Record<string, ColumnFamily> = {
 };
 
 /**
- * Columns holding one value per node, the id by constraint, the name in practice:
- * their distribution would only list each node once.
+ * Columns holding one value per node, the id by constraint, the name and the
+ * serial number in practice: their distribution would only list each node once.
  */
-const UNIQUE_PROPS = new Set<string>(["node_id", "nodename"]);
+const UNIQUE_PROPS = new Set<string>(["node_id", "nodename", "serial"]);
 
 const COLUMNS: ListColumn<NodeRow>[] = NODE_PROPS.map((prop) => ({
   prop,
