@@ -1186,7 +1186,40 @@
       "dataHint": "Données libres attachées au tag, en JSON. Facultatif.",
       "dataInvalid": "Ce n'est pas du JSON valide.",
       "save": "Créer le tag",
-      "saving": "Création…"
+      "saving": "Création…",
+      "formHelp": {
+        "summary": "Décrire les données d'un tag avec un formulaire",
+        "naming": "Nommez le tag d'après un formulaire, puis deux deux-points, puis un nom de votre choix :",
+        "example": "Par exemple, avec le formulaire keyval :",
+        "tagData": "Les données propres au tag sont partagées par tous les nœuds et services qui le portent. Elles se changent dans le panneau du tag, par un TagManager.",
+        "attachData": "Chaque nœud ou service qui porte le tag a aussi ses propres données. Elles se saisissent au rattachement, depuis le panneau du nœud ou du service, par qui peut changer ses tags.",
+        "after": "Choisissez un formulaire pour commencer le nom par lui :",
+        "pick": "Commencer le nom par un formulaire",
+        "noForm": "Aucun formulaire ne correspond.",
+        "plainHint": "Pour décrire les données du tag avec un formulaire, nommez-le <formulaire>::<nom>.",
+        "checking": "Recherche du formulaire {{form}}…",
+        "formBased": "✓ Tag à formulaire : ses données sont décrites par le formulaire {{form}}.",
+        "missing": "Aucun formulaire nommé {{form}} : les données du tag seraient du JSON libre. Vérifiez le nom avant « :: ».",
+        "dataHint": "Partagées par tous les nœuds et services qui portent le tag. Facultatives : écrivez-les ici en JSON, ou après la création du tag, dans son panneau, avec le formulaire {{form}}.",
+        "pattern": "<formulaire>::<nom>",
+        "namingThen": "Les données du tag se présentent et se saisissent alors avec ce formulaire, au lieu de s'écrire en JSON."
+      }
+    },
+    "data": {
+      "title": "Données",
+      "formBased": "Décrites par le formulaire {{form}}.",
+      "none": "Aucune donnée.",
+      "edit": "Modifier",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "raw": "Données, en JSON ou en texte",
+      "noForm": "Aucun formulaire nommé {{form}} ne peut être lu : les données se modifient en texte."
+    },
+    "attachments": {
+      "nodes": "Nœuds",
+      "services": "Services",
+      "nodesNone": "Aucun nœud ne porte ce tag.",
+      "servicesNone": "Aucun service ne porte ce tag."
     }
   },
   "users": {
@@ -1840,7 +1873,12 @@
       "label": "Détacher le tag {{name}}",
       "question": "Détacher le tag {{name}} ?",
       "confirm": "Détacher"
-    }
+    },
+    "dataOf": "Données du tag {{name}}",
+    "dataTitle": "{{name}}",
+    "attachData": "Données de ce rattachement",
+    "tagData": "Données du tag, partagées",
+    "tagDataWhere": "se changent dans le panneau du tag"
   },
   "crossLink": {
     "hint": "Voir ce {{kind}}",

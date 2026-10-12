@@ -6,10 +6,10 @@ import { toTagRows, type TagRow } from "./tag-row";
 /**
  * Every tag, keyed by its `tag_id`.
  *
- * `GET /tags/{tag_id}` expects the integer id, which no list returns (see notes.md),
- * so a tag cannot be read by the char(36) `tag_id` the badges carry. The whole list
- * is read instead — a collector counts tens of tags, not thousands — and cached, so
- * that opening several tags from the panels costs a single request.
+ * The whole list is read — a collector counts tens of tags, not thousands — and
+ * cached, so that opening several tags from the panels costs a single request;
+ * `GET /tags/{tag_id}`, which takes the `tag_id` the badges carry, would cost one
+ * per tag.
  */
 function useTagsById() {
   return useQuery({

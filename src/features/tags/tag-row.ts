@@ -16,6 +16,11 @@ export interface TagRow {
   /** Free data attached to the tag; the API returns it already decoded. */
   tag_data: string;
   tag_created: string;
+  /**
+   * The data of one attachment, in the tags of a node or a service; empty
+   * elsewhere, and for an attachment without data.
+   */
+  tag_attach_data: string;
 }
 
 function asText(value: unknown): string {
@@ -32,5 +37,6 @@ export function toTagRows(data: unknown): TagRow[] {
     tag_exclude: asText(readProp(row, "tag_exclude")),
     tag_data: asText(readProp(row, "tag_data")),
     tag_created: asText(readProp(row, "tag_created")),
+    tag_attach_data: asText(readProp(row, "tag_attach_data")),
   }));
 }

@@ -1186,7 +1186,40 @@
       "dataHint": "Free data attached to the tag, in JSON. Optional.",
       "dataInvalid": "This is not valid JSON.",
       "save": "Create the tag",
-      "saving": "Creating…"
+      "saving": "Creating…",
+      "formHelp": {
+        "summary": "How to describe a tag's data with a form",
+        "naming": "Name the tag after a form, then two colons, then a name of your own:",
+        "example": "For instance, with the form keyval:",
+        "tagData": "The tag's own data is shared by every node and service carrying the tag. It changes in the tag's panel, by a TagManager.",
+        "attachData": "Each node or service carrying the tag has data of its own as well. It is filled in when the tag is attached, from the node or service panel, by whoever may change its tags.",
+        "after": "Pick a form to start the name with it:",
+        "pick": "Start the name with a form",
+        "noForm": "No matching form.",
+        "plainHint": "To describe the tag's data with a form, name it <form>::<name>.",
+        "checking": "Looking for the form {{form}}…",
+        "formBased": "✓ Form-based tag: its data is described by the form {{form}}.",
+        "missing": "No form named {{form}}: the tag's data would be free JSON. Check the name before the \"::\".",
+        "dataHint": "Shared by every node and service carrying the tag. Optional: write it here in JSON, or after creating the tag, in its panel, through the form {{form}}.",
+        "pattern": "<form>::<name>",
+        "namingThen": "The tag's data is then laid out and filled in with that form, rather than written in JSON."
+      }
+    },
+    "data": {
+      "title": "Data",
+      "formBased": "Described by the form {{form}}.",
+      "none": "No data.",
+      "edit": "Edit",
+      "save": "Save",
+      "saving": "Saving…",
+      "raw": "Data, as JSON or text",
+      "noForm": "No form named {{form}} can be read: the data is edited as text."
+    },
+    "attachments": {
+      "nodes": "Nodes",
+      "services": "Services",
+      "nodesNone": "No node carries this tag.",
+      "servicesNone": "No service carries this tag."
     }
   },
   "users": {
@@ -1840,7 +1873,12 @@
       "label": "Detach tag {{name}}",
       "question": "Detach tag {{name}}?",
       "confirm": "Detach"
-    }
+    },
+    "dataOf": "Data of tag {{name}}",
+    "dataTitle": "{{name}}",
+    "attachData": "Data of this attachment",
+    "tagData": "Data of the tag, shared",
+    "tagDataWhere": "changed in the tag panel"
   },
   "crossLink": {
     "hint": "Show this {{kind}}",

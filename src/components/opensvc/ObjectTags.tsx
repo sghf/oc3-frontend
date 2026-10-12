@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TagRow } from "@/features/tags/tag-row";
+import { tagFormName } from "@/features/tags/tag-form";
+import { TagDataField } from "@/features/tags/TagDataField";
 import { Combobox } from "@/components/ui/Combobox";
-import { CloseIcon, PlusIcon } from "@/components/ui/icons";
+import { CloseIcon, DatabaseIcon, PlusIcon } from "@/components/ui/icons";
 import { ObjectIcon } from "./ObjectIcon";
 import { usePeek } from "./use-peek";
 
@@ -27,6 +29,13 @@ export interface TagEditControl {
   /** `tag_id` of the tag being detached. */
   detaching: string | null;
   detachError: string | null;
+  /** `tag_id` of the tag the last attachment succeeded for, null otherwise. */
+  justAttached: string | null;
+  /**
+   * Stores the data of an attachment, as text; resolves to the refusal of the
+   * collector, or null.
+   */
+  saveAttachData: (tagId: string, text: string) => Promise<string | null>;
 }
 
 /**
@@ -57,6 +66,16 @@ export function ObjectTags({
   const section = useRef<HTMLElement>(null);
   const confirming =
     edit === undefined ? undefined : tags?.find((tag) => tag.tag_id === edit.confirmingDetach);
+  // The form-based tag whose data shows under the badges, and whether its
+  // attachment data opens on its form, as after attaching it.
+  const [dataOf, setDataOf] = useState<{ tagId: string; editing: boolean } | null>(null);
+  const justAttached = edit?.justAttached ?? null;
+  useEffect(() => {
+    const attached = tags?.find((tag) => tag.tag_id === justAttached);
+    if (attached !== undefined && tagFormName(attached.tag_name) !== null)
+      setDataOf({ tagId: attached.tag_id, editing: true });
+  }, [justAttached, tags]);
+  const shown = dataOf === null ? undefined : tags?.find((tag) => tag.tag_id === dataOf.tagId);
   return (
     <section ref={section} className="mb-4">
       <div className="mb-1 flex items-center gap-2">
@@ -111,6 +130,22 @@ export function ObjectTags({
                 >
                   {tag.tag_name}
                 </button>
+                {tagFormName(tag.tag_name) !== null && (
+                  <button
+                    type="button"
+                    aria-expanded={shown?.tag_id === tag.tag_id}
+                    aria-label={t("objectTags.dataOf", { name: tag.tag_name })}
+                    title={t("objectTags.dataOf", { name: tag.tag_name })}
+                    onClick={() => {
+                      setDataOf(
+                        shown?.tag_id === tag.tag_id ? null : { tagId: tag.tag_id, editing: false },
+                      );
+                    }}
+                    className="inline-flex items-center border-l border-tag-ink/30 px-1.5 hover:bg-tag-hover aria-expanded:bg-tag-hover"
+                  >
+                    <DatabaseIcon width={11} height={11} />
+                  </button>
+                )}
                 {editable && (
                   <button
                     type="button"
@@ -131,6 +166,20 @@ export function ObjectTags({
             );
           })}
         </ul>
+      )}
+      {shown !== undefined && (
+        <TagData
+          key={shown.tag_id}
+          tag={shown}
+          startEditing={dataOf?.editing === true}
+          onSave={editable ? (text) => edit.saveAttachData(shown.tag_id, text) : undefined}
+          onOpenTag={() => {
+            openRecord("tag", shown.tag_id);
+          }}
+          onClose={() => {
+            setDataOf(null);
+          }}
+        />
       )}
       {edit !== undefined && confirming !== undefined && (
         <DetachConfirm
@@ -154,6 +203,67 @@ export function ObjectTags({
       )}
       {edit?.picking === true && <AttachForm attach={edit} />}
     </section>
+  );
+}
+
+/**
+ * The data of a form-based tag on this object, under the badges: that of the
+ * attachment, which whoever may change the tags of the object edits with the tag's
+ * form; and that of the tag, shared by every node and service carrying it, shown
+ * only: it changes in the tag's panel, where everything it serves is listed.
+ */
+function TagData({
+  tag,
+  startEditing,
+  onSave,
+  onOpenTag,
+  onClose,
+}: {
+  tag: TagRow;
+  startEditing: boolean;
+  onSave?: (text: string) => Promise<string | null>;
+  onOpenTag: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const formName = tagFormName(tag.tag_name);
+  return (
+    <div className="mt-2 flex flex-col gap-3 rounded-(--radius-panel) border border-line bg-surface p-3">
+      <div className="flex items-center gap-2">
+        <h4 className="font-semibold">{t("objectTags.dataTitle", { name: tag.tag_name })}</h4>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("detail.close")}
+          title={t("detail.close")}
+          className="ml-auto rounded-(--radius-control) p-0.5 text-ink-muted hover:text-ink"
+        >
+          <CloseIcon className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <section>
+        <h5 className="mb-1 text-ink-muted">{t("objectTags.attachData")}</h5>
+        <TagDataField
+          formName={formName}
+          value={tag.tag_attach_data}
+          onSave={onSave}
+          startEditing={startEditing && onSave !== undefined}
+        />
+      </section>
+      <section>
+        <h5 className="mb-1 flex flex-wrap items-center gap-2 text-ink-muted">
+          {t("objectTags.tagData")}
+          <button
+            type="button"
+            onClick={onOpenTag}
+            className="font-normal text-accent underline underline-offset-2"
+          >
+            {t("objectTags.tagDataWhere")}
+          </button>
+        </h5>
+        <TagDataField formName={formName} value={tag.tag_data} />
+      </section>
+    </div>
   );
 }
 

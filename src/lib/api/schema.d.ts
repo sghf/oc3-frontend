@@ -3709,7 +3709,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List tags attached to a node */
+        /**
+         * @description List the tags attached to a node, one row per attachment: the props of the
+         *     tag, and tag_attach_data, the data of this attachment. A form-based tag, named
+         *     "<form>::<name>", describes its tag_data and tag_attach_data with that form.
+         */
         get: operations["GetNodeTags"];
         put?: never;
         post?: never;
@@ -4603,7 +4607,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List tags attached to a service */
+        /**
+         * @description List the tags attached to a service, one row per attachment: the props of the
+         *     tag, and tag_attach_data, the data of this attachment. A form-based tag, named
+         *     "<form>::<name>", describes its tag_data and tag_attach_data with that form.
+         */
         get: operations["GetServiceTags"];
         put?: never;
         post?: never;
@@ -22539,6 +22547,26 @@ export interface operations {
                 stats?: components["parameters"]["inQueryStats"];
                 /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
                 orderby?: components["parameters"]["inQueryOrderby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
                 /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
                 groupby?: components["parameters"]["inQueryGroupby"];
             };
@@ -22667,6 +22695,26 @@ export interface operations {
                 stats?: components["parameters"]["inQueryStats"];
                 /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
                 orderby?: components["parameters"]["inQueryOrderby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
                 /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
                 groupby?: components["parameters"]["inQueryGroupby"];
             };
@@ -22771,8 +22819,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
             };
             cookie?: never;
         };
@@ -22796,8 +22844,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
             };
             cookie?: never;
         };
@@ -22832,8 +22880,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
             };
             cookie?: never;
         };
@@ -22866,8 +22914,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
             };
             cookie?: never;
         };
@@ -22897,8 +22945,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
                 /** @description ID of the node */
                 node_id: string;
             };
@@ -22936,8 +22984,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
                 /** @description ID of the node */
                 node_id: string;
             };
@@ -22999,8 +23047,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
             };
             cookie?: never;
         };
@@ -23024,8 +23072,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
                 /** @description ID or name of the service */
                 svc_id: string;
             };
@@ -23063,8 +23111,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description ID of the tag */
-                tag_id: number;
+                /** @description The tag_id of the tag (a UUID), or its record id */
+                tag_id: string;
                 /** @description ID or name of the service */
                 svc_id: string;
             };

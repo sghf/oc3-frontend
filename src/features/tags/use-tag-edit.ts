@@ -85,6 +85,25 @@ export function useTagEdit(kind: TagTargetKind, objectId: string | undefined): T
     onSuccess: invalidate,
   });
 
+  const saveAttachData = useMutation({
+    mutationFn: async ({ tagId, text }: { tagId: string; text: string }) => {
+      // Posted again with its data, an attached tag keeps its attachment and
+      // takes the new data.
+      const { error } =
+        kind === "node"
+          ? await api.POST("/tags/nodes", {
+              body: { tag_id: tagId, node_id: objectId ?? "", tag_attach_data: text },
+            })
+          : await api.POST("/tags/services", {
+              body: { tag_id: tagId, svc_id: objectId ?? "", tag_attach_data: text },
+            });
+      return error === undefined ? null : problemText(error);
+    },
+    onSuccess: async (refused) => {
+      if (refused === null) await invalidate();
+    },
+  });
+
   const detach = useMutation({
     mutationFn: async (tagId: string) => {
       const { error } =
@@ -123,5 +142,7 @@ export function useTagEdit(kind: TagTargetKind, objectId: string | undefined): T
     },
     detaching: detach.isPending ? (detach.variables ?? null) : null,
     detachError: detach.isError ? detach.error.message : null,
+    justAttached: attach.isSuccess ? (attach.variables ?? null) : null,
+    saveAttachData: (tagId, text) => saveAttachData.mutateAsync({ tagId, text }),
   };
 }
