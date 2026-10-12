@@ -170,15 +170,12 @@ export function MenuButton({
           onKeyDown={onMenuKeyDown}
           className="absolute left-0 z-30 mt-1 min-w-56 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg"
         >
-          {items.map((item) => (
-            <MenuEntry
-              key={item.key}
-              item={item}
-              onChosen={() => {
-                close(true);
-              }}
-            />
-          ))}
+          <MenuList
+            items={items}
+            onChosen={() => {
+              close(true);
+            }}
+          />
         </div>
       )}
     </div>
@@ -186,10 +183,87 @@ export function MenuButton({
 }
 
 /**
- * An entry of a menu: a choice, or the opener of a submenu shown beside it.
+ * How long the pointer may cross other entries on its way to an open submenu
+ * before they take over: a diagonal path to a submenu entry lower down passes over
+ * them. Coming back to the submenu, or to its opener, within that time keeps it.
  */
-function MenuEntry({ item, onChosen }: { item: MenuItem; onChosen: () => void }) {
-  const [open, setOpen] = useState(false);
+const SUBMENU_SWITCH_MS = 250;
+
+/**
+ * The entries of one menu level, and which of their submenus is open: one at a
+ * time, owned here rather than by each entry so that moving between them is
+ * decided in one place. Hovering an entry opens its submenu at once when none is
+ * open, after `SUBMENU_SWITCH_MS` when another one is; the keyboard opens and
+ * closes at once. Leaving the menu altogether keeps the submenu open, until another
+ * entry is hovered or the menu closes.
+ */
+function MenuList({ items, onChosen }: { items: MenuItem[]; onChosen: () => void }) {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const current = useRef<string | null>(null);
+  current.current = openKey;
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  function hover(key: string | null) {
+    window.clearTimeout(timer.current);
+    if (key === current.current) return;
+    if (current.current === null) {
+      setOpenKey(key);
+      return;
+    }
+    timer.current = window.setTimeout(() => {
+      setOpenKey(key);
+    }, SUBMENU_SWITCH_MS);
+  }
+
+  function setNow(key: string | null) {
+    window.clearTimeout(timer.current);
+    setOpenKey(key);
+  }
+
+  return (
+    <>
+      {items.map((item) => (
+        <MenuEntry
+          key={item.key}
+          item={item}
+          onChosen={onChosen}
+          open={openKey === item.key}
+          onHover={() => {
+            hover(item.items === undefined ? null : item.key);
+          }}
+          setOpen={(next) => {
+            setNow(next ? item.key : null);
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+/**
+ * An entry of a menu: a choice, or the opener of a submenu shown beside it. Its
+ * menu level says whether the submenu is open (`MenuList`).
+ */
+function MenuEntry({
+  item,
+  onChosen,
+  open,
+  onHover,
+  setOpen,
+}: {
+  item: MenuItem;
+  onChosen: () => void;
+  open: boolean;
+  onHover: () => void;
+  setOpen: (open: boolean) => void;
+}) {
   const opener = useRef<HTMLButtonElement>(null);
   const submenu = useRef<HTMLDivElement>(null);
   const subId = useId();
@@ -249,12 +323,9 @@ function MenuEntry({ item, onChosen }: { item: MenuItem; onChosen: () => void })
   return (
     <div
       className="relative"
-      onPointerEnter={() => {
-        if (sub !== undefined) setOpen(true);
-      }}
-      onPointerLeave={() => {
-        if (sub !== undefined) setOpen(false);
-      }}
+      // The submenu is inside this element: entering it, through the strip that
+      // joins it to the entry, counts as staying here.
+      onPointerEnter={onHover}
     >
       {item.separatorBefore === true && (
         <div role="separator" className="my-1 border-t border-line" />
@@ -290,17 +361,19 @@ function MenuEntry({ item, onChosen }: { item: MenuItem; onChosen: () => void })
         {sub !== undefined && <CaretRightIcon className="h-3.5 w-3.5 text-ink-muted" />}
       </button>
       {sub !== undefined && open && (
-        <div
-          ref={submenu}
-          id={subId}
-          role="menu"
-          aria-label={item.label}
-          onKeyDown={onSubKeyDown}
-          className="absolute top-0 left-full z-40 ml-1 min-w-56 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg"
-        >
-          {sub.map((child) => (
-            <MenuEntry key={child.key} item={child} onChosen={onChosen} />
-          ))}
+        // A transparent strip over the menu's padding and border and the gap beside
+        // it: the pointer goes from the entry to the submenu without leaving either.
+        <div className="absolute -top-1 left-full z-40 pt-1 pl-2">
+          <div
+            ref={submenu}
+            id={subId}
+            role="menu"
+            aria-label={item.label}
+            onKeyDown={onSubKeyDown}
+            className="min-w-56 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg"
+          >
+            <MenuList items={sub} onChosen={onChosen} />
+          </div>
         </div>
       )}
     </div>
