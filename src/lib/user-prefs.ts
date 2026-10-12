@@ -74,7 +74,7 @@ export interface UserPrefs {
    * The side menu: the keys of the collapsed sections. Absent, every section is
    * expanded. The old interface does not fold its menu, so the key is ours alone.
    */
-  nav?: { collapsed?: string[] };
+  nav?: { collapsed?: string[]; view?: string };
   /**
    * The records the user bookmarked, oldest first, each named by its kind and its
    * id. The old interface has no bookmarks: the key is ours alone.
@@ -512,6 +512,40 @@ export function useNavCollapsedPref() {
       save.mutate(
         collapsed.includes(key) ? collapsed.filter((k) => k !== key) : [...collapsed, key],
       );
+    },
+  };
+}
+
+/**
+ * The menu the side menu shows, operator or admin, kept for the account; operator
+ * until one is chosen. The change shows at once and is saved behind it.
+ */
+export function useNavViewPref() {
+  const queryClient = useQueryClient();
+  const prefs = useUserPrefs();
+  const stored = prefs.data?.nav?.view;
+  const view: "operator" | "admin" = stored === "admin" ? "admin" : "operator";
+  const save = useMutation({
+    mutationFn: async (next: "operator" | "admin") => {
+      queryClient.setQueryData<UserPrefs>(PREFS_KEY, (current) => ({
+        ...current,
+        nav: { ...current?.nav, view: next },
+      }));
+      await savePrefs(queryClient, (current) => ({
+        ...current,
+        nav: { ...current.nav, view: next },
+      }));
+    },
+    onError: () => {
+      void queryClient.invalidateQueries({ queryKey: PREFS_KEY });
+    },
+  });
+  return {
+    view,
+    /** Whether the stored choice is read: until then, `view` is the default. */
+    ready: prefs.data !== undefined || prefs.isError,
+    setView: (next: "operator" | "admin") => {
+      if (next !== view) save.mutate(next);
     },
   };
 }

@@ -9,11 +9,15 @@
     "menuShortcut": "Press n to move to the menu",
     "categories": {
       "infrastructure": "Infrastructure",
-      "dataManagement": "Data Management",
       "requests": "Requests",
       "compliance": "Compliance",
-      "administration": "Administration",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "inventory": "Inventory",
+      "access": "Access",
+      "inventoryData": "Inventory data",
+      "reporting": "Reporting",
+      "filtering": "Filtering",
+      "audit": "Audit"
     },
     "apps": "Apps",
     "networks": "Networks",
@@ -23,7 +27,7 @@
     "users": "Users",
     "instances": "Service Instances",
     "obsolescence": "Obsolescence",
-    "logs": "Logs",
+    "logs": "Audit log",
     "claimMappings": "Claim mappings",
     "filters": "Filters",
     "filtersets": "Filtersets",
@@ -49,7 +53,13 @@
     "serviceActions": "Actions",
     "filter": "Filter the menu",
     "clearFilter": "Clear the menu filter",
-    "noMatch": "No menu entry matches."
+    "noMatch": "No menu entry matches.",
+    "views": {
+      "operator": "Operator",
+      "admin": "Admin"
+    },
+    "viewLabel": "Menu view",
+    "inView": "In {{view}}"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -60,7 +70,8 @@
     "menuMove": "In the menu: move between entries, Enter opens",
     "escape": "Close the panel, a list or this help; leave the menu",
     "help": "Show this list",
-    "hint": "Single keys act when no field has the focus."
+    "hint": "Single keys act when no field has the focus.",
+    "menuView": "Switch the menu between Operator and Admin"
   },
   "header": {
     "search": "Search the collector",

@@ -20,7 +20,7 @@ import { usePanelSide } from "@/components/ui/panel-side";
 import { LiveIndicator } from "./LiveIndicator";
 import { SessionFilter } from "./SessionFilter";
 import { SidebarIcon } from "@/components/ui/icons";
-import { useAppearance } from "@/lib/user-prefs";
+import { useAppearance, useNavViewPref } from "@/lib/user-prefs";
 import { BookmarksBar } from "./BookmarksBar";
 import { BookmarksProvider } from "./BookmarksProvider";
 import { GlobalSearch } from "./search/GlobalSearch";
@@ -74,6 +74,15 @@ export function AppShell() {
         field.select();
       } else menu?.querySelector<HTMLElement>("a, button")?.focus();
     });
+    return true;
+  });
+
+  // "v", for view, switches the menu between operator and admin; it unfolds the menu
+  // first when it is folded, so that the switch shows.
+  const navView = useNavViewPref();
+  useShortcut("v", () => {
+    if (!sidebarOpen) toggleSidebar();
+    navView.setView(navView.view === "operator" ? "admin" : "operator");
     return true;
   });
 

@@ -58,142 +58,176 @@ export interface NavEntry {
   privileges?: readonly string[];
 }
 
+/**
+ * The two menus the side menu switches between: "operator", to watch the estate
+ * and act on it day to day, and "admin", to set up how the collector works. Each
+ * section belongs to one of them, so does each page.
+ */
+export type NavView = "operator" | "admin";
+
+export const NAV_VIEWS: readonly NavView[] = ["operator", "admin"];
+
 export interface NavCategory {
   key: string;
   labelKey: string;
+  view: NavView;
   entries: NavEntry[];
 }
 
-/** Entries outside any category, at the top of the menu. */
+/** Entries outside any category, at the top of the operator menu. */
 export const NAV_TOP: NavEntry[] = [
   { to: "/", labelKey: "nav.dashboard", icon: "dashboard", exact: true },
 ];
 
+/**
+ * The sections of both menus. The operator sections keep the keys of the former
+ * single menu, so that the sections a user folded stay folded.
+ */
 export const NAV_CATEGORIES: NavCategory[] = [
   {
     key: "infrastructure",
     labelKey: "nav.categories.infrastructure",
+    view: "operator",
     entries: [
       { to: "/nodes", labelKey: "nav.nodes", icon: "node" },
-      // Not in the historical menu: the clusters whose daemon pushes its status, next
-      // to the nodes they group.
       { to: "/clusters", labelKey: "nav.clusters", icon: "cluster" },
       { to: "/services", labelKey: "nav.services", icon: "service" },
       { to: "/instances", labelKey: "nav.instances", icon: "instance" },
-      // `view-resources` of the historical menu: the resources of every instance.
       { to: "/resources", labelKey: "nav.resources", icon: "resource" },
-      // `view-actions` of the historical menu: the actions the agents ran.
       { to: "/service-actions", labelKey: "nav.serviceActions", icon: "action" },
+    ],
+  },
+  {
+    key: "inventory",
+    labelKey: "nav.categories.inventory",
+    view: "operator",
+    entries: [
       { to: "/networks", labelKey: "nav.networks", icon: "network" },
       { to: "/disks", labelKey: "nav.disks", icon: "disk" },
-      // `view-san` of the historical menu: the ports of the SAN switches.
       { to: "/san-switches", labelKey: "nav.switches", icon: "switch" },
-      // `view-nodes-hw` of the historical menu: the hardware components of every node.
       { to: "/hardware", labelKey: "nav.hardware", icon: "hardware" },
-      // `view-pkg` of the historical menu: the packages installed on the nodes.
       { to: "/packages", labelKey: "nav.packages", icon: "package" },
     ],
   },
   {
-    // Application codes go here rather than under Infrastructure: the historical menu
-    // kept their creation in `dm-add-app`, and the view carries the list and the
-    // creation together.
-    key: "dataManagement",
-    labelKey: "nav.categories.dataManagement",
-    entries: [
-      { to: "/apps", labelKey: "nav.apps", icon: "app" },
-      { to: "/tags", labelKey: "nav.tags", icon: "tags" },
-    ],
-  },
-  {
-    // The Requests section of the historical menu, placed before Administration as
-    // there: the request portal, and later the pending requests and their history.
-    key: "requests",
-    labelKey: "nav.categories.requests",
-    entries: [
-      // `req-new` of the historical Requests menu: the catalog of the forms to submit.
-      // Exact: the prefix would also match the requests list below.
-      { to: "/requests", labelKey: "nav.newRequest", icon: "form", exact: true },
-      // `req-pending-my`: the pending requests awaiting the user's team.
-      { to: "/requests/team", labelKey: "nav.teamRequests", icon: "form" },
-      // `req-pending-tiers`: the team's pending requests awaiting someone else.
-      { to: "/requests/tiers", labelKey: "nav.tiersRequests", icon: "form" },
-      // `req-all` of the historical Requests menu: every request submitted.
-      { to: "/requests/all", labelKey: "nav.allRequests", icon: "form" },
-    ],
-  },
-  {
-    // The Compliance section of the historical menu, placed between Requests and
-    // Administration.
     key: "compliance",
     labelKey: "nav.categories.compliance",
+    view: "operator",
     entries: [
-      // `comp-modsets` of the historical menu.
       { to: "/compliance/status", labelKey: "nav.complianceStatus", icon: "complianceStatus" },
-      { to: "/compliance/modulesets", labelKey: "nav.modulesets", icon: "moduleset" },
-      // `comp-rsets` of the historical menu.
-      { to: "/compliance/rulesets", labelKey: "nav.rulesets", icon: "ruleset" },
-      // `comp-designer` of the historical menu.
-      {
-        to: "/compliance/designer",
-        labelKey: "nav.designer",
-        icon: "designer",
-        privileges: ["CompManager"],
-      },
-      // `comp-log` of the historical menu.
       { to: "/compliance/logs", labelKey: "nav.complianceLogs", icon: "complianceLog" },
     ],
   },
   {
-    // The Statistics section of the historical menu, placed between Compliance and
-    // Administration as there: what is read, apart from what is administered.
-    key: "statistics",
-    labelKey: "nav.categories.statistics",
+    key: "requests",
+    labelKey: "nav.categories.requests",
+    view: "operator",
     entries: [
-      // `stat-reports` of the historical menu: the reports, rendered, to read.
-      { to: "/stats/reports", labelKey: "nav.statReports", icon: "report" },
+      { to: "/requests", labelKey: "nav.newRequest", icon: "form", exact: true },
+      { to: "/requests/team", labelKey: "nav.teamRequests", icon: "form" },
+      { to: "/requests/tiers", labelKey: "nav.tiersRequests", icon: "form" },
+      { to: "/requests/all", labelKey: "nav.allRequests", icon: "form" },
     ],
   },
   {
-    // The historical menu places users under Administration (`adm-usr`).
-    key: "administration",
-    labelKey: "nav.categories.administration",
+    key: "statistics",
+    labelKey: "nav.categories.statistics",
+    view: "operator",
+    entries: [{ to: "/stats/reports", labelKey: "nav.statReports", icon: "report" }],
+  },
+  {
+    key: "access",
+    labelKey: "nav.categories.access",
+    view: "admin",
     entries: [
       { to: "/users", labelKey: "nav.users", icon: "user", privileges: ["UserManager"] },
-      // Groups follow the users they gather. The historical menu kept them under Data
-      // Management (`dm-add-group`); moved here on request.
       { to: "/groups", labelKey: "nav.groups", icon: "group", privileges: ["GroupManager"] },
-      // Who may sign in through the identity provider, and with which teams. A rule
-      // may grant any team, Manager included: Manager only. No historical equivalent.
       {
         to: "/claim-mappings",
         labelKey: "nav.claimMappings",
         icon: "claimMapping",
         privileges: ["Manager"],
       },
-      // `adm-obs` in the historical menu.
+    ],
+  },
+  {
+    key: "inventoryData",
+    labelKey: "nav.categories.inventoryData",
+    view: "admin",
+    entries: [
+      { to: "/apps", labelKey: "nav.apps", icon: "app" },
+      { to: "/tags", labelKey: "nav.tags", icon: "tags" },
       {
         to: "/obsolescence",
         labelKey: "nav.obsolescence",
         icon: "obsolescence",
         privileges: ["ObsManager"],
       },
-      // `adm-log`.
-      { to: "/logs", labelKey: "nav.logs", icon: "log" },
-      // `adm-filters`.
-      // No privilege of their own in the collector: Manager.
-      { to: "/filters", labelKey: "nav.filters", icon: "filter", privileges: ["Manager"] },
-      // `adm-filtersets`.
-      { to: "/filtersets", labelKey: "nav.filtersets", icon: "filterset", privileges: ["Manager"] },
-      // `adm-forms`.
-      { to: "/forms", labelKey: "nav.forms", icon: "form", privileges: ["FormsManager"] },
-      // `adm-metrics`: the SQL requests feeding the charts and the reports.
+    ],
+  },
+  {
+    key: "complianceDesign",
+    labelKey: "nav.categories.compliance",
+    view: "admin",
+    entries: [
+      { to: "/compliance/modulesets", labelKey: "nav.modulesets", icon: "moduleset" },
+      { to: "/compliance/rulesets", labelKey: "nav.rulesets", icon: "ruleset" },
+      {
+        to: "/compliance/designer",
+        labelKey: "nav.designer",
+        icon: "designer",
+        privileges: ["CompManager"],
+      },
+    ],
+  },
+  {
+    key: "requestForms",
+    labelKey: "nav.categories.requests",
+    view: "admin",
+    entries: [{ to: "/forms", labelKey: "nav.forms", icon: "form", privileges: ["FormsManager"] }],
+  },
+  {
+    key: "reporting",
+    labelKey: "nav.categories.reporting",
+    view: "admin",
+    entries: [
       { to: "/metrics", labelKey: "nav.metrics", icon: "metric", privileges: ["ReportsManager"] },
-      // `adm-charts`: the time series of historized metrics.
       { to: "/charts", labelKey: "nav.charts", icon: "chart", privileges: ["ReportsManager"] },
-      // `adm-reports`: the definitions of the pages of charts and metrics, read in
-      // Statistics.
       { to: "/reports", labelKey: "nav.reports", icon: "report", privileges: ["ReportsManager"] },
     ],
   },
+  {
+    key: "filtering",
+    labelKey: "nav.categories.filtering",
+    view: "admin",
+    entries: [
+      { to: "/filters", labelKey: "nav.filters", icon: "filter", privileges: ["Manager"] },
+      { to: "/filtersets", labelKey: "nav.filtersets", icon: "filterset", privileges: ["Manager"] },
+    ],
+  },
+  {
+    key: "audit",
+    labelKey: "nav.categories.audit",
+    view: "admin",
+    entries: [{ to: "/logs", labelKey: "nav.logs", icon: "log" }],
+  },
 ];
+
+/**
+ * The menu a page belongs to: that of the entry its path starts with, the longest
+ * one winning (`/stats/reports/12` is Statistics' Reports, `/reports` Report
+ * definitions). Null for a page of no menu, such as the profile or the action
+ * queue: the side menu then stays as it is.
+ */
+export function viewOfPath(pathname: string): NavView | null {
+  if (pathname === "/") return "operator";
+  let best: { length: number; view: NavView } | null = null;
+  for (const category of NAV_CATEGORIES) {
+    for (const entry of category.entries) {
+      const hit = pathname === entry.to || pathname.startsWith(`${entry.to}/`);
+      if (hit && (best === null || entry.to.length > best.length))
+        best = { length: entry.to.length, view: category.view };
+    }
+  }
+  return best?.view ?? null;
+}

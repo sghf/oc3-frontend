@@ -9,11 +9,15 @@
     "menuShortcut": "Touche n pour aller au menu",
     "categories": {
       "infrastructure": "Infrastructure",
-      "dataManagement": "Gestion des données",
       "requests": "Demandes",
       "compliance": "Conformité",
-      "administration": "Administration",
-      "statistics": "Statistiques"
+      "statistics": "Statistiques",
+      "inventory": "Inventaire",
+      "access": "Accès",
+      "inventoryData": "Données d'inventaire",
+      "reporting": "Rapports",
+      "filtering": "Filtrage",
+      "audit": "Audit"
     },
     "apps": "Codes application",
     "networks": "Réseaux",
@@ -23,7 +27,7 @@
     "users": "Utilisateurs",
     "instances": "Instances de service",
     "obsolescence": "Obsolescence",
-    "logs": "Journaux",
+    "logs": "Journal d'audit",
     "claimMappings": "Revendications OIDC",
     "filters": "Filtres",
     "filtersets": "Filtersets",
@@ -49,7 +53,13 @@
     "serviceActions": "Actions",
     "filter": "Filtrer le menu",
     "clearFilter": "Effacer le filtre du menu",
-    "noMatch": "Aucune entrée du menu ne correspond."
+    "noMatch": "Aucune entrée du menu ne correspond.",
+    "views": {
+      "operator": "Opérateur",
+      "admin": "Admin"
+    },
+    "viewLabel": "Menu affiché",
+    "inView": "Dans {{view}}"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -60,7 +70,8 @@
     "menuMove": "Dans le menu : passer d'une entrée à l'autre, Entrée ouvre",
     "escape": "Fermer le panneau, une liste ou cette aide ; quitter le menu",
     "help": "Afficher cette liste",
-    "hint": "Les touches simples agissent quand aucun champ n'a le focus."
+    "hint": "Les touches simples agissent quand aucun champ n'a le focus.",
+    "menuView": "Passer du menu Opérateur au menu Admin, et inversement"
   },
   "header": {
     "search": "Rechercher dans le collector",
