@@ -438,7 +438,8 @@ export function InstancesPage() {
 
   return (
     <section>
-      <div className="mb-3 flex items-center gap-3">
+      {/* As tall as the Actions button from the start: checking a row must not push the list down. */}
+      <div className="mb-3 flex min-h-7 items-center gap-3">
         <h1 className="flex items-center gap-2 text-title font-semibold">
           <ObjectIcon kind="instance" className="h-5 w-5" />
           {t("instances.title")}
