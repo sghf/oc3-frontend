@@ -718,3 +718,33 @@ export function HashIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** The operator menu: a pulse, watching what runs. */
+export function PulseIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path
+        d="M2.5 13h4.3l2.6-6.6 4.6 11.4 2.8-6.3h4.7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** The admin menu: three sliders, setting things up. */
+export function SlidersIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="5" width="18" height="2.4" rx="1.2" />
+      <rect x="3" y="10.8" width="18" height="2.4" rx="1.2" />
+      <rect x="3" y="16.6" width="18" height="2.4" rx="1.2" />
+      <circle cx="9" cy="6.2" r="2.9" />
+      <circle cx="15.5" cy="12" r="2.9" />
+      <circle cx="7.5" cy="17.8" r="2.9" />
+    </Svg>
+  );
+}

@@ -1,7 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
-import { CaretRightIcon, CloseIcon, SearchIcon } from "@/components/ui/icons";
+import {
+  CaretRightIcon,
+  CloseIcon,
+  PulseIcon,
+  SearchIcon,
+  SlidersIcon,
+} from "@/components/ui/icons";
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { useNavCollapsedPref, useNavViewPref } from "@/lib/user-prefs";
 import { labelMatches, normalizeSearch } from "@/lib/label-search";
@@ -39,10 +45,14 @@ function NavLink({ entry }: { entry: NavEntry }) {
   );
 }
 
+const VIEW_ICON = { operator: PulseIcon, admin: SlidersIcon } as const;
+
 /**
- * The choice between the two menus, at the top of the side menu: a radio group, the
- * arrows switching from one to the other, the menu shown named in words and not by
- * the tint alone.
+ * The choice between the two menus, at the top of the side menu: a sunken track
+ * and a raised thumb sliding to the menu chosen, each named in words beside its
+ * icon, the one in use in the ink and its icon in the accent. A radio group: the
+ * arrows switch from one to the other. The slide is skipped for whoever asks for
+ * reduced motion.
  */
 function ViewSwitch({ view, onChange }: { view: NavView; onChange: (view: NavView) => void }) {
   const { t } = useTranslation();
@@ -51,7 +61,7 @@ function ViewSwitch({ view, onChange }: { view: NavView; onChange: (view: NavVie
       role="radiogroup"
       aria-label={t("nav.viewLabel")}
       aria-keyshortcuts="v"
-      className="mb-2 grid grid-cols-2 gap-0.5 rounded-(--radius-control) border border-line bg-surface p-0.5"
+      className="relative mb-2 grid h-8 grid-cols-2 rounded-full bg-surface-sunken p-[3px]"
       onKeyDown={(event) => {
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
         // Left and right choose; up and down go on through the menu.
@@ -62,8 +72,15 @@ function ViewSwitch({ view, onChange }: { view: NavView; onChange: (view: NavVie
         event.currentTarget.querySelector<HTMLButtonElement>(`[data-view="${next}"]`)?.focus();
       }}
     >
+      <span
+        aria-hidden="true"
+        className={`absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-surface-raised shadow-sm ring-1 ring-line transition-transform duration-200 ease-out motion-reduce:transition-none ${
+          view === "admin" ? "translate-x-full" : ""
+        }`}
+      />
       {NAV_VIEWS.map((option) => {
         const checked = option === view;
+        const Icon = VIEW_ICON[option];
         return (
           <button
             key={option}
@@ -76,10 +93,11 @@ function ViewSwitch({ view, onChange }: { view: NavView; onChange: (view: NavVie
             onClick={() => {
               onChange(option);
             }}
-            className={`h-6 rounded-[calc(var(--radius-control)-2px)] text-data font-medium ${
-              checked ? "bg-accent text-accent-ink" : "text-ink-muted hover:text-ink"
+            className={`relative inline-flex items-center justify-center gap-1.5 rounded-full text-data font-medium transition-colors ${
+              checked ? "text-ink" : "text-ink-muted hover:text-ink"
             }`}
           >
+            <Icon width={13} height={13} className={checked ? "text-accent" : undefined} />
             {t(`nav.views.${option}`)}
           </button>
         );
