@@ -8,10 +8,18 @@ import { InNoticeRegion } from "@/components/ui/NoticeRegion";
 import { nextNoticeId, noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
-/** An entry of the menu: the action posted to the queue, and its group. */
+/**
+ * An entry of the menu: the action posted to the queue, and its group. Its label is
+ * `<prefix>.items.<action>`, the full name of the action, which the confirmation and
+ * the reports use too; `<prefix>.menu.<action>`, when given, is a shorter label for
+ * the menu alone, where the submenu's name already says the rest.
+ */
 export interface ActionEntry {
   action: string;
-  /** Separator line before this entry, to mark a group. */
+  /**
+   * Separator line before this entry. On the first entry of a group, before its
+   * submenu; on another entry of a group, before it within the submenu.
+   */
   separatorBefore?: boolean;
   /**
    * The submenu the entry goes in, labelled `<prefix>.groups.<group>`: the entries
@@ -120,7 +128,7 @@ export function ActionsMenu({
   /** Where the confirmation of an action shows: on the row, or in a card under the button. */
   confirm?: "inline" | "popover";
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [pending, setPending] = useState<Pending | null>(null);
   // Each report numbered, never twice: a new one starts its time again.
   const [outcome, setOutcomeState] = useState<(Outcome & { id: number }) | null>(null);
@@ -194,7 +202,9 @@ export function ActionsMenu({
 
   const itemOf = (entry: ActionEntry): MenuItem => ({
     key: entry.action,
-    label: t(`${prefix}.items.${entry.action}`),
+    label: i18n.exists(`${prefix}.menu.${entry.action}`)
+      ? t(`${prefix}.menu.${entry.action}`)
+      : t(`${prefix}.items.${entry.action}`),
     separatorBefore: entry.separatorBefore === true,
     disabled: busy,
     onSelect: () => {
@@ -219,8 +229,10 @@ export function ActionsMenu({
       };
       submenus.set(entry.group, submenu);
       items.push(submenu);
+      submenu.items?.push({ ...itemOf(entry), separatorBefore: false });
+      continue;
     }
-    submenu.items?.push({ ...itemOf(entry), separatorBefore: false });
+    submenu.items?.push(itemOf(entry));
   }
 
   if (onCompare !== undefined && targets.length >= 2)

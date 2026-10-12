@@ -12,21 +12,22 @@ import { problemText } from "@/lib/api/problem";
  * Agent actions of a whole service, the service entries of the historical collector
  * (`am_svc_agent_leafs`). The API posts them on a node of the service seen alive in
  * the last fifteen minutes, without `--local`: they apply to the service, not to
- * that one instance. Start, stop, switch and giveback, the orchestration one runs
- * most, stay at the top with freeze and thaw; the recovery of a failed action and
- * the inventory pushes go in submenus.
+ * that one instance. As on the node, one submenu per kind of effect, from the
+ * harmless to the disruptive: what refreshes the collector's data; orchestration,
+ * freezing it then clearing or aborting what it runs; placement; then, apart, the
+ * start and the stop. Within a submenu the reversible entries come first.
  */
 const SERVICE_ACTIONS: readonly ActionEntry[] = [
-  { action: "start" },
-  { action: "stop" },
-  { action: "switch" },
-  { action: "giveback" },
-  { action: "freeze", separatorBefore: true },
-  { action: "thaw" },
-  { action: "abort", group: "recovery", separatorBefore: true },
-  { action: "clear", group: "recovery" },
-  { action: "push config", group: "inventory" },
-  { action: "push resinfo", group: "inventory" },
+  { action: "push config", group: "refresh" },
+  { action: "push resinfo", group: "refresh" },
+  { action: "freeze", group: "orchestration" },
+  { action: "thaw", group: "orchestration" },
+  { action: "clear", group: "orchestration", separatorBefore: true },
+  { action: "abort", group: "orchestration" },
+  { action: "switch", group: "placement" },
+  { action: "giveback", group: "placement" },
+  { action: "start", group: "startStop", separatorBefore: true },
+  { action: "stop", group: "startStop", separatorBefore: true },
 ];
 
 /**

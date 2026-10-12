@@ -11,31 +11,33 @@ import { fromInstanceId } from "./instance-id";
 
 /**
  * Agent actions of an instance, the instance entries of the historical collector
- * (`on_services_instances`): start, stop and restart at the top, then placement
- * (switch, takeover, giveback), replication, freeze and thaw, and in submenus the
- * maintenance of the instance, the compliance runs on the modules attached to the
- * service, and the inventory pushes.
+ * (`on_services_instances`). As on the node, one submenu per kind of effect, from
+ * the harmless to the disruptive: what refreshes the collector's data; the
+ * compliance runs on the modules attached to the service; orchestration, freezing
+ * it then clearing or aborting what it runs; the replication to the remotes; the
+ * maintenance of the instance; placement; then, apart, the start, the restart and
+ * the stop. Within a submenu the reversible entries come first.
  */
 const INSTANCE_ACTIONS: readonly ActionEntry[] = [
-  { action: "start" },
-  { action: "stop" },
-  { action: "restart" },
-  { action: "switch", group: "placement", separatorBefore: true },
-  { action: "takeover", group: "placement" },
-  { action: "giveback", group: "placement" },
+  { action: "push config", group: "refresh" },
+  { action: "push resinfo", group: "refresh" },
+  { action: "compliance_check", group: "compliance" },
+  { action: "compliance_fix", group: "compliance" },
+  { action: "freeze", group: "orchestration" },
+  { action: "thaw", group: "orchestration" },
+  { action: "clear", group: "orchestration", separatorBefore: true },
+  { action: "abort", group: "orchestration" },
   { action: "syncall", group: "sync" },
   { action: "syncnodes", group: "sync" },
   { action: "syncdrp", group: "sync" },
-  { action: "freeze", separatorBefore: true },
-  { action: "thaw" },
-  { action: "enable", group: "maintenance", separatorBefore: true },
-  { action: "disable", group: "maintenance" },
-  { action: "abort", group: "maintenance" },
-  { action: "clear", group: "maintenance" },
-  { action: "compliance_check", group: "compliance" },
-  { action: "compliance_fix", group: "compliance" },
-  { action: "push config", group: "inventory" },
-  { action: "push resinfo", group: "inventory" },
+  { action: "enable", group: "maintenance" },
+  { action: "disable", group: "maintenance", separatorBefore: true },
+  { action: "switch", group: "placement" },
+  { action: "takeover", group: "placement" },
+  { action: "giveback", group: "placement" },
+  { action: "start", group: "startStop", separatorBefore: true },
+  { action: "restart", group: "startStop", separatorBefore: true },
+  { action: "stop", group: "startStop" },
 ];
 
 /**

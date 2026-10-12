@@ -6,7 +6,8 @@ import { problemText } from "@/lib/api/problem";
  * Agent actions of a whole cluster: the three cluster-wide actions of om3 (`om
  * cluster freeze`, `unfreeze` and `abort`). The collector queues them for a live
  * node of the cluster running om3, which runs them on every node (`om node <action>
- * --node *`). Abort, which stops the running orchestration, stands apart. The other
+ * --node *`). Three entries, left without submenu, which would only add a click:
+ * freeze and thaw, then, apart, abort, which stops the running orchestration. The other
  * cluster commands of om3 (join, leave, enroll, evict, register, ssh trust) need
  * arguments or a local session and are not offered.
  */

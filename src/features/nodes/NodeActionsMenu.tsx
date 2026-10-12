@@ -10,32 +10,33 @@ import { problemText } from "@/lib/api/problem";
 
 /**
  * Agent actions of a node, the "node agent" entries of the historical collector
- * (`am_node_agent_leafs`). The most used stay at the top: the node inventory, the
- * checks, the sysreport, freeze and thaw. The others are grouped in submenus by
- * what they act on: the other inventories, compliance, the agent itself, and the
- * actions that stop the node, last and apart. Wake On LAN, which goes through
- * another node, the provisioning from a template and the root password rotation
- * are not offered, as the API does not accept them.
+ * (`am_node_agent_leafs`), in one submenu per kind of effect and from the harmless
+ * to the disruptive: what refreshes the collector's data and changes nothing on the
+ * node; compliance; orchestration, where services may run; maintenance of the agent
+ * and of the node's view of its storage; then, apart, the reboot and the shutdown.
+ * Within a submenu the reversible entries come first. Wake On LAN, which goes
+ * through another node, the provisioning from a template and the root password
+ * rotation are not offered, as the API does not accept them.
  */
 const ACTIONS: readonly ActionEntry[] = [
-  { action: "pushasset" },
-  { action: "checks" },
-  { action: "sysreport" },
-  { action: "pushdisks", group: "inventory" },
-  { action: "pushpkg", group: "inventory" },
-  { action: "pushpatch", group: "inventory" },
-  { action: "pushstats", group: "inventory" },
-  { action: "scanscsi", group: "inventory" },
+  { action: "pushasset", group: "refresh" },
+  { action: "checks", group: "refresh" },
+  { action: "sysreport", group: "refresh" },
+  { action: "pushdisks", group: "refresh" },
+  { action: "pushpkg", group: "refresh" },
+  { action: "pushpatch", group: "refresh" },
+  { action: "pushstats", group: "refresh" },
   { action: "compliance_check", group: "compliance" },
   { action: "compliance_fix", group: "compliance" },
   { action: "updatecomp", group: "compliance" },
-  { action: "updatepkg", group: "agent" },
-  { action: "freeze", separatorBefore: true },
-  { action: "thaw" },
-  { action: "reboot", group: "power", separatorBefore: true },
-  { action: "schedule_reboot", group: "power" },
+  { action: "freeze", group: "orchestration" },
+  { action: "thaw", group: "orchestration" },
+  { action: "drain", group: "orchestration", separatorBefore: true },
+  { action: "updatepkg", group: "maintenance" },
+  { action: "scanscsi", group: "maintenance" },
+  { action: "schedule_reboot", group: "power", separatorBefore: true },
   { action: "unschedule_reboot", group: "power" },
-  { action: "drain", group: "power" },
+  { action: "reboot", group: "power", separatorBefore: true },
   { action: "shutdown", group: "power" },
 ];
 

@@ -237,10 +237,26 @@
         "drain": "Drainer",
         "shutdown": "Arrêter"
       },
+      "menu": {
+        "pushasset": "Inventaire du nœud",
+        "checks": "Relevés",
+        "sysreport": "Sysreport",
+        "pushdisks": "Disques",
+        "pushpkg": "Paquets installés",
+        "pushpatch": "Correctifs installés",
+        "pushstats": "Statistiques",
+        "compliance_check": "Vérifier",
+        "compliance_fix": "Corriger",
+        "updatecomp": "Mettre à jour les modules",
+        "updatepkg": "Mettre à jour l'agent OpenSVC",
+        "scanscsi": "Réexaminer les hôtes SCSI",
+        "reboot": "Redémarrer maintenant"
+      },
       "groups": {
-        "inventory": "Inventaire",
+        "refresh": "Rafraîchir les données",
         "compliance": "Conformité",
-        "agent": "Agent",
+        "orchestration": "Orchestration",
+        "maintenance": "Maintenance",
         "power": "Redémarrage et arrêt"
       },
       "data": {
@@ -760,9 +776,15 @@
         "push config": "Remonter la configuration du service",
         "push resinfo": "Remonter les informations applicatives"
       },
+      "menu": {
+        "push config": "Configuration du service",
+        "push resinfo": "Informations applicatives"
+      },
       "groups": {
-        "recovery": "Reprise",
-        "inventory": "Inventaire"
+        "refresh": "Rafraîchir les données",
+        "orchestration": "Orchestration",
+        "placement": "Placement",
+        "startStop": "Démarrage et arrêt"
       },
       "data": {
         "delete": {
@@ -1404,13 +1426,23 @@
         "push config": "Remonter la configuration du service",
         "push resinfo": "Remonter les informations applicatives"
       },
+      "menu": {
+        "push config": "Configuration du service",
+        "push resinfo": "Informations applicatives",
+        "compliance_check": "Vérifier",
+        "compliance_fix": "Corriger",
+        "syncall": "Toutes les copies",
+        "syncnodes": "Copies des pairs",
+        "syncdrp": "Copies de secours"
+      },
       "groups": {
-        "recovery": "Reprise",
-        "inventory": "Inventaire",
-        "placement": "Placement",
+        "refresh": "Rafraîchir les données",
+        "compliance": "Conformité",
+        "orchestration": "Orchestration",
         "sync": "Synchronisation",
         "maintenance": "Maintenance",
-        "compliance": "Conformité"
+        "placement": "Placement",
+        "startStop": "Démarrage et arrêt"
       },
       "data": {
         "delete": {

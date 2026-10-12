@@ -237,10 +237,26 @@
         "drain": "Drain",
         "shutdown": "Shut down"
       },
+      "menu": {
+        "pushasset": "Node information",
+        "checks": "Check values",
+        "sysreport": "Sysreport",
+        "pushdisks": "Disks",
+        "pushpkg": "Installed packages",
+        "pushpatch": "Installed patches",
+        "pushstats": "Performance stats",
+        "compliance_check": "Check",
+        "compliance_fix": "Fix",
+        "updatecomp": "Update modules",
+        "updatepkg": "Update OpenSVC agent",
+        "scanscsi": "Rescan SCSI hosts",
+        "reboot": "Reboot now"
+      },
       "groups": {
-        "inventory": "Inventory",
+        "refresh": "Refresh data",
         "compliance": "Compliance",
-        "agent": "Agent",
+        "orchestration": "Orchestration",
+        "maintenance": "Maintenance",
         "power": "Reboot and shutdown"
       },
       "data": {
@@ -755,14 +771,20 @@
         "giveback": "Give back",
         "freeze": "Freeze",
         "thaw": "Thaw",
-        "abort": "Abort",
-        "clear": "Clear",
+        "abort": "Abort the action",
+        "clear": "Clear the failure",
         "push config": "Update service information",
         "push resinfo": "Update app information"
       },
+      "menu": {
+        "push config": "Service information",
+        "push resinfo": "App information"
+      },
       "groups": {
-        "recovery": "Recovery",
-        "inventory": "Inventory"
+        "refresh": "Refresh data",
+        "orchestration": "Orchestration",
+        "placement": "Placement",
+        "startStop": "Start and stop"
       },
       "data": {
         "delete": {
@@ -1397,20 +1419,30 @@
         "thaw": "Thaw",
         "enable": "Enable",
         "disable": "Disable",
-        "abort": "Abort",
-        "clear": "Clear",
+        "abort": "Abort the action",
+        "clear": "Clear the failure",
         "compliance_check": "Compliance check",
         "compliance_fix": "Compliance fix",
         "push config": "Update service information",
         "push resinfo": "Update app information"
       },
+      "menu": {
+        "push config": "Service information",
+        "push resinfo": "App information",
+        "compliance_check": "Check",
+        "compliance_fix": "Fix",
+        "syncall": "All remotes",
+        "syncnodes": "Peer remotes",
+        "syncdrp": "Disaster recovery remotes"
+      },
       "groups": {
-        "recovery": "Recovery",
-        "inventory": "Inventory",
-        "placement": "Placement",
+        "refresh": "Refresh data",
+        "compliance": "Compliance",
+        "orchestration": "Orchestration",
         "sync": "Synchronization",
         "maintenance": "Maintenance",
-        "compliance": "Compliance"
+        "placement": "Placement",
+        "startStop": "Start and stop"
       },
       "data": {
         "delete": {
