@@ -41,61 +41,69 @@ type ServiceRow = components["schemas"]["ServiceRow"];
 const DEFAULT_SORT = ["svcname"];
 
 /**
- * Every service property exposed by apicollector, in the order of its
- * `meta.available_props`. `satisfies` confronts them with the generated schema: a
- * prop renamed on the oc3 side breaks the typecheck instead of disappearing
- * silently.
+ * Every service property exposed by apicollector, in the column order of the
+ * historical collector's services table (`table_services` in `tables.js`), the
+ * props it did not have next to their kin: the order of the columns on display and
+ * in the export, whatever the columns chosen. `satisfies` confronts them with the
+ * generated schema: a prop renamed on the oc3 side breaks the typecheck instead of
+ * disappearing silently.
  */
 const SERVICE_PROPS = [
   "id",
   "svc_id",
-  "svcname",
   "cluster_id",
+  "svc_hostid",
+  "svcname",
   "svc_status",
   "svc_availstatus",
+  "svc_frozen",
+  "svc_provisioned",
+  "svc_placement",
   "svc_app",
   "svc_env",
   "svc_ha",
   "svc_topology",
-  "svc_frozen",
-  "svc_placement",
-  "svc_provisioned",
   "svc_flex_min_nodes",
   "svc_flex_max_nodes",
   "svc_flex_target",
   "svc_flex_cpu_low_threshold",
   "svc_flex_cpu_high_threshold",
+  "svc_drptype",
   "svc_autostart",
+  "svc_wave",
   "svc_nodes",
   "svc_drpnode",
   "svc_drpnodes",
-  "svc_drptype",
-  "svc_comment",
-  "svc_created",
-  "svc_status_updated",
-  "svc_hostid",
-  "svc_wave",
-  "svc_config",
-  "svc_config_updated",
   "svc_metrocluster",
   "svc_drnoaction",
   "svc_notifications",
   "svc_snooze_till",
+  "svc_comment",
+  "svc_config",
+  "svc_config_updated",
+  "svc_created",
+  "svc_status_updated",
   "svc_sla",
   "svc_availability",
   "svc_availability_updated",
   "updated",
 ] as const satisfies readonly (keyof ServiceRow)[];
 
-/** Columns shown by default: the identity of the service and its state. */
+/**
+ * Columns shown by default, those of the historical collector's services table
+ * (`default_columns` of `table_services`), in the order of SERVICE_PROPS.
+ */
 const DEFAULT_COLS: string[] = [
   "svcname",
-  "svc_availstatus",
   "svc_status",
-  "svc_app",
-  "svc_sla",
-  "svc_availability",
+  "svc_availstatus",
+  "svc_frozen",
+  "svc_provisioned",
+  "svc_placement",
+  "svc_ha",
+  "svc_topology",
   "svc_status_updated",
+  "updated",
 ];
 
 /** Integer props of the oc3 `service` mapping (the `colInt` and `col` helpers), aligned right. */
