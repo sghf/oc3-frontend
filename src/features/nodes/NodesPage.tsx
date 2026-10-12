@@ -41,8 +41,25 @@ type NodeRow = components["schemas"]["NodeRow"];
 
 const DEFAULT_SORT = ["nodename"];
 
-/** Columns shown by default: enough to identify a node, not to audit it. */
-const DEFAULT_COLS: string[] = ["nodename", "app", "node_env", "os_concat", "last_comm"];
+/**
+ * Columns shown by default, those of the historical collector's nodes table
+ * (`default_columns` of `table_nodes`), in the order of NODE_PROPS, but
+ * `node_frozen`: the row marks a frozen node already.
+ */
+const DEFAULT_COLS: string[] = [
+  "nodename",
+  "serial",
+  "status",
+  "loc_building",
+  "loc_floor",
+  "loc_rack",
+  "cpu_dies",
+  "cpu_cores",
+  "cpu_model",
+  "mem_bytes",
+  "node_env",
+  "team_responsible",
+];
 
 /** Integer props of the oc3 `node` mapping (the `colInt` helper), aligned right. */
 const NUMERIC_PROPS = new Set<string>([
