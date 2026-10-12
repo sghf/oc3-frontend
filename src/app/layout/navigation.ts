@@ -43,6 +43,7 @@ export interface NavEntry {
     | "/requests/tiers"
     | "/compliance/modulesets"
     | "/compliance/rulesets"
+    | "/compliance/status"
     | "/compliance/logs"
     | "/compliance/designer";
   labelKey: string;
@@ -128,6 +129,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.compliance",
     entries: [
       // `comp-modsets` of the historical menu.
+      { to: "/compliance/status", labelKey: "nav.complianceStatus", icon: "complianceStatus" },
       { to: "/compliance/modulesets", labelKey: "nav.modulesets", icon: "moduleset" },
       // `comp-rsets` of the historical menu.
       { to: "/compliance/rulesets", labelKey: "nav.rulesets", icon: "ruleset" },

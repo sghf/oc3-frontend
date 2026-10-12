@@ -40,6 +40,7 @@
     "tiersRequests": "En attente d'action de tiers",
     "modulesets": "Modulesets",
     "rulesets": "Rulesets",
+    "complianceStatus": "Statut",
     "complianceLogs": "Journaux",
     "designer": "Concepteur",
     "statReports": "Rapports",
@@ -2211,6 +2212,44 @@
       "excludeRuleset": "Retirer {{name}} des rulesets inclus",
       "rulesetIncluded": "Ruleset {{name}} inclus.",
       "rulesetExcluded": "Ruleset {{name}} n'est plus inclus."
+    }
+  },
+  "complianceStatus": {
+    "title": "Statut de conformité",
+    "sectionsLabel": "Afficher",
+    "sections": {
+      "runs": "Exécutions",
+      "module": "Par module",
+      "node": "Par nœud",
+      "service": "Par service"
+    },
+    "by": {
+      "module": "Module",
+      "node": "Nœud",
+      "service": "Service"
+    },
+    "summary": {
+      "compliance": "Conformité",
+      "compliant_one": "{{count}} exécution sur {{total}} ok ou n/a",
+      "compliant_other": "{{count}} exécutions sur {{total}} ok ou n/a",
+      "total": "Exécutions",
+      "obsolete": "obsolète",
+      "obsoleteHint": "Vérifications de plus de {{days}} jours, quel que soit leur statut"
+    },
+    "pct": "{{pct}} %",
+    "noRuns": "Aucune exécution ne correspond.",
+    "showRuns": "Afficher les exécutions de {{name}}",
+    "fields": {
+      "id": "Id",
+      "run_date": "Date d'exécution",
+      "node_id": "Id du nœud",
+      "nodes.nodename": "Nœud",
+      "svc_id": "Id du service",
+      "services.svcname": "Service",
+      "run_module": "Module",
+      "run_status": "Statut",
+      "rset_md5": "Empreinte md5 du ruleset",
+      "run_log": "Journal"
     }
   },
   "complianceLogs": {

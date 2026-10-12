@@ -10,9 +10,9 @@ import {
   type ColumnFilterOption,
   type ListColumn,
 } from "@/components/opensvc/CollectorList";
+import { RUN_STATUS_OPTIONS, RunLog, RunStatus } from "@/components/opensvc/ComplianceRun";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
-import { StatusBadge, type ObjectState } from "@/components/opensvc/StatusBadge";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
 import { DateTime } from "@/components/ui/DateTime";
 import {
@@ -75,54 +75,12 @@ const FAMILY: Record<LogProp, ColumnFamily> = {
   rset_md5: "ruleset",
 };
 
-/**
- * Exit codes of a module run, as the historical cells tell them: 0 ok, 1 not ok,
- * 2 not applicable, -15 killed; any other code is shown as is.
- */
-const RUN_STATUSES: Record<string, { state: ObjectState; labelKey: string }> = {
-  "0": { state: "up", labelKey: "complianceLogs.status.ok" },
-  "1": { state: "down", labelKey: "complianceLogs.status.nok" },
-  "2": { state: "unknown", labelKey: "complianceLogs.status.na" },
-  "-15": { state: "warn", labelKey: "complianceLogs.status.killed" },
-};
-
-const STATUS_OPTIONS: ColumnFilterOption[] = Object.entries(RUN_STATUSES).map(
-  ([value, { labelKey }]) => ({ value, labelKey }),
-);
-
 /** The actions a module runs; the values are their own labels, as in the cells. */
 const ACTION_OPTIONS: ColumnFilterOption[] = [
   { value: "check" },
   { value: "fixable" },
   { value: "fix" },
 ];
-
-function RunStatus({ value }: { value: number | undefined }) {
-  const { t } = useTranslation();
-  if (value === undefined) return null;
-  const known = RUN_STATUSES[String(value)];
-  return known === undefined ? (
-    <StatusBadge state="unknown" label={String(value)} />
-  ) : (
-    <StatusBadge state={known.state} label={t(known.labelKey)} />
-  );
-}
-
-/** The output of a run, preformatted, its "ERR:" marks in the error tint. */
-function RunLog({ value }: { value: string | undefined }) {
-  if (value === undefined || value === "") return null;
-  const parts = value.split("ERR:");
-  return (
-    <pre className="m-0 font-mono wrap-anywhere whitespace-pre-wrap">
-      {parts.map((part, i) => (
-        <span key={i}>
-          {i > 0 && <span className="font-semibold text-state-down">ERR:</span>}
-          {part}
-        </span>
-      ))}
-    </pre>
-  );
-}
 
 function renderCell(prop: LogProp, row: ComplianceLogRow, locale: string) {
   switch (prop) {
@@ -168,7 +126,7 @@ const COLUMNS: ListColumn<ComplianceLogRow>[] = LOG_PROPS.map((prop) => ({
   sortable: !prop.includes("."),
   filter:
     prop === "run_status"
-      ? { kind: "enum" as const, options: STATUS_OPTIONS }
+      ? { kind: "enum" as const, options: RUN_STATUS_OPTIONS }
       : prop === "run_action"
         ? { kind: "enum" as const, options: ACTION_OPTIONS }
         : undefined,

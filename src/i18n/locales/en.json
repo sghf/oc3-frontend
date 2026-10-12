@@ -40,6 +40,7 @@
     "tiersRequests": "Pending tiers action",
     "modulesets": "Modulesets",
     "rulesets": "Rulesets",
+    "complianceStatus": "Status",
     "complianceLogs": "Logs",
     "designer": "Designer",
     "statReports": "Reports",
@@ -2211,6 +2212,44 @@
       "excludeRuleset": "Remove {{name}} from the included rulesets",
       "rulesetIncluded": "Ruleset {{name}} included.",
       "rulesetExcluded": "Ruleset {{name}} no longer included."
+    }
+  },
+  "complianceStatus": {
+    "title": "Compliance status",
+    "sectionsLabel": "Show",
+    "sections": {
+      "runs": "Runs",
+      "module": "By module",
+      "node": "By node",
+      "service": "By service"
+    },
+    "by": {
+      "module": "Module",
+      "node": "Node",
+      "service": "Service"
+    },
+    "summary": {
+      "compliance": "Compliance",
+      "compliant_one": "{{count}} of {{total}} run ok or n/a",
+      "compliant_other": "{{count}} of {{total}} runs ok or n/a",
+      "total": "Runs",
+      "obsolete": "obsolete",
+      "obsoleteHint": "Checks older than {{days}} days, whatever their status"
+    },
+    "pct": "{{pct}} %",
+    "noRuns": "No check run matches.",
+    "showRuns": "Show the runs of {{name}}",
+    "fields": {
+      "id": "Id",
+      "run_date": "Run date",
+      "node_id": "Node id",
+      "nodes.nodename": "Node",
+      "svc_id": "Service id",
+      "services.svcname": "Service",
+      "run_module": "Module",
+      "run_status": "Status",
+      "rset_md5": "Ruleset md5",
+      "run_log": "Log"
     }
   },
   "complianceLogs": {

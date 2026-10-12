@@ -1890,6 +1890,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/compliance/status/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Count the last check runs of the modules, among those `GET /compliance/status`
+         *     lists with the same filters (the session filterset included): ok, not ok and
+         *     not applicable among the runs of the last 7 days, obsolete past them, their
+         *     total and the share of ok and not applicable runs (`pct`). Overall in
+         *     `totals`, and per module, node or service in `data` when `by` asks for it,
+         *     the least compliant first, then the largest, then by name, as the historical
+         *     compliance status views. The runs of no service are left out of the service
+         *     groups.
+         */
+        get: operations["GetComplianceStatusSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/compliance/status/{status_id}": {
         parameters: {
             query?: never;
@@ -5405,6 +5431,27 @@ export interface components {
             "services.svcname"?: string | null;
             svc_id?: string;
         };
+        /**
+         * @description Check runs by state: ok, not ok and not applicable among the runs of the last
+         *     7 days, obsolete past them. `total` is their sum; `pct` the share of ok and
+         *     not applicable runs, rounded down, null without any run.
+         */
+        ComplianceStatusCounts: {
+            na: number;
+            nok: number;
+            obs: number;
+            ok: number;
+            pct: number | null;
+            total: number;
+        };
+        /**
+         * @description The counts of one module, node or service. `id` is the module name, the
+         *     node id or the service id; `name` the module, node or service name.
+         */
+        ComplianceStatusGroup: components["schemas"]["ComplianceStatusCounts"] & {
+            id: string;
+            name: string;
+        };
         ComplianceStatusListResponse: {
             data: components["schemas"]["ComplianceStatusRow"][] | {
                 [key: string]: {
@@ -5422,13 +5469,19 @@ export interface components {
         ComplianceStatusRow: {
             id?: number;
             node_id?: string;
+            "nodes.nodename"?: string | null;
             rset_md5?: string;
             run_action?: string;
             run_date?: string;
             run_log?: string;
             run_module?: string;
             run_status?: number;
+            "services.svcname"?: string | null;
             svc_id?: string;
+        };
+        ComplianceStatusSummaryResponse: {
+            data: components["schemas"]["ComplianceStatusGroup"][];
+            totals: components["schemas"]["ComplianceStatusCounts"];
         };
         /** @description A version of the compliance export, a commit of its git repository. */
         ComplianceVersion: {
@@ -12813,6 +12866,52 @@ export interface operations {
             400: components["responses"]["400"];
             401: components["responses"]["401"];
             403: components["responses"]["403"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetComplianceStatusSummary: {
+        parameters: {
+            query?: {
+                /** @description Group the counts per module, node or service. */
+                by?: "module" | "node" | "service";
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceStatusSummaryResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
             500: components["responses"]["500"];
         };
     };

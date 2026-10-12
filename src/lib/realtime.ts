@@ -63,7 +63,7 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   comp_rulesets_filtersets: ["rulesets", "designer"],
   comp_rulesets_nodes: ["node", "designer"],
   comp_rulesets_services: ["service", "designer"],
-  comp_status: ["compliance-logs", "node", "service"],
+  comp_status: ["compliance-logs", "compliance-status", "node", "service"],
   log: ["logs", "log"],
   diskinfo: ["disks", "disk", "node", "service"],
   svcdisks: ["disks", "disk", "node", "service"],

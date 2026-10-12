@@ -1,6 +1,7 @@
 import {
   AlertTriangleIcon,
   AsteriskIcon,
+  CheckIcon,
   CodeIcon,
   PieChartIcon,
   LineChartIcon,
@@ -57,6 +58,7 @@ export type ObjectKind =
   | "chart"
   | "moduleset"
   | "ruleset"
+  | "complianceStatus"
   | "complianceLog"
   | "designer"
   | "claimMapping";
@@ -116,6 +118,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   moduleset: { Icon: GearIcon, className: "text-icon-compliance" },
   // The cube of the historical collector (`rset16`), in its compliance crimson.
   ruleset: { Icon: CubeIcon, className: "text-icon-compliance" },
+  // The check mark of the historical compliance status (`compstatus`), in its crimson.
+  complianceStatus: { Icon: CheckIcon, className: "text-icon-compliance" },
   // The history clock of the historical compliance log (`complog`), in its crimson.
   complianceLog: { Icon: HistoryIcon, className: "text-icon-compliance" },
   // The puzzle piece of the historical designer (`designer16`), in the compliance crimson.

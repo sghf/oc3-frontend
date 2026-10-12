@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/
 import { AppShell } from "./layout/AppShell";
 import { AppsPage } from "@/features/apps/AppsPage";
 import { ComplianceLogsPage } from "@/features/compliance-logs/ComplianceLogsPage";
+import { ComplianceStatusPage } from "@/features/compliance-status/ComplianceStatusPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { DesignerPage } from "@/features/designer/DesignerPage";
 import { DisksPage } from "@/features/disks/DisksPage";
@@ -290,6 +291,13 @@ const designerRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+const complianceStatusRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/compliance/status",
+  component: ComplianceStatusPage,
+  validateSearch: parseListSearch,
+});
+
 const complianceLogsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/compliance/logs",
@@ -361,6 +369,7 @@ const routeTree = rootRoute.addChildren([
   tiersRequestsRoute,
   modulesetsRoute,
   rulesetsRoute,
+  complianceStatusRoute,
   complianceLogsRoute,
   designerRoute,
   actionsRoute,
