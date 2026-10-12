@@ -76,10 +76,15 @@ const GROUPS: DetailGroup<ServiceRow>[] = [
         prop: "svc_availability",
         format: (row) =>
           typeof row.svc_availability === "number" ? String(row.svc_availability) : undefined,
-        // Flagged against the SLA, as in the Services view.
+        // Flagged against the SLA and followed by its trend, as in the Services view.
         render: (row, locale) =>
           typeof row.svc_availability === "number" ? (
-            <AvailabilityRate rate={row.svc_availability} sla={row.svc_sla} locale={locale} />
+            <AvailabilityRate
+              rate={row.svc_availability}
+              sla={row.svc_sla}
+              trend={row.svc_availability_trend}
+              locale={locale}
+            />
           ) : null,
       },
       field("svc_frozen"),
@@ -132,8 +137,12 @@ const GROUPS: DetailGroup<ServiceRow>[] = [
   },
 ];
 
-// Ask the collector only for the properties actually shown.
-const PROPS = GROUPS.flatMap((group) => group.fields.map((f) => f.prop)).join(",");
+// Ask the collector only for the properties actually shown, plus the trend the
+// availability field renders without a field of its own.
+const PROPS = [
+  ...GROUPS.flatMap((group) => group.fields.map((f) => f.prop)),
+  "svc_availability_trend",
+].join(",");
 
 /**
  * Detail of a service: its properties, then its related data, one tab each

@@ -905,7 +905,12 @@
         "none": "rien à comparer"
       }
     },
+    "meetsSla": "atteint le SLA de {{sla}}",
     "belowSla": "sous le SLA de {{sla}}",
+    "trend": {
+      "up": "en hausse de {{points}} points sur les 7 derniers jours",
+      "down": "en baisse de {{points}} points sur les 7 derniers jours"
+    },
     "resources": {
       "flags": "Drapeaux",
       "empty": "Aucune ressource rapportée pour ce service.",

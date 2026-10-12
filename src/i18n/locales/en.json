@@ -905,7 +905,12 @@
         "none": "nothing to compare"
       }
     },
+    "meetsSla": "meets the {{sla}} SLA",
     "belowSla": "below the {{sla}} SLA",
+    "trend": {
+      "up": "up {{points}} points over the last 7 days",
+      "down": "down {{points}} points over the last 7 days"
+    },
     "resources": {
       "flags": "Flags",
       "empty": "No resource reported for this service.",

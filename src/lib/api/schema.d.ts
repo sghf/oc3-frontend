@@ -6694,6 +6694,13 @@ export interface components {
              *     filterable. Null without status recorded.
              */
             svc_availability?: number | null;
+            /**
+             * Format: double
+             * @description The change of svc_availability over the last 7 days, in points: its
+             *     value now minus its value 7 days ago, positive when the service is
+             *     more available than it was. Null without status history 7 days ago.
+             */
+            svc_availability_trend?: number | null;
             /** @description When svc_availability was computed. */
             svc_availability_updated?: string | null;
             svc_availstatus?: string;

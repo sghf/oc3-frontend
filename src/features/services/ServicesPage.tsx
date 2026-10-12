@@ -220,7 +220,12 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
       return typeof value === "number" ? formatPercent(value, locale, 3) : null;
     if (prop === "svc_availability")
       return typeof value === "number" ? (
-        <AvailabilityRate rate={value} sla={row.svc_sla} locale={locale} />
+        <AvailabilityRate
+          rate={value}
+          sla={row.svc_sla}
+          trend={row.svc_availability_trend}
+          locale={locale}
+        />
       ) : null;
     // Like the last contact of a node: what counts is the age of the status.
     if (prop === "svc_status_updated")
@@ -246,8 +251,9 @@ const ALL_PROPS = COLUMNS.map((column) => column.prop);
  */
 function queryProps(cols: string[] | undefined): string {
   const shown = visibleProps(cols, DEFAULT_COLS, ALL_PROPS);
-  // The SLA goes with the availability, which is flagged against it.
-  const withSla = shown.includes("svc_availability") ? ["svc_sla"] : [];
+  // The SLA and the trend go with the availability, flagged against the one and
+  // followed by the arrow of the other.
+  const withSla = shown.includes("svc_availability") ? ["svc_sla", "svc_availability_trend"] : [];
   return [...new Set(["svc_id", "svc_frozen", "svc_status_updated", ...withSla, ...shown])].join(
     ",",
   );
