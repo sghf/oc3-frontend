@@ -15,6 +15,8 @@ import { NodeActionsMenu } from "./NodeActionsMenu";
 import { FrozenMark } from "@/components/opensvc/FrozenMark";
 import { frozenFilterOptions } from "@/components/opensvc/filter-options";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
+import { StatusBadge } from "@/components/opensvc/StatusBadge";
+import { isStatusValue, statusBadge } from "@/components/opensvc/status";
 import { OsLogo } from "@/components/opensvc/OsLogo";
 import type { ColumnFamily } from "@/components/opensvc/ColumnFamily";
 import { LastReport } from "@/components/opensvc/LastReport";
@@ -193,6 +195,9 @@ const COLUMNS: ListColumn<NodeRow>[] = NODE_PROPS.map((prop) => ({
     const value = row[prop];
     // The memory column is in mebibytes despite its name, see lib/format.
     if (prop === "mem_bytes") return formatSizeMiB(row.mem_bytes, locale);
+    // Coloured as the statuses of services, with the shape of the state; other text
+    // is shown as is.
+    if (prop === "status" && isStatusValue(value)) return <StatusBadge {...statusBadge(value)} />;
     // As in the historical collector, the system logo precedes the name.
     if (prop === "team_responsible" || prop === "team_integ" || prop === "team_support")
       return <TeamLink name={value} />;

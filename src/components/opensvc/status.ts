@@ -34,3 +34,15 @@ export function statusBadge(value: string | undefined): { state: ObjectState; la
       return { state: toObjectState(value) };
   }
 }
+
+/** The values `statusBadge` knows, an unknown state's included. */
+const STATUS_VALUES = new Set(["up", "warn", "down", "n/a", "stdby up", "stdby down", "undef"]);
+
+/**
+ * Whether a value is a collector status, to show as a badge. A field the collector
+ * also lets one fill by hand, such as the status of a node's asset, may hold free
+ * text: shown as a badge, it would read as an unknown state and lose its words.
+ */
+export function isStatusValue(value: unknown): value is string {
+  return typeof value === "string" && STATUS_VALUES.has(value);
+}
