@@ -3201,5 +3201,25 @@
       "acked_date": "Acknowledged on",
       "acked_comment": "Acknowledgement comment"
     }
+  },
+  "requestDetail": {
+    "title": "Request",
+    "heading": "Request {{id}} · {{label}}",
+    "notFound": "This request does not exist, or you do not take part in it.",
+    "awaiting": "Awaiting",
+    "steps": "Steps",
+    "stepNumber": "Step {{index}}",
+    "current": "Current step",
+    "submitted": "Submitted by {{who}} on",
+    "assignedTo": "assigned to {{who}}",
+    "decision": "Decision",
+    "decided": "This step is already decided.",
+    "noSuccessor": "This step ends the request: there is no next step to decide.",
+    "notAssigned": "Awaiting the decision of {{who}}. Only them can decide on this step.",
+    "choose": "Choose the next step:",
+    "formUnavailable": "The {{name}} form does not exist or is not published to you.",
+    "submit": "Submit the decision",
+    "back": "Back to the choices",
+    "submittedDecision": "{{label}} submitted."
   }
 }

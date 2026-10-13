@@ -25,6 +25,7 @@ import {
 } from "@/lib/list-search";
 import { filterQuery, filtersKey } from "@/lib/column-filters";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { RequestDetailPanel } from "./RequestDetailPanel";
 
 type WorkflowRow = components["schemas"]["WorkflowRow"];
 
@@ -168,8 +169,9 @@ function useRequests(search: ResolvedListSearch, assigned: Assigned) {
 
 /**
  * A list of requests: one row per workflow started by the submission of a form
- * with a workflow output, with its status, its steps and who it awaits. Read-only;
- * the rows are filtered and sorted by the server. Each view keeps its own columns,
+ * with a workflow output, with its status, its steps and who it awaits; a row
+ * opens its request, where its assignee decides on its current step. The rows are
+ * filtered and sorted by the server. Each view keeps its own columns,
  * sort and filters (`prefsKey`); the route that shows it passes its URL state.
  */
 function RequestsList({
@@ -230,6 +232,13 @@ function RequestsList({
         total={data?.total}
         selectAllMatching={allIds}
         filterable
+      />
+
+      <RequestDetailPanel
+        workflowId={search.sel}
+        onClose={() => {
+          update({ sel: undefined });
+        }}
       />
     </section>
   );

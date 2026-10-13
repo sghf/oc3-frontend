@@ -6763,6 +6763,44 @@ export interface components {
             acked_on: string;
             comment: string;
         };
+        StoredFormListResponse: {
+            data: components["schemas"]["StoredFormRow"][] | {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            meta?: components["schemas"]["ListMeta"];
+        };
+        /**
+         * @description A step of a request: a form submitted as a workflow step, joined to the form
+         *     revision it was submitted with (`form_yaml`, `form_name`, `form_folder`,
+         *     `form_date`, `form_id`). `form_head_id` is the first step of its request,
+         *     `form_prev_id` the step it continues; `form_next_id` is null while the step
+         *     awaits a decision of `form_assignee`, the id of the next step once decided,
+         *     0 when the request closed with it. `form_data` is the submitted data as
+         *     stored, JSON text most of the time. Every property is optional: the `props`
+         *     query parameter selects which columns the server returns.
+         */
+        StoredFormRow: {
+            form_assignee?: string | null;
+            form_data?: string | null;
+            form_date?: string | null;
+            /** @description form_yaml parsed, absent when it does not parse */
+            form_definition?: unknown;
+            form_folder?: string | null;
+            form_head_id?: number | null;
+            form_id?: number | null;
+            form_md5?: string | null;
+            form_name?: string | null;
+            form_next_id?: number | null;
+            form_prev_id?: number | null;
+            form_submit_date?: string;
+            form_submitter?: string;
+            form_var_id?: number | null;
+            form_yaml?: string | null;
+            id?: number;
+            results_id?: number | null;
+        };
         SwitchPortListResponse: {
             data: components["schemas"]["SwitchPortRow"][] | {
                 [key: string]: {
@@ -15574,7 +15612,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["StoredFormListResponse"];
                 };
             };
             400: components["responses"]["400"];
@@ -15652,7 +15690,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListResponse"];
+                    "application/json": components["schemas"]["StoredFormListResponse"];
                 };
             };
             400: components["responses"]["400"];

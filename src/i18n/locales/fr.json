@@ -3201,5 +3201,25 @@
       "acked_date": "Acquittée le",
       "acked_comment": "Commentaire d'acquittement"
     }
+  },
+  "requestDetail": {
+    "title": "Demande",
+    "heading": "Demande {{id}} · {{label}}",
+    "notFound": "Cette demande n'existe pas, ou vous n'y prenez pas part.",
+    "awaiting": "En attente de",
+    "steps": "Étapes",
+    "stepNumber": "Étape {{index}}",
+    "current": "Étape en cours",
+    "submitted": "Soumise par {{who}} le",
+    "assignedTo": "assignée à {{who}}",
+    "decision": "Décision",
+    "decided": "Cette étape est déjà décidée.",
+    "noSuccessor": "Cette étape termine la demande : il n'y a pas d'étape suivante à décider.",
+    "notAssigned": "En attente de la décision de {{who}}. Seuls eux peuvent décider de cette étape.",
+    "choose": "Choisissez l'étape suivante :",
+    "formUnavailable": "Le formulaire {{name}} n'existe pas ou ne vous est pas publié.",
+    "submit": "Soumettre la décision",
+    "back": "Revenir aux choix",
+    "submittedDecision": "{{label}} soumis."
   }
 }

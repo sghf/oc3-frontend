@@ -299,7 +299,8 @@ export function FormRender({
           className={
             stickySubmit
               ? "sticky bottom-0 z-10 -mx-4 -mb-4 flex flex-wrap items-center justify-end gap-2 rounded-b-(--radius-panel) border-t border-line bg-surface-raised px-4 py-3"
-              : undefined
+              : // A cancel beside the submit button keeps its distance.
+                "flex flex-wrap items-center gap-2"
           }
         >
           {violations.length > 0 && stickySubmit && (
@@ -319,7 +320,7 @@ export function FormRender({
             {submitLabel ?? t("forms.render.submit")}
           </button>
           {violations.length > 0 && !stickySubmit && (
-            <p role="status" className="mt-2 text-state-down">
+            <p role="status" className="basis-full text-state-down">
               ■ {t("forms.render.violations", { count: violations.length })}
             </p>
           )}
