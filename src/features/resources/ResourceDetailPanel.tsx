@@ -6,14 +6,23 @@ import { problemText } from "@/lib/api/problem";
 import { DetailPanel } from "@/components/opensvc/DetailPanel";
 import { RESOURCE_GROUPS } from "./resource-groups";
 import { resourceName } from "./resource-format";
+import { ResourceActionsMenu } from "./ResourceActionsMenu";
 
 type ResourceRow = components["schemas"]["ResourceRow"];
 
-const PROPS = RESOURCE_GROUPS.flatMap((group) => group.fields.map((f) => f.prop)).join(",");
+// The fields shown, and the names the actions menu reads.
+const PROPS = [
+  ...new Set([
+    ...RESOURCE_GROUPS.flatMap((group) => group.fields.map((f) => f.prop)),
+    "services.svcname",
+    "nodes.nodename",
+  ]),
+].join(",");
 
 /**
  * A resource of a service instance: where it runs, its state as the agent last
- * reported it, its log. Nothing is edited here.
+ * reported it, its log, and the agent actions on it in the header. Nothing is
+ * edited here.
  */
 export function ResourceDetailPanel({
   resourceId,
@@ -56,6 +65,11 @@ export function ResourceDetailPanel({
       open={resourceId !== undefined}
       title={title}
       onClose={onClose}
+      titleActions={
+        resource !== undefined && resource !== null ? (
+          <ResourceActionsMenu resources={[resource]} confirm="popover" />
+        ) : undefined
+      }
       groups={RESOURCE_GROUPS}
       row={resource}
       labelPrefix="resources.fields"

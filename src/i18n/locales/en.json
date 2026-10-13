@@ -3110,6 +3110,27 @@
         "state": "State",
         "record": "Record"
       }
+    },
+    "actions": {
+      "open": "Actions",
+      "question_one": "Queue {{action}} through the agent of this instance?",
+      "question_other": "Queue {{action}} through the agents of {{count}} instances?",
+      "confirm": "Queue",
+      "queueing": "Queuing…",
+      "queued_one": "{{action}} queued: one agent run.",
+      "queued_other": "{{action}} queued: {{count}} agent runs, one per instance.",
+      "failure": "{{name}}: {{message}}",
+      "items": {
+        "enable": "Enable",
+        "disable": "Disable",
+        "start": "Start",
+        "restart": "Restart",
+        "stop": "Stop"
+      },
+      "groups": {
+        "maintenance": "Maintenance",
+        "startStop": "Start and stop"
+      }
     }
   },
   "actionsMenu": {

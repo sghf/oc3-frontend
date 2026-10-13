@@ -3110,6 +3110,27 @@
         "state": "État",
         "record": "Enregistrement"
       }
+    },
+    "actions": {
+      "open": "Actions",
+      "question_one": "Mettre {{action}} en file pour l'agent de cette instance ?",
+      "question_other": "Mettre {{action}} en file pour les agents de {{count}} instances ?",
+      "confirm": "Mettre en file",
+      "queueing": "Mise en file…",
+      "queued_one": "{{action}} en file : une exécution de l'agent.",
+      "queued_other": "{{action}} en file : {{count}} exécutions de l'agent, une par instance.",
+      "failure": "{{name}} : {{message}}",
+      "items": {
+        "enable": "Activer",
+        "disable": "Désactiver",
+        "start": "Démarrer",
+        "restart": "Redémarrer",
+        "stop": "Arrêter"
+      },
+      "groups": {
+        "maintenance": "Maintenance",
+        "startStop": "Démarrage et arrêt"
+      }
     }
   },
   "actionsMenu": {

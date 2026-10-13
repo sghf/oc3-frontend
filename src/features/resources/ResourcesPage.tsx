@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -25,6 +26,7 @@ import {
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { ResourceActionsMenu } from "./ResourceActionsMenu";
 import { ResourceDetailPanel } from "./ResourceDetailPanel";
 import { resourceFlag, resourceName } from "./resource-format";
 
@@ -151,11 +153,20 @@ function FlagWord({ value }: { value: unknown }) {
 
 const ALL_PROPS = COLUMNS.map((column) => column.prop);
 
-/** Columns shown, plus the ids the detail and the links need. */
+/** What the actions on a resource need: its instance, its container and its id. */
+const ACTION_PROPS = [
+  "id",
+  "svc_id",
+  "node_id",
+  "vmname",
+  "rid",
+  "services.svcname",
+  "nodes.nodename",
+];
+
+/** Columns shown, plus the ids the detail, the links and the actions need. */
 function queryProps(cols: string[] | undefined): string {
-  return [
-    ...new Set(["id", "svc_id", "node_id", ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)]),
-  ].join(",");
+  return [...new Set([...ACTION_PROPS, ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)])].join(",");
 }
 
 /**
@@ -216,8 +227,9 @@ const FILTERSET_SOURCE: FiltersetSource = { table: "resmon", selects: "related" 
 /**
  * The resources of the service instances, as the agents report them: the
  * historical `view-resources` (`resmon`). A Manager sees them all, the others
- * those of the services of an app their teams are responsible for. Read-only: a
- * resource is described by its agent.
+ * those of the services of an app their teams are responsible for. A resource is
+ * described by its agent; the checked ones can be started, stopped, restarted,
+ * enabled or disabled through it.
  */
 export function ResourcesPage() {
   const { t } = useTranslation();
@@ -229,13 +241,21 @@ export function ResourcesPage() {
   const navigate = useNavigate({ from: "/resources" });
   const { data, isPending, isError, error, isFetching } = useResources(search);
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // The rows of a selection extended past the page on display: the actions need
+  // their instance and their rid, which the page does not hold.
+  const [beyondPage, setBeyondPage] = useState<ResourceRow[]>([]);
+
   /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {
     const { data, error } = await api.GET("/resources", {
-      params: { query: { props: "id", limit: 0, filter: filterQuery(search.filters) } },
+      params: {
+        query: { props: ACTION_PROPS.join(","), limit: 0, filter: filterQuery(search.filters) },
+      },
     });
     if (error !== undefined) throw new Error(problemText(error));
     const rows: ResourceRow[] = Array.isArray(data.data) ? data.data : [];
+    setBeyondPage(rows);
     return rows.flatMap((row) => (row.id === undefined ? [] : [String(row.id)]));
   }
 
@@ -250,13 +270,25 @@ export function ResourcesPage() {
   }
 
   const selected = data?.rows.find((row) => String(row.id) === search.sel);
+  const rowsById = new Map(
+    [...beyondPage, ...(data?.rows ?? [])].map((row) => [String(row.id), row] as const),
+  );
+  const selectedRows = selectedIds.flatMap((id) => {
+    const row = rowsById.get(id);
+    return row === undefined ? [] : [row];
+  });
 
   return (
     <section>
-      <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
-        <ObjectIcon kind="resource" className="h-5 w-5" />
-        {t("resources.title")}
-      </h1>
+      {/* As tall as the Actions button from the start: checking a row must not push the list down. */}
+      <div className="mb-3 flex min-h-7 items-center gap-3">
+        <h1 className="flex items-center gap-2 text-title font-semibold">
+          <ObjectIcon kind="resource" className="h-5 w-5" />
+          {t("resources.title")}
+        </h1>
+        {/* On the rows checked in the list; nothing checked, no menu. */}
+        <ResourceActionsMenu resources={selectedRows} />
+      </div>
       <p className="mb-3 max-w-3xl text-ink-muted">{t("resources.intro")}</p>
 
       <CollectorList
@@ -273,6 +305,7 @@ export function ResourcesPage() {
         exportPage={(page) => fetchResources({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        onSelectionChange={setSelectedIds}
         valueStats={resourceStats}
         filterable
         filtersetSource={FILTERSET_SOURCE}
