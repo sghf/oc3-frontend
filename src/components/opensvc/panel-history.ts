@@ -39,6 +39,7 @@ const KIND_ORDER: readonly ObjectKind[] = [
   "cluster",
   "service",
   "instance",
+  "resource",
   "network",
   "disk",
   "app",

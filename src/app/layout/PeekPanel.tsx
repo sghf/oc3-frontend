@@ -1,6 +1,7 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { NodeDetailPanel } from "@/features/nodes/NodeDetailPanel";
 import { ServiceDetailPanel } from "@/features/services/ServiceDetailPanel";
+import { ResourceDetailPanel } from "@/features/resources/ResourceDetailPanel";
 import { InstanceDetailPanel } from "@/features/instances/InstanceDetailPanel";
 import { AppDetailPanel } from "@/features/apps/AppDetailPanel";
 import { DiskDetailPanel } from "@/features/disks/DiskDetailPanel";
@@ -107,6 +108,8 @@ export function PeekPanel() {
             onClose={close}
           />
         );
+      case "resource":
+        return <ResourceDetailPanel resourceId={id} label={label} onClose={close} />;
       case "app":
         return <AppDetailPanel appId={id} label={label} onClose={close} />;
       case "group":

@@ -3,6 +3,7 @@ import { api } from "@/lib/api/client";
 import { readProp } from "@/lib/row";
 import type { PeekStep } from "@/lib/peek-trail";
 import { fromInstanceId, instanceName, pickInstanceRow } from "@/features/instances/instance-id";
+import { resourceName } from "@/features/resources/resource-format";
 
 /**
  * Name of an object, for the panel title and the bookmarks.
@@ -43,6 +44,17 @@ async function fetchLabel(step: PeekStep): Promise<string> {
       const svc = text(readProp(row, "services.svcname"));
       const node = text(readProp(row, "nodes.nodename"));
       return svc === "" && node === "" ? step.id : instanceName(svc, node, key.vmname);
+    }
+    case "resource": {
+      // A resource is named by its service, its node and its rid, as its panel title.
+      const { data } = await api.GET("/resources/{resource_id}", {
+        params: {
+          path: { resource_id: step.id },
+          query: { props: "svc_id,node_id,vmname,rid,services.svcname,nodes.nodename" },
+        },
+      });
+      const row = Array.isArray(data?.data) ? data.data[0] : undefined;
+      return row === undefined ? step.id : resourceName(row);
     }
     case "group": {
       // A team is named by an integer id: its role is what a reader recognises.

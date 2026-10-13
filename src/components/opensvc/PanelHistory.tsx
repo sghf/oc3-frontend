@@ -17,6 +17,7 @@ const KIND_LABEL: Partial<Record<ObjectKind, string>> = {
   cluster: "nav.clusters",
   service: "nav.services",
   instance: "nav.instances",
+  resource: "nav.resources",
   network: "nav.networks",
   disk: "nav.disks",
   app: "nav.apps",

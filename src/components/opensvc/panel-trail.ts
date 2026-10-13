@@ -7,6 +7,7 @@ const PEEK_KINDS: ReadonlySet<string> = new Set<ObjectKind>([
   "cluster",
   "service",
   "instance",
+  "resource",
   "app",
   "group",
   "user",
