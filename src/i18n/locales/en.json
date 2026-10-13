@@ -60,7 +60,8 @@
     },
     "viewLabel": "Menu view",
     "inView": "In {{view}}",
-    "safe": "Safe"
+    "safe": "Safe",
+    "ai": "AI assistant"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -3309,6 +3310,33 @@
     },
     "delete": {
       "question": "Delete {{name}} from the safe? Its content goes too; the services and rulesets referencing it will no longer get it. Its previous versions stay. This cannot be undone."
+    }
+  },
+  "assistant": {
+    "title": "AI assistant",
+    "preview": "Preview · not connected",
+    "newConversation": "New conversation",
+    "conversation": "Conversation with the assistant",
+    "name": "Assistant",
+    "you": "You:",
+    "notConnected": "The assistant is not connected yet: this preview shows the conversation, without answers.",
+    "empty": {
+      "title": "Ask about your estate",
+      "intro": "The assistant will answer from what you can see in the Collector: nodes, services, alerts, compliance and requests. It will never act without asking you first.",
+      "suggestions": "Questions to start with"
+    },
+    "suggestions": {
+      "servicesDown": "Which services are down right now?",
+      "criticalAlerts": "Summarize today's critical alerts",
+      "silentNodes": "Which nodes have not reported in the last hour?",
+      "compliance": "Which nodes fail their compliance checks?"
+    },
+    "composer": {
+      "label": "Message to the assistant",
+      "placeholder": "Ask about nodes, services, alerts…",
+      "send": "Send",
+      "scope": "Answers use only what you are allowed to see. Actions always ask for your confirmation.",
+      "keys": "Enter to send · Shift+Enter for a new line"
     }
   }
 }

@@ -773,3 +773,23 @@ export function DashboardIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** The AI assistant: a large four-pointed spark and two small ones. */
+export function SparklesIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M9.5 3c.6 4.2 2.8 6.4 7 7-4.2.6-6.4 2.8-7 7-.6-4.2-2.8-6.4-7-7 4.2-.6 6.4-2.8 7-7Z" />
+      <path d="M18.5 13.5c.3 1.9 1.2 2.8 3 3-1.8.3-2.7 1.2-3 3-.3-1.8-1.2-2.7-3-3 1.8-.2 2.7-1.1 3-3Z" />
+      <path d="M18 2.5c.2 1.3.8 1.9 2 2-1.2.2-1.8.8-2 2-.2-1.2-.8-1.8-2-2 1.2-.1 1.8-.7 2-2Z" />
+    </Svg>
+  );
+}
+
+/** Sending a message: an arrow pointing up. */
+export function SendIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3.6 19.4 11 18 12.4l-5-5V20.5h-2V7.4l-5 5L4.6 11 12 3.6Z" />
+    </Svg>
+  );
+}

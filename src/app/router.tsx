@@ -22,6 +22,7 @@ import { ClaimMappingsPage } from "@/features/claim-mappings/ClaimMappingsPage";
 import { FiltersetsPage } from "@/features/filtersets/FiltersetsPage";
 import { FormsPage } from "@/features/forms/FormsPage";
 import { SafePage } from "@/features/safe/SafePage";
+import { AssistantPage } from "@/features/assistant/AssistantPage";
 import { NewRequestPage } from "@/features/requests/NewRequestPage";
 import {
   AllRequestsPage,
@@ -240,6 +241,13 @@ const filtersetsRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+// The conversation with the AI assistant, not connected yet.
+const assistantRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai",
+  component: AssistantPage,
+});
+
 // The files of the collector safe, a list as the others.
 const safeRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -373,6 +381,7 @@ const routeTree = rootRoute.addChildren([
   filtersetsRoute,
   formsRoute,
   safeRoute,
+  assistantRoute,
   requestsRoute,
   allRequestsRoute,
   teamRequestsRoute,

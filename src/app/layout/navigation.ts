@@ -42,6 +42,7 @@ export interface NavEntry {
     | "/requests/team"
     | "/requests/tiers"
     | "/safe"
+    | "/ai"
     | "/compliance/modulesets"
     | "/compliance/rulesets"
     | "/compliance/status"
@@ -78,6 +79,9 @@ export interface NavCategory {
 /** Entries outside any category, at the top of the operator menu. */
 export const NAV_TOP: NavEntry[] = [
   { to: "/", labelKey: "nav.dashboard", icon: "dashboardView", exact: true },
+  // The conversation with the AI assistant, right after the dashboard: a way into
+  // the estate as a whole rather than a view of one kind of object.
+  { to: "/ai", labelKey: "nav.ai", icon: "ai" },
 ];
 
 /**
@@ -220,11 +224,16 @@ export const NAV_CATEGORIES: NavCategory[] = [
 /**
  * The menu a page belongs to: that of the entry its path starts with, the longest
  * one winning (`/stats/reports/12` is Statistics' Reports, `/reports` Report
- * definitions). Null for a page of no menu, such as the profile or the action
+ * definitions); the operator menu for the entries at its top, the dashboard and
+ * the assistant. Null for a page of no menu, such as the profile or the action
  * queue: the side menu then stays as it is.
  */
 export function viewOfPath(pathname: string): NavView | null {
-  if (pathname === "/") return "operator";
+  // The entries outside any category are at the top of the operator menu.
+  for (const entry of NAV_TOP) {
+    if (pathname === entry.to || (entry.to !== "/" && pathname.startsWith(`${entry.to}/`)))
+      return "operator";
+  }
   let best: { length: number; view: NavView } | null = null;
   for (const category of NAV_CATEGORIES) {
     for (const entry of category.entries) {

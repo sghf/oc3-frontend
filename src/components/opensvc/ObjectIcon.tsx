@@ -16,6 +16,7 @@ import {
   LifeRingIcon,
   NetworkIcon,
   PuzzleIcon,
+  SparklesIcon,
   LockIcon,
   ServerIcon,
   StackIcon,
@@ -54,6 +55,7 @@ export type ObjectKind =
   | "filterset"
   | "form"
   | "safe"
+  | "ai"
   | "package"
   | "hardware"
   | "switch"
@@ -117,6 +119,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   form: { Icon: PuzzleIcon, className: "text-icon-form" },
   // The padlock of the historical safe16 class, in the colour of the forms it shares.
   safe: { Icon: LockIcon, className: "text-icon-form" },
+  // The assistant takes the accent: it belongs to no object family.
+  ai: { Icon: SparklesIcon, className: "text-accent" },
   package: { Icon: CubeIcon, className: "text-icon-package" },
   // Cornflower blue in the historical collector (`hw16`): the tint of nodes.
   hardware: { Icon: CpuIcon, className: "text-icon-node" },

@@ -60,7 +60,8 @@
     },
     "viewLabel": "Menu affiché",
     "inView": "Dans {{view}}",
-    "safe": "Coffre-fort"
+    "safe": "Coffre-fort",
+    "ai": "Assistant IA"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -3309,6 +3310,33 @@
     },
     "delete": {
       "question": "Supprimer {{name}} du coffre-fort ? Son contenu part aussi ; les services et rulesets qui le référencent ne le recevront plus. Ses versions précédentes restent. Cette opération est irréversible."
+    }
+  },
+  "assistant": {
+    "title": "Assistant IA",
+    "preview": "Aperçu · non connecté",
+    "newConversation": "Nouvelle conversation",
+    "conversation": "Conversation avec l'assistant",
+    "name": "Assistant",
+    "you": "Vous :",
+    "notConnected": "L'assistant n'est pas encore connecté : cet aperçu montre la conversation, sans réponses.",
+    "empty": {
+      "title": "Interrogez votre parc",
+      "intro": "L'assistant répondra à partir de ce que vous pouvez voir dans le Collector : nœuds, services, alertes, conformité et demandes. Il n'agira jamais sans vous le demander d'abord.",
+      "suggestions": "Questions pour commencer"
+    },
+    "suggestions": {
+      "servicesDown": "Quels services sont arrêtés en ce moment ?",
+      "criticalAlerts": "Résume les alertes critiques du jour",
+      "silentNodes": "Quels nœuds n'ont rien remonté depuis une heure ?",
+      "compliance": "Quels nœuds échouent à leurs contrôles de conformité ?"
+    },
+    "composer": {
+      "label": "Message à l'assistant",
+      "placeholder": "Posez une question sur les nœuds, services, alertes…",
+      "send": "Envoyer",
+      "scope": "Les réponses n'utilisent que ce que vous avez le droit de voir. Les actions demandent toujours votre confirmation.",
+      "keys": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne"
     }
   }
 }
