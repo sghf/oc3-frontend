@@ -2320,6 +2320,13 @@ export interface paths {
          *     structure, also stored and readable with GET /form_output_results/{id}. A
          *     negative id designates an internal form. The form must be published to the
          *     caller, unless a manager.
+         *
+         *     A submission continuing a request (`prev_wfid`, a form with a workflow
+         *     output) decides on that step: the form must be one of the next forms the
+         *     step names (the `NextForms` of its workflow output, those of its `Scripts`
+         *     outcomes included), and the caller its assignee, by full name or through
+         *     one of their groups, a manager included; 403 otherwise, 404 when the step
+         *     does not exist.
          */
         put: operations["PutForm"];
         /**
@@ -4038,6 +4045,287 @@ export interface paths {
         };
         /** @description Display a resource, if the caller may see it (see GET /resources). */
         get: operations["GetResource"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List the files of the collector safe the caller may see: a Manager every
+         *     file; a user those they uploaded or published to one of their groups; a
+         *     node those published to its responsible team. Each version of a file is a
+         *     row. `md5`, `sha256` and `size` are those of the plaintext; `encrypted`
+         *     tells whether the file is encrypted at rest.
+         */
+        get: operations["GetSafeFiles"];
+        put?: never;
+        /**
+         * @description Create an empty file reference, to upload its content later (POST
+         *     /safe/{file_id}/upload): its id can be referenced first. Requires the
+         *     SafeUploader privilege, except for a node. The file is published to and
+         *     made the responsibility of the caller's default group. Logged.
+         */
+        post: operations["PostSafeFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Upload a new file into the safe. Requires the SafeUploader privilege,
+         *     except for a node. The file is encrypted at rest when the collector is
+         *     configured to (safe.encryption, safe.keys_file), stored in plaintext
+         *     otherwise, and published to and made the responsibility of the caller's
+         *     default group. Logged.
+         */
+        post: operations["PostSafeUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Show a safe file, if the caller may see it (see GET /safe): an empty list
+         *     otherwise.
+         */
+        get: operations["GetSafeFile"];
+        put?: never;
+        /**
+         * @description Rename a safe file, its content unchanged. The caller must be the uploader
+         *     of the file, in one of its responsible groups, or a Manager. Logged.
+         */
+        post: operations["PostSafeFileName"];
+        /**
+         * @description Delete a safe file version: its row, its groups, and its content on disk
+         *     unless another row holds it. Same rights as the rename. Logged.
+         */
+        delete: operations["DeleteSafeFile"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/am_i_responsible": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Whether the caller may manage the file: its uploader, in one of its
+         *     responsible groups, or a Manager.
+         */
+        get: operations["GetSafeFileAmIResponsible"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Download the content of a safe file, decrypted when it is encrypted at
+         *     rest, and checked against the md5 recorded at upload (403 when it does not
+         *     match). 204 when the md5 the client announces is the file's: it already
+         *     has this version. The caller must be allowed to see the file. Each
+         *     download is written to the audit log.
+         */
+        get: operations["GetSafeFileDownload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List the previous versions of a file, those the caller may see. */
+        get: operations["GetSafeFileHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The content of a text safe file, base64-encoded, for display; 400 for
+         *     another content type. Same rights and checks as the download, and logged
+         *     likewise.
+         */
+        get: operations["GetSafeFilePreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/publications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List the groups the file is published to: their members can list, read and download it. The caller must be allowed to read the file. */
+        get: operations["GetSafeFilePublications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/publications/{group}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Add a group to those the file is published to: their members can list, read and download it. The caller must be the uploader of the
+         *     file, in one of its responsible groups, or a Manager. Logged.
+         */
+        post: operations["PostSafeFilePublication"];
+        /** @description Remove a group from those the file is published to: their members can list, read and download it. Same rights as the addition. Logged. */
+        delete: operations["DeleteSafeFilePublication"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/responsibles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List the groups responsible for the file: their members can manage it. The caller must be allowed to read the file. */
+        get: operations["GetSafeFileResponsibles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/responsibles/{group}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Add a group to those responsible for the file: their members can manage it. The caller must be the uploader of the
+         *     file, in one of its responsible groups, or a Manager. Logged.
+         */
+        post: operations["PostSafeFileResponsible"];
+        /** @description Remove a group from those responsible for the file: their members can manage it. Same rights as the addition. Logged. */
+        delete: operations["DeleteSafeFileResponsible"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Upload a new version of a file. The file keeps its id, which the safe://
+         *     references name; the previous version becomes a row of its own, listed by
+         *     GET /safe/{file_id}/history. Requires the SafeUploader privilege, except
+         *     for a node, and the responsibility of the file. Logged.
+         */
+        post: operations["PostSafeFileUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/safe/{file_id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Where a file is referenced: the services whose configuration names it
+         *     (`{safe://<id>}` or its stored name), and the variables of the rulesets
+         *     published to the caller's groups holding it. The caller must be allowed
+         *     to see the file.
+         */
+        get: operations["GetSafeFileUsage"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6538,6 +6826,68 @@ export interface components {
             var_updated?: string;
             var_value?: string;
         };
+        SafeFileListResponse: {
+            data: components["schemas"]["SafeFileRow"][] | {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            meta?: components["schemas"]["ListMeta"];
+        };
+        SafeFilePreviewResponse: {
+            data: {
+                content_type: string;
+                /** @description The content, base64-encoded. */
+                data: string;
+            };
+        };
+        /**
+         * @description A version of a file of the collector safe. `uuid` is its stored name, the
+         *     one safe:// references may name. `md5`, `sha256` and `size` are those of
+         *     the plaintext. `encrypted` tells whether the file is encrypted at rest.
+         *     Every property is optional: the `props` query parameter selects which
+         *     columns the server returns.
+         */
+        SafeFileRow: {
+            encrypted?: boolean;
+            id?: number;
+            md5?: string;
+            name?: string;
+            /** @description The roles of the groups the file is published to, comma-separated. */
+            safe_team_publication?: string | null;
+            /** @description The roles of the groups responsible for the file, comma-separated. */
+            safe_team_responsible?: string | null;
+            sha256?: string | null;
+            size?: number;
+            uploaded_date?: string;
+            uploaded_from?: string;
+            uploader?: number | null;
+            uploader_name?: string | null;
+            uuid?: string;
+        };
+        SafeFileUsageResponse: {
+            data: {
+                services: {
+                    svc_id: string;
+                    svcname: string;
+                }[];
+                variables: {
+                    id: number;
+                    ruleset_id: number;
+                    ruleset_name: string;
+                    var_name: string;
+                }[];
+            };
+        };
+        SafeGroupListResponse: {
+            data: {
+                id: number;
+                role: string;
+            }[];
+        };
+        SafeInfoResponse: {
+            info: string;
+        };
         SanTopology: {
             links: components["schemas"]["SanTopologyLink"][];
             nodes: components["schemas"]["SanTopologyNode"][];
@@ -7049,6 +7399,15 @@ export interface components {
         };
         /** @description Conflict */
         409: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Content Too Large */
+        413: {
             headers: {
                 [name: string]: unknown;
             };
@@ -14756,7 +15115,7 @@ export interface operations {
                 "application/json": {
                     /** @description The information the form expects, as an object, a list of objects or their JSON string form. */
                     data?: unknown;
-                    /** @description The previous step id in an existing workflow. */
+                    /** @description The id of the step of an existing workflow this submission decides on (forms_store.id). */
                     prev_wfid?: unknown;
                 };
             };
@@ -20118,6 +20477,697 @@ export interface operations {
                 };
             };
             401: components["responses"]["401"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFiles: {
+        parameters: {
+            query?: {
+                /** @description A list of properties to include in each data dictionnary. */
+                props?: components["parameters"]["inQueryProps"];
+                /** @description The maximum number of entries to return. 0 means no limit. */
+                limit?: components["parameters"]["inQueryLimit"];
+                /** @description Skip the first entries of the data cursor. */
+                offset?: components["parameters"]["inQueryOffset"];
+                /**
+                 * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+                 *     the meta field. The metadata of a list carries its total number of rows
+                 *     without pagination (total), as well as the rows returned (count), the offset
+                 *     and the limit.
+                 */
+                meta?: components["parameters"]["inQueryMeta"];
+                /**
+                 * @description With "1" or "true", the response counts the distinct values of each
+                 *     selected property instead of listing the rows: `data` maps each property
+                 *     to an object of value → number of rows ("empty" for a null or blank
+                 *     value), over the whole selection (access control, filters and session
+                 *     filterset applied, `offset` ignored). `limit`, when given, caps the
+                 *     number of values returned per property, the most frequent first; without
+                 *     it every value is returned. `meta.total` is the number of rows,
+                 *     `meta.distinct` the number of distinct values of each property, and
+                 *     `meta.other` the number of rows whose value was left out by the limit.
+                 *     A count taking longer than 5 seconds is refused with a 400, asking to
+                 *     narrow the selection.
+                 */
+                stats?: components["parameters"]["inQueryStats"];
+                /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+                orderby?: components["parameters"]["inQueryOrderby"];
+                /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+                groupby?: components["parameters"]["inQueryGroupby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostSafeFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostSafeUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description The content of the file.
+                     */
+                    file: string;
+                    /** @description A name to tell the file by, the name of the uploaded file by default. */
+                    name?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            413: components["responses"]["413"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFile: {
+        parameters: {
+            query?: {
+                /** @description A list of properties to include in each data dictionnary. */
+                props?: components["parameters"]["inQueryProps"];
+                /** @description The maximum number of entries to return. 0 means no limit. */
+                limit?: components["parameters"]["inQueryLimit"];
+                /** @description Skip the first entries of the data cursor. */
+                offset?: components["parameters"]["inQueryOffset"];
+                /**
+                 * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+                 *     the meta field. The metadata of a list carries its total number of rows
+                 *     without pagination (total), as well as the rows returned (count), the offset
+                 *     and the limit.
+                 */
+                meta?: components["parameters"]["inQueryMeta"];
+                /**
+                 * @description With "1" or "true", the response counts the distinct values of each
+                 *     selected property instead of listing the rows: `data` maps each property
+                 *     to an object of value → number of rows ("empty" for a null or blank
+                 *     value), over the whole selection (access control, filters and session
+                 *     filterset applied, `offset` ignored). `limit`, when given, caps the
+                 *     number of values returned per property, the most frequent first; without
+                 *     it every value is returned. `meta.total` is the number of rows,
+                 *     `meta.distinct` the number of distinct values of each property, and
+                 *     `meta.other` the number of rows whose value was left out by the limit.
+                 *     A count taking longer than 5 seconds is refused with a 400, asking to
+                 *     narrow the selection.
+                 */
+                stats?: components["parameters"]["inQueryStats"];
+                /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+                orderby?: components["parameters"]["inQueryOrderby"];
+                /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+                groupby?: components["parameters"]["inQueryGroupby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
+            };
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostSafeFileName: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    DeleteSafeFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeInfoResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFileAmIResponsible: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: boolean;
+                    };
+                };
+            };
+            401: components["responses"]["401"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFileDownload: {
+        parameters: {
+            query?: {
+                /** @description The md5 of the copy the client has. */
+                md5?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The content of the file. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description The client already has this version. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFileHistory: {
+        parameters: {
+            query?: {
+                /** @description A list of properties to include in each data dictionnary. */
+                props?: components["parameters"]["inQueryProps"];
+                /** @description The maximum number of entries to return. 0 means no limit. */
+                limit?: components["parameters"]["inQueryLimit"];
+                /** @description Skip the first entries of the data cursor. */
+                offset?: components["parameters"]["inQueryOffset"];
+                /**
+                 * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+                 *     the meta field. The metadata of a list carries its total number of rows
+                 *     without pagination (total), as well as the rows returned (count), the offset
+                 *     and the limit.
+                 */
+                meta?: components["parameters"]["inQueryMeta"];
+                /**
+                 * @description With "1" or "true", the response counts the distinct values of each
+                 *     selected property instead of listing the rows: `data` maps each property
+                 *     to an object of value → number of rows ("empty" for a null or blank
+                 *     value), over the whole selection (access control, filters and session
+                 *     filterset applied, `offset` ignored). `limit`, when given, caps the
+                 *     number of values returned per property, the most frequent first; without
+                 *     it every value is returned. `meta.total` is the number of rows,
+                 *     `meta.distinct` the number of distinct values of each property, and
+                 *     `meta.other` the number of rows whose value was left out by the limit.
+                 *     A count taking longer than 5 seconds is refused with a 400, asking to
+                 *     narrow the selection.
+                 */
+                stats?: components["parameters"]["inQueryStats"];
+                /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+                orderby?: components["parameters"]["inQueryOrderby"];
+                /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+                groupby?: components["parameters"]["inQueryGroupby"];
+                /**
+                 * @description Column filter, repeatable; several filters combine with AND. Each value is
+                 *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+                 *     for orderby) and `expr` one of:
+                 *       - text: case-insensitive match anywhere in the value;
+                 *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+                 *       - `in:a,b,c`: one of the listed values;
+                 *       - `eq:v`, `ne:v`: equal, not equal;
+                 *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+                 *         a date may be relative to now, `-` then a duration in weeks, days,
+                 *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+                 *         minutes, `gte:-1d12h` those of the last day and a half;
+                 *       - `empty`: no value;
+                 *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+                 *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+                 *         `!empty` (any value).
+                 *     An unknown property, a property without a column, or an invalid regular
+                 *     expression is answered with 400.
+                 */
+                filter?: components["parameters"]["inQueryFilter"];
+            };
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFilePreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFilePreviewResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFilePublications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeGroupListResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostSafeFilePublication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+                /** @description The id or the role of the group */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeInfoResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    DeleteSafeFilePublication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+                /** @description The id or the role of the group */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeInfoResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFileResponsibles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeGroupListResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostSafeFileResponsible: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+                /** @description The id or the role of the group */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeInfoResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    DeleteSafeFileResponsible: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+                /** @description The id or the role of the group */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeInfoResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostSafeFileUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description The content of the file.
+                     */
+                    file: string;
+                    /** @description A name to tell the file by, the name of the uploaded file by default. */
+                    name?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileListResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            413: components["responses"]["413"];
+            500: components["responses"]["500"];
+        };
+    };
+    GetSafeFileUsage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the file (safe.id), or its stored name (safe.uuid, as in safe://safe.uuid.<key>.<name>.<ext>) */
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SafeFileUsageResponse"];
+                };
+            };
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
             404: components["responses"]["404"];
             500: components["responses"]["500"];
         };

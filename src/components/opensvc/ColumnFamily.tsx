@@ -1,4 +1,5 @@
 import {
+  LockIcon,
   AsteriskIcon,
   BellIcon,
   ClockIcon,
@@ -57,7 +58,8 @@ export type ColumnFamily =
   | "moduleset"
   | "ruleset"
   | "filterset"
-  | "action";
+  | "action"
+  | "safe";
 
 /**
  * The collector colours by domain rather than by family: everything about the node is
@@ -100,6 +102,8 @@ const FAMILIES: Record<ColumnFamily, { Icon: typeof ServerIcon; className: strin
   // The cog of the historical `action16` outside of compliance, in its own tint
   // (`legacy-css.ts`): the definition of a form, for one.
   action: { Icon: GearIcon, className: "text-icon-service" },
+  // The padlock of the historical `safe16` class, on the file columns of the safe.
+  safe: { Icon: LockIcon, className: "text-icon-form" },
 };
 
 export function ColumnFamilyIcon({ family }: { family: ColumnFamily }) {

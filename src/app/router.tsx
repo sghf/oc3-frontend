@@ -21,6 +21,7 @@ import { FiltersPage } from "@/features/filters/FiltersPage";
 import { ClaimMappingsPage } from "@/features/claim-mappings/ClaimMappingsPage";
 import { FiltersetsPage } from "@/features/filtersets/FiltersetsPage";
 import { FormsPage } from "@/features/forms/FormsPage";
+import { SafePage } from "@/features/safe/SafePage";
 import { NewRequestPage } from "@/features/requests/NewRequestPage";
 import {
   AllRequestsPage,
@@ -239,6 +240,14 @@ const filtersetsRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+// The files of the collector safe, a list as the others.
+const safeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/safe",
+  component: SafePage,
+  validateSearch: parseListSearch,
+});
+
 const formsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/forms",
@@ -363,6 +372,7 @@ const routeTree = rootRoute.addChildren([
   claimMappingsRoute,
   filtersetsRoute,
   formsRoute,
+  safeRoute,
   requestsRoute,
   allRequestsRoute,
   teamRequestsRoute,

@@ -59,7 +59,8 @@
       "admin": "Admin"
     },
     "viewLabel": "Menu affiché",
-    "inView": "Dans {{view}}"
+    "inView": "Dans {{view}}",
+    "safe": "Coffre-fort"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -3242,5 +3243,72 @@
     "submit": "Soumettre la décision",
     "back": "Revenir aux choix",
     "submittedDecision": "{{label}} soumis."
+  },
+  "safe": {
+    "title": "Coffre-fort",
+    "intro": "Les fichiers du coffre-fort du collector que vous pouvez voir : ceux que vous avez déposés ou qui sont publiés à l'un de vos groupes, tous pour un Manager. Les configurations de services et les rulesets de conformité les référencent en safe://<id>, et les agents les téléchargent avec les identifiants de leur nœud. Chaque version est une ligne ; les fichiers sont chiffrés au repos quand le collector est configuré pour.",
+    "fields": {
+      "id": "Id du fichier",
+      "uuid": "Nom stocké",
+      "name": "Nom",
+      "size": "Taille",
+      "md5": "MD5",
+      "sha256": "SHA-256",
+      "encrypted": "Au repos",
+      "safe_team_publication": "Publié à",
+      "safe_team_responsible": "Responsables",
+      "uploader": "Id du déposant",
+      "uploader_name": "Déposant",
+      "uploaded_from": "Déposé depuis",
+      "uploaded_date": "Déposé"
+    },
+    "encryption": {
+      "encrypted": "chiffré",
+      "plaintext": "en clair"
+    },
+    "detail": {
+      "title": "Fichier du coffre-fort",
+      "tabs": "Données du fichier",
+      "notFound": "Ce fichier n'existe pas, ou vous ne pouvez pas le voir.",
+      "groups": {
+        "file": "Fichier",
+        "record": "Dépôt"
+      }
+    },
+    "actions": {
+      "download": "Télécharger",
+      "newVersion": "Déposer une nouvelle version"
+    },
+    "upload": {
+      "open": "Déposer un fichier",
+      "title": "Déposer un fichier dans le coffre-fort",
+      "intro": "Le fichier est publié à votre groupe par défaut, qui en devient responsable. Référencez-le en safe://<id> une fois déposé.",
+      "file": "Fichier",
+      "nameHint": "Le nom sous lequel retrouver le fichier ; celui du fichier déposé s'il est laissé vide.",
+      "versionNameHint": "Laissé vide, le fichier garde son nom.",
+      "versionIntro": "Le fichier garde son id : les références safe:// reçoivent le nouveau contenu. La version actuelle reste dans l'historique.",
+      "submit": "Déposer",
+      "submitVersion": "Déposer la nouvelle version",
+      "uploading": "Dépôt…",
+      "noFile": "Choisissez un fichier à déposer."
+    },
+    "content": {
+      "tab": "Contenu",
+      "notText": "Ce fichier n'est pas du texte : téléchargez-le pour le lire.",
+      "audited": "Chaque affichage du contenu est inscrit au journal d'audit."
+    },
+    "history": {
+      "tab": "Historique",
+      "empty": "Aucune version précédente."
+    },
+    "usage": {
+      "title": "Référencé par",
+      "none": "Aucune configuration de service ni variable de ruleset ne référence ce fichier.",
+      "service": "Service",
+      "variable": "Variable"
+    },
+    "delete": {
+      "question": "Supprimer {{name}} du coffre-fort ? Son contenu part aussi ; les services et rulesets qui le référencent ne le recevront plus. Ses versions précédentes restent. Cette opération est irréversible."
+    }
   }
 }

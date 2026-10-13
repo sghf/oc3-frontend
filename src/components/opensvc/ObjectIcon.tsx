@@ -16,6 +16,7 @@ import {
   LifeRingIcon,
   NetworkIcon,
   PuzzleIcon,
+  LockIcon,
   ServerIcon,
   StackIcon,
   SwitchIcon,
@@ -52,6 +53,7 @@ export type ObjectKind =
   | "filter"
   | "filterset"
   | "form"
+  | "safe"
   | "package"
   | "hardware"
   | "switch"
@@ -113,6 +115,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   // Same icon as the filter: the historical collector marks both of them `filter16`.
   filterset: { Icon: FilterIcon, className: "text-icon-dashboard" },
   form: { Icon: PuzzleIcon, className: "text-icon-form" },
+  // The padlock of the historical safe16 class, in the colour of the forms it shares.
+  safe: { Icon: LockIcon, className: "text-icon-form" },
   package: { Icon: CubeIcon, className: "text-icon-package" },
   // Cornflower blue in the historical collector (`hw16`): the tint of nodes.
   hardware: { Icon: CpuIcon, className: "text-icon-node" },

@@ -30,7 +30,9 @@ export default defineConfig(({ mode }) => {
       hmr: publicHost ? { host: publicHost, protocol: "wss", clientPort: 443 } : undefined,
       // In dev, the frontend talks to apicollector through this proxy: no CORS to handle.
       proxy: {
-        "/api": { target, changeOrigin: true, secure: false },
+        // xfwd passes the client address on (X-Forwarded-For), which the collector
+        // records, as the source of a safe upload for instance.
+        "/api": { target, changeOrigin: true, secure: false, xfwd: true },
         // The websocket of the oc3 messenger, which announces the changes: on the
         // same origin as the rest, so that the page needs no other address.
         "/realtime": { target: realtimeTarget, ws: true, changeOrigin: true, secure: false },

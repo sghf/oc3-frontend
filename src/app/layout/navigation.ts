@@ -41,6 +41,7 @@ export interface NavEntry {
     | "/requests/all"
     | "/requests/team"
     | "/requests/tiers"
+    | "/safe"
     | "/compliance/modulesets"
     | "/compliance/rulesets"
     | "/compliance/status"
@@ -178,6 +179,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
         icon: "designer",
         privileges: ["CompManager"],
       },
+      // Everyone: the files published to one's teams, which the rulesets and the
+      // service configurations reference (safe://).
+      { to: "/safe", labelKey: "nav.safe", icon: "safe" },
     ],
   },
   {

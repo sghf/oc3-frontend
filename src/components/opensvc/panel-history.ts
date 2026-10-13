@@ -46,6 +46,7 @@ const KIND_ORDER: readonly ObjectKind[] = [
   "tag",
   "moduleset",
   "ruleset",
+  "safe",
   "user",
   "group",
   "filterset",

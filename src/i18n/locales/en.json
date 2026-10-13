@@ -59,7 +59,8 @@
       "admin": "Admin"
     },
     "viewLabel": "Menu view",
-    "inView": "In {{view}}"
+    "inView": "In {{view}}",
+    "safe": "Safe"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -3242,5 +3243,72 @@
     "submit": "Submit the decision",
     "back": "Back to the choices",
     "submittedDecision": "{{label}} submitted."
+  },
+  "safe": {
+    "title": "Safe",
+    "intro": "The files of the collector safe you may see: those you uploaded or that are published to one of your groups, all of them for a Manager. Service configurations and compliance rulesets reference them as safe://<id>, and the agents download them with their node credentials. Each version is a row; files are encrypted at rest when the collector is configured to.",
+    "fields": {
+      "id": "File id",
+      "uuid": "Stored name",
+      "name": "Name",
+      "size": "Size",
+      "md5": "MD5",
+      "sha256": "SHA-256",
+      "encrypted": "At rest",
+      "safe_team_publication": "Published to",
+      "safe_team_responsible": "Responsibles",
+      "uploader": "Uploader id",
+      "uploader_name": "Uploader",
+      "uploaded_from": "Uploaded from",
+      "uploaded_date": "Uploaded"
+    },
+    "encryption": {
+      "encrypted": "encrypted",
+      "plaintext": "plaintext"
+    },
+    "detail": {
+      "title": "Safe file",
+      "tabs": "Safe file data",
+      "notFound": "This file does not exist, or you may not see it.",
+      "groups": {
+        "file": "File",
+        "record": "Upload"
+      }
+    },
+    "actions": {
+      "download": "Download",
+      "newVersion": "Upload a new version"
+    },
+    "upload": {
+      "open": "Upload a file",
+      "title": "Upload a file to the safe",
+      "intro": "The file is published to and made the responsibility of your default group. Reference it as safe://<id> once uploaded.",
+      "file": "File",
+      "nameHint": "The name to tell the file by; the name of the uploaded file if left empty.",
+      "versionNameHint": "Left empty, the file keeps its name.",
+      "versionIntro": "The file keeps its id: the safe:// references get the new content. The current version stays in the history.",
+      "submit": "Upload",
+      "submitVersion": "Upload the new version",
+      "uploading": "Uploading…",
+      "noFile": "Choose a file to upload."
+    },
+    "content": {
+      "tab": "Content",
+      "notText": "This file is not text: download it to read it.",
+      "audited": "Each display of the content is written to the audit log."
+    },
+    "history": {
+      "tab": "History",
+      "empty": "No previous version."
+    },
+    "usage": {
+      "title": "Referenced by",
+      "none": "No service configuration or ruleset variable references this file.",
+      "service": "Service",
+      "variable": "Variable"
+    },
+    "delete": {
+      "question": "Delete {{name}} from the safe? Its content goes too; the services and rulesets referencing it will no longer get it. Its previous versions stay. This cannot be undone."
+    }
   }
 }

@@ -24,6 +24,7 @@ const KIND_LABEL: Partial<Record<ObjectKind, string>> = {
   tag: "nav.tags",
   moduleset: "nav.modulesets",
   ruleset: "nav.rulesets",
+  safe: "nav.safe",
   user: "nav.users",
   group: "nav.groups",
   filterset: "nav.filtersets",

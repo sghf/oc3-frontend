@@ -141,6 +141,13 @@ async function fetchLabel(step: PeekStep): Promise<string> {
       const rows = Array.isArray(data?.data) ? data.data : [];
       return text(readProp(rows[0] ?? {}, "modset_name")) || step.id;
     }
+    case "safe": {
+      const { data } = await api.GET("/safe/{file_id}", {
+        params: { path: { file_id: step.id }, query: { props: "name" } },
+      });
+      const rows = Array.isArray(data?.data) ? data.data : [];
+      return text(readProp(rows[0] ?? {}, "name")) || step.id;
+    }
     case "ruleset": {
       const { data } = await api.GET("/compliance/rulesets/{rset_id}", {
         params: { path: { rset_id: step.id }, query: { props: "ruleset_name" } },

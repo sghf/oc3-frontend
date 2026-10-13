@@ -17,6 +17,7 @@ import { ClusterDetailPanel } from "@/features/clusters/ClusterDetailPanel";
 import { ReportDetailPanel } from "@/features/reports/ReportDetailPanel";
 import { ModulesetDetailPanel } from "@/features/modulesets/ModulesetDetailPanel";
 import { RulesetDetailPanel } from "@/features/rulesets/RulesetDetailPanel";
+import { SafeDetailPanel } from "@/features/safe/SafeDetailPanel";
 import { useTag } from "@/features/tags/use-tag";
 import { currentIndex, parseTrail } from "@/lib/peek-trail";
 import { isPeekStep } from "@/components/opensvc/panel-trail";
@@ -177,6 +178,16 @@ export function PeekPanel() {
         return <ModulesetDetailPanel modsetId={id} label={label} onClose={close} />;
       case "ruleset":
         return <RulesetDetailPanel rsetId={id} label={label} onClose={close} />;
+      case "safe":
+        return (
+          <SafeDetailPanel
+            fileId={id}
+            label={label}
+            tab={tab}
+            onTabChange={onTabChange}
+            onClose={close}
+          />
+        );
       default:
         return null;
     }
