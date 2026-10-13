@@ -12,17 +12,27 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 /**
- * The forms a step can be followed by: the `NextForms` of the workflow output of
- * the form it was submitted with, as `get_workflow_output()` of the historical
- * `requests.js` reads them. Empty when the step ends its request.
+ * The forms a step can be followed by: the `NextForms` of the workflow outputs of
+ * the form it was submitted with, those of their `Success` and `Error` scripts
+ * included, as the API accepts them (`workflowNextForms`, oc3). Empty when the
+ * step ends its request.
  */
 export function nextForms(definition: unknown): string[] {
   if (!isRecord(definition) || !Array.isArray(definition.Outputs)) return [];
-  const output = definition.Outputs.find(
-    (entry): entry is Record<string, unknown> => isRecord(entry) && entry.Dest === "workflow",
-  );
-  if (output === undefined || !Array.isArray(output.NextForms)) return [];
-  return output.NextForms.filter((name): name is string => typeof name === "string");
+  const names: string[] = [];
+  const add = (defs: unknown) => {
+    if (!isRecord(defs) || !Array.isArray(defs.NextForms)) return;
+    for (const name of defs.NextForms) if (typeof name === "string") names.push(name);
+  };
+  for (const output of definition.Outputs) {
+    if (!isRecord(output) || output.Dest !== "workflow") continue;
+    add(output);
+    if (isRecord(output.Scripts)) {
+      add(output.Scripts.Success);
+      add(output.Scripts.Error);
+    }
+  }
+  return [...new Set(names)];
 }
 
 /** The label of a stored step, from the form revision it was submitted with. */

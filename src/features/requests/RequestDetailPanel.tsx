@@ -44,8 +44,8 @@ function isRecord(v: unknown): v is Record<string, unknown> {
  *
  * Deciding is submitting one of the forms the current step names as its next
  * (`NextForms`), as the next step of the request (`prev_wfid`). The choice is
- * offered only to the assignee of the step, their name or one of their groups, as
- * in the historical collector; the API does not check it.
+ * offered only to the assignee of the step, their name or one of their groups,
+ * which the API checks too.
  */
 export function RequestDetailPanel({
   workflowId,
