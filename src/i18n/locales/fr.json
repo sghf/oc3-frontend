@@ -3314,12 +3314,10 @@
   },
   "assistant": {
     "title": "Assistant IA",
-    "preview": "Aperçu · non connecté",
     "newConversation": "Nouvelle conversation",
     "conversation": "Conversation avec l'assistant",
     "name": "Assistant",
     "you": "Vous :",
-    "notConnected": "L'assistant n'est pas encore connecté : cet aperçu montre la conversation, sans réponses.",
     "empty": {
       "title": "Interrogez votre parc",
       "intro": "L'assistant répondra à partir de ce que vous pouvez voir dans le Collector : nœuds, services, alertes, conformité et demandes. Il n'agira jamais sans vous le demander d'abord.",
@@ -3336,7 +3334,36 @@
       "placeholder": "Posez une question sur les nœuds, services, alertes…",
       "send": "Envoyer",
       "scope": "Les réponses n'utilisent que ce que vous avez le droit de voir. Les actions demandent toujours votre confirmation.",
-      "keys": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne"
+      "keys": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne",
+      "stop": "Arrêter"
+    },
+    "conversations": "Conversations",
+    "noConversation": "Aucune conversation pour l'instant.",
+    "untitled": "Nouvelle conversation",
+    "deleteConversation": "Supprimer la conversation {{title}}",
+    "thinking": "Réflexion…",
+    "tools": "Outils utilisés",
+    "toolRunning": "en cours",
+    "toolDone": "terminé",
+    "toolFailed": "en échec",
+    "unavailable": {
+      "disabled": "L'assistant IA n'est pas configuré sur ce collector.",
+      "password_sign_in": "Connectez-vous par authentification unique pour utiliser l'assistant : il agit avec votre identité d'authentification unique.",
+      "token_unavailable": "Votre session d'authentification unique ne détient aucun jeton d'accès pour l'assistant : déconnectez-vous puis reconnectez-vous.",
+      "impersonating": "L'assistant n'est pas utilisable pendant l'usurpation d'un autre utilisateur."
+    },
+    "errors": {
+      "token": "Votre session d'authentification unique ne détient plus de jeton d'accès : déconnectez-vous puis reconnectez-vous.",
+      "unreachable": "L'agent IA est injoignable. Réessayez plus tard.",
+      "stopped": "Arrêté.",
+      "unknown": "L'assistant n'a pas pu répondre."
+    },
+    "confirmation": {
+      "label": "Action en attente de votre décision",
+      "question": "L'assistant veut exécuter : {{title}}. Approuver ?",
+      "destructive": "L'assistant veut exécuter une action destructrice : {{title}}. Approuver ?",
+      "approve": "Approuver",
+      "reject": "Refuser"
     }
   }
 }

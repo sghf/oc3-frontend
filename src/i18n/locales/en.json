@@ -3314,12 +3314,10 @@
   },
   "assistant": {
     "title": "AI assistant",
-    "preview": "Preview · not connected",
     "newConversation": "New conversation",
     "conversation": "Conversation with the assistant",
     "name": "Assistant",
     "you": "You:",
-    "notConnected": "The assistant is not connected yet: this preview shows the conversation, without answers.",
     "empty": {
       "title": "Ask about your estate",
       "intro": "The assistant will answer from what you can see in the Collector: nodes, services, alerts, compliance and requests. It will never act without asking you first.",
@@ -3336,7 +3334,36 @@
       "placeholder": "Ask about nodes, services, alerts…",
       "send": "Send",
       "scope": "Answers use only what you are allowed to see. Actions always ask for your confirmation.",
-      "keys": "Enter to send · Shift+Enter for a new line"
+      "keys": "Enter to send · Shift+Enter for a new line",
+      "stop": "Stop"
+    },
+    "conversations": "Conversations",
+    "noConversation": "No conversation yet.",
+    "untitled": "New conversation",
+    "deleteConversation": "Delete the conversation {{title}}",
+    "thinking": "Thinking…",
+    "tools": "Tools used",
+    "toolRunning": "running",
+    "toolDone": "done",
+    "toolFailed": "failed",
+    "unavailable": {
+      "disabled": "The AI assistant is not configured on this collector.",
+      "password_sign_in": "Sign in with single sign-on to use the assistant: it acts with your single sign-on identity.",
+      "token_unavailable": "Your single sign-on session holds no access token for the assistant: sign out and sign in again.",
+      "impersonating": "The assistant cannot be used while impersonating another user."
+    },
+    "errors": {
+      "token": "Your single sign-on session no longer holds an access token: sign out and sign in again.",
+      "unreachable": "The AI agent cannot be reached. Try again later.",
+      "stopped": "Stopped.",
+      "unknown": "The assistant could not answer."
+    },
+    "confirmation": {
+      "label": "Action waiting for your decision",
+      "question": "The assistant wants to run: {{title}}. Approve?",
+      "destructive": "The assistant wants to run a destructive action: {{title}}. Approve?",
+      "approve": "Approve",
+      "reject": "Reject"
     }
   }
 }
