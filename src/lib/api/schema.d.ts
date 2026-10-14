@@ -3110,7 +3110,15 @@ export interface paths {
      */
     get: operations["GetGroup"];
     put?: never;
-    /** @description Modify a group's properties */
+    /**
+     * @description Modify the properties of a group: role (its name), description, privilege.
+     *     The name is trimmed and may be neither empty, nor longer than 255 characters,
+     *     nor the name of another group (409). privilege is T or F. Requires the
+     *     GroupManager privilege; a caller who is not a Manager may change only the
+     *     organizational groups they are member of. Changing a privilege group, or the
+     *     privilege flag to T, requires the Manager privilege. The Everybody group is
+     *     immutable.
+     */
     post: operations["PostGroup"];
     /**
      * @description Delete a group and cascade delete its membership, apps/forms/rulesets/modulesets
@@ -18524,6 +18532,8 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
       500: components["responses"]["500"];
     };
   };

@@ -1408,7 +1408,8 @@
       "title": "Group",
       "groups": {
         "identity": "Properties"
-      }
+      },
+      "editHint": "The name, description and privilege flag are changed here; only a Manager makes a group a privilege group or changes one. The Everybody group cannot be changed."
     },
     "create": {
       "open": "New group",
@@ -1427,7 +1428,12 @@
       "loading": "Reading the members…",
       "none": "No user is member of this group.",
       "noMatch": "No member matches.",
-      "hint": "Memberships are changed from the panel of each user."
+      "hint": "Memberships are changed from the panel of each user.",
+      "add": "Add a member",
+      "added": "{{user}} added to the group.",
+      "removed": "{{user}} removed from the group.",
+      "remove": "Remove {{user}} from the group",
+      "editHint": "Each change is written at once. A GroupManager who is not a Manager is offered the users sharing one of their organizational groups."
     },
     "actions": {
       "open": "Actions",

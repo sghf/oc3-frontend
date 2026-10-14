@@ -163,8 +163,9 @@ export function GroupsPage() {
     filter:
       prop === "privilege" ? { kind: "enum" as const, options: PRIVILEGE_OPTIONS } : undefined,
     render: (row: GroupRow) =>
+      // An empty flag, as oc3 wrote it for a group created without one, is F.
       prop === "privilege" && row.privilege !== undefined
-        ? t(`groups.privilege.${row.privilege}`)
+        ? t(`groups.privilege.${row.privilege === "T" ? "T" : "F"}`)
         : row[prop],
   }));
 

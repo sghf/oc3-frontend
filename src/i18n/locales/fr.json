@@ -1408,7 +1408,8 @@
       "title": "Groupe",
       "groups": {
         "identity": "Propriétés"
-      }
+      },
+      "editHint": "Le nom, la description et le statut de groupe de privilège se changent ici ; seul un Manager fait d'un groupe un groupe de privilège ou modifie un groupe de privilège. Le groupe Everybody ne se modifie pas."
     },
     "create": {
       "open": "Nouveau groupe",
@@ -1427,7 +1428,12 @@
       "loading": "Lecture des membres…",
       "none": "Aucun utilisateur n'est membre de ce groupe.",
       "noMatch": "Aucun membre ne correspond.",
-      "hint": "Les appartenances se changent depuis le panneau de chaque utilisateur."
+      "hint": "Les appartenances se changent depuis le panneau de chaque utilisateur.",
+      "add": "Ajouter un membre",
+      "added": "{{user}} ajouté au groupe.",
+      "removed": "{{user}} retiré du groupe.",
+      "remove": "Retirer {{user}} du groupe",
+      "editHint": "Chaque changement est enregistré aussitôt. Un GroupManager qui n'est pas Manager se voit proposer les utilisateurs qui partagent un de ses groupes organisationnels."
     },
     "actions": {
       "open": "Actions",
