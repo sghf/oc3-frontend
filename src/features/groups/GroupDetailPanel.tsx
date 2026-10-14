@@ -7,6 +7,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TrashIcon } from "@/components/ui/icons";
 import { problemText } from "@/lib/api/problem";
 import { GroupMembers } from "./GroupMembers";
+import { GroupMenuEntries } from "./GroupMenuEntries";
 
 type GroupRow = components["schemas"]["GroupRow"];
 
@@ -84,6 +85,13 @@ export function GroupDetailPanel({
       actions={
         <div className="space-y-3">
           {groupId !== undefined && <GroupMembers groupId={groupId} />}
+          {groupId !== undefined && group !== undefined && group !== null && (
+            <GroupMenuEntries
+              groupId={groupId}
+              role={group.role}
+              privilege={group.privilege === "T"}
+            />
+          )}
           <ConfirmButton
             icon={<TrashIcon />}
             label={t("detail.delete")}

@@ -42,6 +42,8 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   auth_user: ["users", "user"],
   auth_group: ["groups", "group"],
   auth_membership: ["users", "user", "groups", "group"],
+  // The entries a group hides from the menu: the menu, and the panel of the group.
+  group_hidden_menu_entries: ["user", "group"],
   gen_filtersets: ["filtersets", "filterset", "designer"],
   // The session filterset: `SessionFilter` reads the views again when it changes.
   gen_filterset_user: ["session-filterset"],

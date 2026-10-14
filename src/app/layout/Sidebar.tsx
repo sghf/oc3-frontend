@@ -12,6 +12,7 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { useNavCollapsedPref, useNavViewPref } from "@/lib/user-prefs";
 import { labelMatches, normalizeSearch } from "@/lib/label-search";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
+import { useHiddenMenuEntries } from "@/lib/api/hidden-menu-entries";
 import {
   NAV_CATEGORIES,
   NAV_TOP,
@@ -120,6 +121,9 @@ function ViewSwitch({ view, onChange }: { view: NavView; onChange: (view: NavVie
  * holds it, the impersonated user while impersonating; a section left empty goes.
  * Until the privileges are read, those entries wait; should they not be read, they
  * show: the menu does not lose its way to the views, the API checking the actions.
+ * An entry every organizational group of the user hides
+ * (`/groups/{id}/hidden_menu_entries`, see `useHiddenMenuEntries`) does not show
+ * either: a choice of the teams, not a right, its view staying open to its address.
  *
  * Two menus, chosen at the top (`ViewSwitch`, or "v" anywhere): operator, to watch
  * and act, and admin, to set the collector up. The choice is kept for the account,
@@ -143,10 +147,15 @@ export function Sidebar({ open }: { open: boolean }) {
   const filtering = needle !== "";
   // In English and in French, whichever the interface shows.
   const matches = (key: string) => labelMatches(i18n, key, needle);
+  const hidden = useHiddenMenuEntries();
+  // Rights first, then the choice of the teams: an entry every organizational group
+  // of the user hides is not shown. Not known yet, or not readable, nothing is
+  // hidden: the menu does not wait for it.
   const allowed = (entry: NavEntry) =>
-    entry.privileges === undefined ||
-    privileges.isError ||
-    (privileges.data !== undefined && hasPrivilege(privileges.data, entry.privileges));
+    (entry.privileges === undefined ||
+      privileges.isError ||
+      (privileges.data !== undefined && hasPrivilege(privileges.data, entry.privileges))) &&
+    hidden.data?.has(entry.menuId) !== true;
   const shown = (entry: NavEntry) => allowed(entry) && (!filtering || matches(entry.labelKey));
 
   const { view, ready, setView } = useNavViewPref();

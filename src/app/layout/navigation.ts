@@ -9,6 +9,49 @@
  */
 import type { ObjectKind } from "@/components/opensvc/ObjectIcon";
 
+/** The keys of the menu entries, one per entry, see `NavEntry.menuId`. */
+export type MenuId =
+  | "view-dashboard"
+  | "view-ai"
+  | "view-nodes"
+  | "view-clusters"
+  | "view-services"
+  | "view-service-instances"
+  | "view-resources"
+  | "view-actions"
+  | "view-checks"
+  | "view-node-net"
+  | "view-disks"
+  | "view-san"
+  | "view-nodes-hw"
+  | "view-pkg"
+  | "comp-status"
+  | "comp-log"
+  | "req-new"
+  | "req-pending-my"
+  | "req-pending-tiers"
+  | "req-all"
+  | "stat-reports"
+  | "adm-usr"
+  | "adm-groups"
+  | "adm-claim-mappings"
+  | "view-app"
+  | "adm-tags"
+  | "adm-obs"
+  | "adm-chk-def"
+  | "adm-chk-ctx"
+  | "comp-modsets"
+  | "comp-rsets"
+  | "comp-designer"
+  | "comp-safe"
+  | "adm-forms"
+  | "adm-metrics"
+  | "adm-charts"
+  | "adm-reports"
+  | "adm-filters"
+  | "adm-filtersets"
+  | "adm-log";
+
 export interface NavEntry {
   to:
     | "/"
@@ -51,6 +94,13 @@ export interface NavEntry {
     | "/compliance/status"
     | "/compliance/logs"
     | "/compliance/designer";
+  /**
+   * The key of the entry for the menu entries a group hides
+   * (`/groups/{id}/hidden_menu_entries`): the id of the entry of the historical
+   * menu, so that the entries hidden there stay hidden; one of oc3's
+   * `validMenuEntries`, where the views it did not have were added.
+   */
+  menuId: MenuId;
   labelKey: string;
   icon: ObjectKind;
   /** True for the root: without it, prefix matching would activate it everywhere. */
@@ -81,10 +131,16 @@ export interface NavCategory {
 
 /** Entries outside any category, at the top of the operator menu. */
 export const NAV_TOP: NavEntry[] = [
-  { to: "/", labelKey: "nav.dashboard", icon: "dashboardView", exact: true },
+  {
+    to: "/",
+    menuId: "view-dashboard",
+    labelKey: "nav.dashboard",
+    icon: "dashboardView",
+    exact: true,
+  },
   // The conversation with the AI assistant, right after the dashboard: a way into
   // the estate as a whole rather than a view of one kind of object.
-  { to: "/ai", labelKey: "nav.ai", icon: "ai" },
+  { to: "/ai", menuId: "view-ai", labelKey: "nav.ai", icon: "ai" },
 ];
 
 /**
@@ -97,13 +153,23 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.infrastructure",
     view: "operator",
     entries: [
-      { to: "/nodes", labelKey: "nav.nodes", icon: "node" },
-      { to: "/clusters", labelKey: "nav.clusters", icon: "cluster" },
-      { to: "/services", labelKey: "nav.services", icon: "service" },
-      { to: "/instances", labelKey: "nav.instances", icon: "instance" },
-      { to: "/resources", labelKey: "nav.resources", icon: "resource" },
-      { to: "/service-actions", labelKey: "nav.serviceActions", icon: "action" },
-      { to: "/checks", labelKey: "nav.checks", icon: "check", exact: true },
+      { to: "/nodes", menuId: "view-nodes", labelKey: "nav.nodes", icon: "node" },
+      { to: "/clusters", menuId: "view-clusters", labelKey: "nav.clusters", icon: "cluster" },
+      { to: "/services", menuId: "view-services", labelKey: "nav.services", icon: "service" },
+      {
+        to: "/instances",
+        menuId: "view-service-instances",
+        labelKey: "nav.instances",
+        icon: "instance",
+      },
+      { to: "/resources", menuId: "view-resources", labelKey: "nav.resources", icon: "resource" },
+      {
+        to: "/service-actions",
+        menuId: "view-actions",
+        labelKey: "nav.serviceActions",
+        icon: "action",
+      },
+      { to: "/checks", menuId: "view-checks", labelKey: "nav.checks", icon: "check", exact: true },
     ],
   },
   {
@@ -111,11 +177,11 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.inventory",
     view: "operator",
     entries: [
-      { to: "/networks", labelKey: "nav.networks", icon: "network" },
-      { to: "/disks", labelKey: "nav.disks", icon: "disk" },
-      { to: "/san-switches", labelKey: "nav.switches", icon: "switch" },
-      { to: "/hardware", labelKey: "nav.hardware", icon: "hardware" },
-      { to: "/packages", labelKey: "nav.packages", icon: "package" },
+      { to: "/networks", menuId: "view-node-net", labelKey: "nav.networks", icon: "network" },
+      { to: "/disks", menuId: "view-disks", labelKey: "nav.disks", icon: "disk" },
+      { to: "/san-switches", menuId: "view-san", labelKey: "nav.switches", icon: "switch" },
+      { to: "/hardware", menuId: "view-nodes-hw", labelKey: "nav.hardware", icon: "hardware" },
+      { to: "/packages", menuId: "view-pkg", labelKey: "nav.packages", icon: "package" },
     ],
   },
   {
@@ -123,8 +189,18 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.compliance",
     view: "operator",
     entries: [
-      { to: "/compliance/status", labelKey: "nav.complianceStatus", icon: "complianceStatus" },
-      { to: "/compliance/logs", labelKey: "nav.complianceLogs", icon: "complianceLog" },
+      {
+        to: "/compliance/status",
+        menuId: "comp-status",
+        labelKey: "nav.complianceStatus",
+        icon: "complianceStatus",
+      },
+      {
+        to: "/compliance/logs",
+        menuId: "comp-log",
+        labelKey: "nav.complianceLogs",
+        icon: "complianceLog",
+      },
     ],
   },
   {
@@ -132,27 +208,52 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.requests",
     view: "operator",
     entries: [
-      { to: "/requests", labelKey: "nav.newRequest", icon: "form", exact: true },
-      { to: "/requests/team", labelKey: "nav.teamRequests", icon: "form" },
-      { to: "/requests/tiers", labelKey: "nav.tiersRequests", icon: "form" },
-      { to: "/requests/all", labelKey: "nav.allRequests", icon: "form" },
+      { to: "/requests", menuId: "req-new", labelKey: "nav.newRequest", icon: "form", exact: true },
+      {
+        to: "/requests/team",
+        menuId: "req-pending-my",
+        labelKey: "nav.teamRequests",
+        icon: "form",
+      },
+      {
+        to: "/requests/tiers",
+        menuId: "req-pending-tiers",
+        labelKey: "nav.tiersRequests",
+        icon: "form",
+      },
+      { to: "/requests/all", menuId: "req-all", labelKey: "nav.allRequests", icon: "form" },
     ],
   },
   {
     key: "statistics",
     labelKey: "nav.categories.statistics",
     view: "operator",
-    entries: [{ to: "/stats/reports", labelKey: "nav.statReports", icon: "report" }],
+    entries: [
+      { to: "/stats/reports", menuId: "stat-reports", labelKey: "nav.statReports", icon: "report" },
+    ],
   },
   {
     key: "access",
     labelKey: "nav.categories.access",
     view: "admin",
     entries: [
-      { to: "/users", labelKey: "nav.users", icon: "user", privileges: ["UserManager"] },
-      { to: "/groups", labelKey: "nav.groups", icon: "group", privileges: ["GroupManager"] },
+      {
+        to: "/users",
+        menuId: "adm-usr",
+        labelKey: "nav.users",
+        icon: "user",
+        privileges: ["UserManager"],
+      },
+      {
+        to: "/groups",
+        menuId: "adm-groups",
+        labelKey: "nav.groups",
+        icon: "group",
+        privileges: ["GroupManager"],
+      },
       {
         to: "/claim-mappings",
+        menuId: "adm-claim-mappings",
         labelKey: "nav.claimMappings",
         icon: "claimMapping",
         privileges: ["Manager"],
@@ -164,10 +265,11 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.inventoryData",
     view: "admin",
     entries: [
-      { to: "/apps", labelKey: "nav.apps", icon: "app" },
-      { to: "/tags", labelKey: "nav.tags", icon: "tags" },
+      { to: "/apps", menuId: "view-app", labelKey: "nav.apps", icon: "app" },
+      { to: "/tags", menuId: "adm-tags", labelKey: "nav.tags", icon: "tags" },
       {
         to: "/obsolescence",
+        menuId: "adm-obs",
         labelKey: "nav.obsolescence",
         icon: "obsolescence",
         privileges: ["ObsManager"],
@@ -181,12 +283,14 @@ export const NAV_CATEGORIES: NavCategory[] = [
     entries: [
       {
         to: "/checks/defaults",
+        menuId: "adm-chk-def",
         labelKey: "nav.checkDefaults",
         icon: "check",
         privileges: ["CheckManager"],
       },
       {
         to: "/checks/contextual",
+        menuId: "adm-chk-ctx",
         labelKey: "nav.checkContextual",
         icon: "check",
         privileges: ["ContextCheckManager"],
@@ -198,33 +302,70 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.compliance",
     view: "admin",
     entries: [
-      { to: "/compliance/modulesets", labelKey: "nav.modulesets", icon: "moduleset" },
-      { to: "/compliance/rulesets", labelKey: "nav.rulesets", icon: "ruleset" },
+      {
+        to: "/compliance/modulesets",
+        menuId: "comp-modsets",
+        labelKey: "nav.modulesets",
+        icon: "moduleset",
+      },
+      {
+        to: "/compliance/rulesets",
+        menuId: "comp-rsets",
+        labelKey: "nav.rulesets",
+        icon: "ruleset",
+      },
       {
         to: "/compliance/designer",
+        menuId: "comp-designer",
         labelKey: "nav.designer",
         icon: "designer",
         privileges: ["CompManager"],
       },
       // Everyone: the files published to one's teams, which the rulesets and the
       // service configurations reference (safe://).
-      { to: "/safe", labelKey: "nav.safe", icon: "safe" },
+      { to: "/safe", menuId: "comp-safe", labelKey: "nav.safe", icon: "safe" },
     ],
   },
   {
     key: "requestForms",
     labelKey: "nav.categories.requests",
     view: "admin",
-    entries: [{ to: "/forms", labelKey: "nav.forms", icon: "form", privileges: ["FormsManager"] }],
+    entries: [
+      {
+        to: "/forms",
+        menuId: "adm-forms",
+        labelKey: "nav.forms",
+        icon: "form",
+        privileges: ["FormsManager"],
+      },
+    ],
   },
   {
     key: "reporting",
     labelKey: "nav.categories.reporting",
     view: "admin",
     entries: [
-      { to: "/metrics", labelKey: "nav.metrics", icon: "metric", privileges: ["ReportsManager"] },
-      { to: "/charts", labelKey: "nav.charts", icon: "chart", privileges: ["ReportsManager"] },
-      { to: "/reports", labelKey: "nav.reports", icon: "report", privileges: ["ReportsManager"] },
+      {
+        to: "/metrics",
+        menuId: "adm-metrics",
+        labelKey: "nav.metrics",
+        icon: "metric",
+        privileges: ["ReportsManager"],
+      },
+      {
+        to: "/charts",
+        menuId: "adm-charts",
+        labelKey: "nav.charts",
+        icon: "chart",
+        privileges: ["ReportsManager"],
+      },
+      {
+        to: "/reports",
+        menuId: "adm-reports",
+        labelKey: "nav.reports",
+        icon: "report",
+        privileges: ["ReportsManager"],
+      },
     ],
   },
   {
@@ -232,15 +373,27 @@ export const NAV_CATEGORIES: NavCategory[] = [
     labelKey: "nav.categories.filtering",
     view: "admin",
     entries: [
-      { to: "/filters", labelKey: "nav.filters", icon: "filter", privileges: ["Manager"] },
-      { to: "/filtersets", labelKey: "nav.filtersets", icon: "filterset", privileges: ["Manager"] },
+      {
+        to: "/filters",
+        menuId: "adm-filters",
+        labelKey: "nav.filters",
+        icon: "filter",
+        privileges: ["Manager"],
+      },
+      {
+        to: "/filtersets",
+        menuId: "adm-filtersets",
+        labelKey: "nav.filtersets",
+        icon: "filterset",
+        privileges: ["Manager"],
+      },
     ],
   },
   {
     key: "audit",
     labelKey: "nav.categories.audit",
     view: "admin",
-    entries: [{ to: "/logs", labelKey: "nav.logs", icon: "log" }],
+    entries: [{ to: "/logs", menuId: "adm-log", labelKey: "nav.logs", icon: "log" }],
   },
 ];
 

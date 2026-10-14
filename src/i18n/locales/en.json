@@ -1411,6 +1411,14 @@
           "done_other": "{{count}} groups deleted."
         }
       }
+    },
+    "menu": {
+      "title": "Menu entries",
+      "intro": "The entries the members of {{role}} see in their menu. An entry is hidden to a user only when every team of the user hides it; the Everybody group and the privilege groups do not count, the personal group of a user does.",
+      "readOnly": "Only a GroupManager changes them.",
+      "privilegeGroup": "A privilege group hides no menu entry: the entries of the views a user may not use are not shown anyway.",
+      "shown": "shown",
+      "hidden": "hidden"
     }
   },
   "tags": {

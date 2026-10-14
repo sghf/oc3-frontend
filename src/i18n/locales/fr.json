@@ -1411,6 +1411,14 @@
           "done_other": "{{count}} groupes supprimés."
         }
       }
+    },
+    "menu": {
+      "title": "Entrées du menu",
+      "intro": "Les entrées que les membres de {{role}} voient dans leur menu. Une entrée n'est masquée à un utilisateur que si toutes ses équipes la masquent ; le groupe Everybody et les groupes de privilège ne comptent pas, le groupe personnel d'un utilisateur, si.",
+      "readOnly": "Seul un GroupManager les modifie.",
+      "privilegeGroup": "Un groupe de privilège ne masque aucune entrée : celles des vues qu'un utilisateur ne peut pas utiliser ne sont de toute façon pas affichées.",
+      "shown": "affichée",
+      "hidden": "masquée"
     }
   },
   "tags": {
