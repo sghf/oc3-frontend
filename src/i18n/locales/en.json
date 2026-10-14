@@ -406,8 +406,6 @@
       "days_one": "Last 24 hours",
       "days_other": "Last {{count}} days",
       "empty": "No performance statistics recorded for this node over the period.",
-      "chartLabel_one": "{{name}}, last 24 hours",
-      "chartLabel_other": "{{name}}, last {{count}} days",
       "charts": {
         "cpu": "CPU",
         "load": "Load",
@@ -420,7 +418,18 @@
         "netErrors": "Network errors",
         "diskUtil": "Disk utilization",
         "diskWait": "Disk wait",
-        "diskOps": "Disk transfers"
+        "diskOps": "Disk transfers",
+        "fsUsed": "File system usage",
+        "fsSize": "File system size",
+        "svcCpu": "Container CPU usage",
+        "svcCpuCap": "Container CPU cap",
+        "svcMem": "Container memory usage",
+        "svcMemCap": "Container memory cap",
+        "svcRss": "Container resident memory",
+        "svcSwap": "Container swap",
+        "svcNproc": "Container processes",
+        "svcPg": "Container paging",
+        "svcAt": "Container active memory"
       },
       "metrics": {
         "usr": "user",
@@ -454,8 +463,29 @@
         "txdropps": "tx drops",
         "pct_util": "utilization",
         "await": "wait",
-        "tps": "transfers"
-      }
+        "tps": "transfers",
+        "used": "used",
+        "size": "size",
+        "cpu": "cpu",
+        "cap_cpu": "cpu cap",
+        "mem": "memory",
+        "cap": "memory cap",
+        "rss": "rss",
+        "swap": "swap",
+        "nproc": "processes",
+        "pg": "paging",
+        "avgpg": "average paging",
+        "at": "active",
+        "avgat": "average active"
+      },
+      "custom": "Custom range",
+      "begin": "From",
+      "end": "To",
+      "range": "{{begin}} to {{end}}",
+      "invalidRange_one": "Pick a start date on or before the end date, over {{count}} day at most.",
+      "invalidRange_other": "Pick a start date on or before the end date, over {{count}} days at most.",
+      "chartLabel": "{{name}}, {{period}}",
+      "otherMax": "Others, highest"
     },
     "logs": {
       "empty": "No log entry for this node.",

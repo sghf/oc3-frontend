@@ -3985,11 +3985,15 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description The performance statistics of a node for one group, over the last days: one
-     *     series per metric (and per device for netdev, netdev_err and blockdev), each
+     * @description The performance statistics of a node for one group, over the last days or
+     *     between two dates: one series per metric (and per device for netdev,
+     *     netdev_err and blockdev, per mount point for fs, per container for svc), each
      *     a list of [unix time, value] points, as the historical collector stored them
      *     in whisper files under stats/nodes/<node_id> (cpu/all, mem_u, swap, proc,
-     *     block, netdev/<dev>, netdev_err/<dev>, blockdev/<dev>). The resolution is the
+     *     block, netdev/<dev>, netdev_err/<dev>, blockdev/<dev>, fs_u/<mount point>,
+     *     svc/<container>). The fs series are the size in KB and the used share in
+     *     percent; the svc ones the container cpu and memory usage, their caps, rss,
+     *     swap, process count and paging. The resolution is the
      *     finest the files keep for the period: a minute over half an hour, ten minutes
      *     over three days, an hour over ninety days, a day beyond. A node without
      *     statistics returns an empty list.
@@ -21467,9 +21471,29 @@ export interface operations {
   GetNodeStats: {
     parameters: {
       query: {
-        group: "cpu" | "mem" | "swap" | "proc" | "block" | "netdev" | "netdev_err" | "blockdev";
-        /** @description Days of history, 1 by default, 1095 at most. */
+        group:
+          | "cpu"
+          | "mem"
+          | "swap"
+          | "proc"
+          | "block"
+          | "netdev"
+          | "netdev_err"
+          | "blockdev"
+          | "fs"
+          | "svc";
+        /**
+         * @description Days of history, 1 by default, 1095 at most: before end when given,
+         *     else before now. Ignored when begin is given.
+         */
         days?: number;
+        /**
+         * @description Start of the period. With end, the period may not exceed 1095 days;
+         *     without, it runs to now.
+         */
+        begin?: string;
+        /** @description End of the period, now by default. Must be after begin. */
+        end?: string;
       };
       header?: never;
       path: {

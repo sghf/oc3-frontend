@@ -406,8 +406,6 @@
       "days_one": "Dernières 24 heures",
       "days_other": "{{count}} derniers jours",
       "empty": "Aucune statistique de performance enregistrée pour ce nœud sur la période.",
-      "chartLabel_one": "{{name}}, dernières 24 heures",
-      "chartLabel_other": "{{name}}, {{count}} derniers jours",
       "charts": {
         "cpu": "CPU",
         "load": "Charge",
@@ -420,7 +418,18 @@
         "netErrors": "Erreurs réseau",
         "diskUtil": "Utilisation des disques",
         "diskWait": "Attente des disques",
-        "diskOps": "Transferts des disques"
+        "diskOps": "Transferts des disques",
+        "fsUsed": "Occupation des systèmes de fichiers",
+        "fsSize": "Taille des systèmes de fichiers",
+        "svcCpu": "CPU des conteneurs",
+        "svcCpuCap": "Plafond CPU des conteneurs",
+        "svcMem": "Mémoire des conteneurs",
+        "svcMemCap": "Plafond mémoire des conteneurs",
+        "svcRss": "Mémoire résidente des conteneurs",
+        "svcSwap": "Swap des conteneurs",
+        "svcNproc": "Processus des conteneurs",
+        "svcPg": "Pagination des conteneurs",
+        "svcAt": "Mémoire active des conteneurs"
       },
       "metrics": {
         "usr": "utilisateur",
@@ -454,8 +463,29 @@
         "txdropps": "rejets émis",
         "pct_util": "utilisation",
         "await": "attente",
-        "tps": "transferts"
-      }
+        "tps": "transferts",
+        "used": "occupé",
+        "size": "taille",
+        "cpu": "cpu",
+        "cap_cpu": "plafond cpu",
+        "mem": "mémoire",
+        "cap": "plafond mémoire",
+        "rss": "rss",
+        "swap": "swap",
+        "nproc": "processus",
+        "pg": "pagination",
+        "avgpg": "pagination moyenne",
+        "at": "active",
+        "avgat": "active moyenne"
+      },
+      "custom": "Période libre",
+      "begin": "Du",
+      "end": "Au",
+      "range": "du {{begin}} au {{end}}",
+      "invalidRange_one": "Choisissez une date de début antérieure ou égale à la date de fin, sur {{count}} jour au plus.",
+      "invalidRange_other": "Choisissez une date de début antérieure ou égale à la date de fin, sur {{count}} jours au plus.",
+      "chartLabel": "{{name}}, {{period}}",
+      "otherMax": "Autres, maximum"
     },
     "logs": {
       "empty": "Aucune entrée de journal pour ce nœud.",
