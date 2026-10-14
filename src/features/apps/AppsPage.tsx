@@ -244,6 +244,9 @@ export function AppsPage() {
         onClose={() => {
           update({ sel: undefined });
         }}
+        onRenamed={(code) => {
+          update({ sel: code });
+        }}
       />
 
       <CreateAppPanel

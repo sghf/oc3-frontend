@@ -1218,7 +1218,8 @@
       "groups": {
         "identity": "Propriétés"
       },
-      "teamsHint": "Modifier les équipes d'une app requiert le privilège AppManager et la responsabilité de l'app ; sauf pour un Manager, seules les équipes dont vous êtes membre peuvent être ajoutées. Les équipes responsables gèrent l'app, celles à qui elle est publiée voient ses nœuds et services."
+      "teamsHint": "Modifier les équipes d'une app requiert le privilège AppManager et la responsabilité de l'app ; sauf pour un Manager, seules les équipes dont vous êtes membre peuvent être ajoutées. Les équipes responsables gèrent l'app, celles à qui elle est publiée voient ses nœuds et services.",
+      "editHint": "Le code, la description, le domaine et l'équipe d'exploitation se changent par un AppManager responsable de l'application. Renommer le code le renomme sur ses nœuds et ses services. L'équipe d'exploitation est un groupe organisationnel."
     },
     "create": {
       "open": "Nouveau code",

@@ -225,7 +225,14 @@ export interface paths {
     /** @description Display app properties */
     get: operations["GetApp"];
     put?: never;
-    /** @description Change an application code properties */
+    /**
+     * @description Change the properties of an application code. Renaming it renames it on its
+     *     nodes and services too. app is trimmed and may be neither empty, nor longer
+     *     than 64 characters, nor the code of another application, compared without
+     *     regard to case (409); app_domain is 64 characters at most; app_team_ops is
+     *     empty or the name of an organizational group. Requires the AppManager
+     *     privilege and the responsibility of the app, which a Manager has.
+     */
     post: operations["PostApp"];
     /** @description Delete an application code */
     delete: operations["DeleteApp"];
@@ -9174,6 +9181,7 @@ export interface operations {
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];
+      409: components["responses"]["409"];
       500: components["responses"]["500"];
     };
   };

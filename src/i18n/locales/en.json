@@ -1218,7 +1218,8 @@
       "groups": {
         "identity": "Properties"
       },
-      "teamsHint": "Changing the teams of an app requires the AppManager privilege and the responsibility of the app; unless you are a Manager, you can only add teams you are a member of. The responsible teams manage the app, the teams it is published to see its nodes and services."
+      "teamsHint": "Changing the teams of an app requires the AppManager privilege and the responsibility of the app; unless you are a Manager, you can only add teams you are a member of. The responsible teams manage the app, the teams it is published to see its nodes and services.",
+      "editHint": "The code, description, domain and ops team are changed by an AppManager responsible for the app. Renaming the code renames it on the nodes and services of the app. The ops team is an organizational group."
     },
     "create": {
       "open": "New app",
