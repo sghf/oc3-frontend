@@ -65,6 +65,7 @@ export type ObjectKind =
   | "moduleset"
   | "ruleset"
   | "complianceStatus"
+  | "check"
   | "complianceLog"
   | "designer"
   | "claimMapping";
@@ -133,6 +134,9 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   ruleset: { Icon: CubeIcon, className: "text-icon-compliance" },
   // The check mark of the historical compliance status (`compstatus`), in its crimson.
   complianceStatus: { Icon: CheckIcon, className: "text-icon-compliance" },
+  // The green check mark of the historical checks (`check16`), in the green of the
+  // services, the compliance status keeping the crimson one.
+  check: { Icon: CheckIcon, className: "text-icon-service" },
   // The history clock of the historical compliance log (`complog`), in its crimson.
   complianceLog: { Icon: HistoryIcon, className: "text-icon-compliance" },
   // The puzzle piece of the historical designer (`designer16`), in the compliance crimson.

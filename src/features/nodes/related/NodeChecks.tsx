@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import { CheckState, CheckThresholds } from "@/components/opensvc/CheckState";
+import { CHECK_STATE_KEY } from "@/components/opensvc/check-state";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { RelatedTable, type RelatedColumn } from "@/components/opensvc/RelatedTable";
 import { RelativeTime } from "@/components/ui/RelativeTime";
@@ -12,13 +14,6 @@ type CheckRow = components["schemas"]["CheckRow"];
 
 /** Natural sort of instances: /data2 before /data10. */
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-
-/** The words saying where a check stands, by `chk_err`. */
-const STATE_KEY: Record<number, string> = {
-  0: "nodes.checks.within",
-  1: "nodes.checks.below",
-  2: "nodes.checks.above",
-};
 
 /**
  * The checks the agent of a node reports, grouped by type. A search narrows them as
@@ -47,7 +42,9 @@ export function NodeChecks({ nodeId, locale }: { nodeId: string; locale: string 
           if (texts.some((text) => text != null && normalizeSearch(text).includes(needle)))
             return true;
           const state =
-            row.chk_err === undefined || row.chk_err === null ? undefined : STATE_KEY[row.chk_err];
+            row.chk_err === undefined || row.chk_err === null
+              ? undefined
+              : CHECK_STATE_KEY[row.chk_err];
           return state !== undefined && labelMatches(i18n, state, needle);
         });
 
@@ -95,30 +92,18 @@ export function NodeChecks({ nodeId, locale }: { nodeId: string; locale: string 
     {
       key: "thresholds",
       label: t("nodes.checks.fields.thresholds"),
-      render: (row) =>
-        (row.chk_low ?? null) === null && (row.chk_high ?? null) === null ? (
-          <span className="text-ink-muted">{t("nodes.checks.noThresholds")}</span>
-        ) : (
-          <>
-            <span className="tabular-nums">
-              {row.chk_low ?? "−∞"} – {row.chk_high ?? "+∞"}
-            </span>{" "}
-            <span className="text-ink-muted">{row.chk_threshold_provider}</span>
-          </>
-        ),
+      render: (row) => (
+        <CheckThresholds
+          low={row.chk_low}
+          high={row.chk_high}
+          provider={row.chk_threshold_provider}
+        />
+      ),
     },
     {
       key: "chk_err",
       label: t("nodes.checks.fields.chk_err"),
-      // Out of bounds is said with a glyph and a word, not by its color alone.
-      render: (row) =>
-        row.chk_err === 1 ? (
-          <span className="text-state-down">▼ {t("nodes.checks.below")}</span>
-        ) : row.chk_err === 2 ? (
-          <span className="text-state-down">▲ {t("nodes.checks.above")}</span>
-        ) : row.chk_err === 0 ? (
-          <span className="text-state-up">● {t("nodes.checks.within")}</span>
-        ) : null,
+      render: (row) => <CheckState err={row.chk_err} />,
     },
   ];
 

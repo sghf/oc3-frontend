@@ -76,6 +76,12 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   node_hba: ["node", "service"],
   packages: ["packages", "node"],
   obsolescence: ["obsolescence", "obsolescence-setting"],
+  // The feed of a node's checks publishes "checks", the API the tables it changes.
+  checks: ["checks", "check", "node"],
+  checks_live: ["checks", "check", "node"],
+  checks_settings: ["checks", "check"],
+  checks_defaults: ["check-defaults", "check-default"],
+  gen_filterset_check_threshold: ["check-contextual", "check-contextual-one"],
 };
 
 /** Events are gathered this long before the queries are refreshed. */

@@ -35,7 +35,7 @@ export interface ActionEntry {
  * records, at once, rather than an action queued for the agent. Labels and texts
  * come from `<prefix>.data.<key>.label`, `.question`, `.confirm`, `.running` and
  * `.done`; with a choice, `.choice` names its field, and `.done` receives the
- * label chosen as `choice`.
+ * label chosen as `choice`, and the values entered in its fields, by their key.
  */
 export interface DataActionEntry {
   key: string;
@@ -56,6 +56,12 @@ export interface DataActionEntry {
   /** Something to choose in the confirmation, applied to every object: a tag, a moduleset… */
   choice?: DataActionChoice;
   /**
+   * Integers to enter in the confirmation, applied to every object, such as
+   * thresholds: their keys, labelled `<prefix>.data.<key>.fields.<field>`. One of
+   * them at least is required; a field left empty is not passed.
+   */
+  fields?: readonly string[];
+  /**
    * Read when the confirmation opens: what the action would also break, such as
    * the filtersets using a filter to delete. The confirmation waits for them.
    */
@@ -64,7 +70,11 @@ export interface DataActionEntry {
    * Runs the action on one object, with the value chosen when the entry has a
    * choice; returns the API error message, or null.
    */
-  run: (target: ActionTarget, choice: string | undefined) => Promise<string | null>;
+  run: (
+    target: ActionTarget,
+    choice: string | undefined,
+    values: Readonly<Record<string, number>>,
+  ) => Promise<string | null>;
   /** Called with the objects the action succeeded on. */
   onDone?: (done: ActionTarget[]) => void;
 }
@@ -204,16 +214,18 @@ export function ActionsMenu({
     mutationFn: async ({
       entry,
       choice,
+      values,
     }: {
       entry: DataActionEntry;
       choice: ComboboxOption | undefined;
+      values: Record<string, number>;
     }): Promise<Outcome> => {
       // One object after the other: each is a transaction on the collector side,
       // and a long selection must not open them all at once.
       const done: ActionTarget[] = [];
       const failures: string[] = [];
       for (const target of targets) {
-        const message = await entry.run(target, choice?.value);
+        const message = await entry.run(target, choice?.value, values);
         if (message === null) done.push(target);
         else failures.push(failureText(target, message));
       }
@@ -222,7 +234,11 @@ export function ActionsMenu({
         done:
           done.length === 0
             ? null
-            : t(`${prefix}.data.${entry.key}.done`, { count: done.length, choice: choice?.label }),
+            : t(`${prefix}.data.${entry.key}.done`, {
+                count: done.length,
+                choice: choice?.label,
+                ...values,
+              }),
         failures,
       };
     },
@@ -337,9 +353,9 @@ export function ActionsMenu({
                   : t(`${prefix}.data.${pending.entry.key}.confirm`, { count: targets.length })
               }
               busy={data.isPending}
-              onConfirm={(choice) => {
+              onConfirm={(choice, values) => {
                 data.mutate(
-                  { entry: pending.entry, choice },
+                  { entry: pending.entry, choice, values },
                   {
                     onSettled: () => {
                       setPending(null);
@@ -478,12 +494,14 @@ function DataConfirm({
   question: string;
   confirmLabel: string;
   busy: boolean;
-  onConfirm: (choice: ComboboxOption | undefined) => void;
+  onConfirm: (choice: ComboboxOption | undefined, values: Record<string, number>) => void;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
   const tone = CONFIRM_TONES[entry.tone ?? "destructive"];
   const [chosen, setChosen] = useState("");
+  const [typed, setTyped] = useState<Record<string, string>>({});
+  const firstField = useRef<HTMLInputElement>(null);
   // What the action would also remove, acknowledged: required once the warnings
   // say something, or could not be read.
   const [acknowledged, setAcknowledged] = useState(false);
@@ -502,7 +520,19 @@ function DataConfirm({
   });
   useEffect(() => {
     if (entry.choice !== undefined) choiceInput.current?.focus();
-  }, [entry.choice]);
+    else if (entry.fields !== undefined) firstField.current?.focus();
+  }, [entry.choice, entry.fields]);
+
+  // The values entered: integers, the empty fields left out.
+  const values: Record<string, number> = {};
+  let invalidField = false;
+  for (const field of entry.fields ?? []) {
+    const text = (typed[field] ?? "").trim();
+    if (text === "") continue;
+    if (/^-?\d+$/.test(text)) values[field] = Number(text);
+    else invalidField = true;
+  }
+  const missingValue = entry.fields !== undefined && Object.keys(values).length === 0;
 
   const choice = options.data?.find((option) => option.value === chosen);
   const mustAcknowledge =
@@ -511,7 +541,9 @@ function DataConfirm({
   const waiting =
     (entry.choice !== undefined && choice === undefined) ||
     (entry.warnings !== undefined && warnings.isPending) ||
-    (mustAcknowledge && !acknowledged);
+    (mustAcknowledge && !acknowledged) ||
+    invalidField ||
+    missingValue;
   const names = targets.map((target) => target.name);
   const shown = names.slice(0, NAMES_SHOWN);
   const more = names.length - shown.length;
@@ -585,6 +617,21 @@ function DataConfirm({
       {/* The field of a choice on the row of the buttons: its list opens under them,
           over nothing the confirmation needs. */}
       <div className="flex flex-wrap items-center gap-2">
+        {entry.fields?.map((field, index) => (
+          <label key={field} className="flex items-center gap-1.5">
+            {t(`${prefix}.data.${entry.key}.fields.${field}`)}
+            <input
+              ref={index === 0 ? firstField : undefined}
+              inputMode="numeric"
+              value={typed[field] ?? ""}
+              aria-invalid={(typed[field] ?? "").trim() !== "" && !(field in values)}
+              onChange={(event) => {
+                setTyped((previous) => ({ ...previous, [field]: event.target.value }));
+              }}
+              className="h-7 w-24 rounded-(--radius-control) border border-line bg-surface px-2 font-mono aria-invalid:border-state-down"
+            />
+          </label>
+        ))}
         {entry.choice !== undefined && !options.isError && (
           <Combobox
             options={options.data ?? []}
@@ -603,10 +650,12 @@ function DataConfirm({
         )}
         <button
           type="button"
-          autoFocus={entry.tone === "change" && entry.choice === undefined}
+          autoFocus={
+            entry.tone === "change" && entry.choice === undefined && entry.fields === undefined
+          }
           disabled={busy || waiting}
           onClick={() => {
-            onConfirm(choice);
+            onConfirm(choice, values);
           }}
           className={`h-7 rounded-(--radius-control) px-3 font-medium disabled:opacity-60 ${tone.button}`}
         >
@@ -614,7 +663,9 @@ function DataConfirm({
         </button>
         <button
           type="button"
-          autoFocus={entry.tone !== "change" && entry.choice === undefined}
+          autoFocus={
+            entry.tone !== "change" && entry.choice === undefined && entry.fields === undefined
+          }
           disabled={busy}
           onClick={onCancel}
           className="h-7 rounded-(--radius-control) border border-line bg-surface px-3"

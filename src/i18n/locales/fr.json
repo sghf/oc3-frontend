@@ -17,7 +17,8 @@
       "inventoryData": "Données d'inventaire",
       "reporting": "Rapports",
       "filtering": "Filtrage",
-      "audit": "Audit"
+      "audit": "Audit",
+      "checks": "Checks"
     },
     "apps": "Codes application",
     "networks": "Réseaux",
@@ -61,7 +62,10 @@
     "viewLabel": "Menu affiché",
     "inView": "Dans {{view}}",
     "safe": "Coffre-fort",
-    "ai": "Assistant IA"
+    "ai": "Assistant IA",
+    "checks": "Checks",
+    "checkDefaults": "Seuils par défaut",
+    "checkContextual": "Seuils contextuels"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -3667,6 +3671,191 @@
       "destructive": "L'assistant veut exécuter une action destructrice : {{title}}. Approuver ?",
       "approve": "Approuver",
       "reject": "Refuser"
+    }
+  },
+  "checks": {
+    "title": "Checks",
+    "fields": {
+      "id": "Id",
+      "node_id": "Id du nœud",
+      "nodes.nodename": "Nœud",
+      "svc_id": "Id du service",
+      "services.svcname": "Service",
+      "chk_type": "Type",
+      "chk_instance": "Instance",
+      "chk_value": "Valeur",
+      "chk_low": "Seuil bas",
+      "chk_high": "Seuil haut",
+      "chk_err": "État",
+      "chk_threshold_provider": "Source des seuils",
+      "chk_created": "Créé",
+      "chk_updated": "Mis à jour",
+      "thresholds": "Seuils"
+    },
+    "detail": {
+      "title": "Check",
+      "groups": {
+        "check": "Check",
+        "thresholds": "Seuils",
+        "object": "Nœud et service"
+      }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "setThresholds": {
+          "label": "Fixer les seuils",
+          "question_one": "Fixer les seuils de ce check ? Ils priment sur les seuils contextuels et par défaut ; un seuil laissé vide garde sa valeur actuelle.",
+          "question_other": "Fixer les seuils de ces {{count}} checks ? Ils priment sur les seuils contextuels et par défaut ; un seuil laissé vide garde la valeur actuelle de chaque check.",
+          "fields": {
+            "chk_low": "Bas",
+            "chk_high": "Haut"
+          },
+          "confirm_one": "Fixer",
+          "confirm_other": "Fixer sur {{count}} checks",
+          "running": "Enregistrement…",
+          "done_one": "Seuils fixés sur 1 check.",
+          "done_other": "Seuils fixés sur {{count}} checks."
+        },
+        "resetThresholds": {
+          "label": "Réinitialiser les seuils",
+          "question_one": "Réinitialiser les seuils de ce check ? Il reprend ses seuils contextuels ou par défaut.",
+          "question_other": "Réinitialiser les seuils de ces {{count}} checks ? Ils reprennent leurs seuils contextuels ou par défaut.",
+          "confirm_one": "Réinitialiser",
+          "confirm_other": "Réinitialiser {{count}} checks",
+          "running": "Réinitialisation…",
+          "done_one": "Seuils de 1 check réinitialisés.",
+          "done_other": "Seuils de {{count}} checks réinitialisés."
+        },
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce check et ses alertes ? L'agent le remonte de nouveau à sa prochaine exécution des checks s'il existe toujours. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} checks et leurs alertes ? Les agents les remontent de nouveau à leur prochaine exécution des checks s'ils existent toujours. Cette action est irréversible.",
+          "confirm_one": "Supprimer le check",
+          "confirm_other": "Supprimer {{count}} checks",
+          "running": "Suppression…",
+          "done_one": "1 check supprimé.",
+          "done_other": "{{count}} checks supprimés."
+        }
+      }
+    }
+  },
+  "checkDefaults": {
+    "title": "Seuils par défaut",
+    "intro": "Les seuils d'un type de check. Un check prend, parmi les seuils par défaut de son type dont le motif d'instance correspond à son instance, celui de la plus haute priorité, puis du motif le plus long, sauf seuils fixés sur lui ou seuils contextuels.",
+    "fields": {
+      "id": "Id",
+      "chk_type": "Type",
+      "chk_inst": "Motif d'instance",
+      "chk_prio": "Priorité",
+      "chk_low": "Seuil bas",
+      "chk_high": "Seuil haut"
+    },
+    "create": {
+      "open": "Nouveaux seuils",
+      "title": "Nouveaux seuils par défaut",
+      "intro": "Seuils par défaut d'un type de check, pour les instances que le motif désigne. Les checks du type les prennent en arrière-plan.",
+      "submit": "Ajouter",
+      "submitting": "Ajout…",
+      "hints": {
+        "chk_type": "Le type de check, tel que les agents le remontent : fs_u, mpath, eth…",
+        "chk_inst": "Expression régulière couvrant toute l'instance ; vide pour toutes les instances.",
+        "chk_prio": "Parmi les seuils par défaut qui s'appliquent à un check, la plus haute priorité l'emporte.",
+        "chk_low": "Vide pour aucun seuil bas.",
+        "chk_high": "Vide pour aucun seuil haut."
+      },
+      "invalid": {
+        "chk_type": "Obligatoire.",
+        "chk_inst": "Expression régulière invalide.",
+        "chk_prio": "Un entier.",
+        "chk_low": "Un entier, pas au-dessus du seuil haut.",
+        "chk_high": "Un entier, pas en dessous du seuil bas."
+      }
+    },
+    "detail": {
+      "title": "Seuils par défaut",
+      "editHint": "Les checks du type prennent la modification en arrière-plan.",
+      "deleteQuestion": "Supprimer ces seuils par défaut ? Les checks du type prennent les suivants qui s'appliquent, ou aucun.",
+      "groups": {
+        "scope": "Portée",
+        "thresholds": "Seuils"
+      }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ces seuils par défaut ? Les checks du type prennent les suivants qui s'appliquent, ou aucun, en arrière-plan. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} seuils par défaut ? Les checks de leurs types prennent les suivants qui s'appliquent, ou aucun, en arrière-plan. Cette action est irréversible.",
+          "confirm_one": "Supprimer les seuils",
+          "confirm_other": "Supprimer {{count}} seuils",
+          "running": "Suppression…",
+          "done_one": "1 seuil par défaut supprimé.",
+          "done_other": "{{count}} seuils par défaut supprimés."
+        }
+      }
+    }
+  },
+  "checkContextual": {
+    "title": "Seuils contextuels",
+    "intro": "Les seuils des checks d'un type et des instances qu'un motif désigne, sur les nœuds et services qu'un filterset sélectionne. Ils priment sur les seuils par défaut ; les seuils fixés sur un check priment sur eux.",
+    "fields": {
+      "id": "Id",
+      "fset_id": "Id du filterset",
+      "gen_filtersets.fset_name": "Filterset",
+      "chk_type": "Type",
+      "chk_instance": "Motif d'instance",
+      "chk_low": "Seuil bas",
+      "chk_high": "Seuil haut"
+    },
+    "create": {
+      "open": "Nouveaux seuils",
+      "title": "Nouveaux seuils contextuels",
+      "intro": "Seuils des checks d'un type sur les nœuds et services qu'un filterset sélectionne. Les checks du type les prennent en arrière-plan.",
+      "submit": "Ajouter",
+      "submitting": "Ajout…",
+      "filtersetPlaceholder": "Choisir un filterset",
+      "hints": {
+        "fset_id": "Les nœuds, et services, auxquels les seuils s'appliquent.",
+        "chk_type": "Le type de check, tel que les agents le remontent : fs_u, mpath, eth…",
+        "chk_instance": "Expression régulière cherchée n'importe où dans l'instance : ^/$ pour le seul système de fichiers racine.",
+        "chk_low": "Obligatoire.",
+        "chk_high": "Obligatoire."
+      },
+      "invalid": {
+        "chk_type": "Obligatoire.",
+        "chk_instance": "Expression régulière invalide.",
+        "chk_low": "Un entier, pas au-dessus du seuil haut.",
+        "chk_high": "Un entier, pas en dessous du seuil bas."
+      }
+    },
+    "detail": {
+      "title": "Seuils contextuels",
+      "editHint": "Les checks du type prennent la modification en arrière-plan. Pour changer de filterset, ajoutez d'autres seuils.",
+      "deleteQuestion": "Supprimer ces seuils ? Les checks concernés reprennent leurs seuils par défaut.",
+      "groups": {
+        "scope": "Portée",
+        "thresholds": "Seuils"
+      }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ces seuils contextuels ? Les checks concernés reprennent leurs seuils par défaut, en arrière-plan. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} seuils contextuels ? Les checks concernés reprennent leurs seuils par défaut, en arrière-plan. Cette action est irréversible.",
+          "confirm_one": "Supprimer les seuils",
+          "confirm_other": "Supprimer {{count}} seuils",
+          "running": "Suppression…",
+          "done_one": "1 seuil contextuel supprimé.",
+          "done_other": "{{count}} seuils contextuels supprimés."
+        }
+      }
     }
   }
 }

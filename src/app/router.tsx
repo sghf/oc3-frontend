@@ -6,6 +6,9 @@ import { ComplianceStatusPage } from "@/features/compliance-status/ComplianceSta
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { DesignerPage } from "@/features/designer/DesignerPage";
 import { DisksPage } from "@/features/disks/DisksPage";
+import { ChecksPage } from "@/features/checks/ChecksPage";
+import { CheckDefaultsPage } from "@/features/checks/CheckDefaultsPage";
+import { CheckContextualPage } from "@/features/checks/CheckContextualPage";
 import { PackagesPage } from "@/features/packages/PackagesPage";
 import { HardwarePage } from "@/features/hardware/HardwarePage";
 import { SwitchesPage } from "@/features/switches/SwitchesPage";
@@ -87,6 +90,27 @@ const networksRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/networks",
   component: NetworksPage,
+  validateSearch: parseListSearch,
+});
+
+const checksRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checks",
+  component: ChecksPage,
+  validateSearch: parseListSearch,
+});
+
+const checkDefaultsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checks/defaults",
+  component: CheckDefaultsPage,
+  validateSearch: parseListSearch,
+});
+
+const checkContextualRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checks/contextual",
+  component: CheckContextualPage,
   validateSearch: parseListSearch,
 });
 
@@ -362,6 +386,9 @@ const routeTree = rootRoute.addChildren([
   serviceActionsRoute,
   networksRoute,
   disksRoute,
+  checksRoute,
+  checkDefaultsRoute,
+  checkContextualRoute,
   switchesRoute,
   metricsRoute,
   reportsRoute,

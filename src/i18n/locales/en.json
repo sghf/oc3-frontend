@@ -17,7 +17,8 @@
       "inventoryData": "Inventory data",
       "reporting": "Reporting",
       "filtering": "Filtering",
-      "audit": "Audit"
+      "audit": "Audit",
+      "checks": "Checks"
     },
     "apps": "Apps",
     "networks": "Networks",
@@ -61,7 +62,10 @@
     "viewLabel": "Menu view",
     "inView": "In {{view}}",
     "safe": "Safe",
-    "ai": "AI assistant"
+    "ai": "AI assistant",
+    "checks": "Checks",
+    "checkDefaults": "Check defaults",
+    "checkContextual": "Contextual thresholds"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -3667,6 +3671,191 @@
       "destructive": "The assistant wants to run a destructive action: {{title}}. Approve?",
       "approve": "Approve",
       "reject": "Reject"
+    }
+  },
+  "checks": {
+    "title": "Checks",
+    "fields": {
+      "id": "Id",
+      "node_id": "Node id",
+      "nodes.nodename": "Node",
+      "svc_id": "Service id",
+      "services.svcname": "Service",
+      "chk_type": "Type",
+      "chk_instance": "Instance",
+      "chk_value": "Value",
+      "chk_low": "Low threshold",
+      "chk_high": "High threshold",
+      "chk_err": "State",
+      "chk_threshold_provider": "Threshold provider",
+      "chk_created": "Created",
+      "chk_updated": "Updated",
+      "thresholds": "Thresholds"
+    },
+    "detail": {
+      "title": "Check",
+      "groups": {
+        "check": "Check",
+        "thresholds": "Thresholds",
+        "object": "Node and service"
+      }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "setThresholds": {
+          "label": "Set thresholds",
+          "question_one": "Set the thresholds of this check? They take precedence over the contextual and default ones; a threshold left empty keeps its current value.",
+          "question_other": "Set the thresholds of these {{count}} checks? They take precedence over the contextual and default ones; a threshold left empty keeps the current value of each check.",
+          "fields": {
+            "chk_low": "Low",
+            "chk_high": "High"
+          },
+          "confirm_one": "Set",
+          "confirm_other": "Set on {{count}} checks",
+          "running": "Setting…",
+          "done_one": "Thresholds set on 1 check.",
+          "done_other": "Thresholds set on {{count}} checks."
+        },
+        "resetThresholds": {
+          "label": "Reset thresholds",
+          "question_one": "Reset the thresholds of this check? It takes its contextual or default thresholds again.",
+          "question_other": "Reset the thresholds of these {{count}} checks? They take their contextual or default thresholds again.",
+          "confirm_one": "Reset",
+          "confirm_other": "Reset {{count}} checks",
+          "running": "Resetting…",
+          "done_one": "Thresholds of 1 check reset.",
+          "done_other": "Thresholds of {{count}} checks reset."
+        },
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this check and its alerts? The agent reports it again at its next check run if the check still exists. This cannot be undone.",
+          "question_other": "Delete these {{count}} checks and their alerts? The agents report them again at their next check run if the checks still exist. This cannot be undone.",
+          "confirm_one": "Delete the check",
+          "confirm_other": "Delete {{count}} checks",
+          "running": "Deleting…",
+          "done_one": "1 check deleted.",
+          "done_other": "{{count}} checks deleted."
+        }
+      }
+    }
+  },
+  "checkDefaults": {
+    "title": "Check defaults",
+    "intro": "The thresholds of a check type. A check takes, among the defaults of its type whose instance pattern matches its instance, the one of the highest priority, then of the longest pattern, unless thresholds set on it or contextual ones apply.",
+    "fields": {
+      "id": "Id",
+      "chk_type": "Type",
+      "chk_inst": "Instance pattern",
+      "chk_prio": "Priority",
+      "chk_low": "Low threshold",
+      "chk_high": "High threshold"
+    },
+    "create": {
+      "open": "New defaults",
+      "title": "New check defaults",
+      "intro": "Default thresholds of a check type, for the instances the pattern matches. The checks of the type take them in the background.",
+      "submit": "Add the defaults",
+      "submitting": "Adding…",
+      "hints": {
+        "chk_type": "The check type, as the agents report it: fs_u, mpath, eth…",
+        "chk_inst": "Regular expression matching the whole instance; empty for every instance.",
+        "chk_prio": "Among the defaults matching a check, the highest priority wins.",
+        "chk_low": "Empty for no low threshold.",
+        "chk_high": "Empty for no high threshold."
+      },
+      "invalid": {
+        "chk_type": "Required.",
+        "chk_inst": "Not a valid regular expression.",
+        "chk_prio": "An integer.",
+        "chk_low": "An integer, not above the high threshold.",
+        "chk_high": "An integer, not below the low threshold."
+      }
+    },
+    "detail": {
+      "title": "Check defaults",
+      "editHint": "The checks of the type take the change in the background.",
+      "deleteQuestion": "Delete these defaults? The checks of the type take the next matching defaults, or none.",
+      "groups": {
+        "scope": "Scope",
+        "thresholds": "Thresholds"
+      }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete these defaults? The checks of the type take the next matching defaults, or none, in the background. This cannot be undone.",
+          "question_other": "Delete these {{count}} defaults? The checks of their types take the next matching defaults, or none, in the background. This cannot be undone.",
+          "confirm_one": "Delete the defaults",
+          "confirm_other": "Delete {{count}} defaults",
+          "running": "Deleting…",
+          "done_one": "1 default deleted.",
+          "done_other": "{{count}} defaults deleted."
+        }
+      }
+    }
+  },
+  "checkContextual": {
+    "title": "Contextual thresholds",
+    "intro": "The thresholds of the checks of a type and of the instances a pattern matches, on the nodes and services a filterset selects. They take precedence over the defaults; thresholds set on a check over them.",
+    "fields": {
+      "id": "Id",
+      "fset_id": "Filterset id",
+      "gen_filtersets.fset_name": "Filterset",
+      "chk_type": "Type",
+      "chk_instance": "Instance pattern",
+      "chk_low": "Low threshold",
+      "chk_high": "High threshold"
+    },
+    "create": {
+      "open": "New thresholds",
+      "title": "New contextual thresholds",
+      "intro": "Thresholds of the checks of a type on the nodes and services a filterset selects. The checks of the type take them in the background.",
+      "submit": "Add the thresholds",
+      "submitting": "Adding…",
+      "filtersetPlaceholder": "Choose a filterset",
+      "hints": {
+        "fset_id": "The nodes, and services, the thresholds apply to.",
+        "chk_type": "The check type, as the agents report it: fs_u, mpath, eth…",
+        "chk_instance": "Regular expression found anywhere in the instance: ^/$ for the root filesystem alone.",
+        "chk_low": "Required.",
+        "chk_high": "Required."
+      },
+      "invalid": {
+        "chk_type": "Required.",
+        "chk_instance": "Not a valid regular expression.",
+        "chk_low": "An integer, not above the high threshold.",
+        "chk_high": "An integer, not below the low threshold."
+      }
+    },
+    "detail": {
+      "title": "Contextual thresholds",
+      "editHint": "The checks of the type take the change in the background. To change the filterset, add new thresholds.",
+      "deleteQuestion": "Delete these thresholds? The checks they apply to take the defaults again.",
+      "groups": {
+        "scope": "Scope",
+        "thresholds": "Thresholds"
+      }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete these contextual thresholds? The checks they apply to take the defaults again, in the background. This cannot be undone.",
+          "question_other": "Delete these {{count}} contextual thresholds? The checks they apply to take the defaults again, in the background. This cannot be undone.",
+          "confirm_one": "Delete the thresholds",
+          "confirm_other": "Delete {{count}} thresholds",
+          "running": "Deleting…",
+          "done_one": "1 contextual threshold deleted.",
+          "done_other": "{{count}} contextual thresholds deleted."
+        }
+      }
     }
   }
 }

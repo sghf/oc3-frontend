@@ -19,6 +19,9 @@ export interface NavEntry {
     | "/instances"
     | "/resources"
     | "/service-actions"
+    | "/checks"
+    | "/checks/defaults"
+    | "/checks/contextual"
     | "/networks"
     | "/disks"
     | "/san-switches"
@@ -100,6 +103,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { to: "/instances", labelKey: "nav.instances", icon: "instance" },
       { to: "/resources", labelKey: "nav.resources", icon: "resource" },
       { to: "/service-actions", labelKey: "nav.serviceActions", icon: "action" },
+      { to: "/checks", labelKey: "nav.checks", icon: "check", exact: true },
     ],
   },
   {
@@ -167,6 +171,25 @@ export const NAV_CATEGORIES: NavCategory[] = [
         labelKey: "nav.obsolescence",
         icon: "obsolescence",
         privileges: ["ObsManager"],
+      },
+    ],
+  },
+  {
+    key: "checks",
+    labelKey: "nav.categories.checks",
+    view: "admin",
+    entries: [
+      {
+        to: "/checks/defaults",
+        labelKey: "nav.checkDefaults",
+        icon: "check",
+        privileges: ["CheckManager"],
+      },
+      {
+        to: "/checks/contextual",
+        labelKey: "nav.checkContextual",
+        icon: "check",
+        privileges: ["ContextCheckManager"],
       },
     ],
   },
