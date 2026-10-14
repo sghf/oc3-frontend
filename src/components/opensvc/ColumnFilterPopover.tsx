@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { ValueStats } from "@/lib/api/value-stats";
 import { filtersKey, invertFilter, isInverted, type ColumnFilters } from "@/lib/column-filters";
 import { EnumChecklist } from "@/components/ui/EnumFilter";
-import { HoverPopover } from "@/components/ui/HoverPopover";
+import { Popover } from "@/components/ui/Popover";
 import { TextFilter, type TextOperator } from "@/components/ui/TextFilter";
 import { FilterIcon } from "@/components/ui/icons";
 import type { ListColumn } from "./CollectorList";
@@ -15,7 +15,7 @@ const OPERATORS: TextOperator[] = ["contains", "eq", "ne", "regex", "gt", "gte",
 
 /**
  * The filter of a column, in a compact popover opened from its header (see
- * HoverPopover): the operator and the text of a text column, or the values of a
+ * Popover): the operator and the text of a text column, or the values of a
  * column holding a known set; under them, when the view counts values, the
  * distribution of the column's values to pick from (ColumnValues); at the foot,
  * Exclude, which keeps the rows the filter leaves out, and Clear.
@@ -59,7 +59,7 @@ export function ColumnFilterPopover<T>({
       : `${isInverted(expr) ? `${t("list.filters.not")} ` : ""}${describeFilter(column, expr, t)}`;
 
   return (
-    <HoverPopover
+    <Popover
       label={
         active
           ? t("list.filters.openActive", { column: name, filter: described })
@@ -174,6 +174,6 @@ export function ColumnFilterPopover<T>({
           </div>
         </>
       )}
-    </HoverPopover>
+    </Popover>
   );
 }
