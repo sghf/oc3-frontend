@@ -18,6 +18,11 @@ export interface RelatedSummary {
   count: number | undefined;
   parts?: SummaryPart[];
   /**
+   * Shows the empty shares too, at their place: for counters that say something at
+   * zero, such as the visible and hidden entries of a menu.
+   */
+  keepEmptyParts?: boolean;
+  /**
    * Why the tab has no count to give, when it cannot apply to the object (nothing
    * to compare on a single node, for instance): the counter then shows "n/a", with
    * this reason as its tooltip and for screen readers.

@@ -1413,12 +1413,33 @@
       }
     },
     "menu": {
+      "tab": "Menu",
       "title": "Entrées du menu",
       "intro": "Les entrées que les membres de {{role}} voient dans leur menu. Une entrée n'est masquée à un utilisateur que si toutes ses équipes la masquent ; le groupe Everybody et les groupes de privilège ne comptent pas, le groupe personnel d'un utilisateur, si.",
       "readOnly": "Seul un GroupManager les modifie.",
-      "privilegeGroup": "Un groupe de privilège ne masque aucune entrée : celles des vues qu'un utilisateur ne peut pas utiliser ne sont de toute façon pas affichées.",
-      "shown": "affichée",
-      "hidden": "masquée"
+      "filter": "Filtrer les entrées",
+      "showEntry": "Afficher {{entry}}",
+      "showSection": "Afficher la section {{section}}",
+      "sectionShown_one": "{{shown}} sur {{count}}",
+      "sectionShown_other": "{{shown}} sur {{count}}",
+      "hiddenFor_one": "masquée · {{count}} sur {{total}}",
+      "hiddenFor_other": "masquée · {{count}} sur {{total}}",
+      "noMembers": "Le groupe n'a aucun membre : l'entrée n'est masquée à personne.",
+      "hiddenForNone": "Masquée à aucun membre : chacun a une autre équipe, ou son groupe personnel, qui l'affiche.",
+      "hiddenTo": "Masquée à :",
+      "shownTo": "Encore affichée à :",
+      "keptBy": "par {{groups}}",
+      "personalGroup": "son groupe personnel",
+      "hidePersonal_one": "La masquer aussi sur 1 groupe personnel",
+      "hidePersonal_other": "La masquer aussi sur {{count}} groupes personnels",
+      "hidePersonalHint": "Pour les membres dont seul le groupe personnel l'affiche ; ceux qu'une autre équipe garde la voient toujours.",
+      "visibleCount_one": "1 entrée affichée",
+      "visibleCount_other": "{{count}} entrées affichées",
+      "hiddenCount_one": "1 entrée masquée",
+      "hiddenCount_other": "{{count}} entrées masquées"
+    },
+    "related": {
+      "label": "Détails du groupe"
     }
   },
   "tags": {

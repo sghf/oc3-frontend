@@ -114,7 +114,15 @@ export function PeekPanel() {
       case "app":
         return <AppDetailPanel appId={id} label={label} onClose={close} />;
       case "group":
-        return <GroupDetailPanel groupId={id} label={label} onClose={close} />;
+        return (
+          <GroupDetailPanel
+            groupId={id}
+            label={label}
+            tab={tab}
+            onTabChange={onTabChange}
+            onClose={close}
+          />
+        );
       case "user":
         return <UserDetailPanel userId={id} label={label} onClose={close} />;
       case "disk":

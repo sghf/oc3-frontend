@@ -793,3 +793,12 @@ export function SendIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** Hidden, an eye struck through (fa-eye-slash): a menu entry a group hides. */
+export function EyeOffIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M2.3 3.7a1 1 0 0 1 1.4-1.4l18 18a1 1 0 0 1-1.4 1.4l-3.1-3.1A10.4 10.4 0 0 1 12 20C6.5 20 2.6 15.6 1.2 12.6a1.5 1.5 0 0 1 0-1.2 15 15 0 0 1 3.7-4.9L2.3 3.7Zm4 4A12.5 12.5 0 0 0 3.3 12c1.3 2.5 4.6 5.8 8.7 5.8 1.5 0 2.9-.4 4.1-1.1l-2-2a3.5 3.5 0 0 1-4.8-4.8L6.3 7.7Zm5.7-1.5c-.5 0-1 0-1.4.1L8.8 4.5A10.6 10.6 0 0 1 12 4c5.5 0 9.4 4.4 10.8 7.4.2.4.2.8 0 1.2a14.8 14.8 0 0 1-2.7 3.7l-1.6-1.6a12.6 12.6 0 0 0 2.2-2.7C19.4 9.5 16.1 6.2 12 6.2Z" />
+    </Svg>
+  );
+}

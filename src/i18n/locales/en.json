@@ -1413,12 +1413,33 @@
       }
     },
     "menu": {
+      "tab": "Menu",
       "title": "Menu entries",
       "intro": "The entries the members of {{role}} see in their menu. An entry is hidden to a user only when every team of the user hides it; the Everybody group and the privilege groups do not count, the personal group of a user does.",
       "readOnly": "Only a GroupManager changes them.",
-      "privilegeGroup": "A privilege group hides no menu entry: the entries of the views a user may not use are not shown anyway.",
-      "shown": "shown",
-      "hidden": "hidden"
+      "filter": "Filter the entries",
+      "showEntry": "Show {{entry}}",
+      "showSection": "Show the {{section}} section",
+      "sectionShown_one": "{{shown}} of {{count}}",
+      "sectionShown_other": "{{shown}} of {{count}}",
+      "hiddenFor_one": "hidden · {{count}} of {{total}}",
+      "hiddenFor_other": "hidden · {{count}} of {{total}}",
+      "noMembers": "The group has no member: the entry is hidden to nobody.",
+      "hiddenForNone": "Hidden to none of the members: each has another team, or their personal group, that shows it.",
+      "hiddenTo": "Hidden to:",
+      "shownTo": "Still shown to:",
+      "keptBy": "by {{groups}}",
+      "personalGroup": "their personal group",
+      "hidePersonal_one": "Also hide it on 1 personal group",
+      "hidePersonal_other": "Also hide it on {{count}} personal groups",
+      "hidePersonalHint": "For the members whose personal group alone keeps it shown; those kept by another team still see it.",
+      "visibleCount_one": "1 entry shown",
+      "visibleCount_other": "{{count}} entries shown",
+      "hiddenCount_one": "1 entry hidden",
+      "hiddenCount_other": "{{count}} entries hidden"
+    },
+    "related": {
+      "label": "Group details"
     }
   },
   "tags": {

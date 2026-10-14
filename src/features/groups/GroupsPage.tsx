@@ -231,7 +231,11 @@ export function GroupsPage() {
         groupId={creating ? undefined : search.sel}
         label={selected?.role ?? ""}
         onClose={() => {
-          update({ sel: undefined });
+          update({ sel: undefined, tab: undefined });
+        }}
+        tab={search.tab}
+        onTabChange={(tab) => {
+          update({ tab });
         }}
       />
 
