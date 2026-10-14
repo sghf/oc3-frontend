@@ -6120,7 +6120,18 @@ export interface components {
        */
       basic: boolean;
       oidc: {
+        /**
+         * @description Client id of the collector at the provider (server.auth.oidc.client_id),
+         *     the one its sign-in uses; empty when OpenID Connect is disabled. The
+         *     client is confidential: its secret stays on the server.
+         */
+        client_id: string;
         enabled: boolean;
+        /**
+         * @description Issuer identifier of the provider (server.auth.oidc.issuer), as its
+         *     discovery document gives it; empty when OpenID Connect is disabled.
+         */
+        issuer: string;
         /** @description Name of the provider (display_name), for messages and logs; the sign-in screen does not show it */
         name: string;
         /** @description Whether the provider was discovered and the sign-in can start */
