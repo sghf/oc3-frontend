@@ -2,6 +2,7 @@ import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { SelectionDeleteMenu } from "@/components/opensvc/SelectionDeleteMenu";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { toPage } from "@/lib/api/page";
@@ -185,6 +186,16 @@ export function FormsPage() {
   );
   const navigate = useNavigate({ from: "/forms" });
   const { data, isPending, isError, error, isFetching } = useForms(search);
+  // The rows checked, and those just deleted, for the list to untick them.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleted, setDeleted] = useState<string[]>([]);
+  // Names from the page on display: a selection extended to the following pages does
+  // not have them all, so the id then serves as a fallback in the messages.
+  const names = new Map<string, string>();
+  for (const row of data?.rows ?? []) {
+    const id = row.id === undefined ? undefined : String(row.id);
+    if (id !== undefined && row.form_name !== undefined) names.set(id, row.form_name);
+  }
   // A single form: creation when nothing is selected, editing otherwise.
   const [panel, setPanel] = useState<"create" | "edit" | null>(null);
   const selectedForm = useForm(panel === "edit" ? search.sel : undefined);
@@ -236,6 +247,24 @@ export function FormsPage() {
         >
           {t("forms.form.open")}
         </button>
+        {/* On the rows checked in the list; nothing checked, no menu. */}
+        <SelectionDeleteMenu
+          targets={selectedIds.map((id) => ({ id, name: names.get(id) ?? id }))}
+          prefix="forms.actions"
+          privileges={["FormsManager"]}
+          remove={async (id) => {
+            const { error } = await api.DELETE("/forms/{form_id}", {
+              params: { path: { form_id: Number(id) } },
+            });
+            return error === undefined ? null : problemText(error);
+          }}
+          invalidate={[["forms"]]}
+          onDeleted={(ids) => {
+            setDeleted(ids);
+            // The detail of a deleted object has nothing left to show.
+            if (search.sel !== undefined && ids.includes(search.sel)) update({ sel: undefined });
+          }}
+        />
       </div>
       <p className="mb-3 max-w-3xl text-ink-muted">{t("forms.intro")}</p>
 
@@ -253,6 +282,8 @@ export function FormsPage() {
         exportPage={(page) => fetchForms({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        onSelectionChange={setSelectedIds}
+        unselect={deleted}
         valueStats={formStats}
         filterable
       />

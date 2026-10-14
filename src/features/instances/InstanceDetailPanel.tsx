@@ -186,11 +186,7 @@ export function InstanceDetailPanel({
       label={t("instances.detail.tabs")}
       titleActions={
         tagEdit.allowed && instanceId !== undefined ? (
-          <InstanceActionsMenu
-            instances={[{ id: instanceId, name: title }]}
-            onDeleted={onClose}
-            confirm="popover"
-          />
+          <InstanceActionsMenu instances={[{ id: instanceId, name: title }]} onDeleted={onClose} />
         ) : undefined
       }
     >

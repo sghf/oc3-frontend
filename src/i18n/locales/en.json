@@ -282,6 +282,81 @@
           "running": "Deleting…",
           "done_one": "1 node deleted.",
           "done_other": "{{count}} nodes deleted."
+        },
+        "notificationsOn": {
+          "label": "Turn notifications on",
+          "question_one": "Turn on the notifications of the alerts of this node?",
+          "question_other": "Turn on the notifications of the alerts of these {{count}} nodes?",
+          "confirm_one": "Turn on",
+          "confirm_other": "Turn on for {{count}} nodes",
+          "running": "Turning on…",
+          "done_one": "Notifications turned on for 1 node.",
+          "done_other": "Notifications turned on for {{count}} nodes."
+        },
+        "notificationsOff": {
+          "label": "Turn notifications off",
+          "question_one": "Turn off the notifications of the alerts of this node? Its alerts are still raised, but no longer sent.",
+          "question_other": "Turn off the notifications of the alerts of these {{count}} nodes? Their alerts are still raised, but no longer sent.",
+          "confirm_one": "Turn off",
+          "confirm_other": "Turn off for {{count}} nodes",
+          "running": "Turning off…",
+          "done_one": "Notifications turned off for 1 node.",
+          "done_other": "Notifications turned off for {{count}} nodes."
+        },
+        "tagAttach": {
+          "label": "Attach a tag",
+          "question_one": "Attach a tag to this node:",
+          "question_other": "Attach a tag to these {{count}} nodes:",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach to {{count}} nodes",
+          "running": "Attaching…",
+          "done_one": "Tag {{choice}} attached to 1 node.",
+          "done_other": "Tag {{choice}} attached to {{count}} nodes.",
+          "choice": "Tag"
+        },
+        "modulesetAttach": {
+          "label": "Attach a moduleset",
+          "question_one": "Attach a moduleset to this node:",
+          "question_other": "Attach a moduleset to these {{count}} nodes:",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach to {{count}} nodes",
+          "running": "Attaching…",
+          "done_one": "Moduleset {{choice}} attached to 1 node.",
+          "done_other": "Moduleset {{choice}} attached to {{count}} nodes.",
+          "choice": "Moduleset"
+        },
+        "modulesetDetach": {
+          "label": "Detach a moduleset",
+          "question_one": "Detach a moduleset from this node:",
+          "question_other": "Detach a moduleset from these {{count}} nodes:",
+          "confirm_one": "Detach",
+          "confirm_other": "Detach from {{count}} nodes",
+          "running": "Detaching…",
+          "done_one": "Moduleset {{choice}} detached from 1 node.",
+          "done_other": "Moduleset {{choice}} detached from {{count}} nodes.",
+          "choice": "Moduleset"
+        },
+        "rulesetAttach": {
+          "label": "Attach a ruleset",
+          "question_one": "Attach a ruleset to this node:",
+          "question_other": "Attach a ruleset to these {{count}} nodes:",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach to {{count}} nodes",
+          "running": "Attaching…",
+          "done_one": "Ruleset {{choice}} attached to 1 node.",
+          "done_other": "Ruleset {{choice}} attached to {{count}} nodes.",
+          "choice": "Ruleset (explicit and public)"
+        },
+        "rulesetDetach": {
+          "label": "Detach a ruleset",
+          "question_one": "Detach a ruleset from this node:",
+          "question_other": "Detach a ruleset from these {{count}} nodes:",
+          "confirm_one": "Detach",
+          "confirm_other": "Detach from {{count}} nodes",
+          "running": "Detaching…",
+          "done_one": "Ruleset {{choice}} detached from 1 node.",
+          "done_other": "Ruleset {{choice}} detached from {{count}} nodes.",
+          "choice": "Ruleset (explicit and public)"
         }
       }
     },
@@ -816,6 +891,81 @@
           "running": "Deleting…",
           "done_one": "1 service deleted.",
           "done_other": "{{count}} services deleted."
+        },
+        "notificationsOn": {
+          "label": "Turn notifications on",
+          "question_one": "Turn on the notifications of the alerts of this service?",
+          "question_other": "Turn on the notifications of the alerts of these {{count}} services?",
+          "confirm_one": "Turn on",
+          "confirm_other": "Turn on for {{count}} services",
+          "running": "Turning on…",
+          "done_one": "Notifications turned on for 1 service.",
+          "done_other": "Notifications turned on for {{count}} services."
+        },
+        "notificationsOff": {
+          "label": "Turn notifications off",
+          "question_one": "Turn off the notifications of the alerts of this service? Its alerts are still raised, but no longer sent.",
+          "question_other": "Turn off the notifications of the alerts of these {{count}} services? Their alerts are still raised, but no longer sent.",
+          "confirm_one": "Turn off",
+          "confirm_other": "Turn off for {{count}} services",
+          "running": "Turning off…",
+          "done_one": "Notifications turned off for 1 service.",
+          "done_other": "Notifications turned off for {{count}} services."
+        },
+        "tagAttach": {
+          "label": "Attach a tag",
+          "question_one": "Attach a tag to this service:",
+          "question_other": "Attach a tag to these {{count}} services:",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach to {{count}} services",
+          "running": "Attaching…",
+          "done_one": "Tag {{choice}} attached to 1 service.",
+          "done_other": "Tag {{choice}} attached to {{count}} services.",
+          "choice": "Tag"
+        },
+        "modulesetAttach": {
+          "label": "Attach a moduleset",
+          "question_one": "Attach a moduleset to this service:",
+          "question_other": "Attach a moduleset to these {{count}} services:",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach to {{count}} services",
+          "running": "Attaching…",
+          "done_one": "Moduleset {{choice}} attached to 1 service.",
+          "done_other": "Moduleset {{choice}} attached to {{count}} services.",
+          "choice": "Moduleset"
+        },
+        "modulesetDetach": {
+          "label": "Detach a moduleset",
+          "question_one": "Detach a moduleset from this service:",
+          "question_other": "Detach a moduleset from these {{count}} services:",
+          "confirm_one": "Detach",
+          "confirm_other": "Detach from {{count}} services",
+          "running": "Detaching…",
+          "done_one": "Moduleset {{choice}} detached from 1 service.",
+          "done_other": "Moduleset {{choice}} detached from {{count}} services.",
+          "choice": "Moduleset"
+        },
+        "rulesetAttach": {
+          "label": "Attach a ruleset",
+          "question_one": "Attach a ruleset to this service:",
+          "question_other": "Attach a ruleset to these {{count}} services:",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach to {{count}} services",
+          "running": "Attaching…",
+          "done_one": "Ruleset {{choice}} attached to 1 service.",
+          "done_other": "Ruleset {{choice}} attached to {{count}} services.",
+          "choice": "Ruleset (explicit and public)"
+        },
+        "rulesetDetach": {
+          "label": "Detach a ruleset",
+          "question_one": "Detach a ruleset from this service:",
+          "question_other": "Detach a ruleset from these {{count}} services:",
+          "confirm_one": "Detach",
+          "confirm_other": "Detach from {{count}} services",
+          "running": "Detaching…",
+          "done_one": "Ruleset {{choice}} detached from 1 service.",
+          "done_other": "Ruleset {{choice}} detached from {{count}} services.",
+          "choice": "Ruleset (explicit and public)"
         }
       },
       "fields": {
@@ -1038,6 +1188,22 @@
     },
     "delete": {
       "question": "Delete the {{app}} code? Its responsibles and publications go with it. This cannot be undone."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this application code? Its responsibles and publications go with it. This cannot be undone.",
+          "question_other": "Delete these {{count}} application codes? Their responsibles and publications go with them. This cannot be undone.",
+          "confirm_one": "Delete the application code",
+          "confirm_other": "Delete {{count}} application codes",
+          "running": "Deleting…",
+          "done_one": "1 application code deleted.",
+          "done_other": "{{count}} application codes deleted."
+        }
+      }
     }
   },
   "networks": {
@@ -1135,6 +1301,22 @@
         "outside": "Outside the network.",
         "before": "The last address comes before the first."
       }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this IP address? The agent of a node reports it again at its next asset push if the node still has it. This cannot be undone.",
+          "question_other": "Delete these {{count}} IP addresses? The agent of a node reports them again at its next asset push if the node still has them. This cannot be undone.",
+          "confirm_one": "Delete the IP address",
+          "confirm_other": "Delete {{count}} IP addresses",
+          "running": "Deleting…",
+          "done_one": "1 IP address deleted.",
+          "done_other": "{{count}} IP addresses deleted."
+        }
+      }
     }
   },
   "disks": {
@@ -1206,6 +1388,22 @@
       "none": "No user is member of this group.",
       "noMatch": "No member matches.",
       "hint": "Memberships are changed from the panel of each user."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this group? Its memberships go with it, as do the responsibilities and publications it gives on applications, forms, rulesets and modulesets. The Everybody group cannot be deleted. This cannot be undone.",
+          "question_other": "Delete these {{count}} groups? Their memberships go with them, as do the responsibilities and publications they give on applications, forms, rulesets and modulesets. The Everybody group cannot be deleted. This cannot be undone.",
+          "confirm_one": "Delete the group",
+          "confirm_other": "Delete {{count}} groups",
+          "running": "Deleting…",
+          "done_one": "1 group deleted.",
+          "done_other": "{{count}} groups deleted."
+        }
+      }
     }
   },
   "tags": {
@@ -1267,6 +1465,22 @@
       "services": "Services",
       "nodesNone": "No node carries this tag.",
       "servicesNone": "No service carries this tag."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this tag? Its attachments to nodes and services go with it. This cannot be undone.",
+          "question_other": "Delete these {{count}} tags? Their attachments to nodes and services go with them. This cannot be undone.",
+          "confirm_one": "Delete the tag",
+          "confirm_other": "Delete {{count}} tags",
+          "running": "Deleting…",
+          "done_one": "1 tag deleted.",
+          "done_other": "{{count}} tags deleted."
+        }
+      }
     }
   },
   "users": {
@@ -1576,6 +1790,22 @@
         "deadlines": "Deadlines"
       },
       "editHint": "Only the deadlines can be changed; clearing one removes it. A change applies to the matching nodes and updates their obsolescence alerts on the dashboard."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this obsolescence setting? The next refresh creates it again, without dates, for the hardware models and OS versions the nodes still report. This cannot be undone.",
+          "question_other": "Delete these {{count}} obsolescence settings? The next refresh creates them again, without dates, for the hardware models and OS versions the nodes still report. This cannot be undone.",
+          "confirm_one": "Delete the obsolescence setting",
+          "confirm_other": "Delete {{count}} obsolescence settings",
+          "running": "Deleting…",
+          "done_one": "1 obsolescence setting deleted.",
+          "done_other": "{{count}} obsolescence settings deleted."
+        }
+      }
     }
   },
   "logs": {
@@ -1760,6 +1990,24 @@
         "definition": "Definition",
         "record": "Record"
       }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this filter? It is removed from the filtersets using it, which then select other objects. This cannot be undone.",
+          "question_other": "Delete these {{count}} filters? They are removed from the filtersets using them, which then select other objects. This cannot be undone.",
+          "confirm_one": "Delete the filter",
+          "confirm_other": "Delete {{count}} filters",
+          "running": "Deleting…",
+          "done_one": "1 filter deleted.",
+          "done_other": "{{count}} filters deleted.",
+          "used_one": "{{name}}: used by {{count}} filterset",
+          "used_other": "{{name}}: used by {{count}} filtersets"
+        }
+      }
     }
   },
   "filtersets": {
@@ -1842,6 +2090,24 @@
       "create": "Create and add",
       "reuse": "Add the existing filter",
       "noId": "The collector did not return the id of the new filter."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this filterset? Its uses go with it: the filtersets nesting it, the rulesets it restricts, the session filters, check thresholds, comparisons and sysreport grants using it. This cannot be undone.",
+          "question_other": "Delete these {{count}} filtersets? Their uses go with them: the filtersets nesting them, the rulesets they restrict, the session filters, check thresholds, comparisons and sysreport grants using them. This cannot be undone.",
+          "confirm_one": "Delete the filterset",
+          "confirm_other": "Delete {{count}} filtersets",
+          "running": "Deleting…",
+          "done_one": "1 filterset deleted.",
+          "done_other": "{{count}} filtersets deleted.",
+          "used_one": "{{name}}: used in {{count}} place",
+          "used_other": "{{name}}: used in {{count}} places"
+        }
+      }
     }
   },
   "related": {
@@ -2064,7 +2330,23 @@
       "subFormNotFound": "Sub-form {{name}} not found."
     },
     "definitionMore_one": "+{{count}} more line",
-    "definitionMore_other": "+{{count}} more lines"
+    "definitionMore_other": "+{{count}} more lines",
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this form? Its publications and responsibles go with it. This cannot be undone.",
+          "question_other": "Delete these {{count}} forms? Their publications and responsibles go with them. This cannot be undone.",
+          "confirm_one": "Delete the form",
+          "confirm_other": "Delete {{count}} forms",
+          "running": "Deleting…",
+          "done_one": "1 form deleted.",
+          "done_other": "{{count}} forms deleted."
+        }
+      }
+    }
   },
   "requests": {
     "title": "New request",
@@ -2396,6 +2678,22 @@
       "run_status": "Status",
       "rset_md5": "Ruleset md5",
       "run_log": "Log"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "delete": {
+          "label": "Delete",
+          "question_one": "Delete this check run? Only the last run of each module is kept: the next check of the module records it again. This cannot be undone.",
+          "question_other": "Delete these {{count}} check runs? Only the last run of each module is kept: the next check of the module records it again. This cannot be undone.",
+          "confirm_one": "Delete the check run",
+          "confirm_other": "Delete {{count}} check runs",
+          "running": "Deleting…",
+          "done_one": "1 check run deleted.",
+          "done_other": "{{count}} check runs deleted."
+        }
+      }
     }
   },
   "complianceLogs": {
@@ -3140,7 +3438,12 @@
     "more_one": "and 1 more",
     "more_other": "and {{count}} more",
     "compare": "Compare the selection",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "choiceLoading": "Loading the choices…",
+    "choiceNone": "Nothing matches.",
+    "checking": "Checking where they are used…",
+    "acknowledge_one": "I understand that this use is removed with it",
+    "acknowledge_other": "I understand that these uses are removed with them"
   },
   "commonality": {
     "title": "Commonality of {{what}}",

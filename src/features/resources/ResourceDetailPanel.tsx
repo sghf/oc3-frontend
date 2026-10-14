@@ -67,7 +67,7 @@ export function ResourceDetailPanel({
       onClose={onClose}
       titleActions={
         resource !== undefined && resource !== null ? (
-          <ResourceActionsMenu resources={[resource]} confirm="popover" />
+          <ResourceActionsMenu resources={[resource]} />
         ) : undefined
       }
       groups={RESOURCE_GROUPS}

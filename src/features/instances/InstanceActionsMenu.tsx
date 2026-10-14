@@ -54,13 +54,10 @@ export function InstanceActionsMenu({
   instances,
   onDeleted,
   onCompare,
-  confirm,
 }: {
   instances: ActionTarget[];
   /** Opens the comparison of the selection, see ActionsMenu. */
   onCompare?: () => void;
-  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
-  confirm?: "inline" | "popover";
   /** Ids of the instances deleted, as given in `instances`, containers included. */
   onDeleted?: (ids: string[]) => void;
 }) {
@@ -119,7 +116,6 @@ export function InstanceActionsMenu({
       actions={INSTANCE_ACTIONS}
       dataActions={dataActions}
       onCompare={onCompare}
-      confirm={confirm}
       prefix="instances.actions"
       queue={async (target, action) => {
         const key = fromInstanceId(target.id);

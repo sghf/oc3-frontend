@@ -282,6 +282,81 @@
           "running": "Suppression…",
           "done_one": "1 nœud supprimé.",
           "done_other": "{{count}} nœuds supprimés."
+        },
+        "notificationsOn": {
+          "label": "Activer les notifications",
+          "question_one": "Activer les notifications des alertes de ce nœud ?",
+          "question_other": "Activer les notifications des alertes de ces {{count}} nœuds ?",
+          "confirm_one": "Activer",
+          "confirm_other": "Activer pour {{count}} nœuds",
+          "running": "Activation…",
+          "done_one": "Notifications activées pour 1 nœud.",
+          "done_other": "Notifications activées pour {{count}} nœuds."
+        },
+        "notificationsOff": {
+          "label": "Désactiver les notifications",
+          "question_one": "Désactiver les notifications des alertes de ce nœud ? Ses alertes sont toujours levées, mais plus envoyées.",
+          "question_other": "Désactiver les notifications des alertes de ces {{count}} nœuds ? Leurs alertes sont toujours levées, mais plus envoyées.",
+          "confirm_one": "Désactiver",
+          "confirm_other": "Désactiver pour {{count}} nœuds",
+          "running": "Désactivation…",
+          "done_one": "Notifications désactivées pour 1 nœud.",
+          "done_other": "Notifications désactivées pour {{count}} nœuds."
+        },
+        "tagAttach": {
+          "label": "Attacher un tag",
+          "question_one": "Attacher un tag à ce nœud :",
+          "question_other": "Attacher un tag à ces {{count}} nœuds :",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher à {{count}} nœuds",
+          "running": "Rattachement…",
+          "done_one": "Tag {{choice}} attaché à 1 nœud.",
+          "done_other": "Tag {{choice}} attaché à {{count}} nœuds.",
+          "choice": "Tag"
+        },
+        "modulesetAttach": {
+          "label": "Attacher un moduleset",
+          "question_one": "Attacher un moduleset à ce nœud :",
+          "question_other": "Attacher un moduleset à ces {{count}} nœuds :",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher à {{count}} nœuds",
+          "running": "Rattachement…",
+          "done_one": "Moduleset {{choice}} attaché à 1 nœud.",
+          "done_other": "Moduleset {{choice}} attaché à {{count}} nœuds.",
+          "choice": "Moduleset"
+        },
+        "modulesetDetach": {
+          "label": "Détacher un moduleset",
+          "question_one": "Détacher un moduleset de ce nœud :",
+          "question_other": "Détacher un moduleset de ces {{count}} nœuds :",
+          "confirm_one": "Détacher",
+          "confirm_other": "Détacher de {{count}} nœuds",
+          "running": "Détachement…",
+          "done_one": "Moduleset {{choice}} détaché de 1 nœud.",
+          "done_other": "Moduleset {{choice}} détaché de {{count}} nœuds.",
+          "choice": "Moduleset"
+        },
+        "rulesetAttach": {
+          "label": "Attacher un ruleset",
+          "question_one": "Attacher un ruleset à ce nœud :",
+          "question_other": "Attacher un ruleset à ces {{count}} nœuds :",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher à {{count}} nœuds",
+          "running": "Rattachement…",
+          "done_one": "Ruleset {{choice}} attaché à 1 nœud.",
+          "done_other": "Ruleset {{choice}} attaché à {{count}} nœuds.",
+          "choice": "Ruleset (explicite et public)"
+        },
+        "rulesetDetach": {
+          "label": "Détacher un ruleset",
+          "question_one": "Détacher un ruleset de ce nœud :",
+          "question_other": "Détacher un ruleset de ces {{count}} nœuds :",
+          "confirm_one": "Détacher",
+          "confirm_other": "Détacher de {{count}} nœuds",
+          "running": "Détachement…",
+          "done_one": "Ruleset {{choice}} détaché de 1 nœud.",
+          "done_other": "Ruleset {{choice}} détaché de {{count}} nœuds.",
+          "choice": "Ruleset (explicite et public)"
         }
       }
     },
@@ -816,6 +891,81 @@
           "running": "Suppression…",
           "done_one": "1 service supprimé.",
           "done_other": "{{count}} services supprimés."
+        },
+        "notificationsOn": {
+          "label": "Activer les notifications",
+          "question_one": "Activer les notifications des alertes de ce service ?",
+          "question_other": "Activer les notifications des alertes de ces {{count}} services ?",
+          "confirm_one": "Activer",
+          "confirm_other": "Activer pour {{count}} services",
+          "running": "Activation…",
+          "done_one": "Notifications activées pour 1 service.",
+          "done_other": "Notifications activées pour {{count}} services."
+        },
+        "notificationsOff": {
+          "label": "Désactiver les notifications",
+          "question_one": "Désactiver les notifications des alertes de ce service ? Ses alertes sont toujours levées, mais plus envoyées.",
+          "question_other": "Désactiver les notifications des alertes de ces {{count}} services ? Leurs alertes sont toujours levées, mais plus envoyées.",
+          "confirm_one": "Désactiver",
+          "confirm_other": "Désactiver pour {{count}} services",
+          "running": "Désactivation…",
+          "done_one": "Notifications désactivées pour 1 service.",
+          "done_other": "Notifications désactivées pour {{count}} services."
+        },
+        "tagAttach": {
+          "label": "Attacher un tag",
+          "question_one": "Attacher un tag à ce service :",
+          "question_other": "Attacher un tag à ces {{count}} services :",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher à {{count}} services",
+          "running": "Rattachement…",
+          "done_one": "Tag {{choice}} attaché à 1 service.",
+          "done_other": "Tag {{choice}} attaché à {{count}} services.",
+          "choice": "Tag"
+        },
+        "modulesetAttach": {
+          "label": "Attacher un moduleset",
+          "question_one": "Attacher un moduleset à ce service :",
+          "question_other": "Attacher un moduleset à ces {{count}} services :",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher à {{count}} services",
+          "running": "Rattachement…",
+          "done_one": "Moduleset {{choice}} attaché à 1 service.",
+          "done_other": "Moduleset {{choice}} attaché à {{count}} services.",
+          "choice": "Moduleset"
+        },
+        "modulesetDetach": {
+          "label": "Détacher un moduleset",
+          "question_one": "Détacher un moduleset de ce service :",
+          "question_other": "Détacher un moduleset de ces {{count}} services :",
+          "confirm_one": "Détacher",
+          "confirm_other": "Détacher de {{count}} services",
+          "running": "Détachement…",
+          "done_one": "Moduleset {{choice}} détaché de 1 service.",
+          "done_other": "Moduleset {{choice}} détaché de {{count}} services.",
+          "choice": "Moduleset"
+        },
+        "rulesetAttach": {
+          "label": "Attacher un ruleset",
+          "question_one": "Attacher un ruleset à ce service :",
+          "question_other": "Attacher un ruleset à ces {{count}} services :",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher à {{count}} services",
+          "running": "Rattachement…",
+          "done_one": "Ruleset {{choice}} attaché à 1 service.",
+          "done_other": "Ruleset {{choice}} attaché à {{count}} services.",
+          "choice": "Ruleset (explicite et public)"
+        },
+        "rulesetDetach": {
+          "label": "Détacher un ruleset",
+          "question_one": "Détacher un ruleset de ce service :",
+          "question_other": "Détacher un ruleset de ces {{count}} services :",
+          "confirm_one": "Détacher",
+          "confirm_other": "Détacher de {{count}} services",
+          "running": "Détachement…",
+          "done_one": "Ruleset {{choice}} détaché de 1 service.",
+          "done_other": "Ruleset {{choice}} détaché de {{count}} services.",
+          "choice": "Ruleset (explicite et public)"
         }
       },
       "fields": {
@@ -1038,6 +1188,22 @@
     },
     "delete": {
       "question": "Supprimer le code {{app}} ? Ses responsables et ses publications partent avec lui. C'est irréversible."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce code application ? Ses responsables et publications partent avec lui. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} codes application ? Leurs responsables et publications partent avec eux. Cette action est irréversible.",
+          "confirm_one": "Supprimer le code application",
+          "confirm_other": "Supprimer {{count}} codes application",
+          "running": "Suppression…",
+          "done_one": "1 code application supprimé.",
+          "done_other": "{{count}} codes application supprimés."
+        }
+      }
     }
   },
   "networks": {
@@ -1135,6 +1301,22 @@
         "outside": "Hors du réseau.",
         "before": "La dernière adresse précède la première."
       }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer cette adresse IP ? L'agent du nœud la remonte de nouveau à son prochain envoi d'inventaire si le nœud l'a toujours. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} adresses IP ? L'agent d'un nœud les remonte de nouveau à son prochain envoi d'inventaire si le nœud les a toujours. Cette action est irréversible.",
+          "confirm_one": "Supprimer l'adresse IP",
+          "confirm_other": "Supprimer {{count}} adresses IP",
+          "running": "Suppression…",
+          "done_one": "1 adresse IP supprimée.",
+          "done_other": "{{count}} adresses IP supprimées."
+        }
+      }
     }
   },
   "disks": {
@@ -1206,6 +1388,22 @@
       "none": "Aucun utilisateur n'est membre de ce groupe.",
       "noMatch": "Aucun membre ne correspond.",
       "hint": "Les appartenances se changent depuis le panneau de chaque utilisateur."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce groupe ? Ses adhésions partent avec lui, ainsi que les responsabilités et publications qu'il donne sur des applications, formulaires, rulesets et modulesets. Le groupe Everybody ne peut pas être supprimé. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} groupes ? Leurs adhésions partent avec eux, ainsi que les responsabilités et publications qu'ils donnent sur des applications, formulaires, rulesets et modulesets. Le groupe Everybody ne peut pas être supprimé. Cette action est irréversible.",
+          "confirm_one": "Supprimer le groupe",
+          "confirm_other": "Supprimer {{count}} groupes",
+          "running": "Suppression…",
+          "done_one": "1 groupe supprimé.",
+          "done_other": "{{count}} groupes supprimés."
+        }
+      }
     }
   },
   "tags": {
@@ -1267,6 +1465,22 @@
       "services": "Services",
       "nodesNone": "Aucun nœud ne porte ce tag.",
       "servicesNone": "Aucun service ne porte ce tag."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce tag ? Ses rattachements aux nœuds et aux services partent avec lui. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} tags ? Leurs rattachements aux nœuds et aux services partent avec eux. Cette action est irréversible.",
+          "confirm_one": "Supprimer le tag",
+          "confirm_other": "Supprimer {{count}} tags",
+          "running": "Suppression…",
+          "done_one": "1 tag supprimé.",
+          "done_other": "{{count}} tags supprimés."
+        }
+      }
     }
   },
   "users": {
@@ -1576,6 +1790,22 @@
         "deadlines": "Échéances"
       },
       "editHint": "Seules les échéances se modifient ; en vider une la supprime. Une modification s'applique aux nœuds concernés et met à jour leurs alertes d'obsolescence au dashboard."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce réglage d'obsolescence ? Le prochain rafraîchissement le recrée, sans dates, si les nœuds remontent encore ce modèle ou cette version d'OS. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} réglages d'obsolescence ? Le prochain rafraîchissement les recrée, sans dates, pour les modèles et versions d'OS que les nœuds remontent encore. Cette action est irréversible.",
+          "confirm_one": "Supprimer le réglage d'obsolescence",
+          "confirm_other": "Supprimer {{count}} réglages d'obsolescence",
+          "running": "Suppression…",
+          "done_one": "1 réglage d'obsolescence supprimé.",
+          "done_other": "{{count}} réglages d'obsolescence supprimés."
+        }
+      }
     }
   },
   "logs": {
@@ -1760,6 +1990,24 @@
         "definition": "Définition",
         "record": "Enregistrement"
       }
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce filtre ? Il est retiré des filtersets qui l'utilisent, qui sélectionnent alors d'autres objets. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} filtres ? Ils sont retirés des filtersets qui les utilisent, qui sélectionnent alors d'autres objets. Cette action est irréversible.",
+          "confirm_one": "Supprimer le filtre",
+          "confirm_other": "Supprimer {{count}} filtres",
+          "running": "Suppression…",
+          "done_one": "1 filtre supprimé.",
+          "done_other": "{{count}} filtres supprimés.",
+          "used_one": "{{name}} : utilisé par {{count}} filterset",
+          "used_other": "{{name}} : utilisé par {{count}} filtersets"
+        }
+      }
     }
   },
   "filtersets": {
@@ -1842,6 +2090,24 @@
       "create": "Créer et ajouter",
       "reuse": "Ajouter le filtre existant",
       "noId": "Le collector n'a pas renvoyé l'id du nouveau filtre."
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce filterset ? Ses usages partent avec lui : les filtersets qui l'imbriquent, les rulesets qu'il restreint, les filtres de session, seuils de checks, comparaisons et accès aux sysreports qui l'utilisent. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} filtersets ? Leurs usages partent avec eux : les filtersets qui les imbriquent, les rulesets qu'ils restreignent, les filtres de session, seuils de checks, comparaisons et accès aux sysreports qui les utilisent. Cette action est irréversible.",
+          "confirm_one": "Supprimer le filterset",
+          "confirm_other": "Supprimer {{count}} filtersets",
+          "running": "Suppression…",
+          "done_one": "1 filterset supprimé.",
+          "done_other": "{{count}} filtersets supprimés.",
+          "used_one": "{{name}} : utilisé à {{count}} endroit",
+          "used_other": "{{name}} : utilisé à {{count}} endroits"
+        }
+      }
     }
   },
   "related": {
@@ -2064,7 +2330,23 @@
       "subFormNotFound": "Sous-formulaire {{name}} introuvable."
     },
     "definitionMore_one": "+{{count}} ligne",
-    "definitionMore_other": "+{{count}} lignes"
+    "definitionMore_other": "+{{count}} lignes",
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer ce formulaire ? Ses publications et responsables partent avec lui. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} formulaires ? Leurs publications et responsables partent avec eux. Cette action est irréversible.",
+          "confirm_one": "Supprimer le formulaire",
+          "confirm_other": "Supprimer {{count}} formulaires",
+          "running": "Suppression…",
+          "done_one": "1 formulaire supprimé.",
+          "done_other": "{{count}} formulaires supprimés."
+        }
+      }
+    }
   },
   "requests": {
     "title": "Nouvelle demande",
@@ -2396,6 +2678,22 @@
       "run_status": "Statut",
       "rset_md5": "Empreinte md5 du ruleset",
       "run_log": "Journal"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "delete": {
+          "label": "Supprimer",
+          "question_one": "Supprimer cette exécution ? Seule la dernière exécution de chaque module est gardée : la prochaine vérification du module l'enregistre de nouveau. Cette action est irréversible.",
+          "question_other": "Supprimer ces {{count}} exécutions ? Seule la dernière exécution de chaque module est gardée : la prochaine vérification du module l'enregistre de nouveau. Cette action est irréversible.",
+          "confirm_one": "Supprimer l'exécution",
+          "confirm_other": "Supprimer {{count}} exécutions",
+          "running": "Suppression…",
+          "done_one": "1 exécution supprimée.",
+          "done_other": "{{count}} exécutions supprimées."
+        }
+      }
     }
   },
   "complianceLogs": {
@@ -3140,7 +3438,12 @@
     "more_one": "et 1 autre",
     "more_other": "et {{count}} autres",
     "compare": "Comparer la sélection",
-    "dismiss": "Fermer"
+    "dismiss": "Fermer",
+    "choiceLoading": "Chargement des choix…",
+    "choiceNone": "Aucun résultat.",
+    "checking": "Vérification de leurs usages…",
+    "acknowledge_one": "Je comprends que cet usage est supprimé avec",
+    "acknowledge_other": "Je comprends que ces usages sont supprimés avec"
   },
   "commonality": {
     "title": "Points communs de {{what}}",

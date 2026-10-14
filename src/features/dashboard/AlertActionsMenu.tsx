@@ -18,12 +18,9 @@ import { problemText } from "@/lib/api/problem";
 export function AlertActionsMenu({
   alerts,
   onDeleted,
-  confirm,
 }: {
   alerts: ActionTarget[];
   onDeleted?: (ids: string[]) => void;
-  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
-  confirm?: "inline" | "popover";
 }) {
   const queryClient = useQueryClient();
   const dataActions: DataActionEntry[] = [
@@ -47,12 +44,5 @@ export function AlertActionsMenu({
       },
     },
   ];
-  return (
-    <ActionsMenu
-      targets={alerts}
-      dataActions={dataActions}
-      confirm={confirm}
-      prefix="dashboard.actions"
-    />
-  );
+  return <ActionsMenu targets={alerts} dataActions={dataActions} prefix="dashboard.actions" />;
 }

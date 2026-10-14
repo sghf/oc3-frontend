@@ -66,12 +66,9 @@ function byInstance(resources: readonly ResourceRow[]): Map<string, InstanceReso
  */
 export function ResourceActionsMenu({
   resources,
-  confirm,
 }: {
   /** The resources acted on, with their service, node, container and rid. */
   resources: readonly ResourceRow[];
-  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
-  confirm?: "inline" | "popover";
 }) {
   const groups = byInstance(resources);
   const targets = [...groups].map(([id, group]) => ({
@@ -82,7 +79,6 @@ export function ResourceActionsMenu({
     <ActionsMenu
       targets={targets}
       actions={RESOURCE_ACTIONS}
-      confirm={confirm}
       prefix="resources.actions"
       queue={async (target, action) => {
         const group = groups.get(target.id);

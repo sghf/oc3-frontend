@@ -111,7 +111,6 @@ export function AlertDetailPanel({
               onDeleted?.(alertId);
               onClose();
             }}
-            confirm="popover"
           />
         ) : undefined
       }

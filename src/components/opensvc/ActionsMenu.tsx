@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { MenuButton, type MenuItem } from "@/components/ui/MenuButton";
 import { CloseIcon, GearIcon } from "@/components/ui/icons";
 import { NOTICE_CARD, NOTICE_TONES, type NoticeTone } from "@/components/ui/notice-tones";
@@ -33,20 +34,46 @@ export interface ActionEntry {
  * An entry of the "Data actions" submenu: a change made on the collector's own
  * records, at once, rather than an action queued for the agent. Labels and texts
  * come from `<prefix>.data.<key>.label`, `.question`, `.confirm`, `.running` and
- * `.done`.
+ * `.done`; with a choice, `.choice` names its field, and `.done` receives the
+ * label chosen as `choice`.
  */
 export interface DataActionEntry {
   key: string;
   /**
    * Privileges any of which lets the user see the entry, a Manager holding them
-   * all. The menu follows the effective privileges, impersonation included; the API
-   * still checks each object.
+   * all; none, every user. The menu follows the effective privileges, impersonation
+   * included; the API still checks each object.
    */
   privileges: readonly string[];
-  /** Runs the action on one object; returns the API error message, or null. */
-  run: (target: ActionTarget) => Promise<string | null>;
+  /**
+   * "destructive", the default, for what cannot be undone: a red confirmation, the
+   * focus on Cancel. "change" for what the opposite entry undoes, such as attaching
+   * a tag or turning the notifications on: a plain confirmation.
+   */
+  tone?: "destructive" | "change";
+  /** Separator line before this entry in the submenu. */
+  separatorBefore?: boolean;
+  /** Something to choose in the confirmation, applied to every object: a tag, a moduleset… */
+  choice?: DataActionChoice;
+  /**
+   * Read when the confirmation opens: what the action would also break, such as
+   * the filtersets using a filter to delete. The confirmation waits for them.
+   */
+  warnings?: (targets: ActionTarget[]) => Promise<string[]>;
+  /**
+   * Runs the action on one object, with the value chosen when the entry has a
+   * choice; returns the API error message, or null.
+   */
+  run: (target: ActionTarget, choice: string | undefined) => Promise<string | null>;
   /** Called with the objects the action succeeded on. */
   onDone?: (done: ActionTarget[]) => void;
+}
+
+/** The options a data action offers to choose from, loaded when its confirmation opens. */
+export interface DataActionChoice {
+  /** Cache key of the options, shared by the menus offering the same ones. */
+  queryKey: readonly unknown[];
+  load: () => Promise<ComboboxOption[]>;
 }
 
 /** Names listed in a data action question; the others are counted. */
@@ -103,9 +130,9 @@ type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataAc
  * objects and its button says what it does. An entry the user's privileges do not
  * allow is not shown, nor the submenu when none is left.
  *
- * In a toolbar the confirmation follows the button on its row; in a panel header,
- * `confirm="popover"`, it opens as a card anchored under the button, the header
- * keeping its single line.
+ * The confirmation opens as a card anchored under the button, over what follows:
+ * the row of the button keeps its height and the button its place, in a list
+ * toolbar as in a panel header.
  */
 export function ActionsMenu({
   targets,
@@ -114,7 +141,6 @@ export function ActionsMenu({
   queue: queueOne = noQueue,
   dataActions = [],
   onCompare,
-  confirm = "inline",
 }: {
   targets: ActionTarget[];
   /** Agent actions; none for an object the agents do not act on, such as an alert. */
@@ -129,8 +155,6 @@ export function ActionsMenu({
    * actions, which change something, as it only reads.
    */
   onCompare?: () => void;
-  /** Where the confirmation of an action shows: on the row, or in a card under the button. */
-  confirm?: "inline" | "popover";
 }) {
   const { t, i18n } = useTranslation();
   const [pending, setPending] = useState<Pending | null>(null);
@@ -177,20 +201,28 @@ export function ActionsMenu({
   });
 
   const data = useMutation({
-    mutationFn: async (entry: DataActionEntry): Promise<Outcome> => {
+    mutationFn: async ({
+      entry,
+      choice,
+    }: {
+      entry: DataActionEntry;
+      choice: ComboboxOption | undefined;
+    }): Promise<Outcome> => {
       // One object after the other: each is a transaction on the collector side,
       // and a long selection must not open them all at once.
       const done: ActionTarget[] = [];
       const failures: string[] = [];
       for (const target of targets) {
-        const message = await entry.run(target);
+        const message = await entry.run(target, choice?.value);
         if (message === null) done.push(target);
         else failures.push(failureText(target, message));
       }
       entry.onDone?.(done);
       return {
         done:
-          done.length === 0 ? null : t(`${prefix}.data.${entry.key}.done`, { count: done.length }),
+          done.length === 0
+            ? null
+            : t(`${prefix}.data.${entry.key}.done`, { count: done.length, choice: choice?.label }),
         failures,
       };
     },
@@ -257,9 +289,10 @@ export function ActionsMenu({
       key: "group:data",
       label: t("actionsMenu.dataActions"),
       separatorBefore: true,
-      items: allowed.map((entry) => ({
+      items: allowed.map((entry, index) => ({
         key: `data:${entry.key}`,
         label: t(`${prefix}.data.${entry.key}.label`),
+        separatorBefore: index > 0 && entry.separatorBefore === true,
         disabled: busy,
         onSelect: () => {
           setOutcome(null);
@@ -275,11 +308,7 @@ export function ActionsMenu({
     pending === null || pending.kind !== "queue" ? "" : t(`${prefix}.items.${pending.action}`);
 
   return (
-    <div
-      className={
-        confirm === "popover" ? "relative flex items-center" : "flex flex-wrap items-center gap-2"
-      }
-    >
+    <div className={"relative flex items-center"}>
       {targets.length > 0 && (
         <MenuButton
           label={t(`${prefix}.open`)}
@@ -293,25 +322,30 @@ export function ActionsMenu({
       )}
 
       {pending !== null && (
-        <div className={confirm === "popover" ? CONFIRM_CARD : "contents"}>
+        <div className={CONFIRM_CARD}>
           {pending !== null && pending.kind === "data" && (
             <DataConfirm
+              entry={pending.entry}
+              prefix={prefix}
+              targets={targets}
               question={t(`${prefix}.data.${pending.entry.key}.question`, {
                 count: targets.length,
               })}
-              names={targets.map((target) => target.name)}
               confirmLabel={
                 data.isPending
                   ? t(`${prefix}.data.${pending.entry.key}.running`)
                   : t(`${prefix}.data.${pending.entry.key}.confirm`, { count: targets.length })
               }
               busy={data.isPending}
-              onConfirm={() => {
-                data.mutate(pending.entry, {
-                  onSettled: () => {
-                    setPending(null);
+              onConfirm={(choice) => {
+                data.mutate(
+                  { entry: pending.entry, choice },
+                  {
+                    onSettled: () => {
+                      setPending(null);
+                    },
                   },
-                });
+                );
               }}
               onCancel={() => {
                 setPending(null);
@@ -407,34 +441,85 @@ export function ActionsMenu({
   );
 }
 
+/** The confirmation's frame, by the tone of the action. */
+const CONFIRM_TONES = {
+  destructive: {
+    box: "border-state-down bg-state-down-soft",
+    mark: <span className="text-state-down">▲ </span>,
+    button: "bg-state-down text-surface-raised",
+  },
+  change: {
+    box: "border-line bg-surface-raised",
+    mark: null,
+    button: "bg-accent text-accent-ink",
+  },
+} as const;
+
 /**
  * The confirmation of a data action: the question, the objects it acts on by name,
- * and a button saying what it does. Cancel takes the focus; Escape or Cancel leave
- * everything as it was.
+ * what else it would break, what to choose when the action needs it, and a button
+ * saying what it does. A destructive action leaves the focus on Cancel, so that an
+ * Enter pressed out of habit changes nothing; a choice takes the focus, the button
+ * waiting for it. Escape or Cancel leave everything as it was.
  */
 function DataConfirm({
+  entry,
+  prefix,
+  targets,
   question,
-  names,
   confirmLabel,
   busy,
   onConfirm,
   onCancel,
 }: {
+  entry: DataActionEntry;
+  prefix: string;
+  targets: ActionTarget[];
   question: string;
-  names: string[];
   confirmLabel: string;
   busy: boolean;
-  onConfirm: () => void;
+  onConfirm: (choice: ComboboxOption | undefined) => void;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
+  const tone = CONFIRM_TONES[entry.tone ?? "destructive"];
+  const [chosen, setChosen] = useState("");
+  // What the action would also remove, acknowledged: required once the warnings
+  // say something, or could not be read.
+  const [acknowledged, setAcknowledged] = useState(false);
+  const choiceInput = useRef<HTMLInputElement>(null);
+  const options = useQuery({
+    queryKey: ["actionsMenu", "choice", ...(entry.choice?.queryKey ?? [])],
+    enabled: entry.choice !== undefined,
+    queryFn: entry.choice?.load ?? (() => Promise.resolve([])),
+  });
+  const warnings = useQuery({
+    queryKey: ["actionsMenu", "warnings", prefix, entry.key, targets.map((target) => target.id)],
+    enabled: entry.warnings !== undefined,
+    // Read again at each opening: what uses an object changes.
+    gcTime: 0,
+    queryFn: () => entry.warnings?.(targets) ?? Promise.resolve([]),
+  });
+  useEffect(() => {
+    if (entry.choice !== undefined) choiceInput.current?.focus();
+  }, [entry.choice]);
+
+  const choice = options.data?.find((option) => option.value === chosen);
+  const mustAcknowledge =
+    entry.warnings !== undefined &&
+    (warnings.isError || (warnings.data !== undefined && warnings.data.length > 0));
+  const waiting =
+    (entry.choice !== undefined && choice === undefined) ||
+    (entry.warnings !== undefined && warnings.isPending) ||
+    (mustAcknowledge && !acknowledged);
+  const names = targets.map((target) => target.name);
   const shown = names.slice(0, NAMES_SHOWN);
   const more = names.length - shown.length;
   return (
     <div
       role="alertdialog"
       aria-label={question}
-      className="flex w-full flex-col items-start gap-2 rounded-(--radius-control) border border-state-down bg-state-down-soft p-3"
+      className={`flex w-full flex-col items-start gap-2 rounded-(--radius-control) border p-3 ${tone.box}`}
       onKeyDown={(event) => {
         if (event.key === "Escape" && !busy) {
           event.stopPropagation();
@@ -443,9 +528,7 @@ function DataConfirm({
       }}
     >
       <p className="font-medium">
-        <span aria-hidden="true" className="text-state-down">
-          ▲{" "}
-        </span>
+        {tone.mark !== null && <span aria-hidden="true">{tone.mark}</span>}
         {question}
       </p>
       <ul className="flex flex-wrap gap-1">
@@ -459,19 +542,79 @@ function DataConfirm({
         ))}
         {more > 0 && <li className="text-ink-muted">{t("actionsMenu.more", { count: more })}</li>}
       </ul>
-      <div className="flex gap-2">
+      {entry.choice !== undefined && options.isError && (
+        <p role="alert" className="text-state-down">
+          ■ {options.error.message}
+        </p>
+      )}
+      {entry.warnings !== undefined &&
+        (warnings.isPending ? (
+          <p className="text-ink-muted">{t("actionsMenu.checking")}</p>
+        ) : warnings.isError ? (
+          <p role="alert" className="text-state-down">
+            ■ {warnings.error.message}
+          </p>
+        ) : (
+          warnings.data.length > 0 && (
+            <ul className="flex flex-col gap-0.5">
+              {warnings.data.map((warning) => (
+                <li key={warning}>
+                  <span aria-hidden="true" className="text-state-warn">
+                    ▲{" "}
+                  </span>
+                  {warning}
+                </li>
+              ))}
+            </ul>
+          )
+        ))}
+      {mustAcknowledge && (
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={acknowledged}
+            onChange={(event) => {
+              setAcknowledged(event.target.checked);
+            }}
+          />
+          {warnings.isError
+            ? t("usage.acknowledgeUnknown")
+            : t("actionsMenu.acknowledge", { count: warnings.data?.length ?? 0 })}
+        </label>
+      )}
+      {/* The field of a choice on the row of the buttons: its list opens under them,
+          over nothing the confirmation needs. */}
+      <div className="flex flex-wrap items-center gap-2">
+        {entry.choice !== undefined && !options.isError && (
+          <Combobox
+            options={options.data ?? []}
+            value={chosen}
+            onChange={setChosen}
+            label={t(`${prefix}.data.${entry.key}.choice`)}
+            placeholder={
+              options.isPending
+                ? t("actionsMenu.choiceLoading")
+                : t(`${prefix}.data.${entry.key}.choice`)
+            }
+            emptyText={t("actionsMenu.choiceNone")}
+            inputRef={choiceInput}
+            className="w-72 max-w-full"
+          />
+        )}
         <button
           type="button"
-          disabled={busy}
-          onClick={onConfirm}
-          className="h-7 rounded-(--radius-control) bg-state-down px-3 font-medium text-surface-raised disabled:opacity-60"
+          autoFocus={entry.tone === "change" && entry.choice === undefined}
+          disabled={busy || waiting}
+          onClick={() => {
+            onConfirm(choice);
+          }}
+          className={`h-7 rounded-(--radius-control) px-3 font-medium disabled:opacity-60 ${tone.button}`}
         >
           {confirmLabel}
         </button>
-        {/* The focus waits on Cancel: an Enter pressed out of habit deletes nothing. */}
         <button
           type="button"
-          autoFocus
+          autoFocus={entry.tone !== "change" && entry.choice === undefined}
           disabled={busy}
           onClick={onCancel}
           className="h-7 rounded-(--radius-control) border border-line bg-surface px-3"

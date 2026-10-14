@@ -214,7 +214,6 @@ export function ServiceDetailPanel({
           <ServiceActionsMenu
             services={[{ id: svcId, name: service?.svcname ?? svcId }]}
             onDeleted={onClose}
-            confirm="popover"
           />
         ) : undefined
       }

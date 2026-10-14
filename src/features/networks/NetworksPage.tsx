@@ -4,6 +4,7 @@ import { DateTime } from "@/components/ui/DateTime";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import { SelectionDeleteMenu } from "@/components/opensvc/SelectionDeleteMenu";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { toPage } from "@/lib/api/page";
@@ -217,6 +218,16 @@ export function NetworksPage() {
   );
   const navigate = useNavigate({ from: "/networks" });
   const { data, isPending, isError, error, isFetching } = useIps(search);
+  // The rows checked, and those just deleted, for the list to untick them.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleted, setDeleted] = useState<string[]>([]);
+  // Names from the page on display: a selection extended to the following pages does
+  // not have them all, so the id then serves as a fallback in the messages.
+  const names = new Map<string, string>();
+  for (const row of data?.rows ?? []) {
+    const id = row.id === undefined ? undefined : String(row.id);
+    if (id !== undefined && row.addr !== undefined) names.set(id, row.addr);
+  }
 
   /** Ids of the whole selection, without pagination. */
   async function allIds(): Promise<string[]> {
@@ -283,6 +294,22 @@ export function NetworksPage() {
             ● {created}
           </span>
         )}
+        {/* On the rows checked in the list; nothing checked, no menu. */}
+        <SelectionDeleteMenu
+          targets={selectedIds.map((id) => ({ id, name: names.get(id) ?? id }))}
+          prefix="networks.actions"
+          privileges={["NodeManager"]}
+          remove={async (id) => {
+            const { error } = await api.DELETE("/ips/{id}", { params: { path: { id } } });
+            return error === undefined ? null : problemText(error);
+          }}
+          invalidate={[["ips"]]}
+          onDeleted={(ids) => {
+            setDeleted(ids);
+            // The detail of a deleted object has nothing left to show.
+            if (search.sel !== undefined && ids.includes(search.sel)) update({ sel: undefined });
+          }}
+        />
       </div>
 
       <CollectorList
@@ -299,6 +326,8 @@ export function NetworksPage() {
         exportPage={(page) => fetchIps({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        onSelectionChange={setSelectedIds}
+        unselect={deleted}
         valueStats={ipStats}
         filterable
       />

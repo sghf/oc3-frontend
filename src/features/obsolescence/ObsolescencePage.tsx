@@ -4,6 +4,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { TransientNotice } from "@/components/ui/TransientNotice";
 import type { components } from "@/lib/api/schema";
+import { SelectionDeleteMenu } from "@/components/opensvc/SelectionDeleteMenu";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
@@ -135,6 +136,16 @@ export function ObsolescencePage() {
   );
   const navigate = useNavigate({ from: "/obsolescence" });
   const { data, isPending, isError, error, isFetching } = useSettings(search);
+  // The rows checked, and those just deleted, for the list to untick them.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleted, setDeleted] = useState<string[]>([]);
+  // Names from the page on display: a selection extended to the following pages does
+  // not have them all, so the id then serves as a fallback in the messages.
+  const names = new Map<string, string>();
+  for (const row of data?.rows ?? []) {
+    const id = row.id === undefined ? undefined : String(row.id);
+    if (id !== undefined && row.obs_name !== undefined) names.set(id, row.obs_name);
+  }
 
   /**
    * Creating the missing settings. The collector does not create a setting by hand:
@@ -232,6 +243,24 @@ export function ObsolescencePage() {
             ■ {refresh.error.message}
           </span>
         )}
+        {/* On the rows checked in the list; nothing checked, no menu. */}
+        <SelectionDeleteMenu
+          targets={selectedIds.map((id) => ({ id, name: names.get(id) ?? id }))}
+          prefix="obsolescence.actions"
+          privileges={["ObsManager"]}
+          remove={async (id) => {
+            const { error } = await api.DELETE("/obsolescence/settings/{id}", {
+              params: { path: { id } },
+            });
+            return error === undefined ? null : problemText(error);
+          }}
+          invalidate={[["obsolescence"]]}
+          onDeleted={(ids) => {
+            setDeleted(ids);
+            // The detail of a deleted object has nothing left to show.
+            if (search.sel !== undefined && ids.includes(search.sel)) update({ sel: undefined });
+          }}
+        />
       </div>
       <p className="mb-3 max-w-3xl text-ink-muted">{t("obsolescence.intro")}</p>
 
@@ -249,6 +278,8 @@ export function ObsolescencePage() {
         exportPage={(page) => fetchSettings({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        onSelectionChange={setSelectedIds}
+        unselect={deleted}
         filterable
       />
 

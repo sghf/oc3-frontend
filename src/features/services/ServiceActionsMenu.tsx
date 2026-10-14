@@ -5,6 +5,7 @@ import {
   type ActionTarget,
   type DataActionEntry,
 } from "@/components/opensvc/ActionsMenu";
+import { objectDataActions } from "@/components/opensvc/object-data-actions";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 
@@ -32,28 +33,28 @@ const SERVICE_ACTIONS: readonly ActionEntry[] = [
 
 /**
  * The agent actions, then the data actions of the historical collector ("Data
- * actions › On services"): for now the deletion of the service from the collector.
- * As there, no privilege group is needed, only the responsibility for the service,
- * which the API checks for each one (a Manager is responsible for them all).
- * `onDeleted` receives the ids of the services deleted.
+ * actions › On services"): notifications, tags and compliance attachments (see
+ * objectDataActions), then, last, the deletion of the service from the collector.
+ * As there, the deletion needs no privilege group, only the responsibility for the
+ * service, which the API checks for each one (a Manager is responsible for them
+ * all). `onDeleted` receives the ids of the services deleted.
  */
 export function ServiceActionsMenu({
   services,
   onDeleted,
   onCompare,
-  confirm,
 }: {
   services: ActionTarget[];
   /** Opens the comparison of the selection, see ActionsMenu. */
   onCompare?: () => void;
-  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
-  confirm?: "inline" | "popover";
   onDeleted?: (ids: string[]) => void;
 }) {
   const queryClient = useQueryClient();
   const dataActions: DataActionEntry[] = [
+    ...objectDataActions("service", queryClient),
     {
       key: "delete",
+      separatorBefore: true,
       privileges: [],
       run: async (target) => {
         // Cascades on the collector side: instances, resources, alerts, tags,
@@ -77,7 +78,6 @@ export function ServiceActionsMenu({
       actions={SERVICE_ACTIONS}
       dataActions={dataActions}
       onCompare={onCompare}
-      confirm={confirm}
       prefix="services.actions"
       queue={async (target, action) => {
         // `svc_id` alone targets the whole service, as in the historical collector.

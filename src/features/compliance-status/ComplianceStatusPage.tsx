@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
+import { SelectionDeleteMenu } from "@/components/opensvc/SelectionDeleteMenu";
 import { api } from "@/lib/api/client";
 import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
@@ -410,6 +411,20 @@ export function ComplianceStatusPage() {
     queryFn: () => fetchComplianceStatus(search),
   });
   const summary = useSummary(search.filters, undefined);
+  // The runs checked, and those just deleted, for the list to untick them.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleted, setDeleted] = useState<string[]>([]);
+  // Names from the page on display, the module and where it ran: a selection
+  // extended to the following pages does not have them all, so the id then serves as
+  // a fallback in the messages.
+  const names = new Map<string, string>();
+  for (const row of runs.data?.rows ?? []) {
+    if (row.id === undefined || row.run_module === undefined) continue;
+    const where = [row["nodes.nodename"], row["services.svcname"]].filter(
+      (name): name is string => typeof name === "string" && name !== "",
+    );
+    names.set(String(row.id), [row.run_module, ...where].join(" · "));
+  }
 
   /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {
@@ -431,13 +446,19 @@ export function ComplianceStatusPage() {
     });
   }
 
+  /** Another tab: the list of the runs comes back without the rows it had checked. */
+  function showSection(next: Section) {
+    setSelectedIds([]);
+    setSection(next);
+  }
+
   /** The runs of a group: its filter on the list, then the list. */
   function pick(by: Grouping, group: Group) {
     update({
       filters: withFilter(search.filters, GROUP_FILTER[by], fromPickedValues([group.name])),
       offset: 0,
     });
-    setSection("runs");
+    showSection("runs");
   }
 
   const tabs = (["runs", "module", "node", "service"] as const).map((key) => ({
@@ -451,10 +472,30 @@ export function ComplianceStatusPage() {
 
   return (
     <section>
-      <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
-        <ObjectIcon kind="complianceStatus" className="h-5 w-5" />
-        {t("complianceStatus.title")}
-      </h1>
+      {/* As tall as the Actions button from the start: checking a row must not push the list down. */}
+      <div className="mb-3 flex min-h-7 items-center gap-3">
+        <h1 className="flex items-center gap-2 text-title font-semibold">
+          <ObjectIcon kind="complianceStatus" className="h-5 w-5" />
+          {t("complianceStatus.title")}
+        </h1>
+        {/* On the runs checked in the list, which only the Runs tab shows. */}
+        {section === "runs" && (
+          <SelectionDeleteMenu
+            targets={selectedIds.map((id) => ({ id, name: names.get(id) ?? id }))}
+            prefix="complianceStatus.actions"
+            privileges={["CompExec"]}
+            remove={async (id) => {
+              const { error } = await api.DELETE("/compliance/status/{status_id}", {
+                params: { path: { status_id: id } },
+              });
+              return error === undefined ? null : problemText(error);
+            }}
+            // The counts and the breakdowns follow the runs.
+            invalidate={[["compliance-status"]]}
+            onDeleted={setDeleted}
+          />
+        )}
+      </div>
 
       {summary.isError ? (
         <p role="alert" className="mb-4 text-state-down">
@@ -470,7 +511,7 @@ export function ComplianceStatusPage() {
           idPrefix="compliance-status"
           tabs={tabs}
           active={section}
-          onSelect={setSection}
+          onSelect={showSection}
         />
       </div>
 
@@ -494,6 +535,8 @@ export function ComplianceStatusPage() {
             exportPage={(page) => fetchComplianceStatus({ ...search, ...page })}
             total={runs.data?.total}
             selectAllMatching={allIds}
+            onSelectionChange={setSelectedIds}
+            unselect={deleted}
             valueStats={complianceStatusStats}
             filterable
           />

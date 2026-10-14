@@ -324,7 +324,6 @@ export function NodeDetailPanel({
           <NodeActionsMenu
             nodes={[{ id: nodeId, name: node?.nodename ?? nodeId }]}
             onDeleted={onClose}
-            confirm="popover"
           />
         ) : undefined
       }

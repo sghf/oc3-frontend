@@ -5,6 +5,7 @@ import {
   type ActionTarget,
   type DataActionEntry,
 } from "@/components/opensvc/ActionsMenu";
+import { objectDataActions } from "@/components/opensvc/object-data-actions";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 
@@ -42,27 +43,27 @@ const ACTIONS: readonly ActionEntry[] = [
 
 /**
  * The agent actions, then the data actions of the historical collector ("Data
- * actions › On nodes"): for now the deletion of the node from the collector, offered
- * to NodeManager as the API requires, which also checks the responsibility for each
- * node. `onDeleted` receives the ids of the nodes deleted.
+ * actions › On nodes"): notifications, tags and compliance attachments (see
+ * objectDataActions), then, last, the deletion of the node from the collector,
+ * offered to NodeManager as the API requires, which also checks the responsibility
+ * for each node. `onDeleted` receives the ids of the nodes deleted.
  */
 export function NodeActionsMenu({
   nodes,
   onDeleted,
   onCompare,
-  confirm,
 }: {
   nodes: ActionTarget[];
   /** Opens the comparison of the selection, see ActionsMenu. */
   onCompare?: () => void;
-  /** Where the confirmation shows, see ActionsMenu: "popover" in a panel header. */
-  confirm?: "inline" | "popover";
   onDeleted?: (ids: string[]) => void;
 }) {
   const queryClient = useQueryClient();
   const dataActions: DataActionEntry[] = [
+    ...objectDataActions("node", queryClient),
     {
       key: "delete",
+      separatorBefore: true,
       privileges: ["NodeManager"],
       run: async (target) => {
         // Cascades on the collector side: instances, alerts, checks, packages, tags
@@ -85,7 +86,6 @@ export function NodeActionsMenu({
       actions={ACTIONS}
       dataActions={dataActions}
       onCompare={onCompare}
-      confirm={confirm}
       prefix="nodes.actions"
       queue={async (target, action) => {
         // `node_id` alone targets the node, as in the historical collector.
