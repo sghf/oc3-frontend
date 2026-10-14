@@ -802,3 +802,12 @@ export function EyeOffIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** Documentation, a book (fa-book): the OpenSVC manual. */
+export function BookIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6.5 2H19a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6.5a1.5 1.5 0 0 0 0 3H19a1 1 0 1 1 0 2H6.5A3.5 3.5 0 0 1 3 20.5v-15A3.5 3.5 0 0 1 6.5 2Zm1.5 4a1 1 0 0 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 0 0 0 2h5a1 1 0 1 0 0-2H8Z" />
+    </Svg>
+  );
+}

@@ -94,7 +94,10 @@
     "sessionFilterImpersonating": "The session filter of the user you act as: it cannot be changed while acting as another user.",
     "sessionFilterClear": "Remove the session filter",
     "accountMenuOf": "Account menu: {{user}}",
-    "signedInAs": "Signed in as {{user}}"
+    "signedInAs": "Signed in as {{user}}",
+    "apiDocs": "API documentation",
+    "newTab": "(opens in a new tab)",
+    "opensvcDocs": "OpenSVC documentation"
   },
   "state": {
     "up": "up",

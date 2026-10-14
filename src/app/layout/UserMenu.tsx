@@ -2,7 +2,9 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
-import { SignOutIcon, UserIcon } from "@/components/ui/icons";
+import { BookIcon, CodeIcon, SignOutIcon, UserIcon } from "@/components/ui/icons";
+import { useApiDocsUrl } from "@/lib/api/api-docs";
+import { useHiddenMenuEntries } from "@/lib/api/hidden-menu-entries";
 import { stopImpersonating } from "@/lib/session";
 import { logOut } from "@/lib/api/session-auth";
 import { useImpersonation } from "@/lib/api/impersonation";
@@ -12,6 +14,9 @@ import { setShortcutsHelp } from "@/lib/shortcuts";
 
 const ITEM =
   "flex w-full items-center gap-2 rounded-(--radius-control) px-2 py-1.5 text-left text-ink hover:bg-surface focus:bg-surface focus:outline-none";
+
+/** The OpenSVC online documentation, whatever the collector. */
+const OPENSVC_DOCS_URL = "https://book.opensvc.com";
 
 /**
  * Account menu, opened from the user icon in the top bar.
@@ -27,6 +32,8 @@ export function UserMenu({ user }: { user: string }) {
   const [open, setOpen] = useState(false);
   const impersonation = useImpersonation();
   const canImpersonate = useCanImpersonate();
+  const apiDocs = useApiDocsUrl();
+  const hiddenEntries = useHiddenMenuEntries();
   const [impersonating, setImpersonating] = useState(false);
   const menuId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -178,6 +185,42 @@ export function UserMenu({ user }: { user: string }) {
             </kbd>
             {t("shortcuts.title")}
           </button>
+          {/* The REST API documentation, the historical "rest_api" entry (menu key
+              help-api, which a group may hide), in a tab of its own: the interface
+              stays where it is. Shown only when oc3 serves it. */}
+          {apiDocs !== undefined && hiddenEntries.data?.has("help-api") !== true && (
+            <a
+              href={apiDocs}
+              target="_blank"
+              rel="noopener noreferrer"
+              role="menuitem"
+              tabIndex={-1}
+              onClick={() => {
+                close(false);
+              }}
+              className={ITEM}
+            >
+              <CodeIcon className="text-ink-muted" />
+              {t("header.apiDocs")}
+              <span className="sr-only">{t("header.newTab")}</span>
+            </a>
+          )}
+          {/* The OpenSVC manual, on its own site, in a tab of its own. */}
+          <a
+            href={OPENSVC_DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            role="menuitem"
+            tabIndex={-1}
+            onClick={() => {
+              close(false);
+            }}
+            className={ITEM}
+          >
+            <BookIcon className="text-ink-muted" />
+            {t("header.opensvcDocs")}
+            <span className="sr-only">{t("header.newTab")}</span>
+          </a>
           <div role="separator" className="my-1 border-t border-line" />
           {impersonation === null && canImpersonate && (
             <button

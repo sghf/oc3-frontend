@@ -94,7 +94,10 @@
     "sessionFilterImpersonating": "Le filtre de session de l'utilisateur incarné : il ne peut pas être changé en agissant comme un autre utilisateur.",
     "sessionFilterClear": "Retirer le filtre de session",
     "accountMenuOf": "Menu du compte : {{user}}",
-    "signedInAs": "Connecté en tant que {{user}}"
+    "signedInAs": "Connecté en tant que {{user}}",
+    "apiDocs": "Documentation de l'API",
+    "newTab": "(s'ouvre dans un nouvel onglet)",
+    "opensvcDocs": "Documentation d'OpenSVC"
   },
   "state": {
     "up": "up",

@@ -15,7 +15,10 @@ import { sessionRefused, stopImpersonating } from "@/lib/session";
  * With an OIDC session the cookie goes with every request on its own (same
  * origin); with the collector password, the Basic header is added here.
  */
-export const api = createClient<paths>({ baseUrl: "/api" });
+/** The path the API is served under, the SPA's own origin proxying it. */
+export const API_BASE = "/api";
+
+export const api = createClient<paths>({ baseUrl: API_BASE });
 
 /**
  * Header the server requires on the requests of a cookie session that change
