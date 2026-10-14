@@ -5306,7 +5306,11 @@ export interface paths {
          */
         get: operations["GetServicesActions"];
         put?: never;
-        post?: never;
+        /**
+         * @description Acknowledge a failed action (bulk form): the 'id' key selects it, the
+         *     acknowledgement is then handled as POST /services_actions/{action_id}.
+         */
+        post: operations["PostServicesActions"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5323,7 +5327,15 @@ export interface paths {
         /** @description Display an action, if the caller may see it (see GET /services_actions). */
         get: operations["GetServicesAction"];
         put?: never;
-        post?: never;
+        /**
+         * @description Acknowledge a failed action, as the historical collector: by whom, when
+         *     and why. Only `ack`, which must be 1, and `acked_comment` are taken. An
+         *     action not failed is left as it is, the answer says so. Requires the
+         *     responsibility of the service (a Manager has it for every service). The
+         *     count of the unacknowledged errors of the instance and its "action
+         *     errors" alert follow at once. Logged.
+         */
+        post: operations["PostServicesAction"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7566,6 +7578,13 @@ export interface components {
         };
         SearchResponse: {
             data: components["schemas"]["SearchGroup"][];
+        };
+        /** @description The acknowledgement of a failed action. */
+        ServiceActionAckRequest: {
+            /** @enum {integer} */
+            ack: 1;
+            /** @description Why the failure needs nothing more. */
+            acked_comment?: string;
         };
         ServiceActionListResponse: {
             data: components["schemas"]["ServiceActionRow"][] | {
@@ -25083,6 +25102,41 @@ export interface operations {
             500: components["responses"]["500"];
         };
     };
+    PostServicesActions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceActionAckRequest"] & {
+                    /**
+                     * Format: int64
+                     * @description The action, svcactions.id
+                     */
+                    id: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InfoResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
     GetServicesAction: {
         parameters: {
             query?: {
@@ -25108,6 +25162,38 @@ export interface operations {
                 };
             };
             401: components["responses"]["401"];
+            404: components["responses"]["404"];
+            500: components["responses"]["500"];
+        };
+    };
+    PostServicesAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Action record identifier (svcactions.id) */
+                action_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceActionAckRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InfoResponse"];
+                };
+            };
+            400: components["responses"]["400"];
+            401: components["responses"]["401"];
+            403: components["responses"]["403"];
             404: components["responses"]["404"];
             500: components["responses"]["500"];
         };

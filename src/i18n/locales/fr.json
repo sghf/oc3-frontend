@@ -1008,7 +1008,10 @@
       "empty_one": "Aucune action ces dernières 24 heures.",
       "empty_other": "Aucune action ces {{count}} derniers jours.",
       "periodNote_one": "Actions des dernières 24 heures.",
-      "periodNote_other": "Actions des {{count}} derniers jours."
+      "periodNote_other": "Actions des {{count}} derniers jours.",
+      "unacked_one": "1 action en échec non acquittée",
+      "unacked_other": "{{count}} actions en échec non acquittées",
+      "showUnacked": "Voir les actions"
     },
     "pkgdiff": {
       "missing": "non installé",
@@ -3530,6 +3533,23 @@
       "acked_by": "Acquittée par",
       "acked_date": "Acquittée le",
       "acked_comment": "Commentaire d'acquittement"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "acknowledge": {
+          "label": "Acquitter",
+          "question_one": "Acquitter cette action en échec ? Son échec n'appelle rien de plus ; elle ne compte plus dans les erreurs d'actions de son instance, ni dans leur alerte.",
+          "question_other": "Acquitter ces {{count}} actions en échec ? Leurs échecs n'appellent rien de plus ; elles ne comptent plus dans les erreurs d'actions de leurs instances, ni dans leurs alertes.",
+          "comment": "Commentaire, pour qui lira les actions",
+          "confirm_one": "Acquitter",
+          "confirm_other": "Acquitter {{count}} actions",
+          "running": "Acquittement…",
+          "done_one": "1 action acquittée.",
+          "done_other": "{{count}} actions acquittées."
+        }
+      }
     }
   },
   "requestDetail": {

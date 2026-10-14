@@ -6,6 +6,7 @@ import { ActionLogLines } from "@/components/opensvc/AgentActionParts";
 import type { AgentAction } from "@/components/opensvc/agent-action";
 import { DetailPanel } from "@/components/opensvc/DetailPanel";
 import { ACTION_GROUPS } from "./action-groups";
+import { ActionAckMenu } from "./ActionAckMenu";
 import { actionName } from "./action-name";
 
 /** The props the panel shows, and those the log lines are found with. */
@@ -15,6 +16,9 @@ const PROPS = [
     "svc_id",
     "node_id",
     "subset",
+    // Whether a failure is acknowledged, which the header's menu needs.
+    "status",
+    "ack",
     ...ACTION_GROUPS.flatMap((group) => group.fields.map((f) => f.prop)),
   ]),
 ].join(",");
@@ -72,6 +76,16 @@ export function ServiceActionDetailPanel({
       isPending={isPending}
       errorMessage={isError ? error.message : null}
       editHint=""
+      // A failure not acknowledged yet: the only change an action takes. Once it is,
+      // the menu stays without target, for its report.
+      titleActions={
+        actionId !== undefined &&
+        action !== undefined &&
+        action !== null &&
+        action.status === "err" ? (
+          <ActionAckMenu actions={action.ack === 1 ? [] : [{ id: actionId, name: title }]} />
+        ) : undefined
+      }
       after={
         action === undefined || action === null ? undefined : (
           <section className="mt-4">

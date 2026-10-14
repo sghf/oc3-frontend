@@ -62,6 +62,12 @@ export interface DataActionEntry {
    */
   fields?: readonly string[];
   /**
+   * A free text to enter in the confirmation, applied to every object, such as
+   * the reason of an acknowledgement, labelled `<prefix>.data.<key>.comment`;
+   * optional.
+   */
+  comment?: boolean;
+  /**
    * Read when the confirmation opens: what the action would also break, such as
    * the filtersets using a filter to delete. The confirmation waits for them.
    */
@@ -74,6 +80,7 @@ export interface DataActionEntry {
     target: ActionTarget,
     choice: string | undefined,
     values: Readonly<Record<string, number>>,
+    comment: string,
   ) => Promise<string | null>;
   /** Called with the objects the action succeeded on. */
   onDone?: (done: ActionTarget[]) => void;
@@ -215,17 +222,19 @@ export function ActionsMenu({
       entry,
       choice,
       values,
+      comment,
     }: {
       entry: DataActionEntry;
       choice: ComboboxOption | undefined;
       values: Record<string, number>;
+      comment: string;
     }): Promise<Outcome> => {
       // One object after the other: each is a transaction on the collector side,
       // and a long selection must not open them all at once.
       const done: ActionTarget[] = [];
       const failures: string[] = [];
       for (const target of targets) {
-        const message = await entry.run(target, choice?.value, values);
+        const message = await entry.run(target, choice?.value, values, comment);
         if (message === null) done.push(target);
         else failures.push(failureText(target, message));
       }
@@ -353,9 +362,9 @@ export function ActionsMenu({
                   : t(`${prefix}.data.${pending.entry.key}.confirm`, { count: targets.length })
               }
               busy={data.isPending}
-              onConfirm={(choice, values) => {
+              onConfirm={(choice, values, comment) => {
                 data.mutate(
-                  { entry: pending.entry, choice, values },
+                  { entry: pending.entry, choice, values, comment },
                   {
                     onSettled: () => {
                       setPending(null);
@@ -494,7 +503,11 @@ function DataConfirm({
   question: string;
   confirmLabel: string;
   busy: boolean;
-  onConfirm: (choice: ComboboxOption | undefined, values: Record<string, number>) => void;
+  onConfirm: (
+    choice: ComboboxOption | undefined,
+    values: Record<string, number>,
+    comment: string,
+  ) => void;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -502,6 +515,8 @@ function DataConfirm({
   const [chosen, setChosen] = useState("");
   const [typed, setTyped] = useState<Record<string, string>>({});
   const firstField = useRef<HTMLInputElement>(null);
+  const [comment, setComment] = useState("");
+  const commentField = useRef<HTMLTextAreaElement>(null);
   // What the action would also remove, acknowledged: required once the warnings
   // say something, or could not be read.
   const [acknowledged, setAcknowledged] = useState(false);
@@ -521,7 +536,8 @@ function DataConfirm({
   useEffect(() => {
     if (entry.choice !== undefined) choiceInput.current?.focus();
     else if (entry.fields !== undefined) firstField.current?.focus();
-  }, [entry.choice, entry.fields]);
+    else if (entry.comment === true) commentField.current?.focus();
+  }, [entry.choice, entry.fields, entry.comment]);
 
   // The values entered: integers, the empty fields left out.
   const values: Record<string, number> = {};
@@ -614,6 +630,20 @@ function DataConfirm({
             : t("actionsMenu.acknowledge", { count: warnings.data?.length ?? 0 })}
         </label>
       )}
+      {entry.comment === true && (
+        <label className="flex w-full flex-col gap-1">
+          {t(`${prefix}.data.${entry.key}.comment`)}
+          <textarea
+            ref={commentField}
+            value={comment}
+            rows={3}
+            onChange={(event) => {
+              setComment(event.target.value);
+            }}
+            className="w-full min-w-72 rounded-(--radius-control) border border-line bg-surface px-2 py-1"
+          />
+        </label>
+      )}
       {/* The field of a choice on the row of the buttons: its list opens under them,
           over nothing the confirmation needs. */}
       <div className="flex flex-wrap items-center gap-2">
@@ -651,11 +681,14 @@ function DataConfirm({
         <button
           type="button"
           autoFocus={
-            entry.tone === "change" && entry.choice === undefined && entry.fields === undefined
+            entry.tone === "change" &&
+            entry.choice === undefined &&
+            entry.fields === undefined &&
+            entry.comment !== true
           }
           disabled={busy || waiting}
           onClick={() => {
-            onConfirm(choice, values);
+            onConfirm(choice, values, comment.trim());
           }}
           className={`h-7 rounded-(--radius-control) px-3 font-medium disabled:opacity-60 ${tone.button}`}
         >
@@ -664,7 +697,10 @@ function DataConfirm({
         <button
           type="button"
           autoFocus={
-            entry.tone !== "change" && entry.choice === undefined && entry.fields === undefined
+            entry.tone !== "change" &&
+            entry.choice === undefined &&
+            entry.fields === undefined &&
+            entry.comment !== true
           }
           disabled={busy}
           onClick={onCancel}

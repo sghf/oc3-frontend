@@ -14,7 +14,7 @@ import { useTagEdit } from "@/features/tags/use-tag-edit";
 import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
 import { StatusTimeline } from "@/components/opensvc/StatusTimeline";
 import { ServiceActionsMenu } from "./ServiceActionsMenu";
-import { useServiceTags } from "./related/queries";
+import { useServiceTags, useUnackedActionErrors } from "./related/queries";
 import { SERVICE_RELATED_TABS } from "./related/service-related";
 import { formatDateTime } from "@/lib/format";
 
@@ -183,6 +183,8 @@ export function ServiceDetailPanel({
   const open = svcId !== undefined;
   const tags = useServiceTags(svcId);
   const tagEdit = useTagEdit("service", svcId);
+  const unacked = useUnackedActionErrors(open ? svcId : undefined);
+  const unackedCount = unacked.data?.length ?? 0;
   const queryClient = useQueryClient();
   // The owners of the service justify its periods of unavailability.
   const responsible = useQuery({
@@ -224,6 +226,23 @@ export function ServiceDetailPanel({
         errorMessage={tags.isError ? tags.error.message : null}
         edit={tagEdit}
       />
+      {/* The failed actions nobody acknowledged, as the historical properties counted them. */}
+      {unackedCount > 0 && (
+        <p className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="text-state-down">
+            ■ {t("services.actions.unacked", { count: unackedCount })}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              onTabChange("actions");
+            }}
+            className="h-6 rounded-(--radius-control) border border-line px-2 hover:bg-surface-sunken"
+          >
+            {t("services.actions.showUnacked")}
+          </button>
+        </p>
+      )}
       <DetailContent
         groups={GROUPS}
         row={service}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -26,6 +27,7 @@ import {
 } from "@/lib/list-search";
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { ActionAckMenu } from "./ActionAckMenu";
 import { ServiceActionDetailPanel } from "./ServiceActionDetailPanel";
 import { actionName } from "./action-name";
 
@@ -185,11 +187,27 @@ function FlagWord({ value }: { value: unknown }) {
 
 const ALL_PROPS = COLUMNS.map((column) => column.prop);
 
-/** Columns shown, plus the ids the detail and the links need, and the scheduler mark. */
+/**
+ * Columns shown, plus the ids the detail and the links need, the scheduler mark,
+ * and the status and acknowledgement that tell the rows one may acknowledge.
+ */
 function queryProps(cols: string[] | undefined): string {
   return [
-    ...new Set(["id", "svc_id", "node_id", "cron", ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS)]),
+    ...new Set([
+      "id",
+      "svc_id",
+      "node_id",
+      "cron",
+      "status",
+      "ack",
+      ...visibleProps(cols, DEFAULT_COLS, ALL_PROPS),
+    ]),
   ].join(",");
+}
+
+/** Whether an action is a failure not acknowledged yet: the only ones to acknowledge. */
+function acknowledgeable(row: AgentAction): boolean {
+  return row.status === "err" && row.ack !== 1;
 }
 
 /** The filters of a request: those of the user, and the actions only. */
@@ -252,7 +270,8 @@ function useActions(search: ResolvedListSearch) {
  * (`svcactions`), apart from the action queue, which lists what the collector asks
  * the agents to do. Each row is an action, its log lines in its detail. A Manager
  * sees them all, the others those of the services of an app their teams are
- * responsible for. Read-only: an action is described by its agent.
+ * responsible for. An action is described by its agent: the only change is the
+ * acknowledgement of a failure, on the rows checked or in the detail.
  */
 export function ServiceActionsPage() {
   const { t } = useTranslation();
@@ -263,14 +282,38 @@ export function ServiceActionsPage() {
   );
   const navigate = useNavigate({ from: "/service-actions" });
   const { data, isPending, isError, error, isFetching } = useActions(search);
+  // The rows checked, to acknowledge them.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // The failures not acknowledged among the rows of a selection extended to every
+  // page, read with their ids; those on display are known from their rows.
+  const [unackedBeyond, setUnackedBeyond] = useState<ReadonlySet<string>>(new Set());
+  // Names from the page on display: a selection extended to the following pages does
+  // not have them all, so the id then serves as a fallback in the messages.
+  const names = new Map<string, string>();
+  for (const row of data?.rows ?? []) {
+    if (row.id !== undefined) names.set(String(row.id), actionName(row));
+  }
+  const onPage = new Map((data?.rows ?? []).map((row) => [String(row.id), acknowledgeable(row)]));
+  // Only the failures not acknowledged: an action that succeeded, or acknowledged
+  // already, has nothing to acknowledge, and is not offered.
+  const toAcknowledge = selectedIds.filter((id) => onPage.get(id) ?? unackedBeyond.has(id));
 
   /** Ids of the whole selection, filters included, without pagination. */
   async function allIds(): Promise<string[]> {
     const { data, error } = await api.GET("/services_actions", {
-      params: { query: { props: "id", limit: 0, filter: requestFilters(search.filters) } },
+      params: {
+        query: { props: "id,status,ack", limit: 0, filter: requestFilters(search.filters) },
+      },
     });
     if (error !== undefined) throw new Error(problemText(error));
     const rows: AgentAction[] = Array.isArray(data.data) ? data.data : [];
+    setUnackedBeyond(
+      new Set(
+        rows
+          .filter(acknowledgeable)
+          .flatMap((row) => (row.id === undefined ? [] : [String(row.id)])),
+      ),
+    );
     return rows.flatMap((row) => (row.id === undefined ? [] : [String(row.id)]));
   }
 
@@ -288,10 +331,15 @@ export function ServiceActionsPage() {
 
   return (
     <section>
-      <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
-        <ObjectIcon kind="action" className="h-5 w-5" />
-        {t("serviceActions.title")}
-      </h1>
+      {/* As tall as the Actions button from the start: checking a row must not push the list down. */}
+      <div className="mb-3 flex min-h-7 items-center gap-3">
+        <h1 className="flex items-center gap-2 text-title font-semibold">
+          <ObjectIcon kind="action" className="h-5 w-5" />
+          {t("serviceActions.title")}
+        </h1>
+        {/* On the rows checked in the list; nothing checked, no menu. */}
+        <ActionAckMenu actions={toAcknowledge.map((id) => ({ id, name: names.get(id) ?? id }))} />
+      </div>
       <p className="mb-3 max-w-3xl text-ink-muted">{t("serviceActions.intro")}</p>
 
       <CollectorList
@@ -308,6 +356,7 @@ export function ServiceActionsPage() {
         exportPage={(page) => fetchActions({ ...search, ...page })}
         total={data?.total}
         selectAllMatching={allIds}
+        onSelectionChange={setSelectedIds}
         valueStats={actionStats}
         filterable
       />

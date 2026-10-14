@@ -1008,7 +1008,10 @@
       "empty_one": "No action in the last 24 hours.",
       "empty_other": "No action in the last {{count}} days.",
       "periodNote_one": "Actions of the last 24 hours.",
-      "periodNote_other": "Actions of the last {{count}} days."
+      "periodNote_other": "Actions of the last {{count}} days.",
+      "unacked_one": "1 failed action not acknowledged",
+      "unacked_other": "{{count}} failed actions not acknowledged",
+      "showUnacked": "Show the actions"
     },
     "pkgdiff": {
       "missing": "not installed",
@@ -3530,6 +3533,23 @@
       "acked_by": "Acknowledged by",
       "acked_date": "Acknowledged on",
       "acked_comment": "Acknowledgement comment"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "acknowledge": {
+          "label": "Acknowledge",
+          "question_one": "Acknowledge this failed action? Its failure needs nothing more; it no longer counts in the action errors of its instance, nor in their alert.",
+          "question_other": "Acknowledge these {{count}} failed actions? Their failures need nothing more; they no longer count in the action errors of their instances, nor in their alerts.",
+          "comment": "Comment, for those who read the actions",
+          "confirm_one": "Acknowledge",
+          "confirm_other": "Acknowledge {{count}} actions",
+          "running": "Acknowledging…",
+          "done_one": "1 action acknowledged.",
+          "done_other": "{{count}} actions acknowledged."
+        }
+      }
     }
   },
   "requestDetail": {

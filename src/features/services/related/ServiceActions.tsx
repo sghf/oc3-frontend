@@ -18,7 +18,9 @@ import {
   SERVICE_ACTIONS_PERIODS,
   SERVICE_ACTIONS_TIMELINE_LIMIT,
   useServiceActions,
+  useUnackedActionErrors,
 } from "./queries";
+import { ActionAckMenu } from "@/features/service-actions/ActionAckMenu";
 import { ServiceActionsTimeline } from "./ServiceActionsTimeline";
 
 /**
@@ -44,6 +46,8 @@ export function ServiceActions({
   const { t } = useTranslation();
   const [days, setDays] = useState<number>(SERVICE_ACTIONS_DEFAULT_DAYS);
   const actions = useServiceActions(svcId, days, nodeId);
+  const unacked = useUnackedActionErrors(svcId, nodeId);
+  const unackedCount = unacked.data?.length ?? 0;
   const all = actions.data?.rows ?? [];
   const rows = all.slice(0, SERVICE_ACTIONS_LIMIT);
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
@@ -148,6 +152,29 @@ export function ServiceActions({
             {t(`services.actions.period.days`, { count: period })}
           </button>
         ))}
+      </div>
+      {/* The failures nobody acknowledged yet, all dates, and their acknowledgement:
+          the menu stays once they are, for its report. */}
+      <div className="flex flex-wrap items-center gap-3 empty:hidden">
+        {unackedCount > 0 && (
+          <p className="text-state-down">
+            ■ {t("services.actions.unacked", { count: unackedCount })}
+          </p>
+        )}
+        <ActionAckMenu
+          actions={(unacked.data ?? []).flatMap((row) =>
+            row.id === undefined
+              ? []
+              : [
+                  {
+                    id: String(row.id),
+                    name: [row.action, row["nodes.nodename"], row.begin]
+                      .filter((part) => part !== undefined && part !== null && part !== "")
+                      .join(" · "),
+                  },
+                ],
+          )}
+        />
       </div>
       {all.length > 0 && (
         <ServiceActionsTimeline

@@ -386,3 +386,33 @@ export function useServiceActionStats(svcId: string | undefined, nodeId?: string
     },
   });
 }
+
+/**
+ * The failed actions of a service not acknowledged yet, whatever their date; of
+ * one node only, for an instance, with `nodeId`. What the historical service
+ * properties counted as action errors, and what an acknowledgement clears.
+ */
+export function useUnackedActionErrors(svcId: string | undefined, nodeId?: string) {
+  return useQuery({
+    queryKey: ["service", svcId, "unackedActionErrors", nodeId ?? ""],
+    enabled: svcId !== undefined,
+    queryFn: async () => {
+      // The actions themselves, not the lines they logged, which carry a status too.
+      const filter = [
+        "log_type:eq:status",
+        "status:err",
+        "ack:!1",
+        ...(nodeId === undefined ? [] : [`node_id:${nodeId}`]),
+      ];
+      const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        params: {
+          path: { svc_id: svcId ?? "" },
+          query: { props: "id,action,begin,nodes.nodename", limit: 0, filter },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
+      return rows;
+    },
+  });
+}
