@@ -1488,7 +1488,9 @@
       "title": "Tag",
       "groups": {
         "identity": "Properties"
-      }
+      },
+      "editHint": "The exclusion pattern is a regular expression of the tag names a node or service carrying this tag cannot carry as well; empty, it excludes nothing. Renaming a form-based tag (<form>::<name>) changes the form describing its data.",
+      "deleteQuestion": "Delete the tag {{name}}? Its attachments to nodes and services go with it. This cannot be undone."
     },
     "create": {
       "open": "New tag",

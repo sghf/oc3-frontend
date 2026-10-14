@@ -1488,7 +1488,9 @@
       "title": "Tag",
       "groups": {
         "identity": "Propriétés"
-      }
+      },
+      "editHint": "Le motif d'exclusion est une expression régulière des noms de tags qu'un nœud ou un service portant ce tag ne peut pas porter en même temps ; vide, il n'exclut rien. Renommer un tag à formulaire (<form>::<nom>) change le formulaire qui décrit ses données.",
+      "deleteQuestion": "Supprimer le tag {{name}} ? Ses rattachements aux nœuds et aux services partent avec lui. Cette action est irréversible."
     },
     "create": {
       "open": "Nouveau tag",

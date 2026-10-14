@@ -5507,7 +5507,14 @@ export interface paths {
     /** @description Display tag property */
     get: operations["GetTag"];
     put?: never;
-    /** @description Update a tag properties */
+    /**
+     * @description Update the properties of a tag. tag_name is trimmed and may be neither
+     *     empty, nor longer than 128 characters, nor the name of another tag (409).
+     *     tag_exclude, 128 characters at most, is a regular expression (MySQL
+     *     REGEXP) of the tag names an object carrying this tag may not carry; an
+     *     expression the database refuses is answered with a 400. The empty string
+     *     excludes nothing.
+     */
     post: operations["PostTag"];
     /** @description Delete the tag and its attachments to nodes and services */
     delete: operations["DeleteTag"];
@@ -25869,6 +25876,7 @@ export interface operations {
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];
+      409: components["responses"]["409"];
       500: components["responses"]["500"];
     };
   };
