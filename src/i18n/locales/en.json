@@ -2479,6 +2479,12 @@
       "view": "View the request",
       "all": "All requests",
       "new": "New request"
+    },
+    "payload": {
+      "summary": "Preview the data sent",
+      "copy": "Copy",
+      "copied": "Copied",
+      "hint": "The body sent on submission, as the inputs stand. An input whose condition does not hold is left out; an empty one is sent empty."
     }
   },
   "packages": {

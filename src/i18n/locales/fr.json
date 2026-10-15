@@ -2479,6 +2479,12 @@
       "view": "Voir la demande",
       "all": "Toutes les demandes",
       "new": "Nouvelle demande"
+    },
+    "payload": {
+      "summary": "Aperçu des données envoyées",
+      "copy": "Copier",
+      "copied": "Copié",
+      "hint": "Le corps envoyé à la soumission, selon les entrées actuelles. Une entrée dont la condition n'est pas remplie est omise ; une entrée vide est envoyée vide."
     }
   },
   "packages": {

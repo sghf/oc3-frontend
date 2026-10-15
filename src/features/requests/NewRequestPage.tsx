@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { useRequestFormsPref } from "@/lib/user-prefs";
+import { copyText } from "@/lib/clipboard";
 import { LegacyCssIcon } from "@/components/opensvc/LegacyCssIcon";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import {
@@ -870,6 +871,11 @@ function RequestForm({
   const { t } = useTranslation();
   const user = useFormUser();
   const def = useMemo(() => parseDefinition(form?.definition), [form]);
+  // What a submission would send, as the form reports it on every change.
+  const [payload, setPayload] = useState<unknown>(undefined);
+  useEffect(() => {
+    setPayload(undefined);
+  }, [form?.id]);
   const submit = useMutation({
     mutationFn: async (data: unknown) => {
       const { data: results, error } = await api.PUT("/forms/{form_id}", {
@@ -947,6 +953,7 @@ function RequestForm({
                 onSubmit={(data) => {
                   submit.mutate(data);
                 }}
+                onDataChange={setPayload}
                 submitLabel={submit.isPending ? t("requests.submitting") : t("requests.submit")}
                 stickySubmit
                 secondaryAction={
@@ -975,6 +982,7 @@ function RequestForm({
                 </button>
               </div>
             )}
+            {resultsId === null && <PayloadPreview formId={form.id} data={payload} />}
             {submit.isError && (
               <p role="alert" className="mt-3 text-state-down">
                 ■ {submit.error.message}
@@ -987,5 +995,51 @@ function RequestForm({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * The body a submission of the form sends to the API, as it stands, under a
+ * disclosure: the call, then the JSON, copied in one click. It follows the
+ * inputs as they change: an input whose condition does not hold is left out,
+ * an empty one is sent empty, as on submission (`groupData`).
+ */
+function PayloadPreview({ formId, data }: { formId: number; data: unknown }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const text = JSON.stringify({ data: data ?? {} }, null, 2);
+  return (
+    <details className="mt-4 rounded-(--radius-panel) border border-line bg-surface">
+      <summary className="cursor-pointer px-3 py-2 text-ink-muted hover:text-ink">
+        {t("requests.payload.summary")}
+      </summary>
+      <div className="flex flex-col gap-2 border-t border-line px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <code className="font-mono text-data text-ink-muted">
+            PUT /api/forms/{String(formId)}
+          </code>
+          <button
+            type="button"
+            onClick={() => {
+              void copyText(text).then(() => {
+                setCopied(true);
+                window.setTimeout(() => {
+                  setCopied(false);
+                }, 2000);
+              });
+            }}
+            className="h-7 rounded-(--radius-control) border border-line px-2 text-ink hover:bg-surface-sunken"
+          >
+            <span aria-live="polite">
+              {copied ? t("requests.payload.copied") : t("requests.payload.copy")}
+            </span>
+          </button>
+        </div>
+        <pre className="max-h-96 overflow-auto font-mono text-data break-all whitespace-pre-wrap text-ink">
+          {text}
+        </pre>
+        <p className="text-ink-muted">{t("requests.payload.hint")}</p>
+      </div>
+    </details>
   );
 }
