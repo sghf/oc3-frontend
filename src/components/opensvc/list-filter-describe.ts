@@ -7,12 +7,6 @@ export function isFilterable<T>(column: ListColumn<T>): boolean {
   return column.filter?.kind !== "none";
 }
 
-/** Whether a column offers the distribution of its values: see ListColumn. */
-export function hasDistribution<T>(column: ListColumn<T>): boolean {
-  if (column.filter?.kind === "none") return false;
-  return column.distribution ?? column.family !== "time";
-}
-
 export function optionLabel(option: ColumnFilterOption, t: TFunction): string {
   return option.labelKey === undefined ? option.value : t(option.labelKey);
 }

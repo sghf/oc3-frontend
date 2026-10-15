@@ -181,7 +181,8 @@ const FAMILY: Record<string, ColumnFamily> = {
 
 /**
  * Columns holding one value per service, the ids by constraint, the name in
- * practice: their distribution would only list each service once.
+ * practice: the comparison of a selection leaves them out, as they would only
+ * tell the services apart.
  */
 const UNIQUE_PROPS = new Set<string>(["id", "svc_id", "svcname"]);
 
@@ -190,7 +191,6 @@ const COLUMNS: ListColumn<ServiceRow>[] = SERVICE_PROPS.map((prop) => ({
   labelKey: `services.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
-  distribution: UNIQUE_PROPS.has(prop) ? false : undefined,
   filter: STATUS_PROPS.has(prop)
     ? { kind: "enum" as const, options: STATUS_FILTER_OPTIONS }
     : prop === "svc_frozen"

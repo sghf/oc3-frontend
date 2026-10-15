@@ -19,7 +19,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { teamsOf, useClaimMapping, type ClaimMappingRow, type TeamKind } from "./claim-mapping-api";
 import { ClaimMappingDetailPanel } from "./ClaimMappingDetailPanel";
@@ -155,6 +156,17 @@ async function fetchMappings(search: ResolvedListSearch) {
   return toPage(all, data.meta, search.limit);
 }
 
+/**
+ * The distribution of a column's values over the claim mappings the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function mappingStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/oidc_mappings", { params: { query } });
+  if (response.error !== undefined) throw new Error(JSON.stringify(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
+}
+
 function useMappings(search: ResolvedListSearch) {
   return useQuery({
     queryKey: [
@@ -245,6 +257,7 @@ export function ClaimMappingsPage() {
       />
 
       <CollectorList
+        valueStats={mappingStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

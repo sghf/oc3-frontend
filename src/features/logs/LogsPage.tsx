@@ -115,22 +115,6 @@ function queryProps(cols: string[] | undefined): string {
 }
 
 /**
- * Columns whose distribution says nothing or misleads: the ids of the entry, the
- * service, the node and the action; the data filling the message, all but unique;
- * and the message itself, whose filter matches the format and that data together,
- * so that a format picked from a distribution would select nothing (the action
- * tells the kind of event). The dates have none, as in every list.
- */
-const NO_DISTRIBUTION = new Set<string>([
-  "id",
-  "svc_id",
-  "node_id",
-  "log_entry_id",
-  "log_dict",
-  "log_fmt",
-]);
-
-/**
  * The distribution of a column's values over the selection: the filters given
  * apply, not the pagination.
  */
@@ -222,7 +206,6 @@ export function LogsPage() {
   const columns: ListColumn<LogRow>[] = LOG_PROPS.map((prop) => ({
     prop,
     labelKey: `logs.fields.${prop}`,
-    distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
     numeric: NUMERIC_PROPS.has(prop),
     family: FAMILY[prop] ?? "state",
     // The message filters on the format and the values filling it together (the

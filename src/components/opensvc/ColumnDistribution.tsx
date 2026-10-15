@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,6 +10,17 @@ import {
 } from "@/lib/column-filters";
 import type { ValueStats } from "@/lib/api/value-stats";
 import { Distribution, type DistributionItem } from "@/components/ui/Distribution";
+
+/**
+ * Whether the distribution of a column is worth showing is read from its values,
+ * over the selection: from IDENTIFIER_FROM rows, a column holding fewer than
+ * ROWS_PER_VALUE rows per value on average is nearly one value per row (a name,
+ * an id, a date, a message with its data), and its distribution, bars of 1 or 2,
+ * tells nothing. Below that many rows, any column has distinct values, and the
+ * bars still serve to pick one.
+ */
+const IDENTIFIER_FROM = 10;
+const ROWS_PER_VALUE = 1.5;
 
 /** How a value of the column is named: the label of its option, or the value. */
 export interface ValueLabel {
@@ -31,6 +42,11 @@ export interface ValueLabel {
  * again of the server: past the first values of a column holding many, that is how
  * the others are reached. `options`, for a column holding a known set, lists each
  * of them, counted or not.
+ *
+ * The distribution of a column of nearly one value per row is left out, its
+ * summary kept with a button to show it anyway (see IDENTIFIER_FROM). That is read
+ * from the values without the narrowing, so that the list does not come and go as
+ * one types.
  */
 export function ColumnValues({
   column,
@@ -64,6 +80,15 @@ export function ColumnValues({
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   });
+  // The column without the narrowing, the same query as when nothing is typed.
+  const whole = useQuery({
+    queryKey: [...queryKey, ""],
+    queryFn: () => fetchStats(undefined),
+    enabled: narrow !== undefined,
+    staleTime: 30 * 1000,
+  });
+  const overall = narrow === undefined ? stats.data : whole.data;
+  const [shownAnyway, setShownAnyway] = useState(false);
 
   const picked = toPickedValues(expr);
   const inverted = isInverted(expr);
@@ -115,6 +140,13 @@ export function ColumnValues({
   // found again by typing.
   const hidden = data === undefined ? [] : picked.filter((v) => !items.some((i) => i.key === v));
   const leftOut = data === undefined ? 0 : data.distinct - data.values.length;
+  const identifier =
+    options === undefined &&
+    overall !== undefined &&
+    overall.total >= IDENTIFIER_FROM &&
+    overall.total < overall.distinct * ROWS_PER_VALUE;
+  // A value picked from the list keeps it on display, to be seen and unpicked.
+  const folded = identifier && !shownAnyway && picked.length === 0;
 
   return (
     <section aria-label={t("list.distribution.title", { column })} className="flex flex-col gap-1">
@@ -139,7 +171,23 @@ export function ColumnValues({
       {data !== undefined && data.total === 0 && options === undefined && (
         <p className="px-1.5 text-ink-muted">{t("list.distribution.none")}</p>
       )}
-      {data !== undefined && items.length > 0 && (
+      {data !== undefined && items.length > 0 && folded && (
+        <p className="flex flex-wrap items-baseline justify-between gap-x-2 px-1.5 text-ink-muted">
+          {overall !== undefined && overall.distinct < overall.total
+            ? t("list.distribution.nearlyUnique")
+            : t("list.distribution.unique")}
+          <button
+            type="button"
+            onClick={() => {
+              setShownAnyway(true);
+            }}
+            className="text-accent underline-offset-2 hover:underline"
+          >
+            {t("list.distribution.show")}
+          </button>
+        </p>
+      )}
+      {data !== undefined && items.length > 0 && !folded && (
         <>
           {inverted && picked.length > 0 && (
             <p className="px-1.5 text-state-warn">

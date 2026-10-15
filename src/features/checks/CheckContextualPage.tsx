@@ -18,7 +18,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { CheckContextualDetailPanel } from "./CheckContextualDetailPanel";
@@ -64,7 +65,6 @@ const COLUMNS: ListColumn<CheckContextualRow>[] = PROPS.map((prop) => ({
   labelKey: `checkContextual.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "state",
-  distribution: prop === "id" || prop === "fset_id" ? false : undefined,
   render: (row: CheckContextualRow) => {
     if (prop === "chk_instance") return <code>{row.chk_instance}</code>;
     if (prop === "gen_filtersets.fset_name")
@@ -102,6 +102,17 @@ async function fetchDefaults(search: ResolvedListSearch) {
   if (error !== undefined) throw new Error(problemText(error));
   const all: CheckContextualRow[] = Array.isArray(data.data) ? data.data : [];
   return toPage(all, data.meta, search.limit);
+}
+
+/**
+ * The distribution of a column's values over the contextual thresholds the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function contextualStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/checks/contextual_settings", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 /**
@@ -204,6 +215,7 @@ export function CheckContextualPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("checkContextual.intro")}</p>
 
       <CollectorList
+        valueStats={contextualStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

@@ -97,19 +97,11 @@ const FAMILY: Record<string, ColumnFamily> = {
   updated: "time",
 };
 
-/**
- * Columns whose distribution says nothing: the ids of the node and the service,
- * whose names have it. The dates have none, as in every list. The disk id keeps
- * its own: a disk seen by several nodes holds several rows, worth spotting.
- */
-const NO_DISTRIBUTION = new Set<string>(["node_id", "svc_id"]);
-
 const COLUMNS: ListColumn<DiskRow>[] = DISK_PROPS.map((prop) => ({
   prop,
   labelKey: `disks.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   // The sizes read in their distribution as in the cells.
   formatValue: SIZE_PROPS.has(prop)
     ? (value: string, locale: string) =>

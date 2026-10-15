@@ -21,7 +21,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { RulesetDetailPanel } from "./RulesetDetailPanel";
 
@@ -179,6 +180,17 @@ async function fetchRulesets(search: ResolvedListSearch) {
   return toPage(all, data.meta, search.limit);
 }
 
+/**
+ * The distribution of a column's values over the rulesets the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function rulesetStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/compliance/rulesets_variables", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
+}
+
 function useRulesets(search: ResolvedListSearch) {
   return useQuery({
     queryKey: [
@@ -247,6 +259,7 @@ export function RulesetsPage() {
       </h1>
 
       <CollectorList
+        valueStats={rulesetStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

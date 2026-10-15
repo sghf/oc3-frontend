@@ -27,13 +27,6 @@ import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 
 type NodeHardwareRow = components["schemas"]["NodeHardwareRow"];
 
-/**
- * Columns whose distribution says nothing: the record id, one value per row, and
- * the id of the node, whose name has it. The dates have none, as in every list.
- * The PCI path keeps its own: one shared by the nodes tells a common layout.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "node_id"]);
-
 /** By node, then component family, then address, as the historical table. */
 const DEFAULT_SORT = ["nodes.nodename", "hw_type", "hw_path"];
 
@@ -90,7 +83,6 @@ function columns(t: (key: string) => string, has: (key: string) => boolean) {
   return HARDWARE_PROPS.map((prop): ListColumn<NodeHardwareRow> => ({
     prop,
     labelKey: `hardware.fields.${prop}`,
-    distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
     numeric: prop === "id",
     family: FAMILY[prop] ?? "cpu",
     filter: prop === "hw_type" ? { kind: "enum", options: TYPE_OPTIONS } : undefined,

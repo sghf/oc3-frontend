@@ -16,7 +16,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { CreateUserPanel } from "./CreateUserPanel";
 import { UserDetailPanel } from "./UserDetailPanel";
@@ -135,6 +136,17 @@ async function fetchUsers(search: ResolvedListSearch) {
   return toPage(all, data.meta, search.limit);
 }
 
+/**
+ * The distribution of a column's values over the users the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function userStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/users", { params: { query } });
+  if (response.error !== undefined) throw new Error(JSON.stringify(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
+}
+
 function useUsers(search: ResolvedListSearch) {
   return useQuery({
     queryKey: [
@@ -212,6 +224,7 @@ export function UsersPage() {
       </div>
 
       <CollectorList
+        valueStats={userStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

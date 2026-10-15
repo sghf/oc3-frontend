@@ -804,7 +804,9 @@
       "alsoPicked": "Also picked: {{values}}.",
       "excluding": "The ticked values are excluded.",
       "hint": "Click: only · Ctrl+click: add",
-      "values": "Values"
+      "values": "Values",
+      "show": "Show the values",
+      "nearlyUnique": "Nearly every row holds its own value."
     }
   },
   "detail": {

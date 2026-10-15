@@ -89,19 +89,11 @@ const FAMILY: Record<string, ColumnFamily> = {
   updated: "time",
 };
 
-/**
- * Columns whose distribution says nothing: the record id, one value per row; the
- * ids of the service and the node, whose names have it; the log of the agent,
- * free text all but unique. The dates have none, as in every list.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "svc_id", "node_id", "res_log"]);
-
 const COLUMNS: ListColumn<ResourceRow>[] = RESOURCE_PROPS.map((prop) => ({
   prop,
   labelKey: `resources.fields.${prop}`,
   numeric: prop === "id",
   family: FAMILY[prop] ?? "resource",
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   filter:
     prop === "res_status"
       ? { kind: "enum" as const, options: STATUS_FILTER_OPTIONS }

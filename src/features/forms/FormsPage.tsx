@@ -66,13 +66,6 @@ const TYPE_OPTIONS: ColumnFilterOption[] = FORM_TYPES.map((value) => ({
   labelKey: `forms.types.${value}`,
 }));
 
-/**
- * Columns whose distribution says nothing, one value per form: the record id, the
- * name, unique, and the definition, the text filter of which stays to find the
- * forms holding a word. The dates have none, as in every list.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "form_name", "form_yaml"]);
-
 /** Lines of the definition shown in its cell. */
 const PREVIEW_LINES = 5;
 
@@ -107,7 +100,6 @@ const COLUMNS: ListColumn<FormRow>[] = FORM_PROPS.map((prop) => ({
   numeric: prop === "id",
   family: FAMILY[prop] ?? "state",
   filter: prop === "form_type" ? { kind: "enum" as const, options: TYPE_OPTIONS } : undefined,
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   render: (row: FormRow, locale: string) => {
     if (prop === "form_created") return <DateTime value={row.form_created} locale={locale} />;
     if (prop === "form_folder") return <code>{row.form_folder}</code>;

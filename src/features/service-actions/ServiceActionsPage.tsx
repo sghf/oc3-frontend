@@ -105,9 +105,6 @@ const FAMILY: Record<ActionProp, ColumnFamily> = {
   acked_comment: "alert",
 };
 
-/** Columns with one value per action: their distribution would list each once. */
-const UNIQUE_PROPS = new Set<string>(["id", "sid", "pid"]);
-
 const STATUS_OPTIONS: ColumnFilterOption[] = [
   { value: "ok", labelKey: "agentActions.statusNames.ok" },
   { value: "warn", labelKey: "agentActions.statusNames.warn" },
@@ -125,7 +122,6 @@ const COLUMNS: ListColumn<AgentAction>[] = ACTION_PROPS.map((prop) => ({
   labelKey: `serviceActions.fields.${prop}`,
   numeric: prop === "id" || prop === "time",
   family: FAMILY[prop],
-  distribution: UNIQUE_PROPS.has(prop) ? false : undefined,
   filter:
     prop === "status"
       ? { kind: "enum" as const, options: STATUS_OPTIONS }

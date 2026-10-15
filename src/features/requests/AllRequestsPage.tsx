@@ -23,7 +23,8 @@ import {
   type ListSearch,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { RequestDetailPanel } from "./RequestDetailPanel";
 
@@ -149,6 +150,27 @@ async function fetchRequests(search: ResolvedListSearch, assigned: Assigned) {
   return toPage(all, data.meta, search.limit);
 }
 
+/**
+ * The distribution of a column's values over the requests of the list, within its
+ * scope (`assigned`) and the filters given, for its filter.
+ */
+async function requestStats(
+  prop: string,
+  filters: ColumnFilters,
+  assigned: Assigned,
+): Promise<ValueStats> {
+  const query = {
+    props: prop,
+    stats: "1",
+    limit: STATS_LIMIT,
+    filter: filterQuery(filters),
+    assigned,
+  };
+  const response = await api.GET("/workflows", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
+}
+
 function useRequests(search: ResolvedListSearch, assigned: Assigned) {
   return useQuery({
     queryKey: [
@@ -229,6 +251,7 @@ function RequestsList({
         errorMessage={isError ? error.message : null}
         hasMore={data?.hasMore ?? false}
         exportPage={(page) => fetchRequests({ ...search, ...page }, assigned)}
+        valueStats={(prop, filters) => requestStats(prop, filters, assigned)}
         total={data?.total}
         selectAllMatching={allIds}
         filterable

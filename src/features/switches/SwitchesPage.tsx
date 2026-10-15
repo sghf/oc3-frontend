@@ -24,13 +24,6 @@ import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 
 type SwitchPortRow = components["schemas"]["SwitchPortRow"];
 
-/**
- * Columns whose distribution says nothing: the record id, one value per row, and
- * the id of the node, unreadable here, no name standing beside it. The dates have
- * none, as in every list.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "node_id"]);
-
 /** By switch, then port index, then port state, as the historical table. */
 const DEFAULT_SORT = ["sw_name", "sw_index", "sw_portstate"];
 
@@ -112,7 +105,6 @@ function renderCell(prop: SwitchProp, row: SwitchPortRow, locale: string) {
 const COLUMNS: ListColumn<SwitchPortRow>[] = SWITCH_PROPS.map((prop) => ({
   prop,
   labelKey: `switches.fields.${prop}`,
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   numeric: NUMERIC_PROPS.includes(prop),
   family: prop === "sw_updated" ? "time" : prop === "node_id" ? "node" : "network",
   filter: prop === "sw_portnego" ? { kind: "enum", options: FLAG_FILTER_OPTIONS } : undefined,

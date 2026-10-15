@@ -17,7 +17,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { ReportCreatePanel } from "./ReportCreatePanel";
 import { ReportDetailPanel } from "./ReportDetailPanel";
@@ -90,6 +91,17 @@ async function fetchReports(search: ResolvedListSearch) {
   if (error !== undefined) throw new Error(problemText(error));
   const all: ReportRow[] = Array.isArray(data.data) ? data.data : [];
   return toPage(all, data.meta, search.limit);
+}
+
+/**
+ * The distribution of a column's values over the reports the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function reportStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/reports", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 function useReports(search: ResolvedListSearch) {
@@ -174,6 +186,7 @@ export function ReportsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("reports.intro")}</p>
 
       <CollectorList
+        valueStats={reportStats}
         columns={columns(t)}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

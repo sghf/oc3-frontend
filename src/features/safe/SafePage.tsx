@@ -17,7 +17,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { EncryptionMark } from "./EncryptionMark";
 import { SafeDetailPanel } from "./SafeDetailPanel";
@@ -79,8 +80,6 @@ const COLUMNS: ListColumn<SafeFileRow>[] = SAFE_PROPS.map((prop) => ({
   family: FAMILY[prop] ?? "safe",
   // A condition rather than a column: no text filter to type into.
   filter: prop === "encrypted" ? { kind: "none" as const } : undefined,
-  distribution:
-    prop === "id" || prop === "uuid" || prop === "md5" || prop === "sha256" ? false : undefined,
   render: (row: SafeFileRow, locale: string) => {
     const value = row[prop];
     if (prop === "size") return formatBytes(row.size, locale);
@@ -116,6 +115,17 @@ async function fetchSafeFiles(search: ResolvedListSearch) {
   if (error !== undefined) throw new Error(problemText(error));
   const all: SafeFileRow[] = Array.isArray(data.data) ? data.data : [];
   return toPage(all, data.meta, search.limit);
+}
+
+/**
+ * The distribution of a column's values over the safe files the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function safeFileStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/safe", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 function useSafeFiles(search: ResolvedListSearch) {
@@ -200,6 +210,7 @@ export function SafePage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("safe.intro")}</p>
 
       <CollectorList
+        valueStats={safeFileStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

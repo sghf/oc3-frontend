@@ -126,17 +126,9 @@ function renderCell(prop: StatusProp, row: StatusRow, locale: string) {
   }
 }
 
-/**
- * Columns whose distribution says nothing: the record id; the ids of the node and
- * the service, whose names have it; the output of the module, free text; and the
- * checksum of the rulesets, unreadable.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "node_id", "svc_id", "run_log", "rset_md5"]);
-
 const COLUMNS: ListColumn<StatusRow>[] = STATUS_PROPS.map((prop) => ({
   prop,
   labelKey: `complianceStatus.fields.${prop}`,
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   numeric: prop === "id",
   family: FAMILY[prop],
   filter:

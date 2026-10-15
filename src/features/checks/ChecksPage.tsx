@@ -86,9 +86,6 @@ const FAMILY: Record<string, ColumnFamily> = {
   chk_updated: "time",
 };
 
-/** Ids and values whose distribution says nothing. */
-const NO_DISTRIBUTION = new Set<string>(["id", "node_id", "svc_id", "chk_value"]);
-
 /** Where a check stands, as the state column words it. */
 const STATE_OPTIONS: ColumnFilterOption[] = [
   { value: "0", labelKey: "nodes.checks.within" },
@@ -101,7 +98,6 @@ const COLUMNS: ListColumn<CheckRow>[] = CHECK_PROPS.map((prop) => ({
   labelKey: `checks.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "state",
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   filter: prop === "chk_err" ? { kind: "enum" as const, options: STATE_OPTIONS } : undefined,
   render: (row: CheckRow, locale: string) => {
     const value = row[prop];

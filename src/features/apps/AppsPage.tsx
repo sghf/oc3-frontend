@@ -19,7 +19,8 @@ import {
   visibleProps,
   type ResolvedListSearch,
 } from "@/lib/list-search";
-import { filterQuery, filtersKey } from "@/lib/column-filters";
+import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
+import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 import { AppDetailPanel } from "./AppDetailPanel";
 import { CreateAppPanel } from "./CreateAppPanel";
@@ -100,6 +101,17 @@ async function fetchApps(search: ResolvedListSearch) {
   if (error !== undefined) throw new Error(JSON.stringify(error));
   const all: AppRow[] = Array.isArray(data.data) ? data.data : [];
   return toPage(all, data.meta, search.limit);
+}
+
+/**
+ * The distribution of a column's values over the application codes the filters given keep,
+ * for its filter: the pagination does not apply.
+ */
+async function appStats(prop: string, filters: ColumnFilters): Promise<ValueStats> {
+  const query = { props: prop, stats: "1", limit: STATS_LIMIT, filter: filterQuery(filters) };
+  const response = await api.GET("/apps", { params: { query } });
+  if (response.error !== undefined) throw new Error(problemText(response.error));
+  return toValueStats(response.data.data, response.data.meta, prop);
 }
 
 function useApps(search: ResolvedListSearch) {
@@ -219,6 +231,7 @@ export function AppsPage() {
       </div>
 
       <CollectorList
+        valueStats={appStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

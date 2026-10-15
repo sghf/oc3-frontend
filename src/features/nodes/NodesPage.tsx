@@ -177,7 +177,8 @@ const FAMILY: Record<string, ColumnFamily> = {
 
 /**
  * Columns holding one value per node, the id by constraint, the name and the
- * serial number in practice: their distribution would only list each node once.
+ * serial number in practice: the comparison of a selection leaves them out, as
+ * they would only tell the nodes apart.
  */
 const UNIQUE_PROPS = new Set<string>(["node_id", "nodename", "serial"]);
 
@@ -186,7 +187,6 @@ const COLUMNS: ListColumn<NodeRow>[] = NODE_PROPS.map((prop) => ({
   labelKey: `nodes.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
-  distribution: UNIQUE_PROPS.has(prop) ? false : undefined,
   filter:
     prop === "node_frozen"
       ? { kind: "enum" as const, options: frozenFilterOptions("T", "F") }

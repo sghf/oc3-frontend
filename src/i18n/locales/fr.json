@@ -804,7 +804,9 @@
       "alsoPicked": "Aussi retenues : {{values}}.",
       "excluding": "Les valeurs cochées sont exclues.",
       "hint": "Clic : seulement · Ctrl+clic : ajouter",
-      "values": "Valeurs"
+      "values": "Valeurs",
+      "show": "Afficher les valeurs",
+      "nearlyUnique": "Presque chaque ligne a sa propre valeur."
     }
   },
   "detail": {

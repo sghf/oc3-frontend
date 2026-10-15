@@ -54,12 +54,6 @@ export interface ListColumn<T> {
    */
   filter?: ColumnFilterSpec;
   /**
-   * Whether the filter offers the distribution of the column's values, in a list
-   * given `valueStats`. By default yes, but for dates and times, nearly one value
-   * per row.
-   */
-  distribution?: boolean;
-  /**
    * How a value of the column reads in its distribution when no option names it:
    * a size in MiB as "1 GiB", say. The filter keeps the value itself.
    */

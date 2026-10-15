@@ -70,18 +70,9 @@ const FAMILY: Record<string, ColumnFamily> = {
   pkg_updated: "time",
 };
 
-/**
- * Columns whose distribution says nothing: the record id, one value per row, and
- * the id of the node, whose name has it. The dates have none, as in every list.
- * The name and the version keep theirs: on how many nodes a package, or one of
- * its versions, is installed.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "node_id"]);
-
 const COLUMNS: ListColumn<PackageRow>[] = PACKAGE_PROPS.map((prop) => ({
   prop,
   labelKey: `packages.fields.${prop}`,
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   numeric: prop === "id",
   family: FAMILY[prop] ?? "package",
   render: (row: PackageRow, locale: string) => {

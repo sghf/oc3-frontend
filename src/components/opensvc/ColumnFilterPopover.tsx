@@ -9,7 +9,7 @@ import { FilterIcon } from "@/components/ui/icons";
 import type { ListColumn } from "./CollectorList";
 import { ColumnFamilyIcon } from "./ColumnFamily";
 import { ColumnValues } from "./ColumnDistribution";
-import { describeFilter, hasDistribution, narrowing, optionLabel } from "./list-filter-describe";
+import { describeFilter, isFilterable, narrowing, optionLabel } from "./list-filter-describe";
 
 const OPERATORS: TextOperator[] = ["contains", "eq", "ne", "regex", "gt", "gte", "lt", "lte"];
 
@@ -19,6 +19,8 @@ const OPERATORS: TextOperator[] = ["contains", "eq", "ne", "regex", "gt", "gte",
  * column holding a known set; under them, when the view counts values, the
  * distribution of the column's values to pick from (ColumnValues); at the foot,
  * Exclude, which keeps the rows the filter leaves out, and Clear.
+ * The distribution is asked for every column: whether it is shown depends on the
+ * values the database holds, not on the column.
  *
  * The trigger is a funnel, red while a filter is set, its tooltip and accessible
  * name then naming the filter; `trigger` replaces it, for the chip of an active
@@ -49,7 +51,8 @@ export function ColumnFilterPopover<T>({
   const active = expr !== undefined;
   const spec = column.filter ?? { kind: "text" as const };
   const options = spec.kind === "enum" ? spec.options : [];
-  const withValues = valueStats !== undefined && hasDistribution(column);
+  // Whether the distribution helps is told by the values themselves (ColumnValues).
+  const withValues = valueStats !== undefined && isFilterable(column);
   const others = Object.fromEntries(
     Object.entries(filters).filter(([prop]) => prop !== column.prop),
   );

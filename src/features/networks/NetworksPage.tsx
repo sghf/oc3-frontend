@@ -120,21 +120,12 @@ const FILTERS: Partial<Record<string, ColumnFilterSpec>> = {
   },
 };
 
-/**
- * Columns whose distribution says nothing: the record id, one value per row; the
- * ids of the node and of the network, whose names have it. The dates have none,
- * as in every list. The addresses and MACs keep theirs: one held by several rows
- * is worth spotting.
- */
-const NO_DISTRIBUTION = new Set<string>(["id", "node_id", "net_id"]);
-
 const COLUMNS: ListColumn<IpRow>[] = IP_PROPS.map((prop) => ({
   prop,
   labelKey: `networks.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
   filter: FILTERS[prop],
-  distribution: NO_DISTRIBUTION.has(prop) ? false : undefined,
   render: (row: IpRow, locale: string) => {
     const value = row[prop];
     if (prop === "nodename")
