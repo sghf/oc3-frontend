@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { Markdown } from "@/components/ui/Markdown";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { RelativeTime } from "@/components/ui/RelativeTime";
 import { SendIcon, SparklesIcon, TrashIcon } from "@/components/ui/icons";
@@ -459,7 +460,7 @@ function Conversation({
                 />
               ) : (
                 <AssistantMessage key={message.id}>
-                  <p className="whitespace-pre-wrap text-ink">{message.text}</p>
+                  <Markdown text={message.text} />
                 </AssistantMessage>
               ),
             )}
@@ -501,9 +502,7 @@ function Conversation({
                     ))}
                   </ul>
                 )}
-                {live.answer !== "" && (
-                  <p className="whitespace-pre-wrap text-ink">{live.answer}</p>
-                )}
+                {live.answer !== "" && <Markdown text={live.answer} />}
                 {live.streaming && live.answer === "" && (
                   <p className="text-ink-muted">
                     <span aria-hidden="true" className="animate-pulse">
