@@ -278,6 +278,13 @@ export function substRefs(data: unknown, s: string): string {
   if (!isRecord(data)) return s;
   return s.replace(/#[\w.]+/g, (ref) => {
     const path = ref.slice(1);
+    // oc3 returns the columns of a joined table under flat keys, "stor_array.id",
+    // where the historical API nested them: the whole reference first, then its
+    // path, a trailing dot left as text.
+    const flat = path.replace(/\.$/, "");
+    const direct = data[flat];
+    if (typeof direct === "string" || typeof direct === "number" || typeof direct === "boolean")
+      return String(direct) + (flat === path ? "" : ".");
     let finalDot = "";
     let val: unknown = data;
     for (const key of path.split(".")) {
@@ -342,6 +349,33 @@ export interface Candidate {
 }
 
 /** Candidates of a rest answer, id and label read as getProcessResultFunc() does. */
+/**
+ * A candidate row in the shape the historical API gave it, which the forms are
+ * written against. oc3 returns the columns of joined tables under flat keys,
+ * "stor_array.id"; the historical API returned pydal's as_list(): a row nested
+ * by table when the columns came from several tables, `{stor_array: {id}}`, and
+ * plain columns when they came from a single one, `{id}`. A form then reads
+ * `#id`, or `#stor_array.id`, whose missing segment substRefs skips.
+ */
+export function legacyRowShape(row: Record<string, unknown>): Record<string, unknown> {
+  const tables: Record<string, Record<string, unknown>> = {};
+  const plain: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) {
+    const dot = key.indexOf(".");
+    if (dot <= 0) {
+      plain[key] = value;
+      continue;
+    }
+    const table = key.slice(0, dot);
+    (tables[table] ??= {})[key.slice(dot + 1)] = value;
+  }
+  const names = Object.keys(tables);
+  if (names.length === 0) return row;
+  const only = names.length === 1 ? tables[names[0] ?? ""] : undefined;
+  if (only !== undefined && Object.keys(plain).length === 0) return only;
+  return { ...plain, ...tables };
+}
+
 export function restCandidates(
   input: FormInput,
   rows: unknown[],
@@ -353,9 +387,10 @@ export function restCandidates(
     idProp = typeof props === "string" ? (props.split(",")[0] ?? "") : input.key;
   }
   idProp = idProp.replace("#", "");
-  return rows.map((row) => {
-    if (typeof row === "string" || typeof row === "number")
-      return { id: String(row), text: String(row) };
+  return rows.map((raw) => {
+    if (typeof raw === "string" || typeof raw === "number")
+      return { id: String(raw), text: String(raw) };
+    const row = isRecord(raw) ? legacyRowShape(raw) : raw;
     const id = substRefs(row, `#${idProp}`);
     return { id, text: input.format === "" ? id : substRefs(row, input.format), data: row };
   });
