@@ -2393,7 +2393,6 @@
     "render": {
       "submit": "Submit",
       "addGroup": "Add an entry",
-      "removeGroup": "Remove this entry",
       "violations_one": "{{count}} input to correct before submitting.",
       "violations_other": "{{count}} inputs to correct before submitting.",
       "mandatory": "mandatory",
@@ -2408,7 +2407,9 @@
       "toggleAll": "Toggle all",
       "subFormMissing": "The sub-form is not named.",
       "subFormNotFound": "Sub-form {{name}} not found.",
-      "noCandidateMatch": "No candidate matches."
+      "noCandidateMatch": "No candidate matches.",
+      "entryName": "{{label}} {{index}}",
+      "removeEntry": "Remove entry {{index}}"
     },
     "definitionMore_one": "+{{count}} more line",
     "definitionMore_other": "+{{count}} more lines",

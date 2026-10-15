@@ -603,6 +603,8 @@ export interface GroupState {
   values: Record<string, InputValue>;
   /** Candidate rows of the selected options, for the Keys references. */
   optionData: Record<string, unknown>;
+  /** Identity of an entry of a repeated form, kept while entries come and go. */
+  uid?: number;
 }
 
 /**

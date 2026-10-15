@@ -18,7 +18,7 @@ export interface ComboboxOption {
  * clears the current choice, which is restored only by choosing an option: with the
  * mouse, or with the arrows and Enter, which only chooses. Escape closes the list
  * without reaching the parent panel; with the list closed, Enter submits the
- * surrounding form as in any field.
+ * surrounding form as in any field. The list is in the page while open only.
  */
 export function Combobox({
   options,
@@ -106,7 +106,7 @@ export function Combobox({
         aria-describedby={describedBy}
         aria-label={label}
         aria-expanded={open}
-        aria-controls={listId}
+        aria-controls={open ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={activeOption === undefined ? undefined : optionId(activeIndex)}
         autoComplete="off"
@@ -171,40 +171,44 @@ export function Combobox({
         }}
         className={`${inputClassName} w-full rounded-(--radius-control) border bg-surface px-2 disabled:opacity-70 ${invalid ? "border-state-down" : accent ? "border-accent font-medium" : "border-line"}`}
       />
-      <ul
-        ref={list}
-        id={listId}
-        role="listbox"
-        aria-label={label}
-        hidden={!open}
-        className="absolute top-full right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-(--radius-control) border border-line bg-surface-raised py-1 shadow-lg"
-      >
-        {filtered.length === 0 ? (
-          <li className="px-2 py-1 text-ink-muted">{emptyText}</li>
-        ) : (
-          filtered.map((option, index) => (
-            <li
-              key={option.value}
-              id={optionId(index)}
-              role="option"
-              aria-selected={option.value === value}
-              // Before the blur of the field, which would close the list under the click.
-              onMouseDown={(event) => {
-                event.preventDefault();
-              }}
-              onMouseEnter={() => {
-                setActive(index);
-              }}
-              onClick={() => {
-                choose(option);
-              }}
-              className={`cursor-pointer px-2 py-1 ${index === activeIndex ? "bg-accent-soft text-ink" : ""} ${option.value === value ? "font-semibold" : ""}`}
-            >
-              {option.label}
-            </li>
-          ))
-        )}
-      </ul>
+      {/* Mounted while open only: a closed list kept in the page, hidden, made
+          React lose track of the nodes around it when an entry holding the field
+          was removed from a repeated form (removeChild on the wrong parent). */}
+      {open && (
+        <ul
+          ref={list}
+          id={listId}
+          role="listbox"
+          aria-label={label}
+          className="absolute top-full right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-(--radius-control) border border-line bg-surface-raised py-1 shadow-lg"
+        >
+          {filtered.length === 0 ? (
+            <li className="px-2 py-1 text-ink-muted">{emptyText}</li>
+          ) : (
+            filtered.map((option, index) => (
+              <li
+                key={option.value}
+                id={optionId(index)}
+                role="option"
+                aria-selected={option.value === value}
+                // Before the blur of the field, which would close the list under the click.
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                }}
+                onMouseEnter={() => {
+                  setActive(index);
+                }}
+                onClick={() => {
+                  choose(option);
+                }}
+                className={`cursor-pointer px-2 py-1 ${index === activeIndex ? "bg-accent-soft text-ink" : ""} ${option.value === value ? "font-semibold" : ""}`}
+              >
+                {option.label}
+              </li>
+            ))
+          )}
+        </ul>
+      )}
     </div>
   );
 }
