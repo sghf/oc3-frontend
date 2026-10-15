@@ -14,6 +14,7 @@ import { problemText } from "@/lib/api/problem";
 import { LegacyCssIcon } from "@/components/opensvc/LegacyCssIcon";
 import { parseLegacyCss } from "@/components/opensvc/legacy-css";
 import { Switch } from "@/components/ui/Switch";
+import { Combobox } from "@/components/ui/Combobox";
 import { CloseIcon, PlusIcon } from "@/components/ui/icons";
 import {
   candidatesPath,
@@ -602,7 +603,8 @@ function InputControl({
   }
 
   // Candidates, static or fetched: a selection list, whether StrictCandidates is
-  // set or not, as the select2 list of the historical renderer.
+  // set or not, as the select2 list of the historical renderer. A single choice is
+  // filtered by typing, as select2 searched: a list of nodes runs to hundreds.
   if (input.candidates !== null || input.fn !== "") {
     const options: Candidate[] =
       input.candidates !== null
@@ -616,6 +618,31 @@ function InputControl({
     const selected = input.multiple ? asStrings(value) : [asString(value)];
     // A value outside the candidates, from a default, still shows.
     const extra = selected.filter((v) => v !== "" && !options.some((o) => o.id === v));
+    if (!input.multiple)
+      return (
+        <>
+          <Combobox
+            id={id}
+            style={style}
+            disabled={input.readOnly}
+            invalid={invalid}
+            describedBy={describedBy}
+            label={input.label}
+            options={[
+              ...extra.map((v) => ({ value: v, label: v })),
+              ...options.map((o) => ({ value: o.id, label: o.text })),
+            ]}
+            value={selected[0] ?? ""}
+            onChange={(v) => {
+              pick(v === "" ? [] : [v]);
+            }}
+            placeholder={input.placeholder || t("forms.render.selectCandidate")}
+            emptyText={t("forms.render.noCandidateMatch")}
+            inputClassName="h-8"
+          />
+          {candidateStatus}
+        </>
+      );
     return (
       <>
         <select

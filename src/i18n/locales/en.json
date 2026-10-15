@@ -2407,7 +2407,8 @@
       "candidatesError": "Candidates unavailable: {{message}}",
       "toggleAll": "Toggle all",
       "subFormMissing": "The sub-form is not named.",
-      "subFormNotFound": "Sub-form {{name}} not found."
+      "subFormNotFound": "Sub-form {{name}} not found.",
+      "noCandidateMatch": "No candidate matches."
     },
     "definitionMore_one": "+{{count}} more line",
     "definitionMore_other": "+{{count}} more lines",

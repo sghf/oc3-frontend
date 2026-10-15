@@ -91,8 +91,14 @@ function str(v: unknown): string {
       : "";
 }
 
+/**
+ * A YAML boolean as the historical collector read the forms, with PyYAML (YAML
+ * 1.1): yes, true and on, in any case. The YAML 1.2 parser of the SPA leaves
+ * "Yes" or "On" as strings, which would silently drop `ReadOnly: Yes` or
+ * `Mandatory: Yes`.
+ */
 function bool(v: unknown): boolean {
-  return v === true || v === "true" || v === "yes" || v === "True";
+  return v === true || (typeof v === "string" && /^(yes|true|on)$/i.test(v));
 }
 
 /**

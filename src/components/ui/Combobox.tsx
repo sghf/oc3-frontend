@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type Ref } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type Ref } from "react";
 
 export interface ComboboxOption {
   value: string;
@@ -30,6 +30,12 @@ export function Combobox({
   className = "",
   inputRef,
   accent = false,
+  id,
+  disabled = false,
+  invalid = false,
+  describedBy,
+  style,
+  inputClassName = "h-7",
 }: {
   options: ComboboxOption[];
   /** Value of the chosen option, "" when none. */
@@ -44,6 +50,18 @@ export function Combobox({
   inputRef?: Ref<HTMLInputElement>;
   /** Accent border and weight: the choice is one in force, worth noticing. */
   accent?: boolean;
+  /** Id of the field, for a `<label htmlFor>` around it. */
+  id?: string;
+  /** The choice is shown and cannot be changed. */
+  disabled?: boolean;
+  /** The choice breaks a rule of the surrounding form: border in the state colour. */
+  invalid?: boolean;
+  /** Ids of the texts describing the field, its help or its error. */
+  describedBy?: string;
+  /** Style of the wrapper, a width for instance. */
+  style?: CSSProperties;
+  /** Height and spacing of the field, to line up with the controls around it. */
+  inputClassName?: string;
 }) {
   const listId = useId();
   const [open, setOpen] = useState(false);
@@ -77,11 +95,15 @@ export function Combobox({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} style={style}>
       <input
         ref={inputRef}
+        id={id}
         type="text"
         role="combobox"
+        disabled={disabled}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         aria-label={label}
         aria-expanded={open}
         aria-controls={listId}
@@ -147,7 +169,7 @@ export function Combobox({
               return;
           }
         }}
-        className={`h-7 w-full rounded-(--radius-control) border bg-surface px-2 ${accent ? "border-accent font-medium" : "border-line"}`}
+        className={`${inputClassName} w-full rounded-(--radius-control) border bg-surface px-2 disabled:opacity-70 ${invalid ? "border-state-down" : accent ? "border-accent font-medium" : "border-line"}`}
       />
       <ul
         ref={list}
