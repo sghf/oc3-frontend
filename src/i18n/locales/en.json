@@ -3644,7 +3644,10 @@
     "formUnavailable": "The {{name}} form does not exist or is not published to you.",
     "submit": "Submit the decision",
     "back": "Back to the choices",
-    "submittedDecision": "{{label}} submitted."
+    "submittedDecision": "{{label}} submitted.",
+    "showLogs": "Show the logs",
+    "hideLogs": "Hide the logs",
+    "logsTitle": "Execution log of step {{index}}"
   },
   "safe": {
     "title": "Safe",

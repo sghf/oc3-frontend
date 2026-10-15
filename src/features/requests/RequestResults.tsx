@@ -53,8 +53,18 @@ function parseResults(raw: unknown): Results {
 /**
  * The progress and outcome of a request: the results structure of its
  * submission, read again while its outputs run, as they log what they do.
+ * `initial`, the structure a submission answered with, spares the first read.
+ * `title` replaces the default heading, which names the results by their id.
  */
-export function RequestResults({ resultsId, initial }: { resultsId: number; initial: unknown }) {
+export function RequestResults({
+  resultsId,
+  initial,
+  title,
+}: {
+  resultsId: number;
+  initial?: unknown;
+  title?: string;
+}) {
   const { t } = useTranslation();
   const query = useQuery({
     queryKey: ["form-output-results", resultsId],
@@ -75,7 +85,7 @@ export function RequestResults({ resultsId, initial }: { resultsId: number; init
   return (
     <section className="mt-4 rounded-(--radius-panel) border border-line bg-surface-raised p-3">
       <h2 className="mb-2 flex items-center gap-2 font-semibold text-ink">
-        {t("requests.results.title", { id: resultsId })}
+        {title ?? t("requests.results.title", { id: resultsId })}
         <span
           role="status"
           className={`font-normal ${failed ? "text-state-down" : done ? "text-state-up" : "text-state-warn"}`}

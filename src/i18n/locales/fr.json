@@ -3644,7 +3644,10 @@
     "formUnavailable": "Le formulaire {{name}} n'existe pas ou ne vous est pas publié.",
     "submit": "Soumettre la décision",
     "back": "Revenir aux choix",
-    "submittedDecision": "{{label}} soumis."
+    "submittedDecision": "{{label}} soumis.",
+    "showLogs": "Afficher les journaux",
+    "hideLogs": "Masquer les journaux",
+    "logsTitle": "Journal d'exécution de l'étape {{index}}"
   },
   "safe": {
     "title": "Coffre-fort",

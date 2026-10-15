@@ -166,9 +166,17 @@ export function RequestDetailPanel({
   );
 }
 
-/** A step of the request: its form, who submitted it and when, whom it went to, its data. */
+/**
+ * A step of the request: its form, who submitted it and when, whom it went to, its
+ * data, and the log of its outputs, opened on demand, as the historical workflow
+ * tab showed the results of each step.
+ */
 function Step({ step, index, current }: { step: StoredFormRow; index: number; current: boolean }) {
   const { t, i18n } = useTranslation();
+  const [showLogs, setShowLogs] = useState(false);
+  const resultsId =
+    typeof step.results_id === "number" && step.results_id > 0 ? step.results_id : null;
+  const logsId = `request-step-${String(step.id)}-logs`;
   return (
     <li
       className={`rounded-(--radius-panel) border p-3 ${current ? "border-accent" : "border-line"}`}
@@ -190,6 +198,30 @@ function Step({ step, index, current }: { step: StoredFormRow; index: number; cu
         )}
       </p>
       <FormValue formName={step.form_name ?? ""} value={step.form_data ?? undefined} />
+      {resultsId !== null && (
+        <div className="mt-2">
+          <button
+            type="button"
+            aria-expanded={showLogs}
+            aria-controls={logsId}
+            onClick={() => {
+              setShowLogs(!showLogs);
+            }}
+            className="inline-flex h-7 items-center gap-1 rounded-(--radius-control) border border-line px-2 hover:bg-surface-sunken"
+          >
+            <span aria-hidden="true">{showLogs ? "▾" : "▸"}</span>
+            {showLogs ? t("requestDetail.hideLogs") : t("requestDetail.showLogs")}
+          </button>
+          <div id={logsId}>
+            {showLogs && (
+              <RequestResults
+                resultsId={resultsId}
+                title={t("requestDetail.logsTitle", { index })}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </li>
   );
 }
