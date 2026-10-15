@@ -10,6 +10,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Markdown } from "@/components/ui/Markdown";
+import { AnswerFeedback } from "./AnswerFeedback";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { RelativeTime } from "@/components/ui/RelativeTime";
 import { SendIcon, SparklesIcon, TrashIcon } from "@/components/ui/icons";
@@ -415,6 +416,13 @@ function Conversation({
 
   const time = new Intl.DateTimeFormat(i18n.language, { hour: "2-digit", minute: "2-digit" });
   const messages = history.data?.messages ?? [];
+  // The feedback goes under the last answer of each turn, which a confirmation
+  // may have split.
+  const lastOfTurn = new Set<string>();
+  for (const turn of new Set(messages.map((m) => m.turn_id))) {
+    const last = messages.filter((m) => m.turn_id === turn && m.role === "assistant").at(-1);
+    if (last !== undefined) lastOfTurn.add(last.id);
+  }
   const empty = messages.length === 0 && live === null && !(id !== null && history.isPending);
   const streaming = live?.streaming === true;
   const showAnswer =
@@ -461,6 +469,13 @@ function Conversation({
               ) : (
                 <AssistantMessage key={message.id}>
                   <Markdown text={message.text} />
+                  {id !== null && lastOfTurn.has(message.id) && (
+                    <AnswerFeedback
+                      conversationId={id}
+                      turnId={message.turn_id}
+                      feedback={message.feedback}
+                    />
+                  )}
                 </AssistantMessage>
               ),
             )}

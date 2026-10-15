@@ -639,6 +639,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/assistant/conversations/{conversation_id}/turns/{turn_id}/feedback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        conversation_id: string;
+        turn_id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * @description Give or replace the feedback of the user on a completed turn: up or down,
+     *     and for down, the reasons and what was expected. The agent keeps a copy
+     *     of the turn for review, without the identity of the user.
+     *
+     *     Relayed by oc3 to the AI agent, at the base_url and path of
+     *     server.assistant, with the access token of the caller's single sign-on
+     *     session, or the bearer token of the request; nothing else of the
+     *     browser's request is forwarded. The agent's answers and error codes are
+     *     returned as they are.
+     */
+    put: operations["PutAssistantFeedback"];
+    post?: never;
+    /**
+     * @description Withdraw the feedback of the user on a turn.
+     *
+     *     Relayed by oc3 to the AI agent, as the other assistant routes.
+     */
+    delete: operations["DeleteAssistantFeedback"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/assistant/status": {
     parameters: {
       query?: never;
@@ -6122,9 +6157,43 @@ export interface components {
         message: string;
       };
     };
+    AssistantFeedback: {
+      expected: string;
+      /** @enum {string} */
+      rating: "up" | "down";
+      reasons: components["schemas"]["AssistantFeedbackReason"][];
+    };
+    AssistantFeedbackEnvelope: {
+      /** Format: date-time */
+      created_at: string;
+      feedback: components["schemas"]["AssistantFeedback"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /**
+     * @description Why an answer falls short: it does not answer the question, information
+     *     is missing, it is incorrect or outdated, it is hard to understand, the
+     *     expected action was not done.
+     * @enum {string}
+     */
+    AssistantFeedbackReason:
+      | "not_answered"
+      | "missing_information"
+      | "incorrect_or_outdated"
+      | "hard_to_understand"
+      | "action_not_done";
+    AssistantFeedbackRequest: {
+      /** @description What the user would have expected, free text. */
+      expected?: string;
+      /** @enum {string} */
+      rating: "up" | "down";
+      /** @description Only with down. */
+      reasons?: components["schemas"]["AssistantFeedbackReason"][];
+    };
     AssistantMessage: {
       /** Format: date-time */
       created_at: string;
+      feedback?: components["schemas"]["AssistantFeedback"];
       id: string;
       /** @enum {string} */
       role: "user" | "assistant";
@@ -10783,6 +10852,198 @@ export interface operations {
       };
       /** @description The prompt is too large. */
       413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The agent could not be reached, or answered badly (assistant_unreachable). */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The agent is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+    };
+  };
+  PutAssistantFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        conversation_id: string;
+        turn_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssistantFeedbackRequest"];
+      };
+    };
+    responses: {
+      /** @description The feedback is stored. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantFeedbackEnvelope"];
+        };
+      };
+      /** @description Invalid request, invalid feedback, or the turn is not completed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description No access token for the caller - a password sign-in, or a single sign-on session to open again (assistant_token_unavailable) - or the agent refused it. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description Not while impersonating (assistant_forbidden). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The assistant is not configured (assistant_disabled), or the conversation or the turn does not exist, or has no feedback to delete (feedback_target_not_found). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The feedback limit of the agent is reached (feedback_limit). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The conversation has expired. */
+      410: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The body is too large. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The agent could not be reached, or answered badly (assistant_unreachable). */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The agent is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+    };
+  };
+  DeleteAssistantFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        conversation_id: string;
+        turn_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The feedback was deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description No access token for the caller - a password sign-in, or a single sign-on session to open again (assistant_token_unavailable) - or the agent refused it. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description Not while impersonating (assistant_forbidden). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The assistant is not configured (assistant_disabled), or the conversation or the turn does not exist, or has no feedback to delete (feedback_target_not_found). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The conversation has expired. */
+      410: {
         headers: {
           [name: string]: unknown;
         };

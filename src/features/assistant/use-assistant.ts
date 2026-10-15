@@ -6,6 +6,9 @@ export type AssistantConversation = components["schemas"]["AssistantConversation
 export type AssistantMessage = components["schemas"]["AssistantMessage"];
 export type AssistantStreamEvent = components["schemas"]["AssistantStreamEvent"];
 export type AssistantConfirmation = components["schemas"]["AssistantConfirmation"];
+export type AssistantFeedback = components["schemas"]["AssistantFeedback"];
+export type AssistantFeedbackRequest = components["schemas"]["AssistantFeedbackRequest"];
+export type AssistantFeedbackReason = components["schemas"]["AssistantFeedbackReason"];
 type AssistantError = components["schemas"]["AssistantError"];
 
 /** An error of the assistant: the agent's or the relay's, with its stable code. */
@@ -176,4 +179,26 @@ export async function streamConfirmation(
     throw failure(error as AssistantError | undefined, response.status);
   }
   await readEvents(data, onEvent);
+}
+
+/** Gives or replaces the feedback of the user on a completed turn. */
+export async function setFeedback(
+  conversationId: string,
+  turnId: string,
+  feedback: AssistantFeedbackRequest,
+): Promise<void> {
+  const { error, response } = await api.PUT(
+    "/assistant/conversations/{conversation_id}/turns/{turn_id}/feedback",
+    { params: { path: { conversation_id: conversationId, turn_id: turnId } }, body: feedback },
+  );
+  if (error !== undefined) throw failure(error, response.status);
+}
+
+/** Withdraws the feedback of the user on a turn. */
+export async function deleteFeedback(conversationId: string, turnId: string): Promise<void> {
+  const { error, response } = await api.DELETE(
+    "/assistant/conversations/{conversation_id}/turns/{turn_id}/feedback",
+    { params: { path: { conversation_id: conversationId, turn_id: turnId } } },
+  );
+  if (error !== undefined) throw failure(error, response.status);
 }

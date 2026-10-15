@@ -3775,6 +3775,34 @@
       "destructive": "L'assistant veut exécuter une action destructrice : {{title}}. Approuver ?",
       "approve": "Approuver",
       "reject": "Refuser"
+    },
+    "feedback": {
+      "question": "Cette réponse vous a-t-elle aidé ?",
+      "up": "Utile",
+      "down": "Pas utile",
+      "withdraw": "Retirer l'avis",
+      "tellMore": "En dire plus",
+      "why": "Qu'est-ce qui n'allait pas ?",
+      "reasons": {
+        "not_answered": "Elle ne répond pas à la question",
+        "missing_information": "Des informations manquent",
+        "incorrect_or_outdated": "Elle est inexacte ou périmée",
+        "hard_to_understand": "Elle est difficile à comprendre",
+        "action_not_done": "L'action attendue n'a pas été faite"
+      },
+      "expected": "Qu'attendiez-vous ?",
+      "count": "{{count}} / {{max}}",
+      "later": "Plus tard",
+      "send": "Envoyer",
+      "privacy": "L'avis et une copie de cet échange sont conservés pour analyse, sans votre identité.",
+      "sent": {
+        "rating": "Merci pour votre avis.",
+        "details": "Merci, les précisions sont envoyées.",
+        "withdrawn": "Avis retiré."
+      },
+      "limit": "L'assistant ne prend plus d'avis pour le moment.",
+      "expired": "Cette conversation a expiré : ses réponses ne peuvent plus être notées.",
+      "failed": "L'avis n'a pas pu être envoyé : {{message}}"
     }
   },
   "checks": {
