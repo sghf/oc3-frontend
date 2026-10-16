@@ -23,6 +23,8 @@ import {
   type SysreportFileDiff,
 } from "./queries";
 import { periodBegin, type Period } from "./sysreport-period";
+import { SysreportPurgeForm, SysreportPurgeTracker, type PurgeTarget } from "./SysreportPurge";
+import { useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
 type Mode = "changes" | "files";
 type Kind = "file" | "command";
@@ -95,6 +97,10 @@ export function NodeSysreport({ nodeId, locale }: { nodeId: string; locale: stri
   // The revision the Files view shows: the latest report unless a change was chosen.
   const [at, setAt] = useState<{ cid: string; date: string } | null>(null);
   const [filesFilter, setFilesFilter] = useState("");
+  // The purge asked from the Files view, followed here: the row it was asked
+  // from leaves with the file.
+  const [purge, setPurge] = useState<PurgeTarget | null>(null);
+  const canPurge = useEffectivePrivileges().data?.has("Manager") === true;
 
   const needle = useDebounced(path.trim(), 250);
   const timeline = useNodeSysreport(nodeId, { path: needle, begin: periodBegin(period), limit });
@@ -293,6 +299,16 @@ export function NodeSysreport({ nodeId, locale }: { nodeId: string; locale: stri
               setPeriod("all");
               setLimit(PAGE);
               select("changes");
+            }}
+            onPurgeQueued={canPurge ? setPurge : undefined}
+          />
+        )}
+        {purge !== null && (
+          <SysreportPurgeTracker
+            nodeId={nodeId}
+            target={purge}
+            onDismiss={() => {
+              setPurge(null);
             }}
           />
         )}
@@ -789,6 +805,7 @@ function Files({
   errorMessage,
   filter,
   onHistory,
+  onPurgeQueued,
 }: {
   nodeId: string;
   locale: string;
@@ -798,6 +815,8 @@ function Files({
   errorMessage: string | null;
   filter: string;
   onHistory: (entry: SysreportEntry) => void;
+  /** Offered to a Manager: removing the file from the history for good. */
+  onPurgeQueued?: (target: PurgeTarget) => void;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<string | null>(null);
@@ -880,6 +899,7 @@ function Files({
                       onHistory={() => {
                         onHistory(entry);
                       }}
+                      onPurgeQueued={onPurgeQueued}
                     />
                   )}
                 </li>
@@ -898,14 +918,17 @@ function FileContent({
   cid,
   entry,
   onHistory,
+  onPurgeQueued,
 }: {
   nodeId: string;
   cid: string;
   entry: SysreportEntry;
   onHistory: () => void;
+  onPurgeQueued?: (target: PurgeTarget) => void;
 }) {
   const { t } = useTranslation();
   const file = useNodeSysreportFile(nodeId, cid, entry.oid, true);
+  const [purging, setPurging] = useState(false);
   const [copied, setCopied] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   useEffect(
@@ -931,6 +954,18 @@ function FileContent({
         <button type="button" onClick={onHistory} className="text-accent hover:underline">
           {t("nodes.sysreport.files.history")}
         </button>
+        {onPurgeQueued !== undefined && (
+          <button
+            type="button"
+            aria-expanded={purging}
+            onClick={() => {
+              setPurging(!purging);
+            }}
+            className="text-state-down hover:underline"
+          >
+            {t("nodes.sysreport.purge.open")}
+          </button>
+        )}
         {content !== undefined && (
           <button
             type="button"
@@ -949,6 +984,19 @@ function FileContent({
           </button>
         )}
       </div>
+      {purging && onPurgeQueued !== undefined && (
+        <SysreportPurgeForm
+          nodeId={nodeId}
+          entry={entry}
+          onQueued={(target) => {
+            setPurging(false);
+            onPurgeQueued(target);
+          }}
+          onCancel={() => {
+            setPurging(false);
+          }}
+        />
+      )}
       {content === undefined ? (
         <p className="text-ink-muted">{t("nodes.sysreport.file.binary")}</p>
       ) : content === "" ? (

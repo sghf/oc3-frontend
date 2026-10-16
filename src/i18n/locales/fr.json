@@ -627,6 +627,32 @@
         "explain": "Ce qui a changé après le premier rapport, jusqu'au second inclus.",
         "identical": "Rien n'a changé entre ces deux rapports.",
         "clear": "Effacer la sélection"
+      },
+      "purge": {
+        "open": "Purger de l’historique…",
+        "title": "Purger ce fichier de l’historique du sysreport",
+        "effects": {
+          "every": "Toutes les versions de ce fichier sont retirées de l’historique, définitivement. Impossible de revenir en arrière.",
+          "ids": "Les révisions à partir de la première qui le contient changent d’identifiant : les liens vers elles ne marchent plus. Une révision qui ne contenait rien d’autre disparaît.",
+          "outside": "Les copies hors du collector ne sont pas touchées : ses sauvegardes, le nœud lui-même.",
+          "again": "Si le nœud suit toujours ce fichier, son prochain envoi l’enregistre de nouveau : retirez-le d’abord du sysreport de l’agent."
+        },
+        "scope": "Le retirer de",
+        "thisNode": "Le sysreport de ce nœud",
+        "allNodes": "Le sysreport de tous les nœuds qui l’ont envoyé",
+        "confirm": "Saisissez le chemin pour confirmer :",
+        "submit": "Purger",
+        "queuing": "Mise en file…",
+        "queued": "Purge de {{path}} en file : le planificateur la lance dans la minute.",
+        "running": "Purge de {{path}} de l’historique du sysreport…",
+        "done_one": "{{path}} purgé de l’historique du sysreport de {{count}} nœud. Révisions réécrites : {{rewritten}}, supprimées : {{dropped}} ; versions détruites : {{removed}}.",
+        "done_other": "{{path}} purgé de l’historique du sysreport de {{count}} nœuds. Révisions réécrites : {{rewritten}}, supprimées : {{dropped}} ; versions détruites : {{removed}}.",
+        "kept_one": "Reste stockée, un autre fichier ayant le même contenu : {{count}} version.",
+        "kept_other": "Restent stockées, d’autres fichiers ayant le même contenu : {{count}} versions.",
+        "nothing": "{{path}} ne figure dans aucun historique de sysreport : rien n’a été purgé.",
+        "failed": "La purge de {{path}} a échoué : {{error}}",
+        "statusError": "Impossible de lire l’avancement de la purge : {{message}}",
+        "dismiss": "Fermer le compte rendu de la purge"
       }
     },
     "compare": {

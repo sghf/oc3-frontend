@@ -627,6 +627,32 @@
         "explain": "What changed after the first report, up to and including the second.",
         "identical": "Nothing changed between these two reports.",
         "clear": "Clear the selection"
+      },
+      "purge": {
+        "open": "Purge from history…",
+        "title": "Purge this file from the sysreport history",
+        "effects": {
+          "every": "Every version of this file is removed from the history, for good. This cannot be undone.",
+          "ids": "The revisions from the first one holding it get new ids: links to them stop working. A revision that held nothing else disappears.",
+          "outside": "Copies outside the collector are not touched: its backups, the node itself.",
+          "again": "If the node still tracks this file, its next report records it again: remove it from the agent's sysreport first."
+        },
+        "scope": "Remove it from",
+        "thisNode": "The sysreport of this node",
+        "allNodes": "The sysreport of every node that reported it",
+        "confirm": "Type the path to confirm:",
+        "submit": "Purge",
+        "queuing": "Queuing…",
+        "queued": "Purge of {{path}} queued: the scheduler runs it within a minute.",
+        "running": "Purging {{path}} from the sysreport history…",
+        "done_one": "{{path}} purged from the sysreport history of {{count}} node. Revisions rewritten: {{rewritten}}, dropped: {{dropped}}; versions destroyed: {{removed}}.",
+        "done_other": "{{path}} purged from the sysreport history of {{count}} nodes. Revisions rewritten: {{rewritten}}, dropped: {{dropped}}; versions destroyed: {{removed}}.",
+        "kept_one": "Still stored because another file holds the same content: {{count}} version.",
+        "kept_other": "Still stored because other files hold the same content: {{count}} versions.",
+        "nothing": "{{path}} was found in no sysreport history: nothing purged.",
+        "failed": "The purge of {{path}} failed: {{error}}",
+        "statusError": "Could not read the progress of the purge: {{message}}",
+        "dismiss": "Dismiss the purge report"
       }
     },
     "compare": {

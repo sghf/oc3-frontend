@@ -4249,6 +4249,33 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/nodes/{node_id}/sysreport/purge": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Remove files from the sysreport history for good, of this node or, with
+     *     all_nodes, of every node having a sysreport: each revision is recreated
+     *     without them, its date and author kept, a revision that held nothing else
+     *     is dropped, then the former revisions and the contents they alone held are
+     *     destroyed. The ids of the revisions change from the first one that held a
+     *     file. A file is named as the sysreport routes show it, by kind and path or
+     *     command line. The purge is queued for the scheduler: the response gives
+     *     its id, GET /sysreport/purges/{purge_id} its progress. It does not stop a
+     *     node from reporting the files again. Manager only; logged.
+     */
+    post: operations["PostNodeSysreportPurge"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/nodes/{node_id}/sysreport/timediff": {
     parameters: {
       query?: never;
@@ -5723,6 +5750,26 @@ export interface paths {
     };
     /** @description List services status log. Each entry is a time range where a service status was stable. */
     get: operations["GetServicesStatusLog"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/sysreport/purges/{purge_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The progress of a sysreport purge: queued, running, done or failed, with
+     *     what it removed on each node holding the files. Kept 7 days. Manager only.
+     */
+    get: operations["GetSysreportPurge"];
     put?: never;
     post?: never;
     delete?: never;
@@ -8495,6 +8542,49 @@ export interface components {
     SysreportPoint: {
       cid: string;
       date: string;
+    };
+    SysreportPurge: {
+      author: string;
+      error?: string;
+      files: components["schemas"]["SysreportPurgeFile"][];
+      finished?: string;
+      id: string;
+      /** @description The nodes to purge; empty for every node */
+      node_ids: string[];
+      /** @description The nodes the files were found on, as they are purged */
+      nodes: components["schemas"]["SysreportPurgeNode"][];
+      requested: string;
+      started?: string;
+      /** @enum {string} */
+      state: "queued" | "running" | "done" | "failed";
+    };
+    SysreportPurgeFile: {
+      /** @enum {string} */
+      kind: "file" | "command";
+      /** @description The absolute path of a file, the command line of a command, as the sysreport routes show them */
+      path: string;
+    };
+    SysreportPurgeInput: {
+      /** @description Purge the files from the sysreport of every node, not only this one */
+      all_nodes?: boolean;
+      files: components["schemas"]["SysreportPurgeFile"][];
+    };
+    SysreportPurgeNode: {
+      /** @description Revisions that held nothing else, gone */
+      dropped: number;
+      error?: string;
+      /** @description Contents still stored because another file of the node holds the same */
+      kept: number;
+      node_id: string;
+      /** @description The paths of the repository the files resolved to */
+      paths: string[];
+      /** @description Contents of the files destroyed */
+      removed: number;
+      /** @description Revisions recreated without the files */
+      rewritten: number;
+    };
+    SysreportPurgeResponse: {
+      data: components["schemas"]["SysreportPurge"];
     };
     SysreportTimediffResponse: {
       data: {
@@ -22572,6 +22662,38 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  PostNodeSysreportPurge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Node identifier (node_id UUID) */
+        node_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SysreportPurgeInput"];
+      };
+    };
+    responses: {
+      /** @description Queued */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SysreportPurgeResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
   GetNodeSysreportTimediff: {
     parameters: {
       query: {
@@ -26879,6 +27001,32 @@ export interface operations {
           "application/json": components["schemas"]["ListResponse"];
         };
       };
+      500: components["responses"]["500"];
+    };
+  };
+  GetSysreportPurge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        purge_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SysreportPurgeResponse"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
       500: components["responses"]["500"];
     };
   };
