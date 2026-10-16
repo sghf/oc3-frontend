@@ -22,6 +22,7 @@ import {
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { PackageDetailPanel } from "./PackageDetailPanel";
 
 type PackageRow = components["schemas"]["PackageRow"];
 
@@ -162,7 +163,8 @@ const FILTERSET_SOURCE: FiltersetSource = {
 /**
  * Packages installed on the nodes the user can see, as their agents report them:
  * one row per node and package, with the provider of the signing key. Read-only;
- * the rows are filtered and sorted by the server.
+ * the rows are filtered and sorted by the server, and a row opens its package in a
+ * panel.
  */
 export function PackagesPage() {
   const { t } = useTranslation();
@@ -194,6 +196,8 @@ export function PackagesPage() {
     });
   }
 
+  const selected = data?.rows.find((row) => String(row.id) === search.sel);
+
   return (
     <section>
       <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
@@ -218,6 +222,16 @@ export function PackagesPage() {
         valueStats={packageStats}
         filterable
         filtersetSource={FILTERSET_SOURCE}
+      />
+
+      <PackageDetailPanel
+        pkgId={search.sel}
+        label={[selected?.pkg_name, selected?.["nodes.nodename"]]
+          .filter((part): part is string => typeof part === "string" && part !== "")
+          .join(" · ")}
+        onClose={() => {
+          update({ sel: undefined });
+        }}
       />
     </section>
   );

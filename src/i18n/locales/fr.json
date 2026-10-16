@@ -2513,6 +2513,15 @@
       "pkg_updated": "Mis à jour",
       "nodes.app": "App du nœud",
       "nodes.os_name": "OS"
+    },
+    "detail": {
+      "title": "Paquet installé",
+      "groups": {
+        "package": "Paquet",
+        "signature": "Signature",
+        "node": "Nœud",
+        "record": "Enregistrement"
+      }
     }
   },
   "switches": {

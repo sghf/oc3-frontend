@@ -2513,6 +2513,15 @@
       "pkg_updated": "Updated",
       "nodes.app": "Node app",
       "nodes.os_name": "OS"
+    },
+    "detail": {
+      "title": "Installed package",
+      "groups": {
+        "package": "Package",
+        "signature": "Signature",
+        "node": "Node",
+        "record": "Record"
+      }
     }
   },
   "switches": {
