@@ -202,7 +202,8 @@
         "hardware": "Matériel",
         "system": "Système",
         "location": "Localisation",
-        "agent": "Agent OpenSVC"
+        "agent": "Agent OpenSVC",
+        "virtualization": "Virtualisation"
       }
     },
     "create": {
@@ -879,7 +880,8 @@
         "placement": "Placement",
         "disasterRecovery": "Plan de secours",
         "collector": "Collector"
-      }
+      },
+      "editHint": "Le SLA, les notifications et leur mise en sourdine, la vague de démarrage et les nœuds de reprise se règlent ici par un responsable du service ; le reste vient des agents."
     },
     "related": {
       "label": "Données du service",

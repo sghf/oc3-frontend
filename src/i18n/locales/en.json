@@ -202,7 +202,8 @@
         "hardware": "Hardware",
         "system": "System",
         "location": "Location",
-        "agent": "OpenSVC Agent"
+        "agent": "OpenSVC Agent",
+        "virtualization": "Virtualization"
       }
     },
     "create": {
@@ -879,7 +880,8 @@
         "placement": "Placement",
         "disasterRecovery": "Disaster recovery",
         "collector": "Collector"
-      }
+      },
+      "editHint": "The SLA, the notifications and their snooze, the start wave and the disaster recovery nodes are set here by a responsible of the service; the rest comes from the agents."
     },
     "related": {
       "label": "Service data",

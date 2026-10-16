@@ -42,11 +42,18 @@ const BOOLEANS = new Set([...EDITABLE_BOOLEANS, "node_frozen"]);
 const EDITABLE = new Set<string>([
   "app",
   "team_responsible",
-  // The integration team is editable on request, but the agent writes it when its
-  // inventory carries it (`team_integ` in `worker/job_feed_system.go`, as `Optional`):
-  // a value set here holds until the next push that mentions it. The support team is
-  // in the same situation, left read-only.
+  // The integration and support teams, the security zone and the asset
+  // environment: the agent writes them only when its inventory carries them
+  // (`Optional` in `worker/job_feed_system.go`), a value set here holding until the
+  // next push that mentions it.
   "team_integ",
+  "team_support",
+  "sec_zone",
+  "asset_env",
+  // The virtualization: the agent never writes it.
+  "hv",
+  "hvpool",
+  "hvvdc",
   "status",
   "role",
   "type",
@@ -148,6 +155,7 @@ const GROUPS: DetailGroup<NodeRow>[] = [
       },
       field("status"),
       field("role"),
+      field("asset_env"),
       field("assetname"),
       field("type"),
       field("sec_zone"),
@@ -208,6 +216,11 @@ const GROUPS: DetailGroup<NodeRow>[] = [
       field("os_update"),
       field("last_boot", date("last_boot")),
     ],
+  },
+  {
+    key: "virtualization",
+    family: "hypervisor",
+    fields: [field("hv"), field("hvpool"), field("hvvdc")],
   },
   {
     key: "location",

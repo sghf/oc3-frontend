@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { components } from "@/lib/api/schema";
+import type { components, paths } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { DetailContent, type DetailGroup } from "@/components/opensvc/DetailPanel";
@@ -43,6 +43,17 @@ const field = (
  * "true", "false", "mixed", "n/a" for the other — which a switch cannot represent.
  */
 const flag = (prop: keyof ServiceRow) => ({ ...field(prop), input: "boolean" as const });
+
+/**
+ * The body of a change of the service. A responsible sets the SLA, the
+ * notifications and their snooze, the start wave and the disaster recovery
+ * nodes, as the historical service properties let one: the agents do not report
+ * them. `svc_app` is not offered: the configuration feed writes it back at each
+ * push.
+ */
+type ServiceUpdate = NonNullable<
+  paths["/services/{svc_id}"]["post"]["requestBody"]
+>["content"]["application/json"];
 
 const GROUPS: DetailGroup<ServiceRow>[] = [
   {
@@ -90,8 +101,12 @@ const GROUPS: DetailGroup<ServiceRow>[] = [
       field("svc_frozen"),
       field("svc_provisioned"),
       field("svc_status_updated", date("svc_status_updated")),
-      field("svc_snooze_till", date("svc_snooze_till")),
-      flag("svc_notifications"),
+      {
+        ...field("svc_snooze_till", date("svc_snooze_till")),
+        input: "date" as const,
+        editable: true,
+      },
+      { ...flag("svc_notifications"), editable: true },
     ],
   },
   {
@@ -111,15 +126,15 @@ const GROUPS: DetailGroup<ServiceRow>[] = [
       field("svc_flex_target"),
       field("svc_flex_cpu_low_threshold"),
       field("svc_flex_cpu_high_threshold"),
-      field("svc_wave"),
+      { ...field("svc_wave"), input: "number" as const, editable: true },
     ],
   },
   {
     key: "disasterRecovery",
     family: "drp",
     fields: [
-      field("svc_drpnode"),
-      field("svc_drpnodes"),
+      { ...field("svc_drpnode"), editable: true },
+      { ...field("svc_drpnodes"), editable: true },
       field("svc_drptype"),
       field("svc_metrocluster"),
       flag("svc_drnoaction"),
@@ -250,21 +265,36 @@ export function ServiceDetailPanel({
         groupPrefix="services.detail.groups"
         isPending={open && isPending}
         errorMessage={isError ? error.message : null}
-        editHint=""
-        onSave={async (changes) => {
-          if (svcId === undefined) return;
-          const sla = changes.svc_sla;
-          if (typeof sla !== "string") return;
-          const { error: failure } = await api.POST("/services/{svc_id}", {
-            params: { path: { svc_id: svcId } },
-            body: { svc_sla: sla },
-          });
-          if (failure !== undefined) throw new Error(problemText(failure));
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["service", svcId] }),
-            queryClient.invalidateQueries({ queryKey: ["services"] }),
-          ]);
-        }}
+        editHint={t("services.detail.editHint")}
+        // Offered to the responsibles of the service, as the API checks it.
+        onSave={
+          tagEdit.allowed
+            ? async (changes) => {
+                if (svcId === undefined) return;
+                const body: ServiceUpdate = {};
+                const str = (v: unknown) => (typeof v === "string" ? v : undefined);
+                body.svc_sla = str(changes.svc_sla);
+                body.svc_snooze_till = str(changes.svc_snooze_till);
+                body.svc_drpnode = str(changes.svc_drpnode);
+                body.svc_drpnodes = str(changes.svc_drpnodes);
+                if (typeof changes.svc_wave === "number") body.svc_wave = changes.svc_wave;
+                if (typeof changes.svc_notifications === "boolean")
+                  body.svc_notifications = changes.svc_notifications;
+                for (const key of Object.keys(body) as (keyof ServiceUpdate)[])
+                  if (body[key] === undefined) delete body[key];
+                if (Object.keys(body).length === 0) return;
+                const { error: failure } = await api.POST("/services/{svc_id}", {
+                  params: { path: { svc_id: svcId } },
+                  body,
+                });
+                if (failure !== undefined) throw new Error(problemText(failure));
+                await Promise.all([
+                  queryClient.invalidateQueries({ queryKey: ["service", svcId] }),
+                  queryClient.invalidateQueries({ queryKey: ["services"] }),
+                ]);
+              }
+            : undefined
+        }
         groupFooters={
           svcId === undefined
             ? undefined
