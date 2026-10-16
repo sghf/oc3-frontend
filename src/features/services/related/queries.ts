@@ -16,8 +16,9 @@ export function useServiceDisks(svcId: string | undefined) {
   return useQuery({
     queryKey: ["service", svcId, "disks"],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/services/{svc_id}/disks", {
+        signal,
         params: {
           path: { svc_id: svcId ?? "" },
           query: {
@@ -44,8 +45,9 @@ export function useServiceHbas(svcId: string | undefined) {
   return useQuery({
     queryKey: ["service", svcId, "hbas"],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const instances = await api.GET("/services_instances/{svc_id}", {
+        signal,
         params: {
           path: { svc_id: svcId ?? "" },
           query: { props: "node_id,nodes.nodename", limit: 0 },
@@ -59,6 +61,7 @@ export function useServiceHbas(svcId: string | undefined) {
       const perNode = await Promise.all(
         unique.map(async (node) => {
           const { data, error } = await api.GET("/nodes/{node_id}/hbas", {
+            signal,
             params: {
               path: { node_id: node.node_id ?? "" },
               query: {
@@ -83,8 +86,9 @@ export function useServiceTags(svcId: string | undefined) {
   return useQuery({
     queryKey: ["service", svcId, "tags"],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/services/{svc_id}/tags", {
+        signal,
         params: { path: { svc_id: svcId ?? "" }, query: { orderby: "tag_name", limit: 0 } },
       });
       if (error !== undefined) throw new Error(problemText(error));
@@ -100,14 +104,20 @@ type PackagesDiff = components["schemas"]["PackagesDiffResponse"];
  * PkgDiff tab: between the nodes running its instances, or with `encap` between
  * its encapsulated nodes. Null when there is nothing to compare: the API answers
  * 400 below two nodes, which a service on a single node always meets.
+ *
+ * Costly for the collector: refreshed live only by the packages the nodes push,
+ * at most every two minutes. Not read while `enabled` is false; what was read is
+ * still given.
  */
-export function useServicePackagesDiff(svcId: string | undefined, encap: boolean) {
+export function useServicePackagesDiff(svcId: string | undefined, encap: boolean, enabled = true) {
   return useQuery({
     queryKey: ["service", svcId, "pkgdiff", encap],
-    enabled: svcId !== undefined,
-    queryFn: async (): Promise<PackagesDiff | null> => {
+    enabled: enabled && svcId !== undefined,
+    meta: { liveTables: ["packages"], liveMinMs: 2 * 60 * 1000 },
+    queryFn: async ({ signal }): Promise<PackagesDiff | null> => {
       const { data, error, response } = await api.GET("/packages/diff", {
         params: { query: { svc_ids: svcId ?? "", encap } },
+        signal,
       });
       if (response.status === 400) return null;
       if (error !== undefined) throw new Error(problemText(error));
@@ -126,8 +136,9 @@ export function useServiceNodeIds(svcId: string | undefined) {
   return useQuery({
     queryKey: ["service", svcId, "node-ids"],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/services_instances", {
+        signal,
         params: {
           query: { props: "node_id", limit: 0, filter: [`svc_id:eq:${svcId ?? ""}`] },
         },
@@ -140,13 +151,18 @@ export function useServiceNodeIds(svcId: string | undefined) {
   });
 }
 
-/** Every property of the given nodes, by name, for the asset differences. */
-export function useNodesAssets(nodeIds: string[] | undefined) {
+/**
+ * Every property of the given nodes, by name, for the asset differences: refreshed
+ * live at most every minute. Not read while `enabled` is false.
+ */
+export function useNodesAssets(nodeIds: string[] | undefined, enabled = true) {
   return useQuery({
     queryKey: ["nodes", "assets", nodeIds],
-    enabled: nodeIds !== undefined && nodeIds.length > 0,
-    queryFn: async () => {
+    enabled: enabled && nodeIds !== undefined && nodeIds.length > 0,
+    meta: { liveTables: ["nodes"], liveMinMs: 60 * 1000 },
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/nodes", {
+        signal,
         params: {
           query: {
             props: NODE_PROPS.join(","),
@@ -174,23 +190,32 @@ export interface NodeCompliance {
 /**
  * The compliance of each of the given nodes: the last run of each module, and the
  * modulesets and rulesets attached. Read node by node, the API having no request
- * over several nodes; a service runs on a handful of them.
+ * over several nodes; a service runs on a handful of them. Refreshed live only by
+ * the compliance tables, at most every minute; not read while `enabled` is false.
  */
-export function useNodesCompliance(nodeIds: string[] | undefined) {
+export function useNodesCompliance(nodeIds: string[] | undefined, enabled = true) {
   return useQueries({
     queries: (nodeIds ?? []).map((nodeId) => ({
       queryKey: ["node", nodeId, "compliance-summary"],
-      queryFn: async (): Promise<NodeCompliance> => {
+      enabled,
+      meta: {
+        liveTables: ["comp_status", "comp_node_moduleset", "comp_rulesets_nodes"],
+        liveMinMs: 60 * 1000,
+      },
+      queryFn: async ({ signal }: { signal: AbortSignal }): Promise<NodeCompliance> => {
         const path = { node_id: nodeId };
         const [status, modulesets, rulesets] = await Promise.all([
           api.GET("/nodes/{node_id}/compliance/status", {
             params: { path, query: { props: "run_module,run_status,svc_id", limit: 0 } },
+            signal,
           }),
           api.GET("/nodes/{node_id}/compliance/modulesets", {
             params: { path, query: { props: "id,modset_name", limit: 0 } },
+            signal,
           }),
           api.GET("/nodes/{node_id}/compliance/rulesets", {
             params: { path, query: { props: "id,ruleset_name", limit: 0 } },
+            signal,
           }),
         ]);
         for (const r of [status, modulesets, rulesets])
@@ -229,9 +254,10 @@ export function useServiceResources(svcId: string | undefined) {
   return useQuery({
     queryKey: ["service", svcId, "resources"],
     enabled: svcId !== undefined,
-    queryFn: async (): Promise<ServiceResource[]> => {
+    queryFn: async ({ signal }): Promise<ServiceResource[]> => {
       const [resources, instances] = await Promise.all([
         api.GET("/services/{svc_id}/resources", {
+          signal,
           params: {
             path: { svc_id: svcId ?? "" },
             query: {
@@ -243,6 +269,7 @@ export function useServiceResources(svcId: string | undefined) {
           },
         }),
         api.GET("/services_instances/{svc_id}", {
+          signal,
           params: {
             path: { svc_id: svcId ?? "" },
             query: { props: "node_id,nodes.nodename", limit: 0 },
@@ -275,8 +302,9 @@ export function useServiceLogs(svcId: string | undefined) {
   return useQuery({
     queryKey: ["service", svcId, "logs"],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/logs", {
+        signal,
         params: {
           query: {
             props:
@@ -335,8 +363,9 @@ export function useServiceActions(svcId: string | undefined, days: number, nodeI
   return useQuery({
     queryKey: ["service", svcId, "actions", nodeId ?? "", actionsSince(days)],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        signal,
         params: {
           path: { svc_id: svcId ?? "" },
           query: {
@@ -370,8 +399,9 @@ export function useServiceActionStats(svcId: string | undefined, nodeId?: string
       actionsSince(SERVICE_ACTIONS_DAYS),
     ],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        signal,
         params: {
           path: { svc_id: svcId ?? "" },
           query: {
@@ -396,7 +426,7 @@ export function useUnackedActionErrors(svcId: string | undefined, nodeId?: strin
   return useQuery({
     queryKey: ["service", svcId, "unackedActionErrors", nodeId ?? ""],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       // The actions themselves, not the lines they logged, which carry a status too.
       const filter = [
         "log_type:eq:status",
@@ -405,6 +435,7 @@ export function useUnackedActionErrors(svcId: string | undefined, nodeId?: strin
         ...(nodeId === undefined ? [] : [`node_id:${nodeId}`]),
       ];
       const { data, error } = await api.GET("/services/{svc_id}/actions", {
+        signal,
         params: {
           path: { svc_id: svcId ?? "" },
           query: { props: "id,action,begin,nodes.nodename", limit: 0, filter },

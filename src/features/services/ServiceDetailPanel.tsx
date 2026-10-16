@@ -11,6 +11,7 @@ import { linkedField } from "@/components/opensvc/linked-field";
 import { NodeNameLinks } from "@/components/opensvc/NodeNameLinks";
 import { ObjectTags } from "@/components/opensvc/ObjectTags";
 import { useTagEdit } from "@/features/tags/use-tag-edit";
+import { useAmIResponsible } from "@/lib/api/am-i-responsible";
 import {
   useFieldConstraints,
   valueLists,
@@ -189,8 +190,9 @@ export function ServiceDetailPanel({
   } = useQuery({
     queryKey: ["service", svcId],
     enabled: svcId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error: failure } = await api.GET("/services/{svc_id}", {
+        signal,
         params: { path: { svc_id: svcId ?? "" }, query: { props: PROPS } },
       });
       if (failure !== undefined) throw new Error(JSON.stringify(failure));
@@ -208,17 +210,7 @@ export function ServiceDetailPanel({
   const unackedCount = unacked.data?.length ?? 0;
   const queryClient = useQueryClient();
   // The owners of the service justify its periods of unavailability.
-  const responsible = useQuery({
-    queryKey: ["service", svcId, "responsible"],
-    enabled: svcId !== undefined,
-    queryFn: async () => {
-      const { data, error: failure } = await api.GET("/services/{svc_id}/am_i_responsible", {
-        params: { path: { svc_id: svcId ?? "" } },
-      });
-      if (failure !== undefined) throw new Error(problemText(failure));
-      return data.data === true;
-    },
-  });
+  const responsible = useAmIResponsible("service", svcId);
 
   return (
     <RelatedTabsPanel

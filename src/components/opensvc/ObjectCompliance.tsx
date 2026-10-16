@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { components } from "@/lib/api/schema";
-import { api } from "@/lib/api/client";
-import { problemText } from "@/lib/api/problem";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
+import { useAmIResponsible } from "@/lib/api/am-i-responsible";
 import {
   attachComp,
   detachComp,
@@ -60,25 +59,8 @@ function useCanEditCompliance(target: CompTarget, readOnly: boolean) {
   const privileges = useEffectivePrivileges();
   const privileged =
     !readOnly && privileges.data !== undefined && hasPrivilege(privileges.data, ["CompExec"]);
-  // 200 when the user is responsible, 403 otherwise: only the status matters. The
-  // same question as the tags of the object, from the same cache.
-  const responsible = useQuery({
-    queryKey: [target.kind, target.id, "am_i_responsible"],
-    enabled: privileged,
-    queryFn: async () => {
-      const { error, response } =
-        target.kind === "node"
-          ? await api.GET("/nodes/{node_id}/am_i_responsible", {
-              params: { path: { node_id: target.id } },
-            })
-          : await api.GET("/services/{svc_id}/am_i_responsible", {
-              params: { path: { svc_id: target.id } },
-            });
-      if (response.status === 403) return false;
-      if (error !== undefined) throw new Error(problemText(error));
-      return true;
-    },
-  });
+  // The same question as the tags of the object, from the same cache.
+  const responsible = useAmIResponsible(target.kind, target.id, privileged);
   return privileged && responsible.data === true;
 }
 

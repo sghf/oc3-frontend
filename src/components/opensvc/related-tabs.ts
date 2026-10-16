@@ -38,8 +38,11 @@ export interface RelatedTab {
   key: string;
   labelKey: string;
   icon: ReactNode;
-  /** Hook called by the tab counter, one component per tab. */
-  useSummary: (id: string | undefined) => RelatedSummary;
+  /**
+   * Hook called by the tab counter, one component per tab, `active` when the tab is
+   * the one on display: a costly count may wait for it.
+   */
+  useSummary: (id: string | undefined, active: boolean) => RelatedSummary;
   render: (id: string, locale: string) => ReactNode;
 }
 

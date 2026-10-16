@@ -20,13 +20,16 @@ import {
  * as the tab, which then opens without reloading anything. No count while a
  * category loads or when one cannot be read; "not applicable" when the service runs
  * on fewer than two nodes, which leaves nothing to compare.
+ *
+ * The comparisons are costly for the collector: read only once the tab is open
+ * (`active`), the count then kept from what they read.
  */
-export function useNodesDiffSummary(svcId: string | undefined): RelatedSummary {
+export function useNodesDiffSummary(svcId: string | undefined, active: boolean): RelatedSummary {
   const { t } = useTranslation();
   const nodeIds = useServiceNodeIds(svcId);
-  const assets = useNodesAssets(nodeIds.data);
-  const packages = useServicePackagesDiff(svcId, false);
-  const compliance = useNodesCompliance(nodeIds.data);
+  const assets = useNodesAssets(nodeIds.data, active);
+  const packages = useServicePackagesDiff(svcId, false, active);
+  const compliance = useNodesCompliance(nodeIds.data, active);
 
   if (nodeIds.data === undefined) return { count: undefined };
   if (nodeIds.data.length < 2)

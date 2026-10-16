@@ -10,8 +10,9 @@ import { ObjectCompliance } from "@/components/opensvc/ObjectCompliance";
 function useIsEncapsulated(svcId: string) {
   return useQuery({
     queryKey: ["service", svcId, "compliance", "encap"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await api.GET("/services/{svc_id}/resinfo", {
+        signal,
         params: { path: { svc_id: svcId }, query: { props: "res_key,res_value", limit: 0 } },
       });
       if (error !== undefined) throw new Error(problemText(error));

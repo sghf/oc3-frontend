@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { QueryClient } from "@tanstack/react-query";
+import type { Query, QueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 
 /**
@@ -14,8 +14,29 @@ import { api } from "@/lib/api/client";
  * failure; once back, everything on display is refreshed, the events missed
  * meanwhile being unknown. Events are gathered for a moment before refreshing: an
  * agent feeding its status touches several tables every few seconds.
+ *
+ * The events only name a table, not the object changed: on a collector of many
+ * nodes, the status of some instance changes every few seconds. So a query is
+ * refreshed live at most every MIN_LIVE_MS (its `meta.liveMinMs` when longer, for
+ * the costly ones), and only by the tables of its `meta.liveTables` when it lists
+ * them, rather than by every table mapped to its key root. A hidden page refreshes
+ * nothing: the tables changed meanwhile are refreshed when it shows again.
  */
 export type RealtimeStatus = "off" | "connecting" | "live" | "retrying";
+
+/** What a query tells of its live refreshes, in its `meta`. */
+interface LiveMeta extends Record<string, unknown> {
+  /** The tables whose changes refresh it; by default, every table of its key root. */
+  liveTables?: readonly string[];
+  /** The least time between two live refreshes, when longer than MIN_LIVE_MS. */
+  liveMinMs?: number;
+}
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    queryMeta: LiveMeta;
+  }
+}
 
 /**
  * The query key roots showing each table. A table no view shows is absent:
@@ -89,6 +110,8 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
 
 /** Events are gathered this long before the queries are refreshed. */
 const FLUSH_MS = 2000;
+/** The least time between two live refreshes of a query. */
+const MIN_LIVE_MS = 15 * 1000;
 /** How long after a live refresh a change on screen is attributed to it. */
 const LIVE_WINDOW_MS = 6000;
 /** Waits between reconnections: 1 s, doubling up to a minute. */
@@ -102,7 +125,12 @@ let attempt = 0;
 let liveRefreshAt = 0;
 let retryTimer: number | undefined;
 let flushTimer: number | undefined;
+/** The tables changed since the last refresh, waiting for it. */
 const pending = new Set<string>();
+/** The queries refreshed too recently, by query hash: refreshed when the timer ends. */
+const deferred = new Map<string, number>();
+/** The queries whose deferred refresh fell while the page was hidden: read on return. */
+const staleWhileHidden = new Set<Query>();
 const listeners = new Set<() => void>();
 
 function setStatus(next: RealtimeStatus) {
@@ -111,12 +139,61 @@ function setStatus(next: RealtimeStatus) {
   for (const listener of listeners) listener();
 }
 
+/** Whether a change of one of the tables refreshes the query. */
+function concerns(query: Query, tables: readonly string[]): boolean {
+  const root = query.queryKey[0];
+  if (typeof root !== "string") return false;
+  const own = query.meta?.liveTables;
+  return tables.some(
+    (table) =>
+      (TABLE_KEYS[table] ?? []).includes(root) && (own === undefined || own.includes(table)),
+  );
+}
+
+/** Refreshes one query, if still in the cache. */
+function refresh(running: QueryClient, query: Query) {
+  liveRefreshAt = Date.now();
+  void running.invalidateQueries({ queryKey: query.queryKey, exact: true });
+}
+
 function flush() {
   flushTimer = undefined;
-  const roots = [...pending];
+  const running = client;
+  if (running === null) return;
+  // Nothing is refreshed while the page is hidden: the tables stay pending until
+  // it shows again (onVisibilityChange).
+  if (document.hidden) return;
+  const tables = [...pending];
   pending.clear();
-  liveRefreshAt = Date.now();
-  for (const root of roots) void client?.invalidateQueries({ queryKey: [root] });
+  const now = Date.now();
+  for (const query of running.getQueryCache().getAll()) {
+    if (!concerns(query, tables) || deferred.has(query.queryHash)) continue;
+    const least = Math.max(MIN_LIVE_MS, query.meta?.liveMinMs ?? 0);
+    const wait = query.state.dataUpdatedAt + least - now;
+    if (wait <= 0) {
+      refresh(running, query);
+      continue;
+    }
+    // Read too recently: refreshed once its least time has passed, whatever
+    // changes meanwhile.
+    deferred.set(
+      query.queryHash,
+      window.setTimeout(() => {
+        deferred.delete(query.queryHash);
+        if (client !== running) return;
+        if (document.hidden) staleWhileHidden.add(query);
+        else refresh(running, query);
+      }, wait),
+    );
+  }
+}
+
+function onVisibilityChange() {
+  if (document.hidden || client === null) return;
+  const running = client;
+  for (const query of staleWhileHidden) refresh(running, query);
+  staleWhileHidden.clear();
+  if (pending.size > 0 && flushTimer === undefined) flushTimer = window.setTimeout(flush, FLUSH_MS);
 }
 
 /**
@@ -144,7 +221,8 @@ function onMessage(raw: unknown) {
     const name =
       typeof event === "object" && event !== null && "event" in event ? event.event : null;
     if (typeof name !== "string" || !name.endsWith("_change")) continue;
-    for (const root of TABLE_KEYS[name.slice(0, -"_change".length)] ?? []) pending.add(root);
+    const table = name.slice(0, -"_change".length);
+    if (table in TABLE_KEYS) pending.add(table);
   }
   if (pending.size > 0 && flushTimer === undefined) flushTimer = window.setTimeout(flush, FLUSH_MS);
 }
@@ -206,6 +284,7 @@ async function connect() {
 export function startRealtime(queryClient: QueryClient): void {
   client = queryClient;
   attempt = 0;
+  document.addEventListener("visibilitychange", onVisibilityChange);
   void connect();
 }
 
@@ -217,6 +296,10 @@ export function stopRealtime(): void {
   retryTimer = undefined;
   flushTimer = undefined;
   pending.clear();
+  for (const timer of deferred.values()) window.clearTimeout(timer);
+  deferred.clear();
+  staleWhileHidden.clear();
+  document.removeEventListener("visibilitychange", onVisibilityChange);
   const ws = socket;
   socket = null;
   ws?.close();

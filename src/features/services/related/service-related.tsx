@@ -52,7 +52,7 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
     // The total of its categories, "n/a" on a single node. It reads the assets, the
     // packages and the compliance of every node when the panel opens; the tab then
     // reuses them.
-    useSummary: (svcId) => useNodesDiffSummary(svcId),
+    useSummary: (svcId, active) => useNodesDiffSummary(svcId, active),
     render: (svcId) => <ServiceNodesDiff svcId={svcId} />,
   },
   {

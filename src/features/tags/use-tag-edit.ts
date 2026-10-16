@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
+import { useAmIResponsible } from "@/lib/api/am-i-responsible";
 import type { TagEditControl } from "@/components/opensvc/ObjectTags";
 import { toTagRows } from "./tag-row";
 
@@ -30,24 +31,7 @@ export function useTagEdit(kind: TagTargetKind, objectId: string | undefined): T
   // tag of another object.
   const [confirming, setConfirming] = useState<{ objectId: string; tagId: string } | null>(null);
 
-  // 200 when the user is responsible, 403 otherwise: only the status matters.
-  const responsible = useQuery({
-    queryKey: [kind, objectId, "am_i_responsible"],
-    enabled: objectId !== undefined,
-    queryFn: async () => {
-      const { error, response } =
-        kind === "node"
-          ? await api.GET("/nodes/{node_id}/am_i_responsible", {
-              params: { path: { node_id: objectId ?? "" } },
-            })
-          : await api.GET("/services/{svc_id}/am_i_responsible", {
-              params: { path: { svc_id: objectId ?? "" } },
-            });
-      if (response.status === 403) return false;
-      if (error !== undefined) throw new Error(problemText(error));
-      return true;
-    },
-  });
+  const responsible = useAmIResponsible(kind, objectId);
 
   const candidates = useQuery({
     queryKey: [kind, objectId, "candidate_tags"],

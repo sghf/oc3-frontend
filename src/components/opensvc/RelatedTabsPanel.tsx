@@ -67,7 +67,7 @@ export function RelatedTabsPanel({
       key: entry.key,
       label: t(entry.labelKey),
       icon: entry.icon,
-      badge: <RelatedCount tab={entry} id={objectId} />,
+      badge: <RelatedCount tab={entry} id={objectId} active={entry.key === active} />,
     })),
   ];
 

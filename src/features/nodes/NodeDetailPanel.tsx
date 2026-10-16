@@ -294,8 +294,9 @@ export function NodeDetailPanel({
   } = useQuery({
     queryKey: ["node", nodeId],
     enabled: nodeId !== undefined,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error: failure } = await api.GET("/nodes/{node_id}", {
+        signal,
         params: { path: { node_id: nodeId ?? "" }, query: { props: PROPS } },
       });
       if (failure !== undefined) throw new Error(JSON.stringify(failure));
