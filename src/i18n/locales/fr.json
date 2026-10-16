@@ -2534,6 +2534,15 @@
       "sw_updated": "Mis à jour",
       "node_id": "Id du nœud distant",
       "id": "Id de l'enregistrement"
+    },
+    "detail": {
+      "title": "Port de switch",
+      "groups": {
+        "switch": "Switch",
+        "port": "Port",
+        "remote": "Branché à l’autre bout",
+        "record": "Enregistrement"
+      }
     }
   },
   "hardware": {

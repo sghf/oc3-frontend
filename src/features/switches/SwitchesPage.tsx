@@ -21,6 +21,7 @@ import {
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { SwitchPortDetailPanel } from "./SwitchPortDetailPanel";
 
 type SwitchPortRow = components["schemas"]["SwitchPortRow"];
 
@@ -170,7 +171,8 @@ function useSwitchPorts(search: ResolvedListSearch) {
 /**
  * Ports of the SAN switches the collector inventories: one row per port, with what
  * is plugged on its other end (a node, a storage array or another switch).
- * Read-only; the rows are filtered and sorted by the server.
+ * Read-only; the rows are filtered and sorted by the server, and a row opens its
+ * port in a panel.
  */
 export function SwitchesPage() {
   const { t } = useTranslation();
@@ -202,6 +204,8 @@ export function SwitchesPage() {
     });
   }
 
+  const selected = data?.rows.find((row) => String(row.id) === search.sel);
+
   return (
     <section>
       <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
@@ -226,6 +230,14 @@ export function SwitchesPage() {
         selectAllMatching={allIds}
         valueStats={switchPortStats}
         filterable
+      />
+
+      <SwitchPortDetailPanel
+        portId={search.sel}
+        label={selected?.sw_name ?? ""}
+        onClose={() => {
+          update({ sel: undefined });
+        }}
       />
     </section>
   );

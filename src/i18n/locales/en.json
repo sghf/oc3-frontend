@@ -2534,6 +2534,15 @@
       "sw_updated": "Updated",
       "node_id": "Remote node id",
       "id": "Record id"
+    },
+    "detail": {
+      "title": "Switch port",
+      "groups": {
+        "switch": "Switch",
+        "port": "Port",
+        "remote": "Plugged on the other end",
+        "record": "Record"
+      }
     }
   },
   "hardware": {

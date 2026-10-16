@@ -4994,6 +4994,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/san-switches/{port_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Display the properties of a port of a SAN switch, as a row of
+     *     GET /san-switches. Any authenticated user sees every port.
+     */
+    get: operations["GetSanSwitchPort"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/search": {
     parameters: {
       query?: never;
@@ -24438,6 +24458,36 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetSanSwitchPort: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+      };
+      header?: never;
+      path: {
+        /** @description Id of the port (switches.id) */
+        port_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SwitchPortListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
       500: components["responses"]["500"];
     };
   };
