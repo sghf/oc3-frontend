@@ -4598,6 +4598,10 @@ export interface paths {
      *     nodes of those services (the nodes named after their instances'
      *     `mon_vmname`). Only the nodes and services of the apps the user's groups
      *     are responsible for are compared, unless the user is a manager.
+     *     A diff is cached until the packages of one of its nodes change, and at most
+     *     server.packages_diff.concurrency of them are computed at once, each given
+     *     server.packages_diff.timeout: 503 when the request waited longer, the
+     *     computation going on for the next request.
      *     Fewer than two nodes is a 400, except with `encap`, which then returns an
      *     empty list.
      */
@@ -23578,6 +23582,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       500: components["responses"]["500"];
+      503: components["responses"]["503"];
     };
   };
   GetPackage: {
