@@ -15,12 +15,15 @@ import { api } from "@/lib/api/client";
  * meanwhile being unknown. Events are gathered for a moment before refreshing: an
  * agent feeding its status touches several tables every few seconds.
  *
- * The events only name a table, not the object changed: on a collector of many
- * nodes, the status of some instance changes every few seconds. So a query is
- * refreshed live at most every MIN_LIVE_MS (its `meta.liveMinMs` when longer, for
- * the costly ones), and only by the tables of its `meta.liveTables` when it lists
- * them, rather than by every table mapped to its key root. A hidden page refreshes
- * nothing: the tables changed meanwhile are refreshed when it shows again.
+ * On a collector of many nodes, the status of some instance changes every few
+ * seconds. The events the agents' feeds cause name the services and the nodes
+ * they changed (`scope`): the queries of a service or a node panel are refreshed
+ * only for their own object; an event naming none concerns any. Besides, a query
+ * is refreshed live at most every MIN_LIVE_MS (its `meta.liveMinMs` when longer,
+ * for the costly ones), and only by the tables of its `meta.liveTables` when it
+ * lists them, rather than by every table mapped to its key root. A hidden page
+ * refreshes nothing: the tables changed meanwhile are refreshed when it shows
+ * again.
  */
 export type RealtimeStatus = "off" | "connecting" | "live" | "retrying";
 
@@ -125,8 +128,45 @@ let attempt = 0;
 let liveRefreshAt = 0;
 let retryTimer: number | undefined;
 let flushTimer: number | undefined;
-/** The tables changed since the last refresh, waiting for it. */
-const pending = new Set<string>();
+/**
+ * The objects a table change concerns: the services and the nodes the event names
+ * in its `scope`, null when it names none, any object then.
+ */
+interface ChangeScope {
+  svcIds: Set<string>;
+  nodeIds: Set<string>;
+}
+
+/** The tables changed since the last refresh, waiting for it, with their scope. */
+const pending = new Map<string, ChangeScope | null>();
+
+/** Adds a change of the table to the pending ones, its scope joined to theirs. */
+function addChange(table: string, scope: ChangeScope | null) {
+  if (!pending.has(table)) {
+    pending.set(table, scope);
+    return;
+  }
+  const previous = pending.get(table) ?? null;
+  if (previous === null || scope === null) {
+    pending.set(table, null);
+    return;
+  }
+  for (const id of scope.svcIds) previous.svcIds.add(id);
+  for (const id of scope.nodeIds) previous.nodeIds.add(id);
+}
+
+/** The scope an event names, null when it names none or one not understood. */
+function readScope(event: object): ChangeScope | null {
+  if (!("scope" in event) || typeof event.scope !== "object" || event.scope === null) return null;
+  const scope = event.scope as Record<string, unknown>;
+  const ids = (value: unknown): Set<string> | null =>
+    Array.isArray(value) && value.every((id) => typeof id === "string")
+      ? new Set(value as string[])
+      : null;
+  const svcIds = ids(scope.svc_ids);
+  const nodeIds = ids(scope.node_ids);
+  return svcIds === null || nodeIds === null ? null : { svcIds, nodeIds };
+}
 /** The queries refreshed too recently, by query hash: refreshed when the timer ends. */
 const deferred = new Map<string, number>();
 /** The queries whose deferred refresh fell while the page was hidden: read on return. */
@@ -139,15 +179,36 @@ function setStatus(next: RealtimeStatus) {
   for (const listener of listeners) listener();
 }
 
-/** Whether a change of one of the tables refreshes the query. */
-function concerns(query: Query, tables: readonly string[]): boolean {
+/**
+ * Whether the object a query shows is among those a change concerns. The queries
+ * of a service or a node panel, keyed `["service", <svc_id>, …]` or
+ * `["node", <node_id>, …]`, and their labels, `["object-label", <kind>, <id>]`,
+ * show one; the lists show any.
+ */
+function inScope(query: Query, scope: ChangeScope | null): boolean {
+  if (scope === null) return true;
+  const [root, first, second] = query.queryKey;
+  // The labels of the panel history, keyed by the kind of object then its id.
+  const [kind, id] = root === "object-label" ? [first, second] : [root, first];
+  if (typeof id !== "string") return true;
+  if (kind === "service") return scope.svcIds.has(id);
+  if (kind === "node") return scope.nodeIds.has(id);
+  return true;
+}
+
+/** Whether one of the changes refreshes the query. */
+function concerns(query: Query, changes: ReadonlyMap<string, ChangeScope | null>): boolean {
   const root = query.queryKey[0];
   if (typeof root !== "string") return false;
   const own = query.meta?.liveTables;
-  return tables.some(
-    (table) =>
-      (TABLE_KEYS[table] ?? []).includes(root) && (own === undefined || own.includes(table)),
-  );
+  for (const [table, scope] of changes)
+    if (
+      (TABLE_KEYS[table] ?? []).includes(root) &&
+      (own === undefined || own.includes(table)) &&
+      inScope(query, scope)
+    )
+      return true;
+  return false;
 }
 
 /** Refreshes one query, if still in the cache. */
@@ -163,7 +224,7 @@ function flush() {
   // Nothing is refreshed while the page is hidden: the tables stay pending until
   // it shows again (onVisibilityChange).
   if (document.hidden) return;
-  const tables = [...pending];
+  const tables = new Map(pending);
   pending.clear();
   const now = Date.now();
   for (const query of running.getQueryCache().getAll()) {
@@ -222,7 +283,7 @@ function onMessage(raw: unknown) {
       typeof event === "object" && event !== null && "event" in event ? event.event : null;
     if (typeof name !== "string" || !name.endsWith("_change")) continue;
     const table = name.slice(0, -"_change".length);
-    if (table in TABLE_KEYS) pending.add(table);
+    if (table in TABLE_KEYS) addChange(table, readScope(event as object));
   }
   if (pending.size > 0 && flushTimer === undefined) flushTimer = window.setTimeout(flush, FLUSH_MS);
 }
