@@ -1108,7 +1108,14 @@ export function CollectorList<T>({
                             className="px-2 text-left font-medium"
                           >
                             <span className="inline-flex items-center gap-1.5">
-                              {rowLead?.(row.original)}
+                              {/* A slot as wide as the mark on every row, filled or
+                                  not: the content of a frozen row lines up with
+                                  the others instead of moving by the mark. */}
+                              {rowLead !== undefined && (
+                                <span className="inline-flex w-3.5 shrink-0 justify-center">
+                                  {rowLead(row.original)}
+                                </span>
+                              )}
                               {content}
                             </span>
                           </FlashCell>
