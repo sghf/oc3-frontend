@@ -11,6 +11,10 @@ import { linkedField } from "@/components/opensvc/linked-field";
 import { NodeNameLinks } from "@/components/opensvc/NodeNameLinks";
 import { ObjectTags } from "@/components/opensvc/ObjectTags";
 import { useTagEdit } from "@/features/tags/use-tag-edit";
+import {
+  useFieldConstraints,
+  valueLists,
+} from "@/features/field-constraints/use-field-constraints";
 import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
 import { StatusTimeline } from "@/components/opensvc/StatusTimeline";
 import { ServiceActionsMenu } from "./ServiceActionsMenu";
@@ -198,6 +202,8 @@ export function ServiceDetailPanel({
   const open = svcId !== undefined;
   const tags = useServiceTags(svcId);
   const tagEdit = useTagEdit("service", svcId);
+  // The values a Manager configured for some attributes, offered when editing them.
+  const constraints = useFieldConstraints("service");
   const unacked = useUnackedActionErrors(open ? svcId : undefined);
   const unackedCount = unacked.data?.length ?? 0;
   const queryClient = useQueryClient();
@@ -263,6 +269,7 @@ export function ServiceDetailPanel({
         row={service}
         labelPrefix="services.fields"
         groupPrefix="services.detail.groups"
+        valueLists={valueLists(constraints.data?.data)}
         isPending={open && isPending}
         errorMessage={isError ? error.message : null}
         editHint={t("services.detail.editHint")}

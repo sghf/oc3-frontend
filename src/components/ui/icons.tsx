@@ -832,3 +832,12 @@ export function ThumbsDownIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/** Values allowed for an attribute: a list, its entries ticked (fa-list-check). */
+export function ListChecksIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M8.3 3.3a1.1 1.1 0 0 1 0 1.6L5.1 8.1a1.1 1.1 0 0 1-1.6 0L1.9 6.5a1.1 1.1 0 1 1 1.6-1.6l.8.8 2.4-2.4a1.1 1.1 0 0 1 1.6 0Zm0 7a1.1 1.1 0 0 1 0 1.6l-3.2 3.2a1.1 1.1 0 0 1-1.6 0l-1.6-1.6a1.1 1.1 0 1 1 1.6-1.6l.8.8 2.4-2.4a1.1 1.1 0 0 1 1.6 0ZM11 5.5c0-.8.7-1.5 1.5-1.5h8a1.5 1.5 0 0 1 0 3h-8c-.8 0-1.5-.7-1.5-1.5Zm0 7c0-.8.7-1.5 1.5-1.5h8a1.5 1.5 0 0 1 0 3h-8c-.8 0-1.5-.7-1.5-1.5ZM4.5 17.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4Zm6.5 2c0-.8.7-1.5 1.5-1.5h8a1.5 1.5 0 0 1 0 3h-8c-.8 0-1.5-.7-1.5-1.5Z" />
+    </Svg>
+  );
+}

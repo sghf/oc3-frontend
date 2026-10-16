@@ -22,6 +22,7 @@ import { ResourcesPage } from "@/features/resources/ResourcesPage";
 import { ServiceActionsPage } from "@/features/service-actions/ServiceActionsPage";
 import { FiltersPage } from "@/features/filters/FiltersPage";
 import { ClaimMappingsPage } from "@/features/claim-mappings/ClaimMappingsPage";
+import { FieldConstraintsPage } from "@/features/field-constraints/FieldConstraintsPage";
 import { FiltersetsPage } from "@/features/filtersets/FiltersetsPage";
 import { FormsPage } from "@/features/forms/FormsPage";
 import { SafePage } from "@/features/safe/SafePage";
@@ -258,6 +259,13 @@ const claimMappingsRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+const fieldConstraintsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/field-constraints",
+  component: FieldConstraintsPage,
+  validateSearch: parseListSearch,
+});
+
 const filtersetsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/filtersets",
@@ -405,6 +413,7 @@ const routeTree = rootRoute.addChildren([
   logsRoute,
   filtersRoute,
   claimMappingsRoute,
+  fieldConstraintsRoute,
   filtersetsRoute,
   formsRoute,
   safeRoute,

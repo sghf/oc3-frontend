@@ -29,6 +29,7 @@ import {
   HashIcon,
   KeyIcon,
   FirewallIcon,
+  ListChecksIcon,
 } from "@/components/ui/icons";
 
 /** Collector object kinds that have a visual identity of their own. */
@@ -68,7 +69,8 @@ export type ObjectKind =
   | "check"
   | "complianceLog"
   | "designer"
-  | "claimMapping";
+  | "claimMapping"
+  | "fieldConstraint";
 
 /**
  * Pictogram and tint of an object kind. The same vocabulary in the menu, in panel
@@ -143,6 +145,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   designer: { Icon: PuzzleIcon, className: "text-icon-compliance" },
   // A key in the tint of users and teams: who gets in, and with which teams.
   claimMapping: { Icon: KeyIcon, className: "text-icon-group" },
+  // The values allowed for node attributes: the tint of the nodes they constrain.
+  fieldConstraint: { Icon: ListChecksIcon, className: "text-icon-node" },
 };
 
 export function ObjectIcon({ kind, className }: { kind: ObjectKind; className?: string }) {

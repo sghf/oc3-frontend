@@ -19,6 +19,10 @@ export interface ComboboxOption {
  * mouse, or with the arrows and Enter, which only chooses. Escape closes the list
  * without reaching the parent panel; with the list closed, Enter submits the
  * surrounding form as in any field. The list is in the page while open only.
+ *
+ * With `freeText`, the options are only suggestions: the text typed is the value,
+ * and no option is active until an arrow key picks one, so that Enter keeps the
+ * text as typed rather than completing it.
  */
 export function Combobox({
   options,
@@ -36,6 +40,7 @@ export function Combobox({
   describedBy,
   style,
   inputClassName = "h-7",
+  freeText = false,
 }: {
   options: ComboboxOption[];
   /** Value of the chosen option, "" when none. */
@@ -62,15 +67,20 @@ export function Combobox({
   style?: CSSProperties;
   /** Height and spacing of the field, to line up with the controls around it. */
   inputClassName?: string;
+  /** Any text typed is the value; the options are suggestions. */
+  freeText?: boolean;
 }) {
   const listId = useId();
   const [open, setOpen] = useState(false);
   // null: nothing typed since the last choice, the field shows the chosen option.
   const [query, setQuery] = useState<string | null>(null);
-  const [active, setActive] = useState(0);
+  // -1: no option active, the free text typed stands.
+  const noActive = freeText ? -1 : 0;
+  const [active, setActive] = useState(noActive);
   const list = useRef<HTMLUListElement>(null);
 
-  const selectedLabel = options.find((option) => option.value === value)?.label ?? "";
+  const selectedLabel =
+    options.find((option) => option.value === value)?.label ?? (freeText ? value : "");
   const needle = (query ?? "").trim().toLowerCase();
   const filtered =
     needle === ""
@@ -115,9 +125,10 @@ export function Combobox({
         value={query ?? selectedLabel}
         onChange={(event) => {
           setQuery(event.target.value);
-          setActive(0);
+          setActive(noActive);
           setOpen(true);
-          if (value !== "") onChange("");
+          if (freeText) onChange(event.target.value);
+          else if (value !== "") onChange("");
         }}
         onFocus={(event) => {
           // The field arrives filled with the chosen option: selecting it straight away
@@ -148,7 +159,8 @@ export function Combobox({
                 return;
               }
               const step = event.key === "ArrowDown" ? 1 : -1;
-              setActive((filtered.length + activeIndex + step) % Math.max(filtered.length, 1));
+              const from = activeIndex < 0 && step < 0 ? 0 : activeIndex;
+              setActive((filtered.length + from + step) % Math.max(filtered.length, 1));
               return;
             }
             case "Enter":
@@ -159,6 +171,12 @@ export function Combobox({
                 event.preventDefault();
                 event.stopPropagation();
                 choose(activeOption);
+              } else if (!freeText && needle !== "") {
+                // Text matching no option: the value is empty meanwhile, and letting
+                // the form have this Enter would submit that, clearing the field. An
+                // empty field, on purpose, still submits.
+                event.preventDefault();
+                event.stopPropagation();
               }
               return;
             case "Escape":
@@ -174,7 +192,8 @@ export function Combobox({
       {/* Mounted while open only: a closed list kept in the page, hidden, made
           React lose track of the nodes around it when an entry holding the field
           was removed from a repeated form (removeChild on the wrong parent). */}
-      {open && (
+      {/* Free text matching no suggestion: nothing to show, the text stands. */}
+      {open && !(freeText && filtered.length === 0) && (
         <ul
           ref={list}
           id={listId}

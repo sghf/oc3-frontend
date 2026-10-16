@@ -7,6 +7,10 @@ import { DetailPanel, type DetailGroup } from "@/components/opensvc/DetailPanel"
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TrashIcon } from "@/components/ui/icons";
 import { problemText } from "@/lib/api/problem";
+import {
+  useFieldConstraints,
+  valueLists,
+} from "@/features/field-constraints/use-field-constraints";
 import { formatDateTime } from "@/lib/format";
 import { ChangeOutcomeLine, TeamsPart } from "@/components/opensvc/CompEditorParts";
 import { useChanges } from "@/components/opensvc/comp-changes";
@@ -135,6 +139,8 @@ export function AppDetailPanel({
     },
   });
   const candidates = useAppTeamCandidates(editable);
+  // The values a Manager configured for the domain, offered when editing it.
+  const constraints = useFieldConstraints("app");
   const teamsChanged = useAppTeamsChanged();
   const { outcome, busy, change, dismiss } = useChanges(async () => {
     if (appId !== undefined) await teamsChanged(appId);
@@ -168,6 +174,7 @@ export function AppDetailPanel({
       options={{ teams: (candidates.data ?? []).map((g) => g.role) }}
       labelPrefix="apps.fields"
       groupPrefix="apps.detail.groups"
+      valueLists={valueLists(constraints.data?.data)}
       isPending={isPending}
       errorMessage={isError ? error.message : null}
       actions={

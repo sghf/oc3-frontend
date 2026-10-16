@@ -42,6 +42,7 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   auth_user: ["users", "user"],
   auth_group: ["groups", "group"],
   auth_membership: ["users", "user", "groups", "group"],
+  field_constraints: ["field-constraints"],
   // The entries a group hides from the menu: the menu, and the panel of the group.
   group_hidden_menu_entries: ["user", "group"],
   gen_filtersets: ["filtersets", "filterset", "designer"],

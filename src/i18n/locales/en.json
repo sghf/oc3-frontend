@@ -30,6 +30,7 @@
     "obsolescence": "Obsolescence",
     "logs": "Audit log",
     "claimMappings": "Claim mappings",
+    "fieldConstraints": "Field values",
     "filters": "Filters",
     "filtersets": "Filtersets",
     "metrics": "Metrics",
@@ -828,7 +829,13 @@
     "no": "No",
     "none": "None",
     "searchValue": "Type to search…",
-    "noMatch": "No matching value."
+    "noMatch": "No matching value.",
+    "outsideList": "not in the list",
+    "outsideListHint": "This value is not among those allowed for this attribute. It stays as it is; changing it means choosing one of the list.",
+    "outsidePattern": "does not match the pattern",
+    "outsidePatternHint": "This value does not match the pattern {{pattern}} set for this attribute. It stays as it is; changing it means typing a value that matches.",
+    "patternHint": "The value must match the pattern {{pattern}}, as a whole.",
+    "patternMismatch": "{{field}}: the value must match the pattern {{pattern}}, as a whole."
   },
   "services": {
     "title": "Services",
@@ -3249,6 +3256,80 @@
     "delete": {
       "question": "Delete the rule {{rule}}?",
       "consequence": "The accounts the rules put in a team no other rule names leave it at once; those added by hand stay, and the team is managed by hand again. The teams other rules still name follow the claims at the next sign-in of each account."
+    }
+  },
+  "fieldConstraints": {
+    "title": "Field values",
+    "add": "New constraint",
+    "intro": "The attributes of nodes, services and apps whose values are constrained; the others are free text. Suggest: the detail panel offers the values of a list in a dropdown, another value can still be typed. Strict: only the values of the list. Regex: only the values matching a pattern. In strict and regex modes the collector refuses the other values a user sets, except clearing the attribute or keeping the value it holds. The values the agents report are never refused, and the values the objects hold are never changed.",
+    "loadError": "Could not load the field values: {{message}}",
+    "none": "No attribute is constrained: every attribute is free text.",
+    "fields": {
+      "object_kind": "Panel",
+      "field": "Attribute",
+      "mode": "Mode",
+      "allowed": "Allowed values",
+      "value_count": "Values",
+      "pattern": "Pattern",
+      "values": "Values (JSON)",
+      "updated": "Changed",
+      "updated_by": "Changed by"
+    },
+    "objects": {
+      "node_one": "node",
+      "node_other": "nodes",
+      "service_one": "service",
+      "service_other": "services",
+      "app_one": "app",
+      "app_other": "apps"
+    },
+    "modes": {
+      "suggest": "Suggest",
+      "strict": "Strict",
+      "regex": "Regex"
+    },
+    "modeHints": {
+      "suggest": "The values of a list are offered in a dropdown; another one can still be typed.",
+      "strict": "Only the values of a list can be chosen. Clearing the attribute and keeping the value it holds stay possible.",
+      "regex": "Only a value matching a pattern can be typed. Clearing the attribute and keeping the value it holds stay possible."
+    },
+    "more_one": "and {{count}} more",
+    "more_other": "and {{count}} more",
+    "panel": {
+      "newTitle": "New constraint",
+      "title": "Values of {{field}}",
+      "chooseField": "Choose an attribute…",
+      "chooseKind": "Choose a panel…",
+      "noFieldLeft": "Every attribute of this panel is constrained",
+      "fieldHint": "The attributes of this panel that a user sets and that have no constraint yet.",
+      "values_one": "Values ({{count}}), one per line",
+      "values_other": "Values ({{count}}), one per line",
+      "import_one": "Add the {{count}} value in use",
+      "import_other": "Add the {{count}} values in use",
+      "importNone": "All the values in use are listed",
+      "valuesHint": "In the order the dropdown shows them. Spaces around a value are removed, duplicates are dropped. Values are case-sensitive: “Paris” and “paris” are two values.",
+      "pattern": "Pattern",
+      "patternHint": "A regular expression in RE2 syntax, which the whole value must match: R[0-9]{2} accepts R11, not R1 nor xR11. Spaces around it are removed.",
+      "patternUnchecked": "The browser cannot check this pattern: the collector will say on saving whether it is valid.",
+      "sample": "Try a value",
+      "sampleMatches": "matches",
+      "sampleFails": "does not match",
+      "heldError": "Could not count the values in use: {{message}}",
+      "outside": {
+        "suggest_one": "Values outside the list, on {{count}} {{objects}}: {{values}}.",
+        "suggest_other": "Values outside the list, on {{count}} {{objects}}: {{values}}.",
+        "strict_one": "Values outside the list, on {{count}} {{objects}}: {{values}}. They are kept, but changing one will take a value of the list.",
+        "strict_other": "Values outside the list, on {{count}} {{objects}}: {{values}}. They are kept, but changing one will take a value of the list.",
+        "regex_one": "Values not matching the pattern, on {{count}} {{objects}}: {{values}}. They are kept, but changing one will take a value that matches.",
+        "regex_other": "Values not matching the pattern, on {{count}} {{objects}}: {{values}}. They are kept, but changing one will take a value that matches."
+      },
+      "tooMany": "A list holds at most {{max}} values.",
+      "save": "Save",
+      "saving": "Saving…",
+      "readOnly": "Only a Manager changes the field values.",
+      "remove": "Remove the constraint",
+      "removeQuestion": "Remove the constraint of {{field}}? The attribute becomes free text again; the values the nodes hold do not change.",
+      "removing": "Removing…"
     }
   },
   "search": {

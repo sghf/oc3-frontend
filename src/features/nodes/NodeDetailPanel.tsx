@@ -12,6 +12,10 @@ import { OsLogo } from "@/components/opensvc/OsLogo";
 import { useTeams } from "@/features/groups/use-teams";
 import { useAppCodes } from "@/features/apps/use-app-codes";
 import { useTagEdit } from "@/features/tags/use-tag-edit";
+import {
+  useFieldConstraints,
+  valueLists,
+} from "@/features/field-constraints/use-field-constraints";
 import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
 import { useNodeTags } from "./related/queries";
 import { problemText } from "@/lib/api/problem";
@@ -319,6 +323,8 @@ export function NodeDetailPanel({
   const teams = useTeams();
   const appCodes = useAppCodes();
   const tagEdit = useTagEdit("node", nodeId);
+  // The values a Manager configured for some attributes, offered when editing them.
+  const constraints = useFieldConstraints("node");
 
   return (
     <RelatedTabsPanel
@@ -350,6 +356,7 @@ export function NodeDetailPanel({
       <DetailContent
         groups={GROUPS}
         options={{ teams: teams.data ?? [], apps: appCodes.data ?? [], actionTypes: ACTION_TYPES }}
+        valueLists={valueLists(constraints.data?.data)}
         row={node}
         onSave={(changes) => save.mutateAsync(changes)}
         labelPrefix="nodes.fields"

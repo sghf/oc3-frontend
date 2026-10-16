@@ -6,6 +6,11 @@ import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { useAppCodes } from "@/features/apps/use-app-codes";
 import { SlideOver } from "@/components/ui/SlideOver";
+import { Combobox } from "@/components/ui/Combobox";
+import {
+  useFieldConstraints,
+  valueLists,
+} from "@/features/field-constraints/use-field-constraints";
 
 const FIELDS = ["nodename", "node_env", "team_responsible", "fqdn", "loc_city"] as const;
 type Field = (typeof FIELDS)[number];
@@ -33,6 +38,9 @@ export function CreateNodePanel({ open, onClose }: { open: boolean; onClose: () 
   const [values, setValues] = useState<Record<Field, string>>(EMPTY);
   const [app, setApp] = useState("");
   const appCodes = useAppCodes();
+  // The values configured for the attributes, the city among them: offered in a
+  // dropdown, the server refusing the others when the list is strict.
+  const lists = valueLists(useFieldConstraints("node").data?.data);
 
   const create = useMutation({
     mutationFn: async () => {
@@ -118,21 +126,50 @@ export function CreateNodePanel({ open, onClose }: { open: boolean; onClose: () 
           </select>
         </div>
 
-        {FIELDS.filter((field) => field !== "nodename").map((field) => (
-          <div key={field} className="mb-3">
-            <label className="mb-1 block font-medium" htmlFor={`create-node-${field}`}>
-              {t(`nodes.fields.${field}`)}
-            </label>
-            <input
-              id={`create-node-${field}`}
-              value={values[field]}
-              onChange={(event) => {
-                setValues((previous) => ({ ...previous, [field]: event.target.value }));
-              }}
-              className="h-8 w-full rounded-(--radius-control) border border-line bg-surface px-2"
-            />
-          </div>
-        ))}
+        {FIELDS.filter((field) => field !== "nodename").map((field) => {
+          const list = lists[field];
+          const set = (value: string) => {
+            setValues((previous) => ({ ...previous, [field]: value }));
+          };
+          return (
+            <div key={field} className="mb-3">
+              <label className="mb-1 block font-medium" htmlFor={`create-node-${field}`}>
+                {t(`nodes.fields.${field}`)}
+              </label>
+              {list === undefined || list.pattern !== undefined ? (
+                <input
+                  id={`create-node-${field}`}
+                  value={values[field]}
+                  onChange={(event) => {
+                    set(event.target.value);
+                  }}
+                  // A regex constraint, checked by the browser before sending: the
+                  // pattern attribute matches the whole value, as the server does.
+                  pattern={list?.pattern}
+                  placeholder={list?.pattern}
+                  title={
+                    list?.pattern === undefined
+                      ? undefined
+                      : t("detail.patternHint", { pattern: list.pattern })
+                  }
+                  className="h-8 w-full rounded-(--radius-control) border border-line bg-surface px-2"
+                />
+              ) : (
+                <Combobox
+                  id={`create-node-${field}`}
+                  options={list.values.map((value) => ({ value, label: value }))}
+                  value={values[field]}
+                  onChange={set}
+                  freeText={!list.strict}
+                  label={t(`nodes.fields.${field}`)}
+                  placeholder={t("detail.searchValue")}
+                  emptyText={t("detail.noMatch")}
+                  inputClassName="h-8"
+                />
+              )}
+            </div>
+          );
+        })}
 
         {create.isError && (
           <p role="alert" className="mb-3 text-state-down">

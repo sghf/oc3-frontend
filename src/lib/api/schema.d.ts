@@ -232,6 +232,9 @@ export interface paths {
      *     regard to case (409); app_domain is 64 characters at most; app_team_ops is
      *     empty or the name of an organizational group. Requires the AppManager
      *     privilege and the responsibility of the app, which a Manager has.
+     *     app_domain constrained in strict or regex mode (see /field_constraints)
+     *     may only take an allowed value, an empty one or the value it holds: 400
+     *     otherwise.
      */
     post: operations["PostApp"];
     /** @description Delete an application code */
@@ -2457,6 +2460,87 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/field_constraints": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The constrained attributes of every kind of object as a list, with the
+     *     column filters, sort, pagination and value statistics of the other lists:
+     *     one row per constraint, the attributes without one being free text. For
+     *     the dropdowns, GET /field_constraints/{object_kind} returns the values of
+     *     one kind typed. Any signed-in user may read them.
+     */
+    get: operations["GetFieldConstraintList"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/field_constraints/{object_kind}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The attributes of the kind of object whose values are constrained, one
+     *     entry each: suggest (the list is offered, another value is accepted),
+     *     strict (the api refuses any other value set by a user, except clearing the
+     *     attribute or keeping the value it holds) or regex (the value set by a user
+     *     must match the whole pattern, with the same exceptions). An attribute
+     *     absent from data is
+     *     free text, the default. fields lists the attributes that may be
+     *     constrained. The writes of the nodes themselves are not checked: they
+     *     report what the node has. Any signed-in user may read them, to fill the
+     *     dropdowns.
+     */
+    get: operations["GetFieldConstraints"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/field_constraints/{object_kind}/{field}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Set the mode and the values allowed for an attribute, creating its
+     *     constraint or replacing it as a whole. Modes suggest and strict take
+     *     values: trimmed, empty ones and duplicates dropped, order kept. Mode regex
+     *     takes a pattern, in RE2 syntax, which the whole value must match (as if
+     *     written ^(?:pattern)$): 400 when it does not compile. The values the
+     *     objects already hold are not changed, even when they do not comply.
+     *     Manager only.
+     */
+    post: operations["PostFieldConstraint"];
+    /**
+     * @description Remove the constraint of an attribute, which becomes free text again, the
+     *     default. The values the objects hold are not changed. 404 when the
+     *     attribute cannot be constrained or has no constraint. Manager only.
+     */
+    delete: operations["DeleteFieldConstraint"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/filters": {
     parameters: {
       query?: never;
@@ -3642,7 +3726,11 @@ export interface paths {
     /** @description List nodes */
     get: operations["GetNodes"];
     put?: never;
-    /** @description Create or update a node (by nodename or node_id) */
+    /**
+     * @description Create or update a node (by nodename or node_id). The attributes a user
+     *     sets are checked against the strict and regex constraints, as by
+     *     POST /nodes/{node_id}.
+     */
     post: operations["PostNodes"];
     /**
      * @description Delete a node (bulk form). The 'node_id' key is mandatory in the body
@@ -3702,7 +3790,13 @@ export interface paths {
     /** @description List entries for a specific node */
     get: operations["GetNode"];
     put?: never;
-    /** @description Update a node properties */
+    /**
+     * @description Update a node properties. A user may only set an attribute constrained in
+     *     strict mode (see /field_constraints) to one of its allowed values, one
+     *     constrained in regex mode to a value matching its pattern, or either to an
+     *     empty value or the value it holds: 400 otherwise. The node itself is not
+     *     checked.
+     */
     post: operations["PostNode"];
     /** @description Delete an OpenSVC node and cascade delete its related entries. The user must hold the NodeManager privilege and be responsible for the node (a Manager is responsible for every node). */
     delete: operations["DeleteNode"];
@@ -4961,7 +5055,11 @@ export interface paths {
     /** @description List entries for a specific service */
     get: operations["GetService"];
     put?: never;
-    /** @description Update a service properties */
+    /**
+     * @description Update a service properties. An attribute constrained in strict or regex
+     *     mode (see /field_constraints) may only take an allowed value, an empty one
+     *     or the value it holds: 400 otherwise.
+     */
     post: operations["PostService"];
     /** @description Delete an OpenSVC service and cascade delete its related entries. */
     delete: operations["DeleteService"];
@@ -6730,6 +6828,87 @@ export interface components {
       svcname?: string;
       updated?: string;
     };
+    FieldConstraint: {
+      field: string;
+      mode: components["schemas"]["FieldConstraintMode"];
+      object_kind: components["schemas"]["FieldConstraintObjectKind"];
+      /** @description In mode regex, the RE2 pattern the whole value must match; empty otherwise */
+      pattern: string;
+      /** @description Date of the last change */
+      updated: string;
+      /** @description Email of the author of the last change */
+      updated_by: string;
+      /** @description The allowed values, in display order; empty in mode regex */
+      values: string[];
+    };
+    FieldConstraintInput: {
+      mode: components["schemas"]["FieldConstraintMode"];
+      /**
+       * @description Mode regex: the RE2 pattern the whole value must match, up to 1024
+       *     characters. Ignored in the other modes.
+       */
+      pattern?: string;
+      /**
+       * @description Modes suggest and strict: at least one value, at most 2000, each up to
+       *     255 characters. Ignored in mode regex.
+       */
+      values?: string[];
+    };
+    FieldConstraintListResponse: {
+      /** @description The constrained attributes; the others are free text */
+      data: components["schemas"]["FieldConstraint"][];
+      /** @description The attributes of the kind of object that may be constrained, in display order */
+      fields: string[];
+    };
+    /**
+     * @description suggest: the values are offered, another one is accepted; strict: a user
+     *     may only set one of the values, clear the attribute or keep the value it
+     *     holds; regex: a user may only set a value matching the whole pattern, clear
+     *     the attribute or keep the value it holds. An attribute without a
+     *     constraint is free text.
+     * @enum {string}
+     */
+    FieldConstraintMode: "suggest" | "strict" | "regex";
+    /**
+     * @description The kind of object whose attributes are constrained, and so the detail
+     *     panel and the table they belong to: node (nodes), service (services), app
+     *     (apps).
+     * @enum {string}
+     */
+    FieldConstraintObjectKind: "node" | "service" | "app";
+    /**
+     * @description A constraint, as a row of the list. Every property is optional: the props
+     *     query parameter selects which columns the server returns.
+     */
+    FieldConstraintRow: {
+      /**
+       * @description What is allowed, as text for filtering and sorting: the pattern in mode
+       *     regex, the values separated by ", " otherwise.
+       */
+      allowed?: string;
+      field?: string;
+      /** @description suggest, strict or regex */
+      mode?: string;
+      object_kind?: string;
+      /** @description In mode regex, the pattern; empty otherwise */
+      pattern?: string;
+      updated?: string;
+      updated_by?: string;
+      /** @description The number of allowed values; 0 in mode regex */
+      value_count?: number;
+      /** @description The allowed values, a JSON array of strings in display order; [] in mode regex */
+      values?: string;
+    };
+    FieldConstraintRowListResponse: {
+      data:
+        | components["schemas"]["FieldConstraintRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
     FilterListResponse: {
       data:
         | components["schemas"]["FilterRow"][]
@@ -8413,6 +8592,15 @@ export interface components {
     };
   };
   responses: {
+    /** @description OK */
+    200: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["Problem"];
+      };
+    };
     /** @description Bad Request */
     400: {
       headers: {
@@ -16323,6 +16511,158 @@ export interface operations {
           "application/json": Record<string, never>;
         };
       };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetFieldConstraintList: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FieldConstraintRowListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetFieldConstraints: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        object_kind: components["schemas"]["FieldConstraintObjectKind"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FieldConstraintListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostFieldConstraint: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        object_kind: components["schemas"]["FieldConstraintObjectKind"];
+        field: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FieldConstraintInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FieldConstraintListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  DeleteFieldConstraint: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        object_kind: components["schemas"]["FieldConstraintObjectKind"];
+        field: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["200"];
+      400: components["responses"]["400"];
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];

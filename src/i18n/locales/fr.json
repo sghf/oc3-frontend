@@ -30,6 +30,7 @@
     "obsolescence": "Obsolescence",
     "logs": "Journal d'audit",
     "claimMappings": "Revendications OIDC",
+    "fieldConstraints": "Valeurs des champs",
     "filters": "Filtres",
     "filtersets": "Filtersets",
     "metrics": "Métriques",
@@ -828,7 +829,13 @@
     "no": "Non",
     "none": "Aucune",
     "searchValue": "Saisir pour chercher…",
-    "noMatch": "Aucune valeur ne correspond."
+    "noMatch": "Aucune valeur ne correspond.",
+    "outsideList": "hors liste",
+    "outsideListHint": "Cette valeur ne fait pas partie de celles autorisées pour cet attribut. Elle reste telle quelle ; la changer demande de choisir une valeur de la liste.",
+    "outsidePattern": "ne correspond pas au motif",
+    "outsidePatternHint": "Cette valeur ne correspond pas au motif {{pattern}} fixé pour cet attribut. Elle reste telle quelle ; la changer demande de saisir une valeur qui y correspond.",
+    "patternHint": "La valeur doit correspondre en entier au motif {{pattern}}.",
+    "patternMismatch": "{{field}} : la valeur doit correspondre en entier au motif {{pattern}}."
   },
   "services": {
     "title": "Services",
@@ -3249,6 +3256,80 @@
     "delete": {
       "question": "Supprimer la règle {{rule}} ?",
       "consequence": "Les comptes que les règles ont mis dans une équipe qu'aucune autre règle ne nomme la quittent aussitôt ; ceux ajoutés à la main restent, et l'équipe redevient gérée à la main. Les équipes que d'autres règles nomment encore suivent les revendications à la prochaine connexion de chaque compte."
+    }
+  },
+  "fieldConstraints": {
+    "title": "Valeurs des champs",
+    "add": "Nouvelle contrainte",
+    "intro": "Les attributs des nœuds, services et applications dont les valeurs sont contraintes ; les autres sont en texte libre. Suggérer : le panneau de détail propose les valeurs d’une liste dans une liste déroulante, une autre valeur peut encore être saisie. Stricte : seulement les valeurs de la liste. Regex : seulement les valeurs qui correspondent à un motif. En modes strict et regex, le collector refuse les autres valeurs fixées par un utilisateur, sauf vider l’attribut ou garder la valeur qu’il porte. Les valeurs remontées par les agents ne sont jamais refusées, et celles que portent les objets ne sont jamais modifiées.",
+    "loadError": "Impossible de charger les valeurs des champs : {{message}}",
+    "none": "Aucun attribut n’est contraint : tous sont en texte libre.",
+    "fields": {
+      "object_kind": "Panneau",
+      "field": "Attribut",
+      "mode": "Mode",
+      "allowed": "Valeurs autorisées",
+      "value_count": "Valeurs",
+      "pattern": "Motif",
+      "values": "Valeurs (JSON)",
+      "updated": "Modifié",
+      "updated_by": "Modifié par"
+    },
+    "objects": {
+      "node_one": "nœud",
+      "node_other": "nœuds",
+      "service_one": "service",
+      "service_other": "services",
+      "app_one": "application",
+      "app_other": "applications"
+    },
+    "modes": {
+      "suggest": "Suggérer",
+      "strict": "Stricte",
+      "regex": "Regex"
+    },
+    "modeHints": {
+      "suggest": "Les valeurs d’une liste sont proposées dans une liste déroulante ; une autre peut encore être saisie.",
+      "strict": "Seules les valeurs d’une liste peuvent être choisies. Vider l’attribut et garder la valeur qu’il porte restent possibles.",
+      "regex": "Seule une valeur qui correspond à un motif peut être saisie. Vider l’attribut et garder la valeur qu’il porte restent possibles."
+    },
+    "more_one": "et {{count}} autre",
+    "more_other": "et {{count}} autres",
+    "panel": {
+      "newTitle": "Nouvelle contrainte",
+      "title": "Valeurs de {{field}}",
+      "chooseField": "Choisir un attribut…",
+      "chooseKind": "Choisir un panneau…",
+      "noFieldLeft": "Tous les attributs de ce panneau sont contraints",
+      "fieldHint": "Les attributs de ce panneau qu’un utilisateur fixe et qui n’ont pas encore de contrainte.",
+      "values_one": "Valeurs ({{count}}), une par ligne",
+      "values_other": "Valeurs ({{count}}), une par ligne",
+      "import_one": "Ajouter la valeur en usage ({{count}})",
+      "import_other": "Ajouter les {{count}} valeurs en usage",
+      "importNone": "Toutes les valeurs en usage sont listées",
+      "valuesHint": "Dans l’ordre où la liste déroulante les montre. Les espaces autour d’une valeur sont retirés, les doublons écartés. Les majuscules comptent : « Paris » et « paris » sont deux valeurs.",
+      "pattern": "Motif",
+      "patternHint": "Une expression régulière en syntaxe RE2, à laquelle la valeur doit correspondre en entier : R[0-9]{2} accepte R11, ni R1 ni xR11. Les espaces autour sont retirés.",
+      "patternUnchecked": "Le navigateur ne sait pas vérifier ce motif : le collector dira à l’enregistrement s’il est valide.",
+      "sample": "Essayer une valeur",
+      "sampleMatches": "correspond",
+      "sampleFails": "ne correspond pas",
+      "heldError": "Impossible de compter les valeurs en usage : {{message}}",
+      "outside": {
+        "suggest_one": "Valeurs hors de la liste, sur {{count}} {{objects}} : {{values}}.",
+        "suggest_other": "Valeurs hors de la liste, sur {{count}} {{objects}} : {{values}}.",
+        "strict_one": "Valeurs hors de la liste, sur {{count}} {{objects}} : {{values}}. Elles sont gardées, mais en changer une demandera une valeur de la liste.",
+        "strict_other": "Valeurs hors de la liste, sur {{count}} {{objects}} : {{values}}. Elles sont gardées, mais en changer une demandera une valeur de la liste.",
+        "regex_one": "Valeurs qui ne correspondent pas au motif, sur {{count}} {{objects}} : {{values}}. Elles sont gardées, mais en changer une demandera une valeur qui y correspond.",
+        "regex_other": "Valeurs qui ne correspondent pas au motif, sur {{count}} {{objects}} : {{values}}. Elles sont gardées, mais en changer une demandera une valeur qui y correspond."
+      },
+      "tooMany": "Une liste compte au plus {{max}} valeurs.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "readOnly": "Seul un Manager modifie les valeurs des champs.",
+      "remove": "Retirer la contrainte",
+      "removeQuestion": "Retirer la contrainte de {{field}} ? L’attribut repasse en texte libre ; les valeurs que portent les nœuds ne changent pas.",
+      "removing": "Retrait…"
     }
   },
   "search": {

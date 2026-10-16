@@ -35,6 +35,7 @@ export type MenuId =
   | "adm-usr"
   | "adm-groups"
   | "adm-claim-mappings"
+  | "adm-field-constraints"
   | "view-app"
   | "adm-tags"
   | "adm-obs"
@@ -77,6 +78,7 @@ export interface NavEntry {
     | "/logs"
     | "/filters"
     | "/claim-mappings"
+    | "/field-constraints"
     | "/metrics"
     | "/reports"
     | "/stats/reports"
@@ -267,6 +269,13 @@ export const NAV_CATEGORIES: NavCategory[] = [
     entries: [
       { to: "/apps", menuId: "view-app", labelKey: "nav.apps", icon: "app" },
       { to: "/tags", menuId: "adm-tags", labelKey: "nav.tags", icon: "tags" },
+      {
+        to: "/field-constraints",
+        menuId: "adm-field-constraints",
+        labelKey: "nav.fieldConstraints",
+        icon: "fieldConstraint",
+        privileges: ["Manager"],
+      },
       {
         to: "/obsolescence",
         menuId: "adm-obs",
