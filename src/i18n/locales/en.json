@@ -2559,6 +2559,14 @@
       "updated": "Updated",
       "nodes.app": "Node app",
       "nodes.os_name": "OS"
+    },
+    "detail": {
+      "title": "Hardware component",
+      "groups": {
+        "component": "Component",
+        "node": "Node",
+        "record": "Record"
+      }
     }
   },
   "allRequests": {

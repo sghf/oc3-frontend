@@ -24,6 +24,7 @@ import {
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { HardwareDetailPanel } from "./HardwareDetailPanel";
 
 type NodeHardwareRow = components["schemas"]["NodeHardwareRow"];
 
@@ -164,7 +165,7 @@ function useHardware(search: ResolvedListSearch) {
 /**
  * Hardware of the nodes the user can see, as their agents report it: one row per
  * component (memory bank, PCI device…) of each node. Read-only; the rows are
- * filtered and sorted by the server.
+ * filtered and sorted by the server, and a row opens its component in a panel.
  */
 export function HardwarePage() {
   const { t, i18n } = useTranslation();
@@ -196,6 +197,8 @@ export function HardwarePage() {
     });
   }
 
+  const selected = data?.rows.find((row) => String(row.id) === search.sel);
+
   return (
     <section>
       <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
@@ -219,6 +222,16 @@ export function HardwarePage() {
         selectAllMatching={allIds}
         valueStats={hardwareStats}
         filterable
+      />
+
+      <HardwareDetailPanel
+        hwId={search.sel}
+        label={[selected?.["nodes.nodename"], selected?.hw_path]
+          .filter((part): part is string => typeof part === "string" && part !== "")
+          .join(" · ")}
+        onClose={() => {
+          update({ sel: undefined });
+        }}
       />
     </section>
   );

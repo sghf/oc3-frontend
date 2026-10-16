@@ -2559,6 +2559,14 @@
       "updated": "Mis à jour",
       "nodes.app": "App du nœud",
       "nodes.os_name": "OS"
+    },
+    "detail": {
+      "title": "Composant matériel",
+      "groups": {
+        "component": "Composant",
+        "node": "Nœud",
+        "record": "Enregistrement"
+      }
     }
   },
   "allRequests": {

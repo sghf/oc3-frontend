@@ -3763,6 +3763,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/nodes/hardware/{hw_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Display a hardware component of a node the user can see, as a row of
+     *     GET /nodes/hardware: 404 when unknown, or on a node the user cannot see.
+     */
+    get: operations["GetNodesHardwareComponent"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/nodes/hbas": {
     parameters: {
       query?: never;
@@ -21054,6 +21074,36 @@ export interface operations {
         };
       };
       401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetNodesHardwareComponent: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+      };
+      header?: never;
+      path: {
+        /** @description Id of the component (node_hw.id) */
+        hw_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NodeHardwareListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
       500: components["responses"]["500"];
     };
   };
