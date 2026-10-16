@@ -9,6 +9,8 @@ import { toPage } from "@/lib/api/page";
 import { problemText } from "@/lib/api/problem";
 import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
 import { RUN_STATUS_OPTIONS, RunLog, RunStatus } from "@/components/opensvc/ComplianceRun";
+import { ComplianceRunDetailPanel } from "@/components/opensvc/ComplianceRunDetailPanel";
+import { OBSOLETE_DAYS, isObsoleteRun } from "@/components/opensvc/compliance-run";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { StatusBadge } from "@/components/opensvc/StatusBadge";
@@ -30,7 +32,6 @@ import {
   type ColumnFilters,
 } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
-import { parseCollectorDate } from "@/lib/format";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
 
 type StatusRow = components["schemas"]["ComplianceStatusRow"];
@@ -43,12 +44,6 @@ type Section = "runs" | Grouping;
 
 /** The most recent first, as the historical table. */
 const DEFAULT_SORT = ["-run_date"];
-
-/**
- * Days after which a check no longer tells the state of its module, as the server
- * counts it (`CompStatusObsoleteAfter` in oc3) and the historical views did.
- */
-const OBSOLETE_DAYS = 7;
 
 /**
  * Props exposed by apicollector, joined names included, in the order of the
@@ -92,12 +87,6 @@ const FAMILY: Record<StatusProp, ColumnFamily> = {
   run_log: "alert",
 };
 
-/** Whether a check is too old to tell the state of its module at `now`. */
-function isObsolete(runDate: string | undefined, now: number): boolean {
-  const parsed = parseCollectorDate(runDate);
-  return parsed !== null && now - parsed.getTime() > OBSOLETE_DAYS * 24 * 60 * 60 * 1000;
-}
-
 function renderCell(prop: StatusProp, row: StatusRow, locale: string) {
   switch (prop) {
     case "run_date":
@@ -116,7 +105,9 @@ function renderCell(prop: StatusProp, row: StatusRow, locale: string) {
       );
     case "run_status":
       // An obsolete check keeps its status, greyed: it is the last one known.
-      return <RunStatus value={row.run_status} outdated={isObsolete(row.run_date, Date.now())} />;
+      return (
+        <RunStatus value={row.run_status} outdated={isObsoleteRun(row.run_date, Date.now())} />
+      );
     case "run_log":
       return <RunLog value={row.run_log} />;
     case "rset_md5":
@@ -377,7 +368,8 @@ function Breakdown({
  * instance, of the nodes the user can see, as the historical compliance status
  * view: the counts of the selection by state, then the runs, or their counts per
  * module, node or service. The filters of the runs narrow the counts too, and the
- * session filterset all of them. Read-only.
+ * session filterset all of them. Read-only; a row of the runs opens the run in a
+ * panel, its output in full.
  */
 export function ComplianceStatusPage() {
   const { t } = useTranslation();
@@ -542,6 +534,16 @@ export function ComplianceStatusPage() {
           />
         )}
       </div>
+
+      <ComplianceRunDetailPanel
+        source="status"
+        // The runs only, which the other tabs do not show.
+        runId={section === "runs" ? search.sel : undefined}
+        label={search.sel === undefined ? "" : (names.get(search.sel) ?? "")}
+        onClose={() => {
+          update({ sel: undefined });
+        }}
+      />
     </section>
   );
 }

@@ -2808,21 +2808,22 @@
       "run_log": "Log",
       "rset_md5": "Ruleset md5"
     },
-    "detail": {
-      "title": "Module run",
-      "noOutput": "The run wrote no output.",
-      "groups": {
-        "run": "Run",
-        "object": "Node and service",
-        "ruleset": "Ruleset",
-        "output": "Output"
-      }
-    },
     "status": {
       "ok": "ok",
       "nok": "not ok",
       "na": "n/a",
       "killed": "killed"
+    }
+  },
+  "complianceRun": {
+    "title": "Module run",
+    "noOutput": "The run wrote no output.",
+    "obsolete": "This check is more than {{days}} days old: its status is the last one known, it may no longer tell the state of the module.",
+    "groups": {
+      "run": "Run",
+      "object": "Node and service",
+      "ruleset": "Ruleset",
+      "output": "Output"
     }
   },
   "designer": {

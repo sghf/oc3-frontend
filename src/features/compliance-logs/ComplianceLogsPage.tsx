@@ -25,7 +25,7 @@ import {
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
-import { ComplianceLogDetailPanel } from "./ComplianceLogDetailPanel";
+import { ComplianceRunDetailPanel } from "@/components/opensvc/ComplianceRunDetailPanel";
 
 type ComplianceLogRow = components["schemas"]["ComplianceLogRow"];
 
@@ -258,8 +258,9 @@ export function ComplianceLogsPage() {
         filterable
       />
 
-      <ComplianceLogDetailPanel
-        logId={search.sel}
+      <ComplianceRunDetailPanel
+        source="log"
+        runId={search.sel}
         label={
           selected === undefined
             ? ""

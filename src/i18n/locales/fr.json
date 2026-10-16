@@ -2808,21 +2808,22 @@
       "run_log": "Journal",
       "rset_md5": "Empreinte md5 du ruleset"
     },
-    "detail": {
-      "title": "Exécution de module",
-      "noOutput": "L’exécution n’a rien écrit.",
-      "groups": {
-        "run": "Exécution",
-        "object": "Nœud et service",
-        "ruleset": "Ruleset",
-        "output": "Sortie"
-      }
-    },
     "status": {
       "ok": "ok",
       "nok": "non ok",
       "na": "n/a",
       "killed": "tué"
+    }
+  },
+  "complianceRun": {
+    "title": "Exécution de module",
+    "noOutput": "L’exécution n’a rien écrit.",
+    "obsolete": "Ce contrôle date de plus de {{days}} jours : son statut est le dernier connu, il peut ne plus dire l’état du module.",
+    "groups": {
+      "run": "Exécution",
+      "object": "Nœud et service",
+      "ruleset": "Ruleset",
+      "output": "Sortie"
     }
   },
   "designer": {
