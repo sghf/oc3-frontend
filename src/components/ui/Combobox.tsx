@@ -191,7 +191,10 @@ export function Combobox({
       />
       {/* Mounted while open only: a closed list kept in the page, hidden, made
           React lose track of the nodes around it when an entry holding the field
-          was removed from a repeated form (removeChild on the wrong parent). */}
+          was removed from a repeated form (removeChild on the wrong parent).
+          Above the sticky bars (z-10), such as the submit bar of a request form,
+          which follow it in the page and would cover it at the same level: at
+          the level of the menus and popovers. */}
       {/* Free text matching no suggestion: nothing to show, the text stands. */}
       {open && !(freeText && filtered.length === 0) && (
         <ul
@@ -199,7 +202,7 @@ export function Combobox({
           id={listId}
           role="listbox"
           aria-label={label}
-          className="absolute top-full right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-(--radius-control) border border-line bg-surface-raised py-1 shadow-lg"
+          className="absolute top-full right-0 left-0 z-30 mt-1 max-h-60 overflow-y-auto rounded-(--radius-control) border border-line bg-surface-raised py-1 shadow-lg"
         >
           {filtered.length === 0 ? (
             <li className="px-2 py-1 text-ink-muted">{emptyText}</li>
