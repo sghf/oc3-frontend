@@ -2808,6 +2808,16 @@
       "run_log": "Log",
       "rset_md5": "Ruleset md5"
     },
+    "detail": {
+      "title": "Module run",
+      "noOutput": "The run wrote no output.",
+      "groups": {
+        "run": "Run",
+        "object": "Node and service",
+        "ruleset": "Ruleset",
+        "output": "Output"
+      }
+    },
     "status": {
       "ok": "ok",
       "nok": "not ok",

@@ -2808,6 +2808,16 @@
       "run_log": "Journal",
       "rset_md5": "Empreinte md5 du ruleset"
     },
+    "detail": {
+      "title": "Exécution de module",
+      "noOutput": "L’exécution n’a rien écrit.",
+      "groups": {
+        "run": "Exécution",
+        "object": "Nœud et service",
+        "ruleset": "Ruleset",
+        "output": "Sortie"
+      }
+    },
     "status": {
       "ok": "ok",
       "nok": "non ok",

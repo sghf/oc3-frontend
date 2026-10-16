@@ -25,6 +25,7 @@ import {
 import { filterQuery, filtersKey, type ColumnFilters } from "@/lib/column-filters";
 import { STATS_LIMIT, toValueStats, type ValueStats } from "@/lib/api/value-stats";
 import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { ComplianceLogDetailPanel } from "./ComplianceLogDetailPanel";
 
 type ComplianceLogRow = components["schemas"]["ComplianceLogRow"];
 
@@ -191,7 +192,8 @@ function useComplianceLogs(search: ResolvedListSearch) {
 /**
  * The runs of the compliance modules (check, fixable, fix) on the nodes the user
  * can see, the most recent first, as the collector's compliance log. The filterset
- * selects the runs by their node. Read-only.
+ * selects the runs by their node. Read-only; a row opens the run in a panel, its
+ * output in full.
  */
 export function ComplianceLogsPage() {
   const { t } = useTranslation();
@@ -229,6 +231,8 @@ export function ComplianceLogsPage() {
     });
   }
 
+  const selected = data?.rows.find((row) => String(row.id) === search.sel);
+
   return (
     <section>
       <h1 className="mb-3 flex items-center gap-2 text-title font-semibold">
@@ -252,6 +256,18 @@ export function ComplianceLogsPage() {
         selectAllMatching={allIds}
         valueStats={complianceLogStats}
         filterable
+      />
+
+      <ComplianceLogDetailPanel
+        logId={search.sel}
+        label={
+          selected === undefined
+            ? ""
+            : `${selected.run_module ?? ""} · ${selected.run_action ?? ""}`
+        }
+        onClose={() => {
+          update({ sel: undefined });
+        }}
       />
     </section>
   );
