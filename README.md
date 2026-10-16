@@ -202,6 +202,25 @@ npm run build
 as `deploy/nginx/default.conf.template`: `/api` to the oc3 API, `/realtime` (websocket) to
 the oc3 messenger, `index.html` for any other unknown path.
 
+### Single-file build
+
+```sh
+npm ci
+npm run build:single
+```
+
+`dist-single/index.html` is the whole application in one file (about 2 MB, 660 kB
+gzipped): the script, the stylesheet, the fonts and the images are inlined, nothing else
+is loaded. Serve it on the same origin as above, for `/` and any path that is not `/api`
+or `/realtime`.
+
+The file carries its own Content-Security-Policy, in a `<meta>` tag: its single inline
+script allowed by hash, fonts and images as data URIs, everything else from this origin
+only. The header policy of `deploy/nginx/security-headers.conf` forbids inline scripts:
+a server of the single file must not send it, nor any policy stricter than the file's.
+Since nothing is cached apart, every page load downloads the whole file: prefer the
+standard build where long-term caching matters.
+
 ## Contributing
 
 Contributions are welcome through pull requests. Before opening one:

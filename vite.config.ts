@@ -1,7 +1,8 @@
 import { fileURLToPath, URL } from "node:url";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, mergeConfig } from "vite";
+import { singleFile } from "./vite-single-file";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -14,8 +15,12 @@ export default defineConfig(({ mode }) => {
   // Empty in local dev: the server is then reached by its IP.
   const publicHost = env.OC3_PUBLIC_HOST ?? "";
 
-  return {
-    plugins: [react(), tailwindcss()],
+  // `vite build --mode single`: the whole application as one index.html.
+  const single =
+    mode === "single" ? singleFile(fileURLToPath(new URL("./public", import.meta.url))) : undefined;
+
+  const base = {
+    plugins: [react(), tailwindcss(), ...(single === undefined ? [] : [single.plugin])],
     resolve: {
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
     },
@@ -39,4 +44,5 @@ export default defineConfig(({ mode }) => {
       },
     },
   };
+  return single === undefined ? base : mergeConfig(base, single.config);
 });
