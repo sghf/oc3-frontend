@@ -7,13 +7,21 @@ import { NodeChecks } from "./NodeChecks";
 import { isOutOfBounds } from "./checks";
 import { NodeInventory } from "./NodeInventory";
 import { NodeLogs } from "./NodeLogs";
+import { NodeServices } from "./NodeServices";
 import { NodeStats } from "./NodeStats";
 import { LineChartIcon } from "@/components/ui/icons";
 import { NodeSysreport } from "./NodeSysreport";
 import { NodeCompliance } from "./NodeCompliance";
-import { useNodeAlerts, useNodeChecks, useNodeLogs, useNodeSysreport } from "./queries";
+import {
+  useNodeAlerts,
+  useNodeChecks,
+  useNodeLogs,
+  useNodeServices,
+  useNodeSysreport,
+} from "./queries";
 import { nokCount, useCompStatus } from "@/lib/api/object-compliance";
 import { periodBegin } from "./sysreport-period";
+import { statusSummary } from "@/components/opensvc/status-summary";
 
 /**
  * Data attached to a node, one tab each, in display order.
@@ -24,6 +32,22 @@ import { periodBegin } from "./sysreport-period";
  * addresses, storage, packages — shares the Inventory tab, one category at a time.
  */
 export const NODE_RELATED_TABS: RelatedTab[] = [
+  {
+    key: "services",
+    labelKey: "nodes.related.services",
+    icon: <ColumnFamilyIcon family="service" />,
+    // The instances split by overall status into those down, in warning, and the
+    // others: what the tab is opened for stands out.
+    useSummary: (nodeId) => {
+      const { t } = useTranslation();
+      return statusSummary(
+        useNodeServices(nodeId).data?.map((row) => row.mon_overallstatus),
+        t,
+        "nodes.services",
+      );
+    },
+    render: (nodeId, locale) => <NodeServices nodeId={nodeId} locale={locale} />,
+  },
   {
     key: "inventory",
     labelKey: "nodes.related.inventory",

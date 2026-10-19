@@ -227,7 +227,8 @@
       "compliance": "Conformité",
       "logs": "Journal",
       "stats": "Statistiques",
-      "checks": "Contrôles"
+      "checks": "Contrôles",
+      "services": "Services"
     },
     "actions": {
       "open": "Actions",
@@ -685,6 +686,27 @@
     "storage": {
       "search": "Chercher un disque ou un adaptateur",
       "matching": "Correspondent : {{disks}} disques sur {{totalDisks}}, {{hbas}} adaptateurs sur {{totalHbas}}"
+    },
+    "services": {
+      "search": "Chercher dans les services",
+      "count_one": "{{count}} instance",
+      "count_other": "{{count}} instances",
+      "matching_one": "{{count}} instance sur {{total}}",
+      "matching_other": "{{count}} instances sur {{total}}",
+      "noMatch": "Aucune instance ne correspond à « {{query}} ».",
+      "empty": "Aucun service : aucun agent n'a remonté d'instance sur ce nœud.",
+      "downCount_one": "{{count}} instance down",
+      "downCount_other": "{{count}} instances down",
+      "warnCount_one": "{{count}} instance en alerte",
+      "warnCount_other": "{{count}} instances en alerte",
+      "otherCount_one": "{{count}} autre instance",
+      "otherCount_other": "{{count}} autres instances",
+      "serviceCount_one": "{{count}} service",
+      "serviceCount_other": "{{count}} services",
+      "containers_one": "{{count}} conteneur",
+      "containers_other": "{{count}} conteneurs",
+      "containersOf_one": "{{count}} conteneur sur {{total}}",
+      "containersOf_other": "{{count}} conteneurs sur {{total}}"
     }
   },
   "auth": {
@@ -2309,18 +2331,18 @@
     "tagDataWhere": "se changent dans le panneau du tag"
   },
   "crossLink": {
-    "hint": "Voir ce {{kind}}",
+    "hint": "Voir {{kind}}",
     "kinds": {
-      "node": "nœud",
-      "service": "service",
-      "instance": "instance",
-      "app": "application",
-      "group": "équipe",
-      "tag": "tag",
-      "user": "utilisateur",
-      "moduleset": "moduleset",
-      "ruleset": "ruleset",
-      "filterset": "filterset"
+      "node": "ce nœud",
+      "service": "ce service",
+      "instance": "cette instance",
+      "app": "cette application",
+      "group": "cette équipe",
+      "tag": "ce tag",
+      "user": "cet utilisateur",
+      "moduleset": "ce moduleset",
+      "ruleset": "ce ruleset",
+      "filterset": "ce filterset"
     }
   },
   "actions": {

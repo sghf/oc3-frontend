@@ -12,6 +12,7 @@ type IpRow = components["schemas"]["IpRow"];
 type DiskRow = components["schemas"]["DiskRow"];
 type HbaRow = components["schemas"]["HbaRow"];
 type CheckRow = components["schemas"]["CheckRow"];
+export type NodeServiceRow = components["schemas"]["InstanceRow"];
 
 /**
  * Hardware inventory of the node, as pushed by the agent. Loaded whole: a node counts
@@ -120,6 +121,36 @@ export function useNodeChecks(nodeId: string | undefined) {
       });
       if (error !== undefined) throw new Error(problemText(error));
       const rows: CheckRow[] = Array.isArray(data.data) ? data.data : [];
+      return rows;
+    },
+  });
+}
+
+/**
+ * The service instances of the node, one row per container for an encapsulated
+ * service, with the columns of the historical collector's node tab
+ * (`table_service_instances_node`). Loaded whole: a node hosts a few hundred
+ * instances at most.
+ */
+export function useNodeServices(nodeId: string | undefined) {
+  return useQuery({
+    queryKey: ["node", nodeId, "services"],
+    enabled: nodeId !== undefined,
+    queryFn: async ({ signal }) => {
+      const { data, error } = await api.GET("/nodes/{node_id}/services", {
+        signal,
+        params: {
+          path: { node_id: nodeId ?? "" },
+          query: {
+            props:
+              "svc_id,node_id,services.svcname,services.svc_ha,services.svc_topology,mon_vmtype,mon_vmname,mon_availstatus,mon_overallstatus,mon_frozen,mon_updated",
+            orderby: "services.svcname,mon_vmname",
+            limit: 0,
+          },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: NodeServiceRow[] = Array.isArray(data.data) ? data.data : [];
       return rows;
     },
   });

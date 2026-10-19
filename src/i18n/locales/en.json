@@ -227,7 +227,8 @@
       "compliance": "Compliance",
       "logs": "Logs",
       "stats": "Stats",
-      "checks": "Checks"
+      "checks": "Checks",
+      "services": "Services"
     },
     "actions": {
       "open": "Actions",
@@ -685,6 +686,27 @@
     "storage": {
       "search": "Search a disk or adapter",
       "matching": "Matching: {{disks}} of {{totalDisks}} disks, {{hbas}} of {{totalHbas}} adapters"
+    },
+    "services": {
+      "search": "Search the services",
+      "count_one": "{{count}} instance",
+      "count_other": "{{count}} instances",
+      "matching_one": "{{count}} instance of {{total}}",
+      "matching_other": "{{count}} instances of {{total}}",
+      "noMatch": "No instance matches “{{query}}”.",
+      "empty": "No service: no agent reported an instance on this node.",
+      "downCount_one": "{{count}} instance down",
+      "downCount_other": "{{count}} instances down",
+      "warnCount_one": "{{count}} instance in warning",
+      "warnCount_other": "{{count}} instances in warning",
+      "otherCount_one": "{{count}} other instance",
+      "otherCount_other": "{{count}} other instances",
+      "serviceCount_one": "{{count}} service",
+      "serviceCount_other": "{{count}} services",
+      "containers_one": "{{count}} container",
+      "containers_other": "{{count}} containers",
+      "containersOf_one": "{{count}} of {{total}} containers",
+      "containersOf_other": "{{count}} of {{total}} containers"
     }
   },
   "auth": {
