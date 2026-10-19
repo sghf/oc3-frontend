@@ -66,7 +66,8 @@
     "ai": "Assistant IA",
     "checks": "Checks",
     "checkDefaults": "Seuils par défaut",
-    "checkContextual": "Seuils contextuels"
+    "checkContextual": "Seuils contextuels",
+    "complianceAttachments": "Attachements"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -4154,6 +4155,50 @@
           "running": "Suppression…",
           "done_one": "1 seuil contextuel supprimé.",
           "done_other": "{{count}} seuils contextuels supprimés."
+        }
+      }
+    }
+  },
+  "complianceAttachments": {
+    "title": "Attachements",
+    "intro": "Les modulesets et les rulesets attachés aux nœuds et aux services, une ligne par attachement ; un nœud ou un service qui n'en a aucun a sa propre ligne, sans moduleset ni ruleset. Filtrer les lignes, les sélectionner, puis attacher ou détacher depuis le menu Actions : le collector vérifie chaque paire comme pour un attachement à l'unité, une paire refusée n'arrête pas les autres.",
+    "nothingAttached": "rien d'attaché sur cette ligne",
+    "tables": {
+      "label": "Attachements des",
+      "modulesets_nodes": "Modulesets des nœuds",
+      "rulesets_nodes": "Rulesets des nœuds",
+      "modulesets_services": "Modulesets des services",
+      "rulesets_services": "Rulesets des services"
+    },
+    "fields": {
+      "moduleset": "Moduleset",
+      "ruleset": "Ruleset",
+      "slave": "Encapsulé"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}} : {{message}}",
+      "data": {
+        "attach": {
+          "label": "Attacher…",
+          "question_one": "Attacher à la cible de cette ligne :",
+          "question_other": "Attacher aux cibles de ces {{count}} lignes, chacune une fois :",
+          "choice": "Moduleset ou ruleset",
+          "confirm_one": "Attacher",
+          "confirm_other": "Attacher",
+          "running": "Attachement…",
+          "done_one": "{{choice}} attaché à 1 cible.",
+          "done_other": "{{choice}} attaché à {{count}} cibles."
+        },
+        "detach": {
+          "label": "Détacher les attachements sélectionnés",
+          "question_one": "Détacher le moduleset ou le ruleset de cette ligne ? Ses modules n'y seront plus vérifiés ni corrigés.",
+          "question_other": "Détacher les modulesets et les rulesets de ces {{count}} lignes ? Leurs modules n'y seront plus vérifiés ni corrigés.",
+          "confirm_one": "Détacher",
+          "confirm_other": "Détacher {{count}}",
+          "running": "Détachement…",
+          "done_one": "1 attachement retiré.",
+          "done_other": "{{count}} attachements retirés."
         }
       }
     }

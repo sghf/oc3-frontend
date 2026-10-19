@@ -2,6 +2,8 @@ import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/
 import { AppShell } from "./layout/AppShell";
 import { AppsPage } from "@/features/apps/AppsPage";
 import { ComplianceLogsPage } from "@/features/compliance-logs/ComplianceLogsPage";
+import { ComplianceAttachmentsPage } from "@/features/compliance-attachments/ComplianceAttachmentsPage";
+import { TABLE_KEYS } from "@/features/compliance-attachments/tables";
 import { ComplianceStatusPage } from "@/features/compliance-status/ComplianceStatusPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { DesignerPage } from "@/features/designer/DesignerPage";
@@ -347,6 +349,17 @@ const complianceStatusRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+const complianceAttachmentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/compliance/attachments",
+  component: ComplianceAttachmentsPage,
+  // The list state, and which of the four tables it is the state of.
+  validateSearch: (raw: Record<string, unknown>) => ({
+    ...parseListSearch(raw),
+    of: TABLE_KEYS.find((key) => key === raw.of),
+  }),
+});
+
 const complianceLogsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/compliance/logs",
@@ -426,6 +439,7 @@ const routeTree = rootRoute.addChildren([
   rulesetsRoute,
   complianceStatusRoute,
   complianceLogsRoute,
+  complianceAttachmentsRoute,
   designerRoute,
   actionsRoute,
   profileRoute,

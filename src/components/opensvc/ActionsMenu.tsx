@@ -74,14 +74,24 @@ export interface DataActionEntry {
   warnings?: (targets: ActionTarget[]) => Promise<string[]>;
   /**
    * Runs the action on one object, with the value chosen when the entry has a
-   * choice; returns the API error message, or null.
+   * choice; returns the API error message, or null. An entry has `run` or `runAll`.
    */
-  run: (
+  run?: (
     target: ActionTarget,
     choice: string | undefined,
     values: Readonly<Record<string, number>>,
     comment: string,
   ) => Promise<string | null>;
+  /**
+   * Runs the action on every object at once, in place of `run` one object after
+   * the other: for a batch the collector applies itself. Returns the objects it
+   * was done for, which the report counts, and the failures, each naming its
+   * object; a rejection is a failure of the whole batch.
+   */
+  runAll?: (
+    targets: ActionTarget[],
+    choice: ComboboxOption | undefined,
+  ) => Promise<{ done: ActionTarget[]; failures: string[] }>;
   /** Called with the objects the action succeeded on. */
   onDone?: (done: ActionTarget[]) => void;
 }
@@ -229,14 +239,20 @@ export function ActionsMenu({
       values: Record<string, number>;
       comment: string;
     }): Promise<Outcome> => {
-      // One object after the other: each is a transaction on the collector side,
-      // and a long selection must not open them all at once.
       const done: ActionTarget[] = [];
       const failures: string[] = [];
-      for (const target of targets) {
-        const message = await entry.run(target, choice?.value, values, comment);
-        if (message === null) done.push(target);
-        else failures.push(failureText(target, message));
+      if (entry.runAll !== undefined) {
+        const result = await entry.runAll(targets, choice);
+        done.push(...result.done);
+        failures.push(...result.failures);
+      } else if (entry.run !== undefined) {
+        // One object after the other: each is a transaction on the collector side,
+        // and a long selection must not open them all at once.
+        for (const target of targets) {
+          const message = await entry.run(target, choice?.value, values, comment);
+          if (message === null) done.push(target);
+          else failures.push(failureText(target, message));
+        }
       }
       entry.onDone?.(done);
       return {

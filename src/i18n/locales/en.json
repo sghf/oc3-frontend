@@ -66,7 +66,8 @@
     "ai": "AI assistant",
     "checks": "Checks",
     "checkDefaults": "Check defaults",
-    "checkContextual": "Contextual thresholds"
+    "checkContextual": "Contextual thresholds",
+    "complianceAttachments": "Attachments"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -4154,6 +4155,50 @@
           "running": "Deleting…",
           "done_one": "1 contextual threshold deleted.",
           "done_other": "{{count}} contextual thresholds deleted."
+        }
+      }
+    }
+  },
+  "complianceAttachments": {
+    "title": "Attachments",
+    "intro": "The modulesets and rulesets attached to the nodes and services, one row per attachment; a node or a service without any has a row of its own, with no moduleset or ruleset. Filter the rows, select them, then attach or detach from the Actions menu: the collector checks each pair as when attaching one by one, a refused pair does not stop the others.",
+    "nothingAttached": "nothing attached on this row",
+    "tables": {
+      "label": "Attachments of",
+      "modulesets_nodes": "Node modulesets",
+      "rulesets_nodes": "Node rulesets",
+      "modulesets_services": "Service modulesets",
+      "rulesets_services": "Service rulesets"
+    },
+    "fields": {
+      "moduleset": "Moduleset",
+      "ruleset": "Ruleset",
+      "slave": "Encapsulated"
+    },
+    "actions": {
+      "open": "Actions",
+      "failure": "{{name}}: {{message}}",
+      "data": {
+        "attach": {
+          "label": "Attach…",
+          "question_one": "Attach to the target of this row:",
+          "question_other": "Attach to the targets of these {{count}} rows, each once:",
+          "choice": "Moduleset or ruleset",
+          "confirm_one": "Attach",
+          "confirm_other": "Attach",
+          "running": "Attaching…",
+          "done_one": "{{choice}} attached to 1 target.",
+          "done_other": "{{choice}} attached to {{count}} targets."
+        },
+        "detach": {
+          "label": "Detach the selected attachments",
+          "question_one": "Detach the moduleset or ruleset of this row? Its modules stop being checked and fixed there.",
+          "question_other": "Detach the modulesets and rulesets of these {{count}} rows? Their modules stop being checked and fixed there.",
+          "confirm_one": "Detach",
+          "confirm_other": "Detach {{count}}",
+          "running": "Detaching…",
+          "done_one": "1 attachment removed.",
+          "done_other": "{{count}} attachments removed."
         }
       }
     }

@@ -29,6 +29,7 @@ import {
   HashIcon,
   KeyIcon,
   FirewallIcon,
+  LinkIcon,
   ListChecksIcon,
 } from "@/components/ui/icons";
 
@@ -70,7 +71,8 @@ export type ObjectKind =
   | "complianceLog"
   | "designer"
   | "claimMapping"
-  | "fieldConstraint";
+  | "fieldConstraint"
+  | "compAttachment";
 
 /**
  * Pictogram and tint of an object kind. The same vocabulary in the menu, in panel
@@ -147,6 +149,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   claimMapping: { Icon: KeyIcon, className: "text-icon-group" },
   // The values allowed for node attributes: the tint of the nodes they constrain.
   fieldConstraint: { Icon: ListChecksIcon, className: "text-icon-node" },
+  // A link in the tint of compliance: modulesets and rulesets tied to their targets.
+  compAttachment: { Icon: LinkIcon, className: "text-icon-compliance" },
 };
 
 export function ObjectIcon({ kind, className }: { kind: ObjectKind; className?: string }) {

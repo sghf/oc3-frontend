@@ -44,6 +44,7 @@ export type MenuId =
   | "comp-modsets"
   | "comp-rsets"
   | "comp-designer"
+  | "comp-attachments"
   | "comp-safe"
   | "adm-forms"
   | "adm-metrics"
@@ -95,7 +96,8 @@ export interface NavEntry {
     | "/compliance/rulesets"
     | "/compliance/status"
     | "/compliance/logs"
-    | "/compliance/designer";
+    | "/compliance/designer"
+    | "/compliance/attachments";
   /**
    * The key of the entry for the menu entries a group hides
    * (`/groups/{id}/hidden_menu_entries`): the id of the entry of the historical
@@ -322,6 +324,14 @@ export const NAV_CATEGORIES: NavCategory[] = [
         menuId: "comp-rsets",
         labelKey: "nav.rulesets",
         icon: "ruleset",
+      },
+      // Manager and CompExec, as the data actions attaching modulesets and rulesets.
+      {
+        to: "/compliance/attachments",
+        menuId: "comp-attachments",
+        labelKey: "nav.complianceAttachments",
+        icon: "compAttachment",
+        privileges: ["CompExec"],
       },
       {
         to: "/compliance/designer",
