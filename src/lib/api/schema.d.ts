@@ -1166,6 +1166,33 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/compliance/attachments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Attach or detach modulesets and rulesets on nodes and services in bulk.
+     *     Each pair goes through the checks of its single route (POST and DELETE
+     *     /nodes/{node_id}/compliance/modulesets/{mset_id}, and the like for the
+     *     rulesets and the services): the caller's responsibility for the node or
+     *     the service, the moduleset or ruleset, whether it is attached already or
+     *     still, and, to attach, whether it may be attached there. A pair refused
+     *     does not stop the others: the response gives the outcome of each, in the
+     *     order of the request, with the status and the message its single route
+     *     answers with. At most 1000 pairs.
+     */
+    post: operations["PostComplianceAttachments"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/compliance/history": {
     parameters: {
       query?: never;
@@ -1728,7 +1755,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * @description List the nodes the caller may see with the modulesets attached to them: one row per node
+     *     and moduleset, and one with no moduleset for a node that has none, as the
+     *     historical collector's "node modulesets" table (comp_modulesets_nodes). The props are those of the nodes
+     *     list, plus the id and the name of the moduleset;
+     *     filter on its name with "empty" to find the nodes without any. The
+     *     session filterset applies.
+     */
+    get: operations["GetComplianceModulesetsNodes"];
     put?: never;
     /** @description Attach a moduleset to a node, as POST /nodes/{node_id}/compliance/modulesets/{mset_id}. */
     post: operations["PostComplianceModulesetsNodes"];
@@ -1794,7 +1829,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * @description List the services the caller may see with the modulesets attached to them or to their encapsulated part (slave): one row per service
+     *     and moduleset, and one with no moduleset for a service that has none, as the
+     *     historical collector's "service modulesets" table (comp_modulesets_services). The props are those of the services
+     *     list, plus the id and the name of the moduleset, and slave;
+     *     filter on its name with "empty" to find the services without any. The
+     *     session filterset applies.
+     */
+    get: operations["GetComplianceModulesetsServices"];
     put?: never;
     /** @description Attach a moduleset to a service, as POST /services/{svc_id}/compliance/modulesets/{mset_id}. */
     post: operations["PostComplianceModulesetsServices"];
@@ -2241,7 +2284,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * @description List the nodes the caller may see with the rulesets attached to them: one row per node
+     *     and ruleset, and one with no ruleset for a node that has none, as the
+     *     historical collector's "node rulesets" table (comp_rulesets_nodes). The props are those of the nodes
+     *     list, plus the id and the name of the ruleset;
+     *     filter on its name with "empty" to find the nodes without any. The
+     *     session filterset applies.
+     */
+    get: operations["GetComplianceRulesetsNodes"];
     put?: never;
     /** @description Attach a ruleset to a node, as POST /nodes/{node_id}/compliance/rulesets/{rset_id}. */
     post: operations["PostComplianceRulesetsNodes"];
@@ -2307,7 +2358,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * @description List the services the caller may see with the rulesets attached to them or to their encapsulated part (slave): one row per service
+     *     and ruleset, and one with no ruleset for a service that has none, as the
+     *     historical collector's "service rulesets" table (comp_rulesets_services). The props are those of the services
+     *     list, plus the id and the name of the ruleset, and slave;
+     *     filter on its name with "empty" to find the services without any. The
+     *     session filterset applies.
+     */
+    get: operations["GetComplianceRulesetsServices"];
     put?: never;
     /** @description Attach a ruleset to a service, as POST /services/{svc_id}/compliance/rulesets/{rset_id}. */
     post: operations["PostComplianceRulesetsServices"];
@@ -6781,6 +6840,36 @@ export interface components {
       modulesets?: components["schemas"]["CompExportModuleset"][];
       rulesets?: components["schemas"]["CompExportRuleset"][];
     };
+    CompNodeModulesetListResponse: {
+      data:
+        | components["schemas"]["CompNodeModulesetRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /** @description A node and a moduleset attached to it; no moduleset on the row of a node that has none */
+    CompNodeModulesetRow: components["schemas"]["NodeRow"] & {
+      modset_id?: number | null;
+      modset_name?: string | null;
+    };
+    CompNodeRulesetListResponse: {
+      data:
+        | components["schemas"]["CompNodeRulesetRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /** @description A node and a ruleset attached to it; no ruleset on the row of a node that has none */
+    CompNodeRulesetRow: components["schemas"]["NodeRow"] & {
+      ruleset_id?: number | null;
+      ruleset_name?: string | null;
+    };
     /**
      * @description Rulesets with their descendants and the filtersets they use, in the format
      *     POST /compliance/import reads.
@@ -6788,6 +6877,73 @@ export interface components {
     CompRulesetExport: {
       filtersets?: components["schemas"]["FiltersetExportItem"][];
       rulesets?: components["schemas"]["CompExportRuleset"][];
+    };
+    CompServiceModulesetListResponse: {
+      data:
+        | components["schemas"]["CompServiceModulesetRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /** @description A service and a moduleset attached to it, or to its encapsulated part when slave is "T" */
+    CompServiceModulesetRow: components["schemas"]["ServiceRow"] & {
+      modset_id?: number | null;
+      modset_name?: string | null;
+      /** @description "T": attached to the encapsulated part of the service */
+      slave?: string | null;
+    };
+    CompServiceRulesetListResponse: {
+      data:
+        | components["schemas"]["CompServiceRulesetRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /** @description A service and a ruleset attached to it, or to its encapsulated part when slave is "T" */
+    CompServiceRulesetRow: components["schemas"]["ServiceRow"] & {
+      ruleset_id?: number | null;
+      ruleset_name?: string | null;
+      /** @description "T": attached to the encapsulated part of the service */
+      slave?: string | null;
+    };
+    ComplianceAttachmentOutcome: {
+      /** @description Its message, or why the pair was refused */
+      info: string;
+      node_id?: string;
+      /** @enum {string} */
+      object: "moduleset" | "ruleset";
+      object_id: string;
+      slave?: boolean;
+      /** @description The status the single route answers with, 202 when done */
+      status: number;
+      svc_id?: string;
+    };
+    /** @description A moduleset or a ruleset, and the node or the service to attach it to or detach it from */
+    ComplianceAttachmentPair: {
+      /** @description The node; exactly one of node_id and svc_id */
+      node_id?: string;
+      /** @enum {string} */
+      object: "moduleset" | "ruleset";
+      /** @description Id of the moduleset or of the ruleset */
+      object_id: string;
+      /** @description For a service, its encapsulated part rather than the service itself */
+      slave?: boolean;
+      /** @description The service; exactly one of node_id and svc_id */
+      svc_id?: string;
+    };
+    ComplianceAttachmentsInput: {
+      /** @enum {string} */
+      action: "attach" | "detach";
+      pairs: components["schemas"]["ComplianceAttachmentPair"][];
+    };
+    ComplianceAttachmentsResponse: {
+      data: components["schemas"]["ComplianceAttachmentOutcome"][];
     };
     /** @description The compliance export a version recorded, in the format of the import. */
     ComplianceExport: {
@@ -12493,6 +12649,33 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  PostComplianceAttachments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceAttachmentsInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of each pair */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceAttachmentsResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
   GetComplianceHistory: {
     parameters: {
       query?: {
@@ -14149,6 +14332,81 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  GetComplianceModulesetsNodes: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompNodeModulesetListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
   PostComplianceModulesetsNodes: {
     parameters: {
       query?: never;
@@ -14363,6 +14621,81 @@ export interface operations {
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModulesetsServices: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompServiceModulesetListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
       500: components["responses"]["500"];
     };
   };
@@ -15826,6 +16159,81 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  GetComplianceRulesetsNodes: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompNodeRulesetListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
   PostComplianceRulesetsNodes: {
     parameters: {
       query?: never;
@@ -16040,6 +16448,81 @@ export interface operations {
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceRulesetsServices: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompServiceRulesetListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
       500: components["responses"]["500"];
     };
   };
