@@ -2951,7 +2951,13 @@
       "objects_other": "{{count}} objets"
     },
     "clone": "Cloner",
-    "export": "JSON",
+    "export": {
+      "open": "Télécharger le JSON",
+      "running": "Export…",
+      "hint": "Télécharger la conformité telle que le collector la détient, au format de l'import : les rulesets et modulesets publiés pour vous, avec les rulesets et filtersets qu'ils utilisent. Les modifications non enregistrées n'y sont pas.",
+      "failed": "L'export a échoué : {{message}}",
+      "title": "Export"
+    },
     "delete": "Supprimer",
     "deleteQuestion": "Supprimer {{name}} ?",
     "deleteQuestionUsed_one": "{{name}} est utilisé une fois. Le supprimer quand même ?",
@@ -3215,6 +3221,44 @@
         "skipped_other": "{{count}} modifications ne peuvent pas être faites :",
         "staged": "Version {{commit}} : {{count}} modifications ajoutées au bac à sable. Relisez-les, puis enregistrez."
       }
+    },
+    "import": {
+      "title": "Import",
+      "intro": "Coller ou charger le JSON d'un export de conformité : celui du designer, d'un ruleset ou d'un moduleset, ou du collector historique. Les filtersets, rulesets et modulesets qui existent déjà sous ce nom sont repris, seules les relations qui leur manquent sont ajoutées ; les nouveaux objets sont publiés pour votre groupe par défaut. L'import s'applique en entier ou pas du tout.",
+      "file": "Charger un fichier…",
+      "orPaste": "ou coller le JSON ci-dessous.",
+      "text": "JSON de l'export",
+      "preview": "À importer",
+      "line": "{{kind}} : {{names}}",
+      "kinds": {
+        "filtersets_one": "{{count}} filterset",
+        "filtersets_other": "{{count}} filtersets",
+        "rulesets_one": "{{count}} ruleset",
+        "rulesets_other": "{{count}} rulesets",
+        "modulesets_one": "{{count}} moduleset",
+        "modulesets_other": "{{count}} modulesets"
+      },
+      "more_one": "et {{count}} autre",
+      "more_other": "et {{count}} autres",
+      "ignored": "Ignoré, inconnu de l'import : {{keys}}.",
+      "pending_one": "Le designer a {{count}} modification non enregistrée : l'enregistrer ou l'abandonner d'abord, l'import écrit directement dans le collector.",
+      "pending_other": "Le designer a {{count}} modifications non enregistrées : les enregistrer ou les abandonner d'abord, l'import écrit directement dans le collector.",
+      "failed": "Rien n'a été importé : {{message}}",
+      "submit": "Importer",
+      "running": "Import…",
+      "done_one": "Importé, {{count}} ligne du collector :",
+      "done_other": "Importé, {{count}} lignes du collector :",
+      "unchanged": "La conformité était déjà telle qu'importée : aucune nouvelle version enregistrée.",
+      "notJson": "Ce n'est pas du JSON valide : {{message}}",
+      "badShape": "Ce JSON n'est pas un export de conformité : un objet dont les filtersets, rulesets et modulesets sont des listes d'objets nommés est attendu.",
+      "nothing": "Cet export ne contient ni filterset, ni ruleset, ni moduleset.",
+      "baseline": "Compliance export as found before an import: the changes made elsewhere since the last version",
+      "subject": "Import of {{filtersets}} filtersets, {{rulesets}} rulesets and {{modulesets}} modulesets"
+    },
+    "exportObject": "JSON",
+    "dump": {
+      "open": "Importer / Exporter",
+      "title": "Importer et exporter la conformité"
     }
   },
   "bookmarks": {

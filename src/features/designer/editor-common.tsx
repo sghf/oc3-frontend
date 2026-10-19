@@ -92,7 +92,7 @@ export function EditorHeader({
               setJson(!json);
             }}
           >
-            {t("designer.export")}
+            {t("designer.exportObject")}
           </button>
           <ConfirmButton
             label={t("designer.delete")}

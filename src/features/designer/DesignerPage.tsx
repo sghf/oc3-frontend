@@ -8,7 +8,14 @@ import { noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
 import { NOTICE_TONES } from "@/components/ui/notice-tones";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { TransientNotice } from "@/components/ui/TransientNotice";
-import { ChevronDownIcon, CloseIcon, HistoryIcon, ResetIcon } from "@/components/ui/icons";
+import {
+  ChevronDownIcon,
+  CloseIcon,
+  HistoryIcon,
+  ResetIcon,
+  UploadIcon,
+} from "@/components/ui/icons";
+import { ImportExportPanel, type ImportResult } from "./ImportExportPanel";
 import { useFormUser } from "@/features/forms/use-form-user";
 import type { RecordedVersion } from "./commit";
 import { useDesigner, type Notice } from "./designer-context";
@@ -68,6 +75,18 @@ export function DesignerPage() {
   const [generation, setGeneration] = useState(0);
   // The compliance history, open on everything or on one object; closed when null.
   const [history, setHistory] = useState<{ object: HistoryObject | null } | null>(null);
+  // The import panel, and the outcome of the last import, kept across the reload it brings.
+  const [importing, setImporting] = useState(false);
+  const [imported, setImported] = useState<ImportResult | null>(null);
+  /** The collector's data read again, then a new sandbox started from it. */
+  const reload = async () => {
+    await queryClient.refetchQueries({ queryKey: ["designer", "exports"] });
+    setGeneration((g) => g + 1);
+    // Everything else shown from the collector may have changed too.
+    void queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] !== "designer",
+    });
+  };
   return (
     <section className="flex h-[calc(100dvh-2.75rem-2rem)] flex-col gap-3">
       <div className="flex items-center gap-3">
@@ -87,6 +106,17 @@ export function DesignerPage() {
         >
           <HistoryIcon className="h-3.5 w-3.5" />
           {t("designer.historyPanel.open")}
+        </button>
+        <button
+          type="button"
+          aria-expanded={importing}
+          className={BUTTON}
+          onClick={() => {
+            setImporting(!importing);
+          }}
+        >
+          <UploadIcon className="h-3.5 w-3.5" />
+          {t("designer.dump.open")}
         </button>
       </div>
       {draft.isPending ? (
@@ -114,6 +144,15 @@ export function DesignerPage() {
             <Workspace
               history={history}
               onHistory={setHistory}
+              importing={importing}
+              onImportClose={() => {
+                setImporting(false);
+              }}
+              imported={imported}
+              onImported={(result) => {
+                setImported(result);
+                void reload();
+              }}
               generation={generation}
               reselect={reselect}
               onCommitStart={(open) => {
@@ -161,6 +200,10 @@ interface Reselect {
 function Workspace({
   history,
   onHistory,
+  importing,
+  onImportClose,
+  imported,
+  onImported,
   generation,
   reselect,
   onCommitStart,
@@ -168,6 +211,10 @@ function Workspace({
 }: {
   history: { object: HistoryObject | null } | null;
   onHistory: (history: { object: HistoryObject | null } | null) => void;
+  importing: boolean;
+  onImportClose: () => void;
+  imported: ImportResult | null;
+  onImported: (result: ImportResult) => void;
   generation: number;
   reselect: Reselect | null;
   onCommitStart: (open: { kind: ObjectKind; name: string } | null) => void;
@@ -292,6 +339,13 @@ function Workspace({
           />
         )}
         <DragHint />
+        <ImportExportPanel
+          open={importing}
+          onClose={onImportClose}
+          pendingCount={designer.log.length}
+          result={imported}
+          onImported={onImported}
+        />
         <HistoryPanel
           // Another object starts the history again: its own filters and page.
           key={history?.object ? `${history.object.kind}:${String(history.object.id)}` : "all"}

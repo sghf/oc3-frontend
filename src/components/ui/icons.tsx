@@ -269,6 +269,15 @@ export function DownloadIcon(props: IconProps) {
   );
 }
 
+/** Loading from a file: an arrow up out of a tray (fa-upload). */
+export function UploadIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3c.3 0 .6.1.8.4l4.5 4.4a1.2 1.2 0 1 1-1.7 1.7l-2.4-2.4v7.9a1.2 1.2 0 1 1-2.4 0V7.1L8.4 9.5a1.2 1.2 0 1 1-1.7-1.7l4.5-4.4c.2-.3.5-.4.8-.4ZM4.2 15.5c.7 0 1.2.5 1.2 1.2v1.9h13.2v-1.9a1.2 1.2 0 1 1 2.4 0v2.5c0 1-.8 1.8-1.8 1.8H4.8C3.8 21 3 20.2 3 19.2v-2.5c0-.7.5-1.2 1.2-1.2Z" />
+    </Svg>
+  );
+}
+
 /** Back to the default values. */
 export function ResetIcon(props: IconProps) {
   return (
