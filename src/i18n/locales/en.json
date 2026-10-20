@@ -1087,11 +1087,9 @@
         "status": "Status",
         "time": "Duration",
         "ack": "Acknowledged",
-        "log": "Log",
         "service": "Service"
       },
       "acked": "by {{by}}",
-      "showLog": "Log",
       "logTitle": "Log of {{action}}",
       "latest": "The latest {{count}} of the {{total}} actions of the period.",
       "errCount_one": "1 in error",
@@ -1111,7 +1109,7 @@
         "ongoing": "ongoing",
         "end": "End",
         "showTable": "Show as a table",
-        "selectHint": "Use the arrow keys to step through the actions, Enter to open the log of one.",
+        "selectHint": "Use the arrow keys to step through the actions, Enter to open the details of one.",
         "capped": "Only the latest {{count}} actions are drawn: choose a shorter period to see them all.",
         "titleByService_one": "Actions of the last 24 hours, by service",
         "titleByService_other": "Actions of the last {{count}} days, by service"
@@ -1122,7 +1120,12 @@
       "periodNote_other": "Actions of the last {{count}} days.",
       "unacked_one": "1 failed action not acknowledged",
       "unacked_other": "{{count}} failed actions not acknowledged",
-      "showUnacked": "Show the actions"
+      "showUnacked": "Show the actions",
+      "view": {
+        "label": "Show as",
+        "table": "Table",
+        "timeline": "Timeline"
+      }
     },
     "pkgdiff": {
       "missing": "not installed",

@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from "react";
+import { useRef, type ComponentProps, type ReactNode } from "react";
 import { FlashScopeContext, useFlash } from "./use-flash";
 
 /** A value that flashes when a live update changes it. */
@@ -56,17 +56,16 @@ export function FlashCell({
 export function FlashRow({
   signature,
   appear,
-  className,
   children,
+  ...props
 }: {
   signature: string;
   appear: boolean;
-  className?: string;
   children: ReactNode;
-}) {
+} & Omit<ComponentProps<"tr">, "ref" | "children">) {
   const ref = useFlash<HTMLTableRowElement>(signature, { appear });
   return (
-    <tr ref={ref} className={className}>
+    <tr ref={ref} {...props}>
       {children}
     </tr>
   );

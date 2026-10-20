@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
+import { SegmentedToggle } from "@/components/ui/SegmentedToggle";
 import {
   CaretRightIcon,
   CloseIcon,
@@ -16,7 +17,6 @@ import { useHiddenMenuEntries } from "@/lib/api/hidden-menu-entries";
 import {
   NAV_CATEGORIES,
   NAV_TOP,
-  NAV_VIEWS,
   viewOfPath,
   type NavCategory,
   type NavEntry,
@@ -48,62 +48,23 @@ function NavLink({ entry }: { entry: NavEntry }) {
 
 const VIEW_ICON = { operator: PulseIcon, admin: SlidersIcon } as const;
 
-/**
- * The choice between the two menus, at the top of the side menu: a sunken track
- * and a raised thumb sliding to the menu chosen, each named in words beside its
- * icon, the one in use in the ink and its icon in the accent. A radio group: the
- * arrows switch from one to the other. The slide is skipped for whoever asks for
- * reduced motion.
- */
+/** The choice between the two menus, at the top of the side menu (`SegmentedToggle`). */
 function ViewSwitch({ view, onChange }: { view: NavView; onChange: (view: NavView) => void }) {
   const { t } = useTranslation();
+  const option = (value: NavView) => ({
+    value,
+    label: t(`nav.views.${value}`),
+    icon: VIEW_ICON[value],
+  });
   return (
-    <div
-      role="radiogroup"
-      aria-label={t("nav.viewLabel")}
-      aria-keyshortcuts="v"
-      className="relative mb-2 grid h-8 grid-cols-2 rounded-full bg-surface-sunken p-[3px]"
-      onKeyDown={(event) => {
-        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-        // Left and right choose; up and down go on through the menu.
-        event.preventDefault();
-        event.stopPropagation();
-        const next = view === "operator" ? "admin" : "operator";
-        onChange(next);
-        event.currentTarget.querySelector<HTMLButtonElement>(`[data-view="${next}"]`)?.focus();
-      }}
-    >
-      <span
-        aria-hidden="true"
-        className={`absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-surface-raised shadow-sm ring-1 ring-line transition-transform duration-200 ease-out motion-reduce:transition-none ${
-          view === "admin" ? "translate-x-full" : ""
-        }`}
-      />
-      {NAV_VIEWS.map((option) => {
-        const checked = option === view;
-        const Icon = VIEW_ICON[option];
-        return (
-          <button
-            key={option}
-            type="button"
-            role="radio"
-            aria-checked={checked}
-            data-view={option}
-            // The group is one stop of the keyboard path, on the menu chosen.
-            tabIndex={checked ? 0 : -1}
-            onClick={() => {
-              onChange(option);
-            }}
-            className={`relative inline-flex items-center justify-center gap-1.5 rounded-full text-data font-medium transition-colors ${
-              checked ? "text-ink" : "text-ink-muted hover:text-ink"
-            }`}
-          >
-            <Icon width={13} height={13} className={checked ? "text-accent" : undefined} />
-            {t(`nav.views.${option}`)}
-          </button>
-        );
-      })}
-    </div>
+    <SegmentedToggle
+      options={[option("operator"), option("admin")]}
+      value={view}
+      onChange={onChange}
+      label={t("nav.viewLabel")}
+      keyShortcuts="v"
+      className="mb-2"
+    />
   );
 }
 

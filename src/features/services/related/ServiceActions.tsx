@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { CrossLink } from "@/components/opensvc/CrossLink";
 import { RelatedTable, type RelatedColumn } from "@/components/opensvc/RelatedTable";
@@ -10,7 +10,9 @@ import {
 } from "@/components/opensvc/AgentActionParts";
 import { actionDuration, type AgentAction } from "@/components/opensvc/agent-action";
 import { DateTime } from "@/components/ui/DateTime";
-import { CloseIcon } from "@/components/ui/icons";
+import { TableIcon, TimelineIcon } from "@/components/ui/icons";
+import { Modal } from "@/components/ui/Modal";
+import { SegmentedToggle } from "@/components/ui/SegmentedToggle";
 import { formatDuration } from "@/lib/format";
 import {
   SERVICE_ACTIONS_DEFAULT_DAYS,
@@ -64,6 +66,11 @@ export function ServiceActions({
   const all = actions.data?.rows ?? [];
   const rows = all.slice(0, SERVICE_ACTIONS_LIMIT);
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
+  // A node's actions show as a timeline or as a table, one at a time: with a
+  // track per service, both at once fill the panel.
+  const [view, setView] = useState<ActionsView>("timeline");
+  const showTimeline = !ofNode || view === "timeline";
+  const showTable = !ofNode || view === "table";
   const selected = all.find((row) => row.id === selectedId);
 
   const allColumns: RelatedColumn<AgentAction>[] = [
@@ -135,22 +142,6 @@ export function ServiceActions({
           </span>
         ) : null,
     },
-    {
-      key: "log",
-      label: t("services.actions.fields.log"),
-      render: (row) => (
-        <button
-          type="button"
-          aria-pressed={row.id === selectedId}
-          onClick={() => {
-            setSelectedId(row.id === selectedId ? undefined : row.id);
-          }}
-          className="h-6 rounded-(--radius-control) border border-line px-1.5 text-ink-muted hover:text-ink aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-ink"
-        >
-          {t("services.actions.showLog")}
-        </button>
-      ),
-    },
   ];
 
   // An instance, or a node, names its node already; a service, its service.
@@ -162,25 +153,38 @@ export function ServiceActions({
 
   return (
     <div className="flex flex-col gap-3">
-      <div
-        role="radiogroup"
-        aria-label={t("services.actions.period.label")}
-        className="flex flex-wrap gap-1"
-      >
-        {SERVICE_ACTIONS_PERIODS.map((period) => (
-          <button
-            key={period}
-            type="button"
-            role="radio"
-            aria-checked={days === period}
-            onClick={() => {
-              setDays(period);
-            }}
-            className="h-7 rounded-(--radius-control) border border-line px-2 aria-checked:border-accent aria-checked:bg-accent-soft aria-checked:font-medium"
-          >
-            {t(`services.actions.period.days`, { count: period })}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div
+          role="radiogroup"
+          aria-label={t("services.actions.period.label")}
+          className="flex flex-wrap gap-1"
+        >
+          {SERVICE_ACTIONS_PERIODS.map((period) => (
+            <button
+              key={period}
+              type="button"
+              role="radio"
+              aria-checked={days === period}
+              onClick={() => {
+                setDays(period);
+              }}
+              className="h-7 rounded-(--radius-control) border border-line px-2 aria-checked:border-accent aria-checked:bg-accent-soft aria-checked:font-medium"
+            >
+              {t(`services.actions.period.days`, { count: period })}
+            </button>
+          ))}
+        </div>
+        {ofNode && (
+          <SegmentedToggle
+            options={[
+              { value: "timeline", label: t("services.actions.view.timeline"), icon: TimelineIcon },
+              { value: "table", label: t("services.actions.view.table"), icon: TableIcon },
+            ]}
+            value={view}
+            onChange={setView}
+            label={t("services.actions.view.label")}
+          />
+        )}
       </div>
       {/* The failures nobody acknowledged yet, all dates, and their acknowledgement:
           the menu stays once they are, for its report. */}
@@ -209,7 +213,7 @@ export function ServiceActions({
           )}
         />
       </div>
-      {all.length > 0 && (
+      {showTimeline && all.length > 0 && (
         <ServiceActionsTimeline
           actions={all}
           trackBy={ofNode ? "service" : "node"}
@@ -221,21 +225,26 @@ export function ServiceActions({
           }}
         />
       )}
-      {actions.data?.hasMore === true && (
+      {showTimeline && actions.data?.hasMore === true && (
         <p className="text-state-warn">
           ▲ {t("services.actions.timeline.capped", { count: SERVICE_ACTIONS_TIMELINE_LIMIT })}
         </p>
       )}
-      <RelatedTable
-        columns={columns}
-        groups={[{ key: "all", label: "", rows }]}
-        rowKey={(row) => String(row.id)}
-        isPending={actions.isPending}
-        errorMessage={actions.isError ? actions.error.message : null}
-        empty={t("services.actions.empty", { count: days })}
-        caption={t("services.related.actions")}
-      />
-      {rows.length > 0 && (
+      {showTable && (
+        <RelatedTable
+          columns={columns}
+          groups={[{ key: "all", label: "", rows }]}
+          rowKey={(row) => String(row.id)}
+          isPending={actions.isPending}
+          errorMessage={actions.isError ? actions.error.message : null}
+          empty={t("services.actions.empty", { count: days })}
+          caption={t("services.related.actions")}
+          onRowOpen={(row) => {
+            setSelectedId(row.id);
+          }}
+        />
+      )}
+      {showTable && rows.length > 0 && (
         <p className="text-ink-muted">
           {all.length > rows.length
             ? t("services.actions.latest", {
@@ -248,68 +257,93 @@ export function ServiceActions({
         </p>
       )}
       {selected !== undefined && (
-        <ActionLog
-          action={selected}
-          ofNode={ofNode}
-          locale={locale}
+        // Chosen on the timeline or in the table: its details in a window.
+        <Modal
+          title={t("services.actions.logTitle", { action: selected.action ?? "" })}
+          closeLabel={t("detail.close")}
           onClose={() => {
             setSelectedId(undefined);
           }}
-        />
+        >
+          <ActionFacts action={selected} ofNode={ofNode} locale={locale} />
+          <ActionLogBody action={selected} />
+        </Modal>
       )}
     </div>
   );
 }
 
-/** The log lines of an action, as the agent wrote them, its colours rendered. */
-function ActionLog({
-  action,
-  ofNode,
-  locale,
-  onClose,
-}: {
-  action: AgentAction;
-  /** The tab of a node: the action is named by its service rather than its node. */
-  ofNode: boolean;
-  locale: string;
-  onClose: () => void;
-}) {
-  const { t } = useTranslation();
-  const section = useRef<HTMLElement>(null);
-  // Chosen from the timeline, the log may open below the fold.
-  useEffect(() => {
-    section.current?.scrollIntoView({ block: "nearest" });
-  }, [action.id]);
+type ActionsView = "timeline" | "table";
+
+/** The command of an action and its log lines. */
+function ActionLogBody({ action }: { action: AgentAction }) {
   return (
-    <section
-      ref={section}
-      aria-label={t("services.actions.logTitle", { action: action.action ?? "" })}
-      className="rounded-(--radius-panel) border border-line bg-surface-raised p-3"
-    >
-      <div className="mb-2 flex items-center gap-2">
-        <h3 className="font-semibold">
-          {t("services.actions.logTitle", { action: action.action ?? "" })}
-        </h3>
-        <span className="text-ink-muted">
-          {ofNode ? action["services.svcname"] : (action["nodes.nodename"] ?? action.node_id)} ·{" "}
-          <DateTime value={action.begin} locale={locale} />
-        </span>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("detail.close")}
-          title={t("detail.close")}
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-(--radius-control) text-ink-muted hover:bg-surface-sunken hover:text-ink"
-        >
-          <CloseIcon className="h-3.5 w-3.5" />
-        </button>
-      </div>
+    <>
       {action.command !== undefined && action.command !== null && action.command !== "" && (
         <p className="mb-2 text-data text-ink-muted">
           <code>{action.command}</code>
         </p>
       )}
       <ActionLogLines action={action} />
-    </section>
+    </>
+  );
+}
+
+/** What the table row of an action tells, for an action chosen on the timeline. */
+function ActionFacts({
+  action,
+  ofNode,
+  locale,
+}: {
+  action: AgentAction;
+  ofNode: boolean;
+  locale: string;
+}) {
+  const { t } = useTranslation();
+  const seconds = actionDuration(action);
+  const facts: [string, ReactNode][] = [
+    [
+      t(ofNode ? "services.actions.fields.service" : "services.actions.fields.node"),
+      ofNode ? (
+        <CrossLink kind="service" id={action.svc_id}>
+          {action["services.svcname"] ?? action.svc_id}
+        </CrossLink>
+      ) : (
+        <CrossLink kind="node" id={action.node_id}>
+          {action["nodes.nodename"] ?? action.node_id}
+        </CrossLink>
+      ),
+    ],
+    [t("services.actions.fields.status"), <ActionStatus key="status" status={action.status} />],
+    [
+      t("services.actions.fields.begin"),
+      <DateTime key="begin" value={action.begin} locale={locale} />,
+    ],
+    [
+      t("services.actions.timeline.end"),
+      action.end === undefined || action.end === null ? (
+        t("services.actions.timeline.ongoing")
+      ) : (
+        <DateTime key="end" value={action.end} locale={locale} />
+      ),
+    ],
+    [
+      t("services.actions.fields.time"),
+      seconds === undefined ? "—" : formatDuration(seconds, locale),
+    ],
+    [
+      t("services.actions.fields.ack"),
+      action.ack === 1 ? t("services.actions.acked", { by: action.acked_by ?? "" }) : "—",
+    ],
+  ];
+  return (
+    <dl className="mb-3 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1">
+      {facts.map(([label, value]) => (
+        <div key={label} className="contents">
+          <dt className="text-ink-muted">{label}</dt>
+          <dd className="m-0">{value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

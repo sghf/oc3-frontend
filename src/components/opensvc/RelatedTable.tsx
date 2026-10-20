@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { FlashRow } from "./Flash";
 
@@ -45,6 +52,7 @@ export function RelatedTable<T>({
   headerTop,
   blockKey,
   flashSignature = JSON.stringify,
+  onRowOpen,
 }: {
   columns: RelatedColumn<T>[];
   groups: RelatedGroup<T>[];
@@ -73,6 +81,12 @@ export function RelatedTable<T>({
    * otherwise flash every row.
    */
   flashSignature?: (row: T) => string;
+  /**
+   * Makes each row open something, its details in a window say: a click anywhere
+   * on it, or Enter or Space once it has the focus. A link or a button inside the
+   * row keeps its own action. Rows in blocks (`blockKey`) do not open.
+   */
+  onRowOpen?: (row: T) => void;
 }) {
   const { t } = useTranslation();
   // Ids of the headers, which the cells of a block name (`headers`).
@@ -141,7 +155,12 @@ export function RelatedTable<T>({
                   key={rowKey(row)}
                   signature={flashSignature(row)}
                   appear={shownOnce.current}
-                  className="border-b border-line/60 align-top last:border-b-0"
+                  className={`border-b border-line/60 align-top last:border-b-0 ${onRowOpen === undefined ? "" : OPENING_ROW}`}
+                  {...(onRowOpen === undefined
+                    ? {}
+                    : openingRow(() => {
+                        onRowOpen(row);
+                      }))}
                 >
                   {columns.map((column) => (
                     <td key={column.key} className={cellClass(column)}>
@@ -220,6 +239,28 @@ export function RelatedTable<T>({
       })}
     </table>
   );
+}
+
+const OPENING_ROW =
+  "cursor-pointer hover:bg-surface-sunken/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent";
+
+/** The handlers of a row that opens: a click beside its links and buttons, Enter or Space. */
+function openingRow(open: () => void) {
+  return {
+    tabIndex: 0,
+    "aria-haspopup": "dialog" as const,
+    onClick: (event: MouseEvent<HTMLTableRowElement>) => {
+      if (event.target instanceof Element && event.target.closest("a, button, input") !== null)
+        return;
+      open();
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLTableRowElement>) => {
+      if (event.target !== event.currentTarget) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      open();
+    },
+  };
 }
 
 function cellClass<T>(column: RelatedColumn<T>): string {

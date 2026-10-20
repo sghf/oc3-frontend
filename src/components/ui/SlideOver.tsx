@@ -22,6 +22,7 @@ import {
   usePanelWidth,
   widthToFit,
 } from "./slide-over-width";
+import { MODAL_BACKDROP } from "./Modal";
 
 /**
  * Side panel sliding in from an edge of the window: the right one, or the left one
@@ -283,6 +284,8 @@ export function SlideOver({
       if (!(target instanceof Element)) return;
       if (panel.current?.contains(target) === true) return;
       if (target.closest(INTERACTIVE) !== null) return;
+      // The backdrop of a modal opened from the panel closes the modal only.
+      if (target.closest(MODAL_BACKDROP) !== null) return;
       // An entry in progress in the panel — an attribute being edited — counts as a
       // form: it is not cleared by a click beside it.
       const focused = document.activeElement;

@@ -206,6 +206,27 @@ export function SignOutIcon(props: IconProps) {
   );
 }
 
+/** A table: a frame cut into rows. */
+export function TableIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path
+        fillRule="evenodd"
+        d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm1 2v3h14V6H5Zm0 5v3h14v-3H5Zm0 5v2h14v-2H5Z"
+      />
+    </Svg>
+  );
+}
+
+/** A timeline: bars of different lengths, one per track. */
+export function TimelineIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3 5h9a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2Zm5 6h11a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2Zm-3 6h7a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2Z" />
+    </Svg>
+  );
+}
+
 /** Column picker. */
 export function ColumnsIcon(props: IconProps) {
   return (
