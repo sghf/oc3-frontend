@@ -4620,6 +4620,202 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/orchestration_runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The runs of the orchestrations, the latest first, with the summary of their
+     *     steps but not their targets. Manager only.
+     */
+    get: operations["GetOrchestrationRuns"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestration_runs/{run_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    /**
+     * @description A run, its steps and the targets of each step, with the status, the
+     *     return code and the output of the action of each target. Manager only.
+     */
+    get: operations["GetOrchestrationRun"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestration_runs/{run_id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Resume a failed or stopped run from the step it stopped at: the targets of
+     *     that step that did not succeed run again, then the next steps, with the
+     *     targets resolved when the run started. 409 when the run is not failed or
+     *     stopped, or an action of it still runs. Manager only.
+     */
+    post: operations["PostOrchestrationRunResume"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestration_runs/{run_id}/stop": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Stop a running run: the targets not started yet do not run, nor the next
+     *     steps, and the actions still waiting in the queue are cancelled. An action
+     *     an agent already runs cannot be interrupted: it goes on and its result is
+     *     recorded. 409 when the run is not running. Manager only.
+     */
+    post: operations["PostOrchestrationRunStop"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestrations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The orchestrations, by name, each with its steps. Manager only. */
+    get: operations["GetOrchestrations"];
+    put?: never;
+    /**
+     * @description Create an orchestration: an ordered list of steps, each one agent action on a
+     *     set of targets. The steps are checked as a whole (see OrchestrationStep):
+     *     400 names the first one that is not valid. 409 when the name is taken.
+     *     Manager only.
+     */
+    post: operations["PostOrchestration"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestrations/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Resolve the targets of each step of an orchestration, saved or not, as a run
+     *     starting now would, and check each one as the action queue would: the
+     *     action is accepted for the kind of target, the target exists and an agent
+     *     can be reached for it. What the check finds is not stored. Manager only.
+     */
+    post: operations["PostOrchestrationCheck"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestrations/{orchestration_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration */
+        orchestration_id: components["parameters"]["inPathOrchestrationId"];
+      };
+      cookie?: never;
+    };
+    /** @description An orchestration and its steps. Manager only. */
+    get: operations["GetOrchestration"];
+    /**
+     * @description Replace an orchestration, its name, description and steps, checked as on
+     *     creation. Its past and running runs keep the plan they started with.
+     *     Manager only.
+     */
+    put: operations["PutOrchestration"];
+    post?: never;
+    /**
+     * @description Delete an orchestration. Its runs stay, with the plan they ran; a running run
+     *     goes on. Manager only.
+     */
+    delete: operations["DeleteOrchestration"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orchestrations/{orchestration_id}/runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration */
+        orchestration_id: components["parameters"]["inPathOrchestrationId"];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Start a run of the orchestration: its steps are frozen in the run, the
+     *     filtersets resolved now, and the first step starts at once. The steps
+     *     then run one after the other, the next starting when every target of
+     *     the previous one succeeded. A target fails when its action returns
+     *     non-zero, is refused by the action queue, is cancelled or outlives the
+     *     time limit of its step; the run then stops: the targets not started and
+     *     the next steps do not run. 400 when a step matches no target. Manager
+     *     only.
+     */
+    post: operations["PostOrchestrationRun"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/packages": {
     parameters: {
       query?: never;
@@ -8019,6 +8215,161 @@ export interface components {
       /** @description Value the claim must equal, or contain for a list */
       value?: string;
     };
+    Orchestration: {
+      created: string;
+      description: string;
+      id: number;
+      name: string;
+      steps: components["schemas"]["OrchestrationStep"][];
+      updated: string;
+      /** @description Email of the author of the last change */
+      updated_by: string;
+    };
+    OrchestrationCheckResponse: {
+      data: components["schemas"]["OrchestrationCheckStep"][];
+    };
+    OrchestrationCheckStep: {
+      /** @description What makes the step itself invalid, empty when it is valid */
+      message: string;
+      step: number;
+      targets: components["schemas"]["OrchestrationCheckTarget"][];
+    };
+    OrchestrationCheckTarget: {
+      cluster_id?: string;
+      /** @description The name of the target, as the run shows it */
+      label: string;
+      /** @description Why the action queue would refuse the target, empty when ok */
+      message: string;
+      node_id?: string;
+      ok: boolean;
+      svc_id?: string;
+    };
+    OrchestrationInput: {
+      description?: string;
+      name: string;
+      steps: components["schemas"]["OrchestrationStep"][];
+    };
+    OrchestrationListResponse: {
+      data: components["schemas"]["Orchestration"][];
+    };
+    OrchestrationRun: {
+      current_step: number;
+      ended?: string | null;
+      id: number;
+      /** @description Why the run failed or was stopped */
+      message: string;
+      name: string;
+      /** @description Null once the orchestration is deleted */
+      orchestration_id?: number | null;
+      /** @description The steps of the orchestration when the run started */
+      plan: components["schemas"]["OrchestrationStep"][];
+      started: string;
+      started_by: string;
+      status: components["schemas"]["OrchestrationRunStatus"];
+      steps: components["schemas"]["OrchestrationRunStep"][];
+    };
+    OrchestrationRunListResponse: {
+      data: components["schemas"]["OrchestrationRun"][];
+    };
+    /** @enum {string} */
+    OrchestrationRunStatus: "running" | "succeeded" | "failed" | "stopped";
+    OrchestrationRunStep: {
+      /** @description The number of targets by status */
+      counts: {
+        [key: string]: number;
+      };
+      ended?: string | null;
+      started?: string | null;
+      status: components["schemas"]["OrchestrationRunStepStatus"];
+      step: number;
+      /** @description Absent from the list of runs */
+      targets?: components["schemas"]["OrchestrationRunTarget"][];
+    };
+    /**
+     * @description stopped: the run was stopped during the step; not_run: the run failed or
+     *     was stopped before it.
+     * @enum {string}
+     */
+    OrchestrationRunStepStatus:
+      "waiting" | "running" | "succeeded" | "failed" | "stopped" | "not_run";
+    OrchestrationRunTarget: {
+      action_id?: number | null;
+      cluster_id: string;
+      command?: string;
+      ended?: string | null;
+      id: number;
+      label: string;
+      /** @description Why it did not succeed, when the action queue or the run says so */
+      message: string;
+      node_id: string;
+      position: number;
+      queued?: string | null;
+      ret?: number | null;
+      started?: string | null;
+      status: components["schemas"]["OrchestrationRunTargetStatus"];
+      stderr?: string;
+      stdout?: string;
+      step: number;
+      svc_id: string;
+    };
+    /**
+     * @description waiting: not started; queued: its action waits in the queue; running: an
+     *     agent runs it; ok: it returned 0; failed: it returned non-zero; refused:
+     *     the queue refused it; timed_out: it outlived the time limit of the step;
+     *     cancelled: its action was cancelled or deleted; not_run: the run stopped
+     *     before it.
+     * @enum {string}
+     */
+    OrchestrationRunTargetStatus:
+      | "waiting"
+      | "queued"
+      | "running"
+      | "ok"
+      | "failed"
+      | "refused"
+      | "timed_out"
+      | "cancelled"
+      | "not_run";
+    /**
+     * @description One action on a set of targets. The action must be one the action queue
+     *     accepts for the kind of target (see PUT /actions); rid, the resources of
+     *     an instance, applies to instances only. pace says how many targets run at
+     *     a time: all, one (one after the other) or batch (batch_size at a time).
+     *     timeout, in seconds, fails a target whose action has not finished by
+     *     then; 0 means no limit.
+     */
+    OrchestrationStep: {
+      action: string;
+      batch_size?: number;
+      kind: components["schemas"]["OrchestrationTargetKind"];
+      name: string;
+      /** @enum {string} */
+      pace: "all" | "one" | "batch";
+      rid?: string;
+      targets: components["schemas"]["OrchestrationTargets"];
+      timeout?: number;
+    };
+    /**
+     * @description What the action of a step acts on: a service as a whole, the instance of a
+     *     service on a node, a node, or a cluster.
+     * @enum {string}
+     */
+    OrchestrationTargetKind: "service" | "instance" | "node" | "cluster";
+    /**
+     * @description How a step names its targets. pick: the ids, svc_id for a service,
+     *     "svc_id@node_id" for an instance, node_id for a node, cluster_id for a
+     *     cluster. filterset: the services, the nodes, the instances of the services
+     *     on the nodes, or the clusters of the nodes, the filterset matches when the
+     *     run starts. same_as: the targets of an earlier step, of the same kind.
+     */
+    OrchestrationTargets: {
+      filterset_id?: number;
+      ids?: string[];
+      /** @enum {string} */
+      mode: "pick" | "filterset" | "same_as";
+      /** @description For same_as, the index of the earlier step, from 0 */
+      step?: number;
+    };
     PackageDiffNode: {
       node_id: string;
       nodename: string;
@@ -8995,6 +9346,10 @@ export interface components {
     inPathMsetId: string;
     /** @description ID of the node */
     inPathNodeId: string;
+    /** @description ID of the orchestration */
+    inPathOrchestrationId: number;
+    /** @description ID of the orchestration run */
+    inPathOrchestrationRunId: number;
     /** @description ID of the ruleset */
     inPathRsetId: string;
     /**
@@ -23960,6 +24315,304 @@ export interface operations {
       };
       401: components["responses"]["401"];
       403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetOrchestrationRuns: {
+    parameters: {
+      query?: {
+        /** @description The runs of this orchestration only */
+        orchestration_id?: number;
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationRunListResponse"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetOrchestrationRun: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationRun"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostOrchestrationRunResume: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationRun"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostOrchestrationRunStop: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationRun"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetOrchestrations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationListResponse"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostOrchestration: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrchestrationInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Orchestration"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostOrchestrationCheck: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrchestrationInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationCheckResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetOrchestration: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration */
+        orchestration_id: components["parameters"]["inPathOrchestrationId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Orchestration"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PutOrchestration: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration */
+        orchestration_id: components["parameters"]["inPathOrchestrationId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrchestrationInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Orchestration"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  DeleteOrchestration: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration */
+        orchestration_id: components["parameters"]["inPathOrchestrationId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["200"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostOrchestrationRun: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration */
+        orchestration_id: components["parameters"]["inPathOrchestrationId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationRun"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
       500: components["responses"]["500"];
     };
   };
