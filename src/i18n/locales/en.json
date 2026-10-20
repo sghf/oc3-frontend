@@ -18,7 +18,8 @@
       "reporting": "Reporting",
       "filtering": "Filtering",
       "audit": "Audit",
-      "checks": "Checks"
+      "checks": "Checks",
+      "orchestration": "Orchestration"
     },
     "apps": "Apps",
     "networks": "Networks",
@@ -67,7 +68,9 @@
     "checks": "Checks",
     "checkDefaults": "Check defaults",
     "checkContextual": "Contextual thresholds",
-    "complianceAttachments": "Attachments"
+    "complianceAttachments": "Attachments",
+    "orchestrations": "Workflows",
+    "orchestrationRuns": "Runs"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -4279,6 +4282,152 @@
           "done_other": "{{count}} attachments removed."
         }
       }
+    }
+  },
+  "orchestrations": {
+    "title": "Workflows",
+    "intro": "Plans of agent actions run step after step on services, instances, nodes or clusters, picked one by one or matched by a filterset. A step starts once every target of the previous one succeeded; the first failure stops the run.",
+    "new": "New workflow",
+    "newTitle": "New workflow",
+    "empty": "No workflow yet.",
+    "neverRun": "never run",
+    "unsaved": "unsaved changes",
+    "save": "Save",
+    "saving": "Saving…",
+    "saveBeforeRun": "Save the changes before running",
+    "runButton": "Run…",
+    "delete": "Delete",
+    "deleteQuestion": "Delete the workflow {{name}}? Its runs stay.",
+    "addStep": "Add a step",
+    "failureRule": "A step fails when one of its targets fails, is refused, is cancelled or exceeds its time limit. The run then stops: the next steps do not run.",
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "steps": "Steps",
+      "lastRun": "Last run",
+      "updated": "Changed"
+    },
+    "kinds": {
+      "service_one": "service",
+      "service_other": "services",
+      "instance_one": "instance",
+      "instance_other": "instances",
+      "node_one": "node",
+      "node_other": "nodes",
+      "cluster_one": "cluster",
+      "cluster_other": "clusters"
+    },
+    "status": {
+      "running": "running",
+      "succeeded": "succeeded",
+      "failed": "failed",
+      "stopped": "stopped",
+      "waiting": "waiting",
+      "not_run": "not run",
+      "queued": "queued",
+      "ok": "ok",
+      "refused": "refused",
+      "timed_out": "timed out",
+      "cancelled": "cancelled"
+    },
+    "step": {
+      "name": "Name of step {{n}}",
+      "namePlaceholder": "Step {{n}}",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "remove": "Remove the step",
+      "kind": "Acts on",
+      "action": "Action",
+      "chooseAction": "Choose an action",
+      "targets": "Targets",
+      "targetsMode": "How the targets are chosen",
+      "modes": {
+        "pick": "Pick",
+        "filterset": "Filterset",
+        "sameAs": "Same as a step"
+      },
+      "addTarget": "Add a {{kind}}",
+      "removeTarget": "Remove {{name}}",
+      "noMatch": "No match",
+      "filterset": "Filterset",
+      "chooseFilterset": "Choose a filterset",
+      "sameAsStep": "Step whose targets to take",
+      "sameAsOption": "Step {{n}} · {{name}}",
+      "matches_one": "{{count}} target now",
+      "matches_other": "{{count}} targets now",
+      "rid": "Resources",
+      "ridPlaceholder": "all",
+      "ridHint": "empty for all, or rids separated by commas",
+      "pace": "Pace",
+      "paces": {
+        "all": "All at once",
+        "one": "One by one",
+        "batch": "By batches"
+      },
+      "batchUnit": "at a time",
+      "timeout": "Time limit",
+      "timeoutHint": "minutes; 0 for none. A target still running then fails the step."
+    },
+    "check": {
+      "title": "Step {{n}} · targets now",
+      "checking": "checking…",
+      "none": "Nothing to check yet.",
+      "ready_one": "{{count}} ready",
+      "ready_other": "{{count}} ready",
+      "refused_one": "{{count}} would be refused",
+      "refused_other": "{{count}} would be refused",
+      "targetReady": "ready",
+      "targetRefused": "refused",
+      "problems_one": "{{count}} problem in the plan: a run would fail.",
+      "problems_other": "{{count}} problems in the plan: a run would fail.",
+      "hint": "Checked as the action queue will at run time. A filterset is resolved again when the run starts, and its targets kept for the whole run."
+    },
+    "confirm": {
+      "title": "Run {{name}}",
+      "summary_one": "{{steps}} steps, {{count}} action in all, one step after the other:",
+      "summary_other": "{{steps}} steps, {{count}} actions in all, one step after the other:",
+      "targets_one": "{{count}} target",
+      "targets_other": "{{count}} targets",
+      "disruptive": "interrupts what runs",
+      "rule": "The run stops at the first step that fails: the next ones do not run.",
+      "typeName": "Type {{name}} to confirm",
+      "start": "Start the run",
+      "starting": "Starting…"
+    },
+    "runs": {
+      "title": "Runs",
+      "empty": "No run yet.",
+      "recent": "Recent runs",
+      "status": "Status",
+      "steps": "Steps done",
+      "started": "Started",
+      "duration": "Duration",
+      "message": "Message"
+    },
+    "run": {
+      "stepOf": "step {{n}} of {{count}}",
+      "startedBy": "started by {{by}}",
+      "stop": "Stop the run",
+      "stopping": "Stopping…",
+      "stopQuestion": "Stop this run?",
+      "stopDetails": "The actions still waiting in the queue are cancelled; those an agent already runs finish, and their results are kept.",
+      "again": "Run again",
+      "resume": "Resume from step {{n}}",
+      "resumeWait": "An action still runs: wait for its end",
+      "failedAt": "Stopped at step {{n}}:",
+      "stoppedAt": "Stopped during step {{n}}:",
+      "notRun_one": "Step {{steps}} did not run.",
+      "notRun_other": "Steps {{steps}} did not run.",
+      "stillRunning": "An action still runs on an agent: its result will be recorded.",
+      "stepLabel": "Step {{n}}",
+      "okOf": "{{ok}} of {{count}} ok",
+      "target": "Target",
+      "ret": "Return",
+      "output": "Output",
+      "detailsTitle": "Step {{n}} · {{target}}",
+      "action": "Action",
+      "queued": "Queued",
+      "ended": "Ended"
     }
   }
 }

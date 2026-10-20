@@ -75,6 +75,8 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   gen_filtersets_filters: ["filtersets", "filterset", "designer"],
   gen_filters: ["filters", "filter", "filtersets", "filterset"],
   forms: ["forms", "form", "form-by-name"],
+  orchestrations: ["orchestrations", "orchestration"],
+  orchestration_runs: ["orchestration-runs", "orchestration-run"],
   forms_store: ["workflows"],
   workflows: ["workflows"],
   form_output_results: ["form-output-results", "workflows"],

@@ -18,7 +18,8 @@
       "reporting": "Rapports",
       "filtering": "Filtrage",
       "audit": "Audit",
-      "checks": "Checks"
+      "checks": "Checks",
+      "orchestration": "Orchestration"
     },
     "apps": "Codes application",
     "networks": "Réseaux",
@@ -67,7 +68,9 @@
     "checks": "Checks",
     "checkDefaults": "Seuils par défaut",
     "checkContextual": "Seuils contextuels",
-    "complianceAttachments": "Attachements"
+    "complianceAttachments": "Attachements",
+    "orchestrations": "Workflows",
+    "orchestrationRuns": "Exécutions"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -4279,6 +4282,152 @@
           "done_other": "{{count}} attachements retirés."
         }
       }
+    }
+  },
+  "orchestrations": {
+    "title": "Workflows",
+    "intro": "Des plans d'actions d'agent menés étape après étape sur des services, instances, nœuds ou clusters, choisis un par un ou par un filterset. Une étape démarre quand toutes les cibles de la précédente ont réussi ; le premier échec arrête l'exécution.",
+    "new": "Nouveau workflow",
+    "newTitle": "Nouveau workflow",
+    "empty": "Aucun workflow pour l'instant.",
+    "neverRun": "jamais exécuté",
+    "unsaved": "modifications non enregistrées",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saveBeforeRun": "Enregistrez les modifications avant d'exécuter",
+    "runButton": "Exécuter…",
+    "delete": "Supprimer",
+    "deleteQuestion": "Supprimer le workflow {{name}} ? Ses exécutions restent.",
+    "addStep": "Ajouter une étape",
+    "failureRule": "Une étape échoue quand l'une de ses cibles échoue, est refusée, est annulée ou dépasse son délai. L'exécution s'arrête alors : les étapes suivantes ne sont pas menées.",
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "steps": "Étapes",
+      "lastRun": "Dernière exécution",
+      "updated": "Modifié"
+    },
+    "kinds": {
+      "service_one": "service",
+      "service_other": "services",
+      "instance_one": "instance",
+      "instance_other": "instances",
+      "node_one": "nœud",
+      "node_other": "nœuds",
+      "cluster_one": "cluster",
+      "cluster_other": "clusters"
+    },
+    "status": {
+      "running": "en cours",
+      "succeeded": "réussie",
+      "failed": "échec",
+      "stopped": "arrêtée",
+      "waiting": "en attente",
+      "not_run": "non menée",
+      "queued": "en file",
+      "ok": "ok",
+      "refused": "refusée",
+      "timed_out": "hors délai",
+      "cancelled": "annulée"
+    },
+    "step": {
+      "name": "Nom de l'étape {{n}}",
+      "namePlaceholder": "Étape {{n}}",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "remove": "Retirer l'étape",
+      "kind": "Agit sur",
+      "action": "Action",
+      "chooseAction": "Choisir une action",
+      "targets": "Cibles",
+      "targetsMode": "Choix des cibles",
+      "modes": {
+        "pick": "Choisir",
+        "filterset": "Filterset",
+        "sameAs": "Comme une étape"
+      },
+      "addTarget": "Ajouter : {{kind}}",
+      "removeTarget": "Retirer {{name}}",
+      "noMatch": "Aucun résultat",
+      "filterset": "Filterset",
+      "chooseFilterset": "Choisir un filterset",
+      "sameAsStep": "Étape dont reprendre les cibles",
+      "sameAsOption": "Étape {{n}} · {{name}}",
+      "matches_one": "{{count}} cible maintenant",
+      "matches_other": "{{count}} cibles maintenant",
+      "rid": "Ressources",
+      "ridPlaceholder": "toutes",
+      "ridHint": "vide pour toutes, ou des rid séparés par des virgules",
+      "pace": "Rythme",
+      "paces": {
+        "all": "Toutes à la fois",
+        "one": "Une par une",
+        "batch": "Par lots"
+      },
+      "batchUnit": "à la fois",
+      "timeout": "Délai",
+      "timeoutHint": "minutes ; 0 pour aucun. Une cible encore en cours fait alors échouer l'étape."
+    },
+    "check": {
+      "title": "Étape {{n}} · cibles maintenant",
+      "checking": "vérification…",
+      "none": "Rien à vérifier pour l'instant.",
+      "ready_one": "{{count}} prête",
+      "ready_other": "{{count}} prêtes",
+      "refused_one": "{{count}} serait refusée",
+      "refused_other": "{{count}} seraient refusées",
+      "targetReady": "prête",
+      "targetRefused": "refusée",
+      "problems_one": "{{count}} problème dans le plan : une exécution échouerait.",
+      "problems_other": "{{count}} problèmes dans le plan : une exécution échouerait.",
+      "hint": "Vérifié comme la file d'actions le fera à l'exécution. Un filterset est résolu à nouveau au démarrage, et ses cibles gardées pour toute l'exécution."
+    },
+    "confirm": {
+      "title": "Exécuter {{name}}",
+      "summary_one": "{{steps}} étapes, {{count}} action en tout, une étape après l'autre :",
+      "summary_other": "{{steps}} étapes, {{count}} actions en tout, une étape après l'autre :",
+      "targets_one": "{{count}} cible",
+      "targets_other": "{{count}} cibles",
+      "disruptive": "interrompt ce qui tourne",
+      "rule": "L'exécution s'arrête à la première étape qui échoue : les suivantes ne sont pas menées.",
+      "typeName": "Tapez {{name}} pour confirmer",
+      "start": "Lancer l'exécution",
+      "starting": "Lancement…"
+    },
+    "runs": {
+      "title": "Exécutions",
+      "empty": "Aucune exécution pour l'instant.",
+      "recent": "Exécutions récentes",
+      "status": "État",
+      "steps": "Étapes faites",
+      "started": "Démarrée",
+      "duration": "Durée",
+      "message": "Message"
+    },
+    "run": {
+      "stepOf": "étape {{n}} sur {{count}}",
+      "startedBy": "lancée par {{by}}",
+      "stop": "Arrêter l'exécution",
+      "stopping": "Arrêt…",
+      "stopQuestion": "Arrêter cette exécution ?",
+      "stopDetails": "Les actions encore en file sont annulées ; celles qu'un agent mène déjà se terminent, et leurs résultats sont gardés.",
+      "again": "Exécuter à nouveau",
+      "resume": "Reprendre à l'étape {{n}}",
+      "resumeWait": "Une action tourne encore : attendez sa fin",
+      "failedAt": "Arrêtée à l'étape {{n}} :",
+      "stoppedAt": "Arrêtée pendant l'étape {{n}} :",
+      "notRun_one": "L'étape {{steps}} n'a pas été menée.",
+      "notRun_other": "Les étapes {{steps}} n'ont pas été menées.",
+      "stillRunning": "Une action tourne encore sur un agent : son résultat sera enregistré.",
+      "stepLabel": "Étape {{n}}",
+      "okOf": "{{ok}} sur {{count}} ok",
+      "target": "Cible",
+      "ret": "Retour",
+      "output": "Sortie",
+      "detailsTitle": "Étape {{n}} · {{target}}",
+      "action": "Action",
+      "queued": "En file",
+      "ended": "Terminée"
     }
   }
 }

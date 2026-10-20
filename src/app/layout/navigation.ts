@@ -13,6 +13,8 @@ import type { ObjectKind } from "@/components/opensvc/ObjectIcon";
 export type MenuId =
   | "view-dashboard"
   | "view-ai"
+  | "orch-workflows"
+  | "orch-runs"
   | "view-nodes"
   | "view-clusters"
   | "view-services"
@@ -97,7 +99,9 @@ export interface NavEntry {
     | "/compliance/status"
     | "/compliance/logs"
     | "/compliance/designer"
-    | "/compliance/attachments";
+    | "/compliance/attachments"
+    | "/orchestrations"
+    | "/orchestrations/runs";
   /**
    * The key of the entry for the menu entries a group hides
    * (`/groups/{id}/hidden_menu_entries`): the id of the entry of the historical
@@ -226,6 +230,29 @@ export const NAV_CATEGORIES: NavCategory[] = [
         icon: "form",
       },
       { to: "/requests/all", menuId: "req-all", labelKey: "nav.allRequests", icon: "form" },
+    ],
+  },
+  {
+    key: "orchestration",
+    labelKey: "nav.categories.orchestration",
+    view: "operator",
+    entries: [
+      // Manager only, as the api: a plan acts on any object of the estate.
+      {
+        to: "/orchestrations",
+        menuId: "orch-workflows",
+        labelKey: "nav.orchestrations",
+        icon: "orchestration",
+        exact: true,
+        privileges: ["Manager"],
+      },
+      {
+        to: "/orchestrations/runs",
+        menuId: "orch-runs",
+        labelKey: "nav.orchestrationRuns",
+        icon: "orchestration",
+        privileges: ["Manager"],
+      },
     ],
   },
   {

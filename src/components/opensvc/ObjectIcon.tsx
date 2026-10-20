@@ -72,7 +72,8 @@ export type ObjectKind =
   | "designer"
   | "claimMapping"
   | "fieldConstraint"
-  | "compAttachment";
+  | "compAttachment"
+  | "orchestration";
 
 /**
  * Pictogram and tint of an object kind. The same vocabulary in the menu, in panel
@@ -96,6 +97,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   resource: { Icon: HashIcon, className: "text-icon-service" },
   // The gear of the historical `action16` class, in the green of the services.
   action: { Icon: GearIcon, className: "text-icon-service" },
+  // An orchestration: steps of agent actions, one after the other.
+  orchestration: { Icon: ListChecksIcon, className: "text-icon-service" },
   network: { Icon: NetworkIcon, className: "text-icon-network" },
   disk: { Icon: DatabaseIcon, className: "text-icon-disk" },
   app: { Icon: AsteriskIcon, className: "text-icon-app" },

@@ -17,6 +17,10 @@ import { SwitchesPage } from "@/features/switches/SwitchesPage";
 import { MetricsPage } from "@/features/metrics/MetricsPage";
 import { ReportsPage } from "@/features/reports/ReportsPage";
 import { ReportReaderPage } from "@/features/report-reader/ReportReaderPage";
+import { OrchestrationsPage } from "@/features/orchestrations/OrchestrationsPage";
+import { OrchestrationEditorPage } from "@/features/orchestrations/OrchestrationEditorPage";
+import { RunsPage } from "@/features/orchestrations/RunsPage";
+import { RunPage } from "@/features/orchestrations/RunPage";
 import { parseReaderSearch } from "@/features/report-reader/reader-search";
 import { ChartsPage } from "@/features/charts/ChartsPage";
 import { ClustersPage } from "@/features/clusters/ClustersPage";
@@ -152,6 +156,31 @@ const statReportRoute = createRoute({
   path: "/stats/reports/$reportId",
   component: ReportReaderPage,
   validateSearch: parseReaderSearch,
+});
+
+// Orchestration: the plans of agent actions, their editor, and their runs.
+const orchestrationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/orchestrations",
+  component: OrchestrationsPage,
+});
+
+const orchestrationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/orchestrations/$orchestrationId",
+  component: OrchestrationEditorPage,
+});
+
+const orchestrationRunsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/orchestrations/runs",
+  component: RunsPage,
+});
+
+const orchestrationRunRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/orchestrations/runs/$runId",
+  component: RunPage,
 });
 
 const metricsRoute = createRoute({
@@ -442,6 +471,10 @@ const routeTree = rootRoute.addChildren([
   complianceAttachmentsRoute,
   designerRoute,
   actionsRoute,
+  orchestrationsRoute,
+  orchestrationRoute,
+  orchestrationRunsRoute,
+  orchestrationRunRoute,
   profileRoute,
 ]);
 
