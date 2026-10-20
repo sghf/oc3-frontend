@@ -5,7 +5,8 @@ import { api } from "@/lib/api/client";
 import { DetailContent, type DetailGroup } from "@/components/opensvc/DetailPanel";
 import { linkedField } from "@/components/opensvc/linked-field";
 import { TeamLink } from "@/features/groups/TeamLink";
-import { NODE_RELATED_TABS } from "./related/node-related";
+import { NODE_RELATED_TABS, NODE_TAB_GROUPS } from "./related/node-related";
+import { useSearch } from "@tanstack/react-router";
 import { NodeActionsMenu } from "./NodeActionsMenu";
 import { ObjectTags } from "@/components/opensvc/ObjectTags";
 import { OsLogo } from "@/components/opensvc/OsLogo";
@@ -269,7 +270,8 @@ const PROPS = GROUPS.flatMap((group) => group.fields.map((f) => f.prop)).join(",
 
 /**
  * Detail of a node: its properties, then its related data, one tab each
- * (`NODE_RELATED_TABS`). The open tab lives in the URL (`tab`), held by the view.
+ * (`NODE_RELATED_TABS`), gathered in groups (`NODE_TAB_GROUPS`). The open tab lives
+ * in the URL (`tab`), held by the view.
  */
 export function NodeDetailPanel({
   nodeId,
@@ -285,6 +287,8 @@ export function NodeDetailPanel({
   onTabChange: (tab: string | undefined) => void;
 }) {
   const { t } = useTranslation();
+  // The category of the former Inventory tab, which links of before its split name.
+  const search: { diff?: unknown } = useSearch({ strict: false });
   const queryClient = useQueryClient();
   const {
     data: node,
@@ -335,7 +339,8 @@ export function NodeDetailPanel({
       onClose={onClose}
       objectId={nodeId}
       tabs={NODE_RELATED_TABS}
-      tab={tab}
+      groups={NODE_TAB_GROUPS}
+      tab={currentTab(tab, search.diff)}
       onTabChange={onTabChange}
       propertiesFamily="node"
       label={t("nodes.related.label")}
@@ -367,4 +372,16 @@ export function NodeDetailPanel({
       />
     </RelatedTabsPanel>
   );
+}
+
+/** The categories the Inventory tab held, a tab each since. */
+const INVENTORY_TABS = ["hardware", "networks", "storage", "packages"];
+
+/**
+ * The tab to open: a link of before the split of the Inventory tab
+ * (`tab=inventory`, its category in `diff`) opens that category, hardware by default.
+ */
+function currentTab(tab: string | undefined, diff: unknown): string | undefined {
+  if (tab !== "inventory") return tab;
+  return INVENTORY_TABS.find((key) => key === diff) ?? "hardware";
 }

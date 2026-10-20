@@ -17,6 +17,8 @@ import {
   SERVICE_ACTIONS_LIMIT,
   SERVICE_ACTIONS_PERIODS,
   SERVICE_ACTIONS_TIMELINE_LIMIT,
+  useNodeActions,
+  useNodeUnackedActionErrors,
   useServiceActions,
   useUnackedActionErrors,
 } from "./queries";
@@ -32,21 +34,32 @@ import { ServiceActionsTimeline } from "./ServiceActionsTimeline";
  * agent's scheduler ran it, and the acknowledgement of a failure. Selecting an
  * action, from either, outlines it in the timeline and shows under the list the
  * lines the agent wrote during it.
+ *
+ * Without `svcId`, the actions of the node `nodeId`, of every service, as the
+ * historical node actions tab (`table_actions_node`): a service column in place of
+ * the node's, a timeline track per service.
  */
 export function ServiceActions({
   svcId,
   nodeId,
   locale,
 }: {
-  svcId: string;
-  /** The node of an instance: its actions only, without the node column. */
+  /** The service; none for the actions of the node `nodeId`, of every service. */
+  svcId?: string;
+  /** The node of an instance, or the node of the tab: its actions only, without the node column. */
   nodeId?: string;
   locale: string;
 }) {
   const { t } = useTranslation();
   const [days, setDays] = useState<number>(SERVICE_ACTIONS_DEFAULT_DAYS);
-  const actions = useServiceActions(svcId, days, nodeId);
-  const unacked = useUnackedActionErrors(svcId, nodeId);
+  const ofNode = svcId === undefined;
+  // Both asked, one of them only enabled: hooks are called whatever the scope.
+  const serviceActions = useServiceActions(svcId, days, nodeId);
+  const nodeActions = useNodeActions(ofNode ? nodeId : undefined, days);
+  const actions = ofNode ? nodeActions : serviceActions;
+  const serviceUnacked = useUnackedActionErrors(svcId, nodeId);
+  const nodeUnacked = useNodeUnackedActionErrors(ofNode ? nodeId : undefined);
+  const unacked = ofNode ? nodeUnacked : serviceUnacked;
   const unackedCount = unacked.data?.length ?? 0;
   const all = actions.data?.rows ?? [];
   const rows = all.slice(0, SERVICE_ACTIONS_LIMIT);
@@ -58,6 +71,15 @@ export function ServiceActions({
       key: "begin",
       label: t("services.actions.fields.begin"),
       render: (row) => <DateTime value={row.begin} locale={locale} />,
+    },
+    {
+      key: "services.svcname",
+      label: t("services.actions.fields.service"),
+      render: (row) => (
+        <CrossLink kind="service" id={row.svc_id}>
+          {row["services.svcname"] ?? row.svc_id}
+        </CrossLink>
+      ),
     },
     {
       key: "nodes.nodename",
@@ -74,8 +96,11 @@ export function ServiceActions({
     {
       key: "action",
       label: t("services.actions.fields.action"),
+      // Its targets wrap: with the service column of a node, the table would
+      // otherwise widen the panel.
+      wrap: true,
       render: (row) => (
-        <span className="flex items-center gap-1.5">
+        <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
           <ScheduledMark cron={row.cron} />
           <span>{row.action}</span>
           <ActionTargets subset={row.subset} rid={row.rid} />
@@ -103,7 +128,10 @@ export function ServiceActions({
       render: (row) =>
         row.ack === 1 ? (
           <span title={row.acked_comment ?? undefined}>
-            {t("services.actions.acked", { by: row.acked_by ?? "" })}
+            {t("services.actions.acked", {
+              // An address may break after its @ rather than hold the column wide.
+              by: (row.acked_by ?? "").replace("@", "@\u200b"),
+            })}
           </span>
         ) : null,
     },
@@ -125,11 +153,12 @@ export function ServiceActions({
     },
   ];
 
-  // An instance names its node already.
-  const columns =
-    nodeId === undefined
-      ? allColumns
-      : allColumns.filter((column) => column.key !== "nodes.nodename");
+  // An instance, or a node, names its node already; a service, its service.
+  const columns = allColumns.filter(
+    (column) =>
+      !(column.key === "nodes.nodename" && nodeId !== undefined) &&
+      !(column.key === "services.svcname" && !ofNode),
+  );
 
   return (
     <div className="flex flex-col gap-3">
@@ -168,7 +197,11 @@ export function ServiceActions({
               : [
                   {
                     id: String(row.id),
-                    name: [row.action, row["nodes.nodename"], row.begin]
+                    name: [
+                      row.action,
+                      ofNode ? row["services.svcname"] : row["nodes.nodename"],
+                      row.begin,
+                    ]
                       .filter((part) => part !== undefined && part !== null && part !== "")
                       .join(" · "),
                   },
@@ -179,6 +212,7 @@ export function ServiceActions({
       {all.length > 0 && (
         <ServiceActionsTimeline
           actions={all}
+          trackBy={ofNode ? "service" : "node"}
           days={days}
           locale={locale}
           selectedId={selectedId}
@@ -216,6 +250,7 @@ export function ServiceActions({
       {selected !== undefined && (
         <ActionLog
           action={selected}
+          ofNode={ofNode}
           locale={locale}
           onClose={() => {
             setSelectedId(undefined);
@@ -229,10 +264,13 @@ export function ServiceActions({
 /** The log lines of an action, as the agent wrote them, its colours rendered. */
 function ActionLog({
   action,
+  ofNode,
   locale,
   onClose,
 }: {
   action: AgentAction;
+  /** The tab of a node: the action is named by its service rather than its node. */
+  ofNode: boolean;
   locale: string;
   onClose: () => void;
 }) {
@@ -253,7 +291,7 @@ function ActionLog({
           {t("services.actions.logTitle", { action: action.action ?? "" })}
         </h3>
         <span className="text-ink-muted">
-          {action["nodes.nodename"] ?? action.node_id} ·{" "}
+          {ofNode ? action["services.svcname"] : (action["nodes.nodename"] ?? action.node_id)} ·{" "}
           <DateTime value={action.begin} locale={locale} />
         </span>
         <button

@@ -4,7 +4,7 @@ import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { DetailContent, type DetailGroup } from "@/components/opensvc/DetailPanel";
 import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
-import { INSTANCE_RELATED_TABS } from "./instance-related";
+import { INSTANCE_RELATED_TABS, INSTANCE_TAB_GROUPS } from "./instance-related";
 import { statusField } from "@/components/opensvc/status-field";
 import { StatusTimeline } from "@/components/opensvc/StatusTimeline";
 import { linkedField } from "@/components/opensvc/linked-field";
@@ -180,6 +180,7 @@ export function InstanceDetailPanel({
       onClose={onClose}
       objectId={instanceId}
       tabs={INSTANCE_RELATED_TABS}
+      groups={INSTANCE_TAB_GROUPS}
       tab={tab}
       onTabChange={onTabChange}
       propertiesFamily="service"

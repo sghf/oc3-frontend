@@ -43,7 +43,25 @@ export interface RelatedTab {
    * the one on display: a costly count may wait for it.
    */
   useSummary: (id: string | undefined, active: boolean) => RelatedSummary;
+  /** What the tab holds, in a few words: the tooltip of its tile in a grouped panel. */
+  descriptionKey?: string;
+  /**
+   * No counter on its tile in a grouped panel: a count of what the tab lists
+   * (packages, log entries…) that tells nothing about the state of the object.
+   */
+  hideCount?: boolean;
   render: (id: string, locale: string) => ReactNode;
+}
+
+/**
+ * Tabs gathered in one box of the panel's tiles. The tabs keep their keys, which
+ * the URL names.
+ */
+export interface RelatedTabGroup {
+  key: string;
+  labelKey: string;
+  /** The keys of its tabs, in display order; those the panel lacks are skipped. */
+  tabs: readonly string[];
 }
 
 /** Key of the properties tab: absent from the URL, it is the default tab. */

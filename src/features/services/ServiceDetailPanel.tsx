@@ -20,7 +20,7 @@ import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
 import { StatusTimeline } from "@/components/opensvc/StatusTimeline";
 import { ServiceActionsMenu } from "./ServiceActionsMenu";
 import { useServiceTags, useUnackedActionErrors } from "./related/queries";
-import { SERVICE_RELATED_TABS } from "./related/service-related";
+import { SERVICE_RELATED_TABS, SERVICE_TAB_GROUPS } from "./related/service-related";
 import { formatDateTime } from "@/lib/format";
 
 type ServiceRow = components["schemas"]["ServiceRow"];
@@ -166,7 +166,8 @@ const PROPS = [
 
 /**
  * Detail of a service: its properties, then its related data, one tab each
- * (`SERVICE_RELATED_TABS`). The open tab lives in the URL (`tab`), held by the view.
+ * (`SERVICE_RELATED_TABS`), gathered in groups (`SERVICE_TAB_GROUPS`). The open tab
+ * lives in the URL (`tab`), held by the view.
  */
 export function ServiceDetailPanel({
   svcId,
@@ -220,6 +221,7 @@ export function ServiceDetailPanel({
       onClose={onClose}
       objectId={svcId}
       tabs={SERVICE_RELATED_TABS}
+      groups={SERVICE_TAB_GROUPS}
       tab={tab}
       onTabChange={onTabChange}
       propertiesFamily="service"

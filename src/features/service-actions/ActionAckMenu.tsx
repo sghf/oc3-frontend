@@ -39,6 +39,7 @@ export function ActionAckMenu({ actions }: { actions: ActionTarget[] }) {
       void queryClient.invalidateQueries({ queryKey: ["alerts"] });
       // The Actions tabs of the service and instance panels, and their counts.
       void queryClient.invalidateQueries({ queryKey: ["service"] });
+      void queryClient.invalidateQueries({ queryKey: ["node"] });
       void queryClient.invalidateQueries({ queryKey: ["instance"] });
       void queryClient.invalidateQueries({ queryKey: ["instances"] });
     },

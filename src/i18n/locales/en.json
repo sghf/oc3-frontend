@@ -223,13 +223,27 @@
       "alerts": "Alerts",
       "networks": "Networks",
       "packages": "Packages",
-      "inventory": "Inventory",
       "sysreport": "Sysreport",
       "compliance": "Compliance",
       "logs": "Logs",
       "stats": "Stats",
       "checks": "Checks",
-      "services": "Services"
+      "services": "Services",
+      "actions": "Actions",
+      "descriptions": {
+        "services": "Instances hosted on the node",
+        "actions": "What the agents ran on it",
+        "hardware": "Components the agent inventoried",
+        "networks": "Addresses and their networks",
+        "storage": "Adapters and disks",
+        "packages": "Installed software",
+        "sysreport": "Files changed over time",
+        "stats": "Performance over time",
+        "alerts": "Open alerts",
+        "checks": "Values against their thresholds",
+        "compliance": "Modules checked and fixed",
+        "logs": "Collector log of the node"
+      }
     },
     "actions": {
       "open": "Actions",
@@ -534,18 +548,11 @@
       "noMatch": "No package matches the search."
     },
     "inventory": {
-      "categoriesLabel": "Inventory categories",
       "categories": {
         "hardware": "Hardware",
         "networks": "Networks",
         "storage": "Storage",
         "packages": "Packages"
-      },
-      "chip": {
-        "count_one": "{{count}} entry",
-        "count_other": "{{count}} entries",
-        "pending": "loading",
-        "error": "could not be loaded"
       }
     },
     "sysreport": {
@@ -945,7 +952,15 @@
       "nodediff": "Nodes Differences",
       "resources": "Resource status",
       "logs": "Logs",
-      "actions": "Actions"
+      "actions": "Actions",
+      "descriptions": {
+        "resources": "State of each resource on each node",
+        "storage": "Disks of the service",
+        "nodediff": "How its nodes differ",
+        "actions": "What the agents ran on it",
+        "compliance": "Modules checked and fixed",
+        "logs": "Collector log of the service"
+      }
     },
     "actions": {
       "open": "Actions",
@@ -1072,7 +1087,8 @@
         "status": "Status",
         "time": "Duration",
         "ack": "Acknowledged",
-        "log": "Log"
+        "log": "Log",
+        "service": "Service"
       },
       "acked": "by {{by}}",
       "showLog": "Log",
@@ -1096,7 +1112,9 @@
         "end": "End",
         "showTable": "Show as a table",
         "selectHint": "Use the arrow keys to step through the actions, Enter to open the log of one.",
-        "capped": "Only the latest {{count}} actions are drawn: choose a shorter period to see them all."
+        "capped": "Only the latest {{count}} actions are drawn: choose a shorter period to see them all.",
+        "titleByService_one": "Actions of the last 24 hours, by service",
+        "titleByService_other": "Actions of the last {{count}} days, by service"
       },
       "empty_one": "No action in the last 24 hours.",
       "empty_other": "No action in the last {{count}} days.",
@@ -1894,7 +1912,14 @@
       "noun_other": "{{count}} instances"
     },
     "actionErrors_one": "{{count}} unacknowledged action error in the last day",
-    "actionErrors_other": "{{count}} unacknowledged action errors in the last day"
+    "actionErrors_other": "{{count}} unacknowledged action errors in the last day",
+    "related": {
+      "descriptions": {
+        "resources": "State of each resource on this node",
+        "actions": "What the agent ran for it on this node",
+        "compliance": "Modules checked and fixed on this node"
+      }
+    }
   },
   "obsolescence": {
     "title": "Obsolescence",
@@ -2252,7 +2277,13 @@
     "properties": "Properties",
     "count_one": "{{count}} item",
     "count_other": "{{count}} items",
-    "notApplicable": "n/a"
+    "notApplicable": "n/a",
+    "groups": {
+      "workload": "Workload",
+      "health": "Health",
+      "configuration": "Configuration",
+      "overview": "Overview"
+    }
   },
   "storage": {
     "san": {

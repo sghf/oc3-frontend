@@ -223,13 +223,27 @@
       "alerts": "Alertes",
       "networks": "Réseaux",
       "packages": "Paquets",
-      "inventory": "Inventaire",
       "sysreport": "Sysreport",
       "compliance": "Conformité",
       "logs": "Journal",
       "stats": "Statistiques",
       "checks": "Contrôles",
-      "services": "Services"
+      "services": "Services",
+      "actions": "Actions",
+      "descriptions": {
+        "services": "Instances hébergées sur le nœud",
+        "actions": "Ce que les agents y ont lancé",
+        "hardware": "Composants inventoriés par l'agent",
+        "networks": "Adresses et leurs réseaux",
+        "storage": "Adaptateurs et disques",
+        "packages": "Logiciels installés",
+        "sysreport": "Fichiers modifiés dans le temps",
+        "stats": "Performances dans le temps",
+        "alerts": "Alertes ouvertes",
+        "checks": "Valeurs face à leurs seuils",
+        "compliance": "Modules vérifiés et corrigés",
+        "logs": "Journal du collector pour le nœud"
+      }
     },
     "actions": {
       "open": "Actions",
@@ -534,18 +548,11 @@
       "noMatch": "Aucun paquet ne correspond à la recherche."
     },
     "inventory": {
-      "categoriesLabel": "Catégories de l'inventaire",
       "categories": {
         "hardware": "Matériel",
         "networks": "Réseaux",
         "storage": "Stockage",
         "packages": "Paquets"
-      },
-      "chip": {
-        "count_one": "{{count}} entrée",
-        "count_other": "{{count}} entrées",
-        "pending": "chargement",
-        "error": "n'a pas pu être chargé"
       }
     },
     "sysreport": {
@@ -945,7 +952,15 @@
       "nodediff": "Différences entre nœuds",
       "resources": "Statut des ressources",
       "logs": "Journal",
-      "actions": "Actions"
+      "actions": "Actions",
+      "descriptions": {
+        "resources": "État de chaque ressource sur chaque nœud",
+        "storage": "Disques du service",
+        "nodediff": "Ce qui diffère entre ses nœuds",
+        "actions": "Ce que les agents y ont lancé",
+        "compliance": "Modules vérifiés et corrigés",
+        "logs": "Journal du collector pour le service"
+      }
     },
     "actions": {
       "open": "Actions",
@@ -1072,7 +1087,8 @@
         "status": "État",
         "time": "Durée",
         "ack": "Acquittée",
-        "log": "Journal"
+        "log": "Journal",
+        "service": "Service"
       },
       "acked": "par {{by}}",
       "showLog": "Journal",
@@ -1096,7 +1112,9 @@
         "end": "Fin",
         "showTable": "Afficher en tableau",
         "selectHint": "Les flèches parcourent les actions, Entrée ouvre le journal de l'une d'elles.",
-        "capped": "Seules les {{count}} dernières actions sont dessinées : choisissez une période plus courte pour les voir toutes."
+        "capped": "Seules les {{count}} dernières actions sont dessinées : choisissez une période plus courte pour les voir toutes.",
+        "titleByService_one": "Actions des dernières 24 heures, par service",
+        "titleByService_other": "Actions des {{count}} derniers jours, par service"
       },
       "empty_one": "Aucune action ces dernières 24 heures.",
       "empty_other": "Aucune action ces {{count}} derniers jours.",
@@ -1894,7 +1912,14 @@
       "noun_other": "{{count}} instances"
     },
     "actionErrors_one": "{{count}} erreur d'action non acquittée sur le dernier jour",
-    "actionErrors_other": "{{count}} erreurs d'action non acquittées sur le dernier jour"
+    "actionErrors_other": "{{count}} erreurs d'action non acquittées sur le dernier jour",
+    "related": {
+      "descriptions": {
+        "resources": "État de chaque ressource sur ce nœud",
+        "actions": "Ce que l'agent y a lancé sur ce nœud",
+        "compliance": "Modules vérifiés et corrigés sur ce nœud"
+      }
+    }
   },
   "obsolescence": {
     "title": "Obsolescence",
@@ -2252,7 +2277,13 @@
     "properties": "Propriétés",
     "count_one": "{{count}} élément",
     "count_other": "{{count}} éléments",
-    "notApplicable": "n/a"
+    "notApplicable": "n/a",
+    "groups": {
+      "workload": "Activité",
+      "health": "Santé",
+      "configuration": "Configuration",
+      "overview": "Vue d’ensemble"
+    }
   },
   "storage": {
     "san": {

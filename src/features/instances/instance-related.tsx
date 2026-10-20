@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { ColumnFamilyIcon } from "@/components/opensvc/ColumnFamily";
-import type { RelatedTab } from "@/components/opensvc/related-tabs";
+import type { RelatedTab, RelatedTabGroup } from "@/components/opensvc/related-tabs";
 import { resourceStatusSummary } from "@/features/services/related/resource-status";
 import { actionStatusSummary } from "@/features/services/related/action-status";
 import { ServiceActions } from "@/features/services/related/ServiceActions";
@@ -17,6 +17,7 @@ export const INSTANCE_RELATED_TABS: RelatedTab[] = [
   {
     key: "resources",
     labelKey: "services.related.resources",
+    descriptionKey: "instances.related.descriptions.resources",
     icon: <ColumnFamilyIcon family="resource" />,
     useSummary: (instanceId) => {
       const { t } = useTranslation();
@@ -27,6 +28,7 @@ export const INSTANCE_RELATED_TABS: RelatedTab[] = [
   {
     key: "actions",
     labelKey: "services.related.actions",
+    descriptionKey: "instances.related.descriptions.actions",
     // The gear of the historical actions tab (`action16`), as on the service.
     icon: <GearIcon className="h-4 w-4 shrink-0 text-icon-service" />,
     // The actions of the service on the node of the instance. The agent does not
@@ -46,6 +48,7 @@ export const INSTANCE_RELATED_TABS: RelatedTab[] = [
   {
     key: "compliance",
     labelKey: "nodes.related.compliance",
+    descriptionKey: "instances.related.descriptions.compliance",
     icon: <ColumnFamilyIcon family="moduleset" />,
     // The checks of the service on the node of the instance: the containers of a
     // node share them, as the agent files them by node.
@@ -74,5 +77,19 @@ export const INSTANCE_RELATED_TABS: RelatedTab[] = [
         <InstanceCompliance svcId={key.svcId} nodeId={key.nodeId} locale={locale} />
       );
     },
+  },
+];
+
+/** The tabs of the instance after its properties, grouped as the service's. */
+export const INSTANCE_TAB_GROUPS: RelatedTabGroup[] = [
+  {
+    key: "workload",
+    labelKey: "related.groups.workload",
+    tabs: ["resources", "actions"],
+  },
+  {
+    key: "configuration",
+    labelKey: "related.groups.configuration",
+    tabs: ["compliance"],
   },
 ];

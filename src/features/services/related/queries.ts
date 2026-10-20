@@ -346,6 +346,18 @@ function actionsSince(days: number): string {
 }
 
 /**
+ * The actions a tab shows: those of a service, on one of its nodes with `nodeId`
+ * (an instance), or those of a node, of every service.
+ */
+type ActionScope = { svcId: string; nodeId?: string } | { svcId?: undefined; nodeId: string };
+
+/** The cache key of the actions of a scope, under the object's: live updates reload it. */
+function scopeKey(scope: ActionScope | undefined, ...rest: string[]): unknown[] {
+  if (scope?.svcId !== undefined) return ["service", scope.svcId, ...rest, scope.nodeId ?? ""];
+  return ["node", scope?.nodeId, ...rest];
+}
+
+/**
  * The filters of the tab: the actions themselves (`log_type` "status"), not their
  * log lines, of the period covered.
  */
@@ -354,34 +366,124 @@ function actionFilters(days: number, nodeId?: string): string[] {
   return nodeId === undefined ? filters : [...filters, `node_id:eq:${nodeId}`];
 }
 
+interface ActionQuery {
+  props: string;
+  limit?: number;
+  stats?: string;
+  filter: string[];
+}
+
 /**
- * The actions the agents ran on the service over the last `days`, the latest
- * first, up to `SERVICE_ACTIONS_TIMELINE_LIMIT`: the timeline draws them, the list
- * shows the latest of them.
+ * Reads the actions of a scope: those of a service through its own route, those
+ * of a node through the list of every action, filtered on it.
  */
-export function useServiceActions(svcId: string | undefined, days: number, nodeId?: string) {
+async function readActions(scope: ActionScope, query: ActionQuery, signal: AbortSignal) {
+  const filter =
+    scope.svcId === undefined ? [...query.filter, `node_id:eq:${scope.nodeId}`] : query.filter;
+  const { data, error } =
+    scope.svcId === undefined
+      ? await api.GET("/services_actions", { signal, params: { query: { ...query, filter } } })
+      : await api.GET("/services/{svc_id}/actions", {
+          signal,
+          params: { path: { svc_id: scope.svcId }, query: { ...query, filter } },
+        });
+  if (error !== undefined) throw new Error(problemText(error));
+  return data;
+}
+
+/** The node of a service scope, as its filters name it; none for a node scope, filtered whole. */
+function serviceNode(scope: ActionScope): string | undefined {
+  return scope.svcId === undefined ? undefined : scope.nodeId;
+}
+
+function useScopedActions(scope: ActionScope | undefined, days: number) {
   return useQuery({
-    queryKey: ["service", svcId, "actions", nodeId ?? "", actionsSince(days)],
-    enabled: svcId !== undefined,
+    queryKey: scopeKey(scope, "actions", actionsSince(days)),
+    enabled: scope !== undefined,
     queryFn: async ({ signal }) => {
-      const { data, error } = await api.GET("/services/{svc_id}/actions", {
-        signal,
-        params: {
-          path: { svc_id: svcId ?? "" },
-          query: {
-            props:
-              "id,svc_id,node_id,nodes.nodename,action,rid,subset,status,begin,end,time,cron,sid,pid,command,ack,acked_by,acked_date,acked_comment",
-            // One more than drawn: whether older actions remain.
-            limit: SERVICE_ACTIONS_TIMELINE_LIMIT + 1,
-            filter: actionFilters(days, nodeId),
-          },
+      if (scope === undefined) return toPage<ServiceAction>([], undefined, 0);
+      const data = await readActions(
+        scope,
+        {
+          props:
+            "id,svc_id,services.svcname,node_id,nodes.nodename,action,rid,subset,status,begin,end,time,cron,sid,pid,command,ack,acked_by,acked_date,acked_comment",
+          // One more than drawn: whether older actions remain.
+          limit: SERVICE_ACTIONS_TIMELINE_LIMIT + 1,
+          filter: actionFilters(days, serviceNode(scope)),
         },
-      });
-      if (error !== undefined) throw new Error(problemText(error));
+        signal,
+      );
       const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
       return toPage(rows, data.meta, SERVICE_ACTIONS_TIMELINE_LIMIT);
     },
   });
+}
+
+function useScopedActionStats(scope: ActionScope | undefined) {
+  return useQuery({
+    queryKey: scopeKey(scope, "actions", "stats", actionsSince(SERVICE_ACTIONS_DAYS)),
+    enabled: scope !== undefined,
+    queryFn: async ({ signal }) => {
+      if (scope === undefined) return toValueStats(undefined, undefined, "status");
+      const data = await readActions(
+        scope,
+        {
+          props: "status",
+          stats: "1",
+          filter: actionFilters(SERVICE_ACTIONS_DAYS, serviceNode(scope)),
+        },
+        signal,
+      );
+      return toValueStats(data.data, data.meta, "status");
+    },
+  });
+}
+
+function useScopedUnackedErrors(scope: ActionScope | undefined) {
+  return useQuery({
+    queryKey: scopeKey(scope, "unackedActionErrors"),
+    enabled: scope !== undefined,
+    queryFn: async ({ signal }) => {
+      if (scope === undefined) return [];
+      // The actions themselves, not the lines they logged, which carry a status too.
+      const node = serviceNode(scope);
+      const data = await readActions(
+        scope,
+        {
+          props: "id,action,begin,services.svcname,nodes.nodename",
+          limit: 0,
+          filter: [
+            "log_type:eq:status",
+            "status:err",
+            "ack:!1",
+            ...(node === undefined ? [] : [`node_id:${node}`]),
+          ],
+        },
+        signal,
+      );
+      const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
+      return rows;
+    },
+  });
+}
+
+const serviceScope = (svcId: string | undefined, nodeId?: string): ActionScope | undefined =>
+  svcId === undefined ? undefined : { svcId, nodeId };
+const nodeScope = (nodeId: string | undefined): ActionScope | undefined =>
+  nodeId === undefined ? undefined : { nodeId };
+
+/**
+ * The actions the agents ran on the service over the last `days`, the latest
+ * first, up to `SERVICE_ACTIONS_TIMELINE_LIMIT`: the timeline draws them, the list
+ * shows the latest of them; of one node only, for an instance, with `nodeId`.
+ */
+export function useServiceActions(svcId: string | undefined, days: number, nodeId?: string) {
+  return useScopedActions(serviceScope(svcId, nodeId), days);
+}
+
+/** The actions the agents ran on a node over the last `days`, of every service. */
+export function useNodeActions(nodeId: string | undefined, days: number) {
+  return useScopedActions(nodeScope(nodeId), days);
 }
 
 /**
@@ -389,32 +491,12 @@ export function useServiceActions(svcId: string | undefined, days: number, nodeI
  * shown; of one node only, for an instance, with `nodeId`.
  */
 export function useServiceActionStats(svcId: string | undefined, nodeId?: string) {
-  return useQuery({
-    queryKey: [
-      "service",
-      svcId,
-      "actions",
-      "stats",
-      nodeId ?? "",
-      actionsSince(SERVICE_ACTIONS_DAYS),
-    ],
-    enabled: svcId !== undefined,
-    queryFn: async ({ signal }) => {
-      const { data, error } = await api.GET("/services/{svc_id}/actions", {
-        signal,
-        params: {
-          path: { svc_id: svcId ?? "" },
-          query: {
-            props: "status",
-            stats: "1",
-            filter: actionFilters(SERVICE_ACTIONS_DAYS, nodeId),
-          },
-        },
-      });
-      if (error !== undefined) throw new Error(problemText(error));
-      return toValueStats(data.data, data.meta, "status");
-    },
-  });
+  return useScopedActionStats(serviceScope(svcId, nodeId));
+}
+
+/** The actions of a node over the period, of every service, counted by status. */
+export function useNodeActionStats(nodeId: string | undefined) {
+  return useScopedActionStats(nodeScope(nodeId));
 }
 
 /**
@@ -423,27 +505,10 @@ export function useServiceActionStats(svcId: string | undefined, nodeId?: string
  * properties counted as action errors, and what an acknowledgement clears.
  */
 export function useUnackedActionErrors(svcId: string | undefined, nodeId?: string) {
-  return useQuery({
-    queryKey: ["service", svcId, "unackedActionErrors", nodeId ?? ""],
-    enabled: svcId !== undefined,
-    queryFn: async ({ signal }) => {
-      // The actions themselves, not the lines they logged, which carry a status too.
-      const filter = [
-        "log_type:eq:status",
-        "status:err",
-        "ack:!1",
-        ...(nodeId === undefined ? [] : [`node_id:${nodeId}`]),
-      ];
-      const { data, error } = await api.GET("/services/{svc_id}/actions", {
-        signal,
-        params: {
-          path: { svc_id: svcId ?? "" },
-          query: { props: "id,action,begin,nodes.nodename", limit: 0, filter },
-        },
-      });
-      if (error !== undefined) throw new Error(problemText(error));
-      const rows: ServiceAction[] = Array.isArray(data.data) ? data.data : [];
-      return rows;
-    },
-  });
+  return useScopedUnackedErrors(serviceScope(svcId, nodeId));
+}
+
+/** The failed actions of a node not acknowledged yet, of every service. */
+export function useNodeUnackedActionErrors(nodeId: string | undefined) {
+  return useScopedUnackedErrors(nodeScope(nodeId));
 }
