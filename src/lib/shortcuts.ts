@@ -42,6 +42,7 @@ export function useShortcut(key: string, handler: () => boolean | undefined): vo
 export const SHORTCUTS: readonly { keys: readonly string[]; labelKey: string }[] = [
   { keys: ["/", "Ctrl K"], labelKey: "shortcuts.search" },
   { keys: ["p"], labelKey: "shortcuts.panel" },
+  { keys: ["r"], labelKey: "shortcuts.refresh" },
   { keys: ["n"], labelKey: "shortcuts.menu" },
   { keys: ["v"], labelKey: "shortcuts.menuView" },
   { keys: ["↑ ↓"], labelKey: "shortcuts.menuMove" },

@@ -82,7 +82,8 @@
     "escape": "Close the panel, a list or this help; leave the menu",
     "help": "Show this list",
     "hint": "Single keys act when no field has the focus.",
-    "menuView": "Switch the menu between Operator and Admin"
+    "menuView": "Switch the menu between Operator and Admin",
+    "refresh": "Read the data of the views again"
   },
   "header": {
     "search": "Search the collector",
@@ -3573,13 +3574,16 @@
   },
   "realtime": {
     "paused": "Paused",
-    "pausedHint": "Live updates are off: the views refresh when you navigate, sort or reload.",
+    "pausedHint": "Live updates are off: the views refresh when you navigate, sort or reload, or press r.",
     "turnOff": "Click to turn live updates off.",
     "turnOn": "Click to turn live updates back on.",
     "live": "Live",
     "offline": "Offline",
     "liveHint": "The views follow the collector: changes appear as they happen.",
-    "offlineHint": "Live updates are interrupted. Reconnecting; the views are refreshed once back."
+    "offlineHint": "Live updates are interrupted. Reconnecting; the views are refreshed once back.",
+    "refreshing": "Refreshing…",
+    "refreshed": "Refreshed",
+    "refreshHint": "Press r to read the data again."
   },
   "impersonation": {
     "start": "Impersonate",

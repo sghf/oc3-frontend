@@ -82,7 +82,8 @@
     "escape": "Fermer le panneau, une liste ou cette aide ; quitter le menu",
     "help": "Afficher cette liste",
     "hint": "Les touches simples agissent quand aucun champ n'a le focus.",
-    "menuView": "Passer du menu Opérateur au menu Admin, et inversement"
+    "menuView": "Passer du menu Opérateur au menu Admin, et inversement",
+    "refresh": "Relire les données des vues"
   },
   "header": {
     "search": "Rechercher dans le collector",
@@ -3573,13 +3574,16 @@
   },
   "realtime": {
     "paused": "En pause",
-    "pausedHint": "Mises à jour en direct coupées : les vues se rafraîchissent quand vous naviguez, triez ou rechargez.",
+    "pausedHint": "Mises à jour en direct coupées : les vues se rafraîchissent quand vous naviguez, triez ou rechargez, ou quand vous appuyez sur r.",
     "turnOff": "Cliquer pour couper les mises à jour en direct.",
     "turnOn": "Cliquer pour rétablir les mises à jour en direct.",
     "live": "En direct",
     "offline": "Hors ligne",
     "liveHint": "Les vues suivent le collector : les changements apparaissent au fil de l'eau.",
-    "offlineHint": "Les mises à jour en direct sont interrompues. Reconnexion en cours ; les vues sont rafraîchies au retour."
+    "offlineHint": "Les mises à jour en direct sont interrompues. Reconnexion en cours ; les vues sont rafraîchies au retour.",
+    "refreshing": "Actualisation…",
+    "refreshed": "Actualisé",
+    "refreshHint": "Appuyez sur r pour relire les données."
   },
   "impersonation": {
     "start": "Se faire passer pour",
