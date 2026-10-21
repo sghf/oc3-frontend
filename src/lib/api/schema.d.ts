@@ -1100,6 +1100,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/checks/live/batch": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Apply one change to checks by id, up to 1000: set_thresholds sets
+     *     chk_low and chk_high (a bound not given keeps the one the check has),
+     *     reset_thresholds removes the thresholds set on them, delete deletes them,
+     *     each as its single route does (responsibility for the node, its audit
+     *     entry). The checks of each node concerned are refreshed once for the batch,
+     *     and one change event sent. Requires the CheckExec privilege.
+     */
+    post: operations["PostChecksLiveBatch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/checks/live/{id}": {
     parameters: {
       query?: never;
@@ -3828,6 +3852,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/nodes/delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Delete nodes by id or name, up to 1000, each as DELETE /nodes/{node_id}
+     *     does: its checks (responsibility for the node), its transaction, its
+     *     cascade and its audit entry; a refusal does not stop the others. One change
+     *     event for the batch. Requires the NodeManager privilege.
+     */
+    post: operations["PostNodesDelete"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/nodes/hardware": {
     parameters: {
       query?: never;
@@ -5417,6 +5463,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/services/delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Delete services by id or name, up to 1000, each as DELETE /services/{svc_id}
+     *     does: responsibility for the service, its transaction, its cascade on the
+     *     instances and alerts and its audit entry; a refusal does not stop the
+     *     others. One change event for the batch.
+     */
+    post: operations["PostServicesDelete"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/services/{svc_id}": {
     parameters: {
       query?: never;
@@ -5949,6 +6017,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/services_actions/ack": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Acknowledge failed agent actions, up to 1000, each as
+     *     POST /services_actions/{action_id} does (responsibility for the service, an
+     *     action not failed or acknowledged already skipped, its audit entry), with
+     *     the same comment. The unacknowledged errors of each instance concerned and
+     *     its "action errors" alert are counted once for the batch, and one change
+     *     event sent.
+     */
+    post: operations["PostServicesActionsAck"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/services_actions/{action_id}": {
     parameters: {
       query?: never;
@@ -5987,6 +6079,29 @@ export interface paths {
     post?: never;
     /** @description Delete a service instance. */
     delete: operations["DeleteServicesInstances"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services_instances/delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Delete service instances, up to 1000, each as
+     *     DELETE /services/{svc_id}/instances/{node_id} does: responsibility for the
+     *     service, its transaction and its audit entry; a refusal does not stop the
+     *     others. The id of an outcome is "svc_id@node_id". One change event for the
+     *     batch.
+     */
+    post: operations["PostServicesInstancesDelete"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -6551,6 +6666,10 @@ export interface components {
         message: string;
       }[];
     };
+    ActionsAckInput: {
+      acked_comment?: string;
+      ids: number[];
+    };
     AlertEvent: {
       /** @description The start of the occurrence, "YYYY-MM-DD HH:MM:SS" in the collector time zone. */
       begin: string;
@@ -6808,6 +6927,16 @@ export interface components {
       /** @description Whether the request carries a valid OpenID Connect session */
       session: boolean;
     };
+    /** @description What became of one object of a batch, as its single route would answer */
+    BatchOutcome: {
+      id: string;
+      info: string;
+      /** @description The http status the single route would answer with */
+      status: number;
+    };
+    BatchResult: {
+      data: components["schemas"]["BatchOutcome"][];
+    };
     ChartListResponse: {
       data:
         | components["schemas"]["ChartRow"][]
@@ -6999,6 +7128,15 @@ export interface components {
       chk_high?: number;
       /** Format: int64 */
       chk_low?: number;
+    };
+    ChecksBatchInput: {
+      /** @enum {string} */
+      action: "set_thresholds" | "reset_thresholds" | "delete";
+      /** Format: int64 */
+      chk_high?: number;
+      /** Format: int64 */
+      chk_low?: number;
+      ids: number[];
     };
     ClusterListResponse: {
       data:
@@ -7707,6 +7845,9 @@ export interface components {
     HiddenMenuEntriesResponse: {
       data: string[];
     };
+    IdsInput: {
+      ids: string[];
+    };
     Impersonation: {
       email: string;
       /** @description The groups of the impersonated user. */
@@ -7791,6 +7932,12 @@ export interface components {
       /** @description Its end; for the current period, the last status received. */
       end: string;
       overall: string;
+    };
+    InstancesInput: {
+      instances: {
+        node_id: string;
+        svc_id: string;
+      }[];
     };
     IpListResponse: {
       data:
@@ -12814,6 +12961,34 @@ export interface operations {
         };
       };
       401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostChecksLiveBatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChecksBatchInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of each object, in the order sent */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BatchResult"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
       500: components["responses"]["500"];
     };
   };
@@ -22034,6 +22209,34 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  PostNodesDelete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IdsInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of each object, in the order sent */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BatchResult"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
   GetNodesHardware: {
     parameters: {
       query?: {
@@ -26128,6 +26331,34 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  PostServicesDelete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IdsInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of each object, in the order sent */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BatchResult"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
   GetService: {
     parameters: {
       query?: {
@@ -27886,6 +28117,34 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  PostServicesActionsAck: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ActionsAckInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of each object, in the order sent */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BatchResult"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
   GetServicesAction: {
     parameters: {
       query?: {
@@ -28055,6 +28314,34 @@ export interface operations {
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostServicesInstancesDelete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InstancesInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of each object, in the order sent */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BatchResult"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
       500: components["responses"]["500"];
     };
   };
