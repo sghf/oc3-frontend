@@ -4563,6 +4563,60 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/nodes/{node_id}/wiki": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Node identifier (node_id UUID or nodename) */
+        node_id: string;
+      };
+      cookie?: never;
+    };
+    /**
+     * @description The notes of the node, a wiki page in Markdown: its latest revision
+     *     with its body, null when none was saved, and the list of its
+     *     revisions, the latest first, without their body. writable tells
+     *     whether the caller may save a revision: a Manager, or a user
+     *     responsible for the node.
+     */
+    get: operations["GetNodeWiki"];
+    put?: never;
+    /**
+     * @description Save a revision of the notes of the node, over the revision base_id,
+     *     0 when the page has none yet. 409 when base_id is not the latest
+     *     revision any more: someone saved meanwhile, and nothing is saved.
+     *     400 when the body is larger than 60000 bytes. A Manager, or a user
+     *     responsible for the node.
+     */
+    post: operations["PostNodeWiki"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/nodes/{node_id}/wiki/{revision_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Node identifier (node_id UUID or nodename) */
+        node_id: string;
+        revision_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description A revision of the notes of the node, with its body. */
+    get: operations["GetNodeWikiRevision"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/obsolescence/refresh": {
     parameters: {
       query?: never;
@@ -6012,6 +6066,60 @@ export interface paths {
      *     "<form>::<name>", describes its tag_data and tag_attach_data with that form.
      */
     get: operations["GetServiceTags"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{svc_id}/wiki": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service identifier (svc_id UUID or svcname) */
+        svc_id: string;
+      };
+      cookie?: never;
+    };
+    /**
+     * @description The notes of the service, a wiki page in Markdown: its latest revision
+     *     with its body, null when none was saved, and the list of its
+     *     revisions, the latest first, without their body. writable tells
+     *     whether the caller may save a revision: a Manager, or a user
+     *     responsible for the service.
+     */
+    get: operations["GetServiceWiki"];
+    put?: never;
+    /**
+     * @description Save a revision of the notes of the service, over the revision base_id,
+     *     0 when the page has none yet. 409 when base_id is not the latest
+     *     revision any more: someone saved meanwhile, and nothing is saved.
+     *     400 when the body is larger than 60000 bytes. A Manager, or a user
+     *     responsible for the service.
+     */
+    post: operations["PostServiceWiki"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{svc_id}/wiki/{revision_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service identifier (svc_id UUID or svcname) */
+        svc_id: string;
+        revision_id: number;
+      };
+      cookie?: never;
+    };
+    /** @description A revision of the notes of the service, with its body. */
+    get: operations["GetServiceWikiRevision"];
     put?: never;
     post?: never;
     delete?: never;
@@ -9439,6 +9547,39 @@ export interface components {
       subject?: string | null;
       /** @description The user, none for a node. */
       user_id?: number | null;
+    };
+    WikiPage: {
+      /** @description The latest revision, with its body; null when none was saved */
+      revision: components["schemas"]["WikiRevision"] | null;
+      /** @description The revisions, the latest first, without their body */
+      revisions: components["schemas"]["WikiRevision"][];
+      /** @description How many revisions the page has in all */
+      total: number;
+      /** @description Whether the caller may save a revision */
+      writable: boolean;
+    };
+    WikiRevision: {
+      /** @description The email of the user who saved it, empty when unknown */
+      author: string;
+      /** @description The notes, in Markdown; absent from a list of revisions */
+      body?: string;
+      /** @description What the revision changed, in a few words; may be empty */
+      change_note: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      saved_on: string;
+    };
+    WikiRevisionInput: {
+      /**
+       * Format: int64
+       * @description The revision edited, 0 when the page has none
+       */
+      base_id: number;
+      /** @description The notes, in Markdown, at most 60000 bytes */
+      body: string;
+      /** @description What the revision changes, at most 200 characters */
+      change_note?: string;
     };
     WorkflowListResponse: {
       data:
@@ -24141,6 +24282,97 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  GetNodeWiki: {
+    parameters: {
+      query?: {
+        /** @description At most this many revisions in the list (default 20, at most 200) */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Node identifier (node_id UUID or nodename) */
+        node_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WikiPage"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostNodeWiki: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Node identifier (node_id UUID or nodename) */
+        node_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WikiRevisionInput"];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WikiRevision"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetNodeWikiRevision: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Node identifier (node_id UUID or nodename) */
+        node_id: string;
+        revision_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WikiRevision"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
   PutObsolescenceRefresh: {
     parameters: {
       query?: never;
@@ -28075,6 +28307,97 @@ export interface operations {
           "application/json": components["schemas"]["ListResponse"];
         };
       };
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetServiceWiki: {
+    parameters: {
+      query?: {
+        /** @description At most this many revisions in the list (default 20, at most 200) */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Service identifier (svc_id UUID or svcname) */
+        svc_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WikiPage"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostServiceWiki: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service identifier (svc_id UUID or svcname) */
+        svc_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WikiRevisionInput"];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WikiRevision"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetServiceWikiRevision: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service identifier (svc_id UUID or svcname) */
+        svc_id: string;
+        revision_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WikiRevision"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
       404: components["responses"]["404"];
       500: components["responses"]["500"];
     };

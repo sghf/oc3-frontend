@@ -1,3 +1,5 @@
+import { ObjectNotes } from "@/components/opensvc/ObjectNotes";
+import { OVERVIEW_GROUP } from "@/components/opensvc/RelatedTileNav";
 import { useTranslation } from "react-i18next";
 import type {
   RelatedTab,
@@ -16,7 +18,7 @@ import { NodeStorage } from "./NodeStorage";
 import { NodeLogs } from "./NodeLogs";
 import { NodeServices } from "./NodeServices";
 import { NodeStats } from "./NodeStats";
-import { GearIcon, LineChartIcon } from "@/components/ui/icons";
+import { BookIcon, GearIcon, LineChartIcon } from "@/components/ui/icons";
 import { NodeSysreport } from "./NodeSysreport";
 import { NodeCompliance } from "./NodeCompliance";
 import {
@@ -52,6 +54,16 @@ function countSummary(count: number | undefined): RelatedSummary {
  * Inventory tab they shared once (`tab=inventory`) opening the first of them.
  */
 export const NODE_RELATED_TABS: RelatedTab[] = [
+  {
+    key: "notes",
+    // The notes are not counted: their revisions say nothing of the node.
+    hideCount: true,
+    labelKey: "notes.tab",
+    descriptionKey: "notes.description",
+    icon: <BookIcon className="h-4 w-4 shrink-0 text-icon-node" />,
+    useSummary: () => ({ count: undefined }),
+    render: (id, locale) => <ObjectNotes kind="node" id={id} locale={locale} />,
+  },
   {
     key: "services",
     labelKey: "nodes.related.services",
@@ -239,6 +251,12 @@ export const NODE_RELATED_TABS: RelatedTab[] = [
  * group is a box of tiles (`RelatedTileNav`).
  */
 export const NODE_TAB_GROUPS: RelatedTabGroup[] = [
+  {
+    // After the properties, in their box.
+    key: OVERVIEW_GROUP,
+    labelKey: "related.groups.overview",
+    tabs: ["notes"],
+  },
   {
     key: "workload",
     labelKey: "related.groups.workload",

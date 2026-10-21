@@ -83,7 +83,7 @@ export function RelatedTileNav({
                     className="translate-y-1 self-end border-t border-dotted border-line-strong"
                   />
                 ))}
-                {group.key === OVERVIEW_GROUP ? (
+                {group.key === OVERVIEW_GROUP && (
                   <li style={tilePlace(0)} className={tileCell(0)}>
                     <button
                       type="button"
@@ -97,35 +97,35 @@ export function RelatedTileNav({
                       {t("related.properties")}
                     </button>
                   </li>
-                ) : (
-                  group.entries.map((entry, rank) => {
-                    const current = entry.key === active;
-                    const description =
-                      entry.descriptionKey === undefined ? undefined : t(entry.descriptionKey);
-                    return (
-                      <li key={entry.key} style={tilePlace(rank)} className={tileCell(rank)}>
-                        <button
-                          type="button"
-                          title={description}
-                          aria-current={current ? "page" : undefined}
-                          onClick={() => {
-                            onSelect(entry.key);
-                          }}
-                          className={tileClass(current)}
-                        >
-                          <span className="shrink-0">{entry.icon}</span>
-                          {t(entry.labelKey)}
-                          {entry.hideCount !== true && (
-                            <RelatedCount tab={entry} id={objectId} active={current} />
-                          )}
-                          {description !== undefined && (
-                            <span className="sr-only">{description}</span>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })
                 )}
+                {group.entries.map((entry, index) => {
+                  const rank = index + (group.key === OVERVIEW_GROUP ? 1 : 0);
+                  const current = entry.key === active;
+                  const description =
+                    entry.descriptionKey === undefined ? undefined : t(entry.descriptionKey);
+                  return (
+                    <li key={entry.key} style={tilePlace(rank)} className={tileCell(rank)}>
+                      <button
+                        type="button"
+                        title={description}
+                        aria-current={current ? "page" : undefined}
+                        onClick={() => {
+                          onSelect(entry.key);
+                        }}
+                        className={tileClass(current)}
+                      >
+                        <span className="shrink-0">{entry.icon}</span>
+                        {t(entry.labelKey)}
+                        {entry.hideCount !== true && (
+                          <RelatedCount tab={entry} id={objectId} active={current} />
+                        )}
+                        {description !== undefined && (
+                          <span className="sr-only">{description}</span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -135,8 +135,15 @@ export function RelatedTileNav({
   );
 }
 
-/** The pseudo-group holding the properties, which have no tab. */
-const OVERVIEW_GROUP = "overview";
+/**
+ * The group holding the properties, which have no tab, first of its tiles. A
+ * panel names it among its groups to add tabs after them (the notes).
+ */
+export const OVERVIEW_GROUP = "overview";
+
+/** The tiles of a group, the properties included in the overview. */
+const tileCount = (group: ResolvedGroup) =>
+  group.entries.length + (group.key === OVERVIEW_GROUP ? 1 : 0);
 
 /** At most this many tiles side by side in a group, the rest on more rows. */
 const TILES_PER_ROW = 3;
@@ -144,11 +151,9 @@ const TILES_PER_ROW = 3;
 // Literal classes, for Tailwind to see them. The tiles share the width of their box.
 const TILE_GRID = ["grid-cols-[auto]", "grid-cols-[repeat(2,auto)]", "grid-cols-[repeat(3,auto)]"];
 
-const tileWidth = (group: ResolvedGroup) =>
-  Math.max(1, Math.min(TILES_PER_ROW, group.entries.length));
+const tileWidth = (group: ResolvedGroup) => Math.max(1, Math.min(TILES_PER_ROW, tileCount(group)));
 
-const tileRows = (group: ResolvedGroup) =>
-  Math.max(1, Math.ceil(group.entries.length / TILES_PER_ROW));
+const tileRows = (group: ResolvedGroup) => Math.max(1, Math.ceil(tileCount(group) / TILES_PER_ROW));
 
 /**
  * The grid rows of a group: its heading, then its rows of tiles, each after the
@@ -187,19 +192,19 @@ const tileClass = (current: boolean) =>
  * their first group, and the groups of a column their own order.
  */
 function tileColumns(groups: ResolvedGroup[]): ResolvedGroup[][] {
-  const overview: ResolvedGroup = {
+  const overview: ResolvedGroup = groups.find((group) => group.key === OVERVIEW_GROUP) ?? {
     key: OVERVIEW_GROUP,
     labelKey: "related.groups.overview",
     tabs: [],
     entries: [],
   };
-  const all = [overview, ...groups];
+  const all = [overview, ...groups.filter((group) => group.key !== OVERVIEW_GROUP)];
   const order = new Map(all.map((group, index) => [group.key, index]));
   const rank = (group: ResolvedGroup | undefined) =>
     group === undefined ? 0 : (order.get(group.key) ?? 0);
-  const tall = all.filter((group) => group.entries.length > TILES_PER_ROW).map((group) => [group]);
+  const tall = all.filter((group) => tileCount(group) > TILES_PER_ROW).map((group) => [group]);
   const low = all
-    .filter((group) => group.entries.length <= TILES_PER_ROW)
+    .filter((group) => tileCount(group) <= TILES_PER_ROW)
     .sort((a, b) => tileWidth(a) - tileWidth(b) || rank(a) - rank(b));
   // Few groups of one row, and none taller: one row of boxes is enough.
   if (tall.length === 0 && low.length <= 3)

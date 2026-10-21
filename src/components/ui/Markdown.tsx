@@ -24,6 +24,8 @@ const RULE = /^ {0,3}([-*_])(\s*\1){2,}\s*$/;
 const QUOTE = /^ {0,3}>\s?/;
 const BULLET = /^(\s*)([-*+])\s+(.*)$/;
 const ORDERED = /^(\s*)(\d{1,9})[.)]\s+(.*)$/;
+// A paragraph line underlined: "===" makes a heading of level 1, "---" of level 2.
+const SETEXT = /^ {0,3}(=+|-+)\s*$/;
 const TABLE_SEPARATOR = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 
 function isBlank(line: string): boolean {
@@ -78,20 +80,7 @@ function blocks(text: string): ReactNode[] {
 
     const heading = HEADING.exec(line);
     if (heading !== null) {
-      const level = (heading[1] ?? "#").length;
-      const content = inline(heading[2] ?? "", key);
-      // Within a message, headings stay modest: weight before size.
-      out.push(
-        level <= 2 ? (
-          <h3 key={key} className="mt-1 text-title font-semibold">
-            {content}
-          </h3>
-        ) : (
-          <h4 key={key} className="mt-1 font-semibold">
-            {content}
-          </h4>
-        ),
-      );
+      out.push(headingBlock((heading[1] ?? "#").length, inline(heading[2] ?? "", key), key));
       i++;
       continue;
     }
@@ -195,10 +184,18 @@ function blocks(text: string): ReactNode[] {
     while (
       i < lines.length &&
       !isBlank(lines[i] ?? "") &&
+      !SETEXT.test(lines[i] ?? "") &&
       !startsBlock(lines[i] ?? "", lines[i + 1])
     ) {
       body.push((lines[i] ?? "").trim());
       i++;
+    }
+    const underline = SETEXT.exec(lines[i] ?? "");
+    if (underline !== null) {
+      const level = (underline[1] ?? "=").startsWith("=") ? 1 : 2;
+      out.push(headingBlock(level, inline(body.join(" "), key), key));
+      i++;
+      continue;
     }
     out.push(
       <p key={key} className="break-words">
@@ -207,6 +204,19 @@ function blocks(text: string): ReactNode[] {
     );
   }
   return out;
+}
+
+/** A heading: within a message or a note, headings stay modest, weight before size. */
+function headingBlock(level: number, content: ReactNode[], key: string): ReactNode {
+  return level <= 2 ? (
+    <h3 key={key} className="mt-1 text-title font-semibold">
+      {content}
+    </h3>
+  ) : (
+    <h4 key={key} className="mt-1 font-semibold">
+      {content}
+    </h4>
+  );
 }
 
 /** The lines of a paragraph: two trailing spaces or a backslash break a line. */

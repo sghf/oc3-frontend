@@ -77,6 +77,9 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   forms: ["forms", "form", "form-by-name"],
   orchestrations: ["orchestrations", "orchestration"],
   orchestration_runs: ["orchestration-runs", "orchestration-run"],
+  // The notes of the nodes and services, under their own key root: a save
+  // refreshes them alone, not every query of the node or service panels.
+  wiki_pages: ["wiki"],
   forms_store: ["workflows"],
   workflows: ["workflows"],
   form_output_results: ["form-output-results", "workflows"],

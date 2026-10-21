@@ -1,5 +1,7 @@
+import { ObjectNotes } from "@/components/opensvc/ObjectNotes";
+import { OVERVIEW_GROUP } from "@/components/opensvc/RelatedTileNav";
 import { ColumnFamilyIcon } from "@/components/opensvc/ColumnFamily";
-import { GearIcon } from "@/components/ui/icons";
+import { BookIcon, GearIcon } from "@/components/ui/icons";
 import type { RelatedTab, RelatedTabGroup } from "@/components/opensvc/related-tabs";
 import { useTranslation } from "react-i18next";
 import { ServiceActions } from "./ServiceActions";
@@ -26,6 +28,16 @@ import { useNodesDiffSummary } from "./use-nodes-diff-summary";
  * naming it in a group.
  */
 export const SERVICE_RELATED_TABS: RelatedTab[] = [
+  {
+    key: "notes",
+    // The notes are not counted: their revisions say nothing of the service.
+    hideCount: true,
+    labelKey: "notes.tab",
+    descriptionKey: "notes.description",
+    icon: <BookIcon className="h-4 w-4 shrink-0 text-icon-service" />,
+    useSummary: () => ({ count: undefined }),
+    render: (id, locale) => <ObjectNotes kind="service" id={id} locale={locale} />,
+  },
   {
     key: "resources",
     labelKey: "services.related.resources",
@@ -122,6 +134,12 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
  * with the alerts and checks of the service, which have no tab yet.
  */
 export const SERVICE_TAB_GROUPS: RelatedTabGroup[] = [
+  {
+    // After the properties, in their box.
+    key: OVERVIEW_GROUP,
+    labelKey: "related.groups.overview",
+    tabs: ["notes"],
+  },
   {
     key: "workload",
     labelKey: "related.groups.workload",
