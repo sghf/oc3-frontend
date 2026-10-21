@@ -7,6 +7,7 @@ import { CloseIcon, GearIcon } from "@/components/ui/icons";
 import { NOTICE_CARD, NOTICE_TONES, type NoticeTone } from "@/components/ui/notice-tones";
 import { InNoticeRegion } from "@/components/ui/NoticeRegion";
 import { nextNoticeId, noticeTime, useAutoDismiss } from "@/components/ui/use-auto-dismiss";
+import { queueActionList, type ActionEnqueue } from "@/lib/api/action-queue";
 import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 
 /**
@@ -166,6 +167,7 @@ export function ActionsMenu({
   actions = [],
   prefix,
   queue: queueOne = noQueue,
+  enqueue,
   dataActions = [],
   onCompare,
 }: {
@@ -176,6 +178,12 @@ export function ActionsMenu({
   prefix: string;
   /** Queues the action on one object; returns the API error message, or null. */
   queue?: (target: ActionTarget, action: string) => Promise<string | null>;
+  /**
+   * The entry of `PUT /actions` acting on one object, or why there is none; in
+   * place of `queue`, the whole selection is then queued by lists
+   * (`queueActionList`), a few requests rather than one per object.
+   */
+  enqueue?: (target: ActionTarget, action: string) => ActionEnqueue | string;
   dataActions?: readonly DataActionEntry[];
   /**
    * Opens the comparison of the targets: offered from two of them, apart from the
@@ -207,9 +215,14 @@ export function ActionsMenu({
 
   const queue = useMutation({
     mutationFn: async (action: string): Promise<Outcome> => {
-      const results = await Promise.all(
-        targets.map(async (target) => ({ target, message: await queueOne(target, action) })),
-      );
+      const results =
+        enqueue === undefined
+          ? await Promise.all(
+              targets.map(async (target) => ({ target, message: await queueOne(target, action) })),
+            )
+          : (await queueActionList(targets.map((target) => enqueue(target, action)))).map(
+              (message, index) => ({ target: targets[index] as ActionTarget, message }),
+            );
       const failures = results
         .filter((result) => result.message !== null)
         .map((result) => failureText(result.target, result.message));

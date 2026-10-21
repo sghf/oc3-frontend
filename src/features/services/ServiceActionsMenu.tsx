@@ -79,11 +79,8 @@ export function ServiceActionsMenu({
       dataActions={dataActions}
       onCompare={onCompare}
       prefix="services.actions"
-      queue={async (target, action) => {
-        // `svc_id` alone targets the whole service, as in the historical collector.
-        const { error } = await api.PUT("/actions", { body: { svc_id: target.id, action } });
-        return error === undefined ? null : problemText(error);
-      }}
+      // `svc_id` alone targets the whole service, as in the historical collector.
+      enqueue={(target, action) => ({ svc_id: target.id, action })}
     />
   );
 }

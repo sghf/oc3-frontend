@@ -1,7 +1,5 @@
 import type { components } from "@/lib/api/schema";
 import { ActionsMenu, type ActionEntry } from "@/components/opensvc/ActionsMenu";
-import { api } from "@/lib/api/client";
-import { problemText } from "@/lib/api/problem";
 
 type ResourceRow = components["schemas"]["ResourceRow"];
 
@@ -80,19 +78,16 @@ export function ResourceActionsMenu({
       targets={targets}
       actions={RESOURCE_ACTIONS}
       prefix="resources.actions"
-      queue={async (target, action) => {
+      enqueue={(target, action) => {
         const group = groups.get(target.id);
         if (group === undefined) return "unknown resource";
-        const { error } = await api.PUT("/actions", {
-          body: {
-            svc_id: group.svcId,
-            node_id: group.nodeId,
-            ...(group.vmname === "" ? {} : { vmname: group.vmname }),
-            rid: group.rids.join(","),
-            action,
-          },
-        });
-        return error === undefined ? null : problemText(error);
+        return {
+          svc_id: group.svcId,
+          node_id: group.nodeId,
+          ...(group.vmname === "" ? {} : { vmname: group.vmname }),
+          rid: group.rids.join(","),
+          action,
+        };
       }}
     />
   );

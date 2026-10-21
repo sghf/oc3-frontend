@@ -1285,7 +1285,8 @@
           "done_one": "1 alerte supprimée.",
           "done_other": "{{count}} alertes supprimées."
         }
-      }
+      },
+      "notFound": "déjà supprimée"
     }
   },
   "apps": {

@@ -1,6 +1,4 @@
 import { ActionsMenu, type ActionEntry, type ActionTarget } from "@/components/opensvc/ActionsMenu";
-import { api } from "@/lib/api/client";
-import { problemText } from "@/lib/api/problem";
 
 /**
  * Agent actions of a whole cluster: the three cluster-wide actions of om3 (`om
@@ -23,11 +21,8 @@ export function ClusterActionsMenu({ clusters }: { clusters: ActionTarget[] }) {
       targets={clusters}
       actions={CLUSTER_ACTIONS}
       prefix="clusters.actions"
-      queue={async (target, action) => {
-        // `cluster_id` alone targets the whole cluster.
-        const { error } = await api.PUT("/actions", { body: { cluster_id: target.id, action } });
-        return error === undefined ? null : problemText(error);
-      }}
+      // `cluster_id` alone targets the whole cluster.
+      enqueue={(target, action) => ({ cluster_id: target.id, action })}
     />
   );
 }

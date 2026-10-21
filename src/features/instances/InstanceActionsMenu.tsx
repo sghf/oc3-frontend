@@ -117,13 +117,11 @@ export function InstanceActionsMenu({
       dataActions={dataActions}
       onCompare={onCompare}
       prefix="instances.actions"
-      queue={async (target, action) => {
+      enqueue={(target, action) => {
         const key = fromInstanceId(target.id);
-        if (key === null) return "invalid instance id";
-        const { error } = await api.PUT("/actions", {
-          body: { svc_id: key.svcId, node_id: key.nodeId, action },
-        });
-        return error === undefined ? null : problemText(error);
+        return key === null
+          ? "invalid instance id"
+          : { svc_id: key.svcId, node_id: key.nodeId, action };
       }}
     />
   );

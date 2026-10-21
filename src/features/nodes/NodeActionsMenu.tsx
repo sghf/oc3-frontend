@@ -87,11 +87,8 @@ export function NodeActionsMenu({
       dataActions={dataActions}
       onCompare={onCompare}
       prefix="nodes.actions"
-      queue={async (target, action) => {
-        // `node_id` alone targets the node, as in the historical collector.
-        const { error } = await api.PUT("/actions", { body: { node_id: target.id, action } });
-        return error === undefined ? null : problemText(error);
-      }}
+      // `node_id` alone targets the node, as in the historical collector.
+      enqueue={(target, action) => ({ node_id: target.id, action })}
     />
   );
 }
