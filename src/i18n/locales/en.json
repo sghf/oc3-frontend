@@ -4397,7 +4397,14 @@
       "rule": "The run stops at the first step that fails: the next ones do not run.",
       "typeName": "Type {{name}} to confirm",
       "start": "Start the run",
-      "starting": "Starting…"
+      "starting": "Starting…",
+      "again_one": "{{count}} target again, of {{total}}",
+      "again_other": "{{count}} targets again, of {{total}}",
+      "resumeTitle": "Resume {{name}} from step {{n}}",
+      "resumeSummary_one": "{{steps}} steps, {{count}} action in all, with the targets resolved when the run started:",
+      "resumeSummary_other": "{{steps}} steps, {{count}} actions in all, with the targets resolved when the run started:",
+      "resume": "Resume the run",
+      "resuming": "Resuming…"
     },
     "runs": {
       "title": "Runs",

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
@@ -6,8 +6,9 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { DateTime } from "@/components/ui/DateTime";
 import { Modal } from "@/components/ui/Modal";
 import { formatDuration } from "@/lib/format";
-import { useRun, useRunCommand, useStartRun, type Run, type RunStep, type RunTarget } from "./api";
+import { useRun, useRunCommand, type Run, type RunStep, type RunTarget } from "./api";
 import { COUNT_ORDER, elapsed } from "./helpers";
+import { ResumeRunConfirmation, StartRunConfirmation } from "./RunConfirmations";
 import { RunStatusPill } from "./RunStatusPill";
 import { BUTTON, CARD, PRIMARY } from "./ui";
 
@@ -35,13 +36,12 @@ function lastLine(text: string | undefined): string {
  */
 export function RunPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const params = useParams({ strict: false });
   const id = Number((params as { runId?: string }).runId);
   const run = useRun(id);
   const stop = useRunCommand(id, "stop");
-  const resume = useRunCommand(id, "resume");
-  const again = useStartRun();
+  // "Run again" and "Resume" open a confirmation first, as a run from the editor.
+  const [confirm, setConfirm] = useState<"again" | "resume" | null>(null);
   const [shown, setShown] = useState<RunTarget | null>(null);
   const [open, setOpen] = useState<Record<number, boolean>>({});
 
@@ -56,7 +56,7 @@ export function RunPage() {
   );
   const ended = r.status === "failed" || r.status === "stopped";
   const notRun = r.steps.filter((step) => step.status === "not_run").map((step) => step.step + 1);
-  const error = stop.error ?? resume.error ?? again.error;
+  const error = stop.error;
 
   return (
     <section>
@@ -116,17 +116,9 @@ export function RunPage() {
         {ended && r.orchestration_id !== null && r.orchestration_id !== undefined && (
           <button
             type="button"
-            disabled={again.isPending}
+            aria-haspopup="dialog"
             onClick={() => {
-              if (r.orchestration_id === null || r.orchestration_id === undefined) return;
-              again.mutate(r.orchestration_id, {
-                onSuccess: (next) => {
-                  void navigate({
-                    to: "/orchestrations/runs/$runId",
-                    params: { runId: String(next.id) },
-                  });
-                },
-              });
+              setConfirm("again");
             }}
             className={BUTTON}
           >
@@ -136,10 +128,11 @@ export function RunPage() {
         {ended && (
           <button
             type="button"
-            disabled={inFlight || resume.isPending}
+            disabled={inFlight}
+            aria-haspopup="dialog"
             title={inFlight ? t("orchestrations.run.resumeWait") : undefined}
             onClick={() => {
-              resume.mutate();
+              setConfirm("resume");
             }}
             className={PRIMARY}
           >
@@ -276,6 +269,22 @@ export function RunPage() {
         })}
       </div>
 
+      {confirm === "again" && r.orchestration_id !== null && r.orchestration_id !== undefined && (
+        <StartRunConfirmation
+          orchestrationId={r.orchestration_id}
+          onClose={() => {
+            setConfirm(null);
+          }}
+        />
+      )}
+      {confirm === "resume" && (
+        <ResumeRunConfirmation
+          run={r}
+          onClose={() => {
+            setConfirm(null);
+          }}
+        />
+      )}
       {shown !== null && (
         <TargetDetails
           target={shown}

@@ -4397,7 +4397,14 @@
       "rule": "L'exécution s'arrête à la première étape qui échoue : les suivantes ne sont pas menées.",
       "typeName": "Tapez {{name}} pour confirmer",
       "start": "Lancer l'exécution",
-      "starting": "Lancement…"
+      "starting": "Lancement…",
+      "again_one": "{{count}} cible à nouveau, sur {{total}}",
+      "again_other": "{{count}} cibles à nouveau, sur {{total}}",
+      "resumeTitle": "Reprendre {{name}} à l'étape {{n}}",
+      "resumeSummary_one": "{{steps}} étapes, {{count}} action en tout, avec les cibles résolues au démarrage de l'exécution :",
+      "resumeSummary_other": "{{steps}} étapes, {{count}} actions en tout, avec les cibles résolues au démarrage de l'exécution :",
+      "resume": "Reprendre l'exécution",
+      "resuming": "Reprise…"
     },
     "runs": {
       "title": "Exécutions",

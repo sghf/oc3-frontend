@@ -4,21 +4,19 @@ import { useTranslation } from "react-i18next";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { DateTime } from "@/components/ui/DateTime";
-import { Modal } from "@/components/ui/Modal";
 import {
-  DESTRUCTIVE_ACTIONS,
   useDeleteOrchestration,
   useOrchestration,
   useOrchestrationCheck,
   useRuns,
   useSaveOrchestration,
-  useStartRun,
   type CheckStep,
   type Orchestration,
   type OrchestrationInput,
 } from "./api";
 import { RunStatusPill } from "./RunStatusPill";
 import { emptyStep } from "./helpers";
+import { StartRunConfirmation } from "./RunConfirmations";
 import { StepEditor } from "./StepEditor";
 import { BUTTON, CARD, INPUT, PRIMARY } from "./ui";
 
@@ -275,10 +273,8 @@ export function OrchestrationEditorPage() {
       </div>
 
       {confirming && id !== undefined && saved.data !== undefined && (
-        <RunConfirmation
-          id={id}
-          orchestration={saved.data}
-          check={check.data}
+        <StartRunConfirmation
+          orchestrationId={id}
           onClose={() => {
             setConfirming(false);
           }}
@@ -344,115 +340,5 @@ function CheckPanel({
         {t("orchestrations.check.hint")}
       </p>
     </div>
-  );
-}
-
-/**
- * The confirmation of a run: the plan as it will run, step by step, with the
- * number of targets matched now; the name to type when a step interrupts what
- * runs (stop, reboot…).
- */
-function RunConfirmation({
-  id,
-  orchestration,
-  check,
-  onClose,
-}: {
-  id: number;
-  orchestration: Orchestration;
-  check: CheckStep[] | undefined;
-  onClose: () => void;
-}) {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const start = useStartRun();
-  const [typed, setTyped] = useState("");
-  const destructive = orchestration.steps.some((step) => DESTRUCTIVE_ACTIONS.has(step.action));
-  const total = (check ?? []).reduce((n, step) => n + step.targets.length, 0);
-  const typedId = useId();
-
-  return (
-    <Modal
-      title={t("orchestrations.confirm.title", { name: orchestration.name })}
-      closeLabel={t("detail.close")}
-      onClose={onClose}
-      className="max-w-xl"
-    >
-      <p className="mb-2">
-        {t("orchestrations.confirm.summary", { steps: orchestration.steps.length, count: total })}
-      </p>
-      <ol className="mb-3 flex flex-col gap-1">
-        {orchestration.steps.map((step, index) => {
-          const c = check?.[index];
-          const ko = c?.targets.filter((target) => !target.ok).length ?? 0;
-          return (
-            <li key={index} className="flex items-center gap-2">
-              <span className="w-5 text-right text-ink-muted tabular-nums">{index + 1}.</span>
-              <span className="font-medium">{step.name === "" ? step.action : step.name}</span>
-              <span className="text-ink-muted">
-                {step.name === "" ? "" : `${step.action} · `}
-                {t("orchestrations.confirm.targets", { count: c?.targets.length ?? 0 })} ·{" "}
-                {t(`orchestrations.step.paces.${step.pace}`)}
-              </span>
-              {DESTRUCTIVE_ACTIONS.has(step.action) && (
-                <span className="text-state-down">■ {t("orchestrations.confirm.disruptive")}</span>
-              )}
-              {ko > 0 && (
-                <span className="text-state-warn">
-                  ▲ {t("orchestrations.check.refused", { count: ko })}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-      <p className="mb-3 text-ink-muted">{t("orchestrations.confirm.rule")}</p>
-      {destructive && (
-        <div className="mb-3">
-          <label htmlFor={typedId} className="mb-1 block font-medium">
-            {t("orchestrations.confirm.typeName", { name: orchestration.name })}
-          </label>
-          <input
-            id={typedId}
-            value={typed}
-            autoComplete="off"
-            onChange={(event) => {
-              setTyped(event.target.value);
-            }}
-            className={`${INPUT} w-full`}
-          />
-        </div>
-      )}
-      {start.isError && (
-        <p role="alert" className="mb-3 text-state-down">
-          ■ {start.error.message}
-        </p>
-      )}
-      <div className="flex justify-end gap-2">
-        <button type="button" onClick={onClose} className={BUTTON}>
-          {t("detail.cancel")}
-        </button>
-        <button
-          type="button"
-          disabled={start.isPending || (destructive && typed !== orchestration.name)}
-          onClick={() => {
-            start.mutate(id, {
-              onSuccess: (run) => {
-                void navigate({
-                  to: "/orchestrations/runs/$runId",
-                  params: { runId: String(run.id) },
-                });
-              },
-            });
-          }}
-          className={PRIMARY}
-        >
-          ▶{" "}
-          {start.isPending
-            ? t("orchestrations.confirm.starting")
-            : t("orchestrations.confirm.start")}
-        </button>
-      </div>
-    </Modal>
   );
 }
