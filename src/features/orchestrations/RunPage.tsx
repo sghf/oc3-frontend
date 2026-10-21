@@ -8,7 +8,11 @@ import { Modal } from "@/components/ui/Modal";
 import { formatDuration } from "@/lib/format";
 import { useRun, useRunCommand, type Run, type RunStep, type RunTarget } from "./api";
 import { COUNT_ORDER, elapsed } from "./helpers";
-import { ResumeRunConfirmation, StartRunConfirmation } from "./RunConfirmations";
+import {
+  ContinueRunConfirmation,
+  ResumeRunConfirmation,
+  StartRunConfirmation,
+} from "./RunConfirmations";
 import { RunStatusPill } from "./RunStatusPill";
 import { BUTTON, CARD, PRIMARY } from "./ui";
 
@@ -18,6 +22,7 @@ const STRIP: Record<RunStep["status"], string> = {
   failed: "border-state-down/40 bg-state-down-soft",
   stopped: "border-state-warn/40 bg-state-warn-soft",
   waiting: "border-line bg-surface-raised",
+  acknowledged: "border-state-warn/40 bg-state-warn-soft",
   not_run: "border-dashed border-line-strong bg-surface-sunken",
 };
 
@@ -41,7 +46,7 @@ export function RunPage() {
   const run = useRun(id);
   const stop = useRunCommand(id, "stop");
   // "Run again" and "Resume" open a confirmation first, as a run from the editor.
-  const [confirm, setConfirm] = useState<"again" | "resume" | null>(null);
+  const [confirm, setConfirm] = useState<"again" | "resume" | "continue" | null>(null);
   const [shown, setShown] = useState<RunTarget | null>(null);
   const [open, setOpen] = useState<Record<number, boolean>>({});
 
@@ -137,6 +142,22 @@ export function RunPage() {
             className={PRIMARY}
           >
             ↻ {t("orchestrations.run.resume", { n: r.current_step + 1 })}
+          </button>
+        )}
+        {(r.status === "failed" || r.status === "stopped") && (
+          <button
+            type="button"
+            disabled={inFlight}
+            aria-haspopup="dialog"
+            title={
+              inFlight ? t("orchestrations.run.resumeWait") : t("orchestrations.run.continueHint")
+            }
+            onClick={() => {
+              setConfirm("continue");
+            }}
+            className={BUTTON}
+          >
+            ◆ {t("orchestrations.run.continue")}
           </button>
         )}
       </div>
@@ -263,6 +284,19 @@ export function RunPage() {
                   </span>
                 )}
               </button>
+              {step.acked_by !== undefined && step.acked_by !== "" && (
+                <div className="border-t border-line px-3 py-2">
+                  <p className="text-state-warn">
+                    ◆ {t("orchestrations.run.acknowledgedBy", { by: step.acked_by })}{" "}
+                    {step.acked_at !== null && step.acked_at !== undefined && (
+                      <span className="text-ink-muted">
+                        <DateTime value={step.acked_at} locale={i18n.language} />
+                      </span>
+                    )}
+                  </p>
+                  <p className="whitespace-pre-wrap">{step.ack_comment}</p>
+                </div>
+              )}
               {expanded && <TargetTable targets={step.targets ?? []} onOpen={setShown} />}
             </div>
           );
@@ -272,6 +306,14 @@ export function RunPage() {
       {confirm === "again" && r.orchestration_id !== null && r.orchestration_id !== undefined && (
         <StartRunConfirmation
           orchestrationId={r.orchestration_id}
+          onClose={() => {
+            setConfirm(null);
+          }}
+        />
+      )}
+      {confirm === "continue" && (
+        <ContinueRunConfirmation
+          run={r}
           onClose={() => {
             setConfirm(null);
           }}

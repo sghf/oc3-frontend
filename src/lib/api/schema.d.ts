@@ -4735,6 +4735,35 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/orchestration_runs/{run_id}/continue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Acknowledge the failed or stopped step of a failed or stopped run and
+     *     go on with the next step: the step becomes acknowledged, with the comment, which is
+     *     required, the author and the date; its targets keep their outcome. The
+     *     next steps run with the targets resolved when the run started; when the
+     *     failed step was the last, the run ends as succeeded. 400 without a
+     *     comment; 409 when the run is neither failed nor stopped, or an action of
+     *     it still runs.
+     *     Manager only.
+     */
+    post: operations["PostOrchestrationRunContinue"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/orchestration_runs/{run_id}/resume": {
     parameters: {
       query?: never;
@@ -8461,12 +8490,21 @@ export interface components {
       status: components["schemas"]["OrchestrationRunStatus"];
       steps: components["schemas"]["OrchestrationRunStep"][];
     };
+    OrchestrationRunContinueInput: {
+      /** @description Why the failure of the step is accepted */
+      comment: string;
+    };
     OrchestrationRunListResponse: {
       data: components["schemas"]["OrchestrationRun"][];
     };
     /** @enum {string} */
     OrchestrationRunStatus: "running" | "succeeded" | "failed" | "stopped";
     OrchestrationRunStep: {
+      /** @description Why the failure was acknowledged */
+      ack_comment?: string;
+      acked_at?: string | null;
+      /** @description Who acknowledged the failure of the step, empty when none did */
+      acked_by?: string;
       /** @description The number of targets by status */
       counts: {
         [key: string]: number;
@@ -8480,11 +8518,12 @@ export interface components {
     };
     /**
      * @description stopped: the run was stopped during the step; not_run: the run failed or
-     *     was stopped before it.
+     *     was stopped before it; acknowledged: the step failed or was stopped, and
+     *     its outcome was accepted for the run to go on (see POST /orchestration_runs/{run_id}/continue).
      * @enum {string}
      */
     OrchestrationRunStepStatus:
-      "waiting" | "running" | "succeeded" | "failed" | "stopped" | "not_run";
+      "waiting" | "running" | "succeeded" | "failed" | "acknowledged" | "stopped" | "not_run";
     OrchestrationRunTarget: {
       action_id?: number | null;
       cluster_id: string;
@@ -24649,6 +24688,39 @@ export interface operations {
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostOrchestrationRunContinue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the orchestration run */
+        run_id: components["parameters"]["inPathOrchestrationRunId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrchestrationRunContinueInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrchestrationRun"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
       500: components["responses"]["500"];
     };
   };

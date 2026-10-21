@@ -4333,7 +4333,8 @@
       "ok": "ok",
       "refused": "refused",
       "timed_out": "timed out",
-      "cancelled": "cancelled"
+      "cancelled": "cancelled",
+      "acknowledged": "acknowledged"
     },
     "step": {
       "name": "Name of step {{n}}",
@@ -4389,8 +4390,8 @@
     },
     "confirm": {
       "title": "Run {{name}}",
-      "summary_one": "{{steps}} steps, {{count}} action in all, one step after the other:",
-      "summary_other": "{{steps}} steps, {{count}} actions in all, one step after the other:",
+      "summary_one": "{{steps}}, {{count}} action in all, one step after the other:",
+      "summary_other": "{{steps}}, {{count}} actions in all, one step after the other:",
       "targets_one": "{{count}} target",
       "targets_other": "{{count}} targets",
       "disruptive": "interrupts what runs",
@@ -4401,10 +4402,20 @@
       "again_one": "{{count}} target again, of {{total}}",
       "again_other": "{{count}} targets again, of {{total}}",
       "resumeTitle": "Resume {{name}} from step {{n}}",
-      "resumeSummary_one": "{{steps}} steps, {{count}} action in all, with the targets resolved when the run started:",
-      "resumeSummary_other": "{{steps}} steps, {{count}} actions in all, with the targets resolved when the run started:",
+      "resumeSummary_one": "{{steps}}, {{count}} action in all, with the targets resolved when the run started:",
+      "resumeSummary_other": "{{steps}}, {{count}} actions in all, with the targets resolved when the run started:",
       "resume": "Resume the run",
-      "resuming": "Resuming…"
+      "resuming": "Resuming…",
+      "continueTitle": "Acknowledge the failure of step {{n}} · {{name}}",
+      "continueSummary_one": "Then {{steps}} to run, {{count}} action in all, with the targets resolved when the run started:",
+      "continueSummary_other": "Then {{steps}} to run, {{count}} actions in all, with the targets resolved when the run started:",
+      "continueLast": "It was the last step: the run ends as succeeded, the failure acknowledged.",
+      "continueComment": "Why go on past this step? (required)",
+      "continue": "Acknowledge and continue",
+      "continuing": "Continuing…",
+      "continueTitleStopped": "Acknowledge the stop at step {{n}} · {{name}}",
+      "steps_one": "{{count}} step",
+      "steps_other": "{{count}} steps"
     },
     "runs": {
       "title": "Runs",
@@ -4439,7 +4450,10 @@
       "detailsTitle": "Step {{n}} · {{target}}",
       "action": "Action",
       "queued": "Queued",
-      "ended": "Ended"
+      "ended": "Ended",
+      "continue": "Acknowledge and continue",
+      "continueHint": "Accept the outcome of this step, with a comment, and run the next steps",
+      "acknowledgedBy": "Acknowledged by {{by}}"
     }
   }
 }

@@ -243,6 +243,25 @@ export function useRunCommand(id: number, command: "stop" | "resume") {
   });
 }
 
+/** Acknowledges the failed step of a run, with its comment, and goes on with the next. */
+export function useContinueRun(id: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (comment: string) => {
+      const { data, error } = await api.POST("/orchestration_runs/{run_id}/continue", {
+        params: { path: { run_id: id } },
+        body: { comment },
+      });
+      if (error !== undefined) return fail(error);
+      return data;
+    },
+    onSuccess: async (run) => {
+      queryClient.setQueryData(["orchestration-run", id], run);
+      await queryClient.invalidateQueries({ queryKey: ["orchestration-runs"] });
+    },
+  });
+}
+
 /**
  * The objects a step may pick, of one kind, for the editor's dropdown: every one
  * the user may see, read once. Enough for the estates seen so far; a search would

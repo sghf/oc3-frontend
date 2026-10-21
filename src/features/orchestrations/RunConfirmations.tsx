@@ -6,6 +6,7 @@ import {
   DESTRUCTIVE_ACTIONS,
   useOrchestration,
   useOrchestrationCheck,
+  useContinueRun,
   useRunCommand,
   useStartRun,
   type OrchestrationStep,
@@ -38,6 +39,7 @@ function RunConfirmDialog({
   pendingLabel,
   pending,
   error,
+  commentLabel,
   onConfirm,
   onClose,
 }: {
@@ -50,12 +52,17 @@ function RunConfirmDialog({
   pendingLabel: string;
   pending: boolean;
   error: Error | null;
-  onConfirm: () => void;
+  /** A comment is required, under this label, and given to onConfirm. */
+  commentLabel?: string;
+  onConfirm: (comment: string) => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const [typed, setTyped] = useState("");
+  const [comment, setComment] = useState("");
   const typedId = useId();
+  const commentId = useId();
+  const commentMissing = commentLabel !== undefined && comment.trim() === "";
   const destructive = lines.some((line) => DESTRUCTIVE_ACTIONS.has(line.step.action));
   return (
     <Modal title={title} closeLabel={t("detail.close")} onClose={onClose} className="max-w-xl">
@@ -82,6 +89,24 @@ function RunConfirmDialog({
         ))}
       </ol>
       <p className="mb-3 text-ink-muted">{t("orchestrations.confirm.rule")}</p>
+      {commentLabel !== undefined && (
+        <div className="mb-3">
+          <label htmlFor={commentId} className="mb-1 block font-medium">
+            {commentLabel}
+          </label>
+          <textarea
+            id={commentId}
+            rows={3}
+            required
+            aria-required="true"
+            value={comment}
+            onChange={(event) => {
+              setComment(event.target.value);
+            }}
+            className="w-full rounded-(--radius-control) border border-line bg-surface p-2"
+          />
+        </div>
+      )}
       {destructive && (
         <div className="mb-3">
           <label htmlFor={typedId} className="mb-1 block font-medium">
@@ -109,8 +134,10 @@ function RunConfirmDialog({
         </button>
         <button
           type="button"
-          disabled={pending || (destructive && typed !== name)}
-          onClick={onConfirm}
+          disabled={pending || commentMissing || (destructive && typed !== name)}
+          onClick={() => {
+            onConfirm(comment.trim());
+          }}
           className={PRIMARY}
         >
           ▶ {pending ? pendingLabel : confirmLabel}
@@ -159,7 +186,10 @@ export function StartRunConfirmation({
       intro={
         orchestration.isPending || check.isPending
           ? t("orchestrations.check.checking")
-          : t("orchestrations.confirm.summary", { steps: steps.length, count: total })
+          : t("orchestrations.confirm.summary", {
+              steps: t("orchestrations.confirm.steps", { count: steps.length }),
+              count: total,
+            })
       }
       lines={lines}
       name={name}
@@ -209,7 +239,10 @@ export function ResumeRunConfirmation({ run, onClose }: { run: Run; onClose: () 
   return (
     <RunConfirmDialog
       title={t("orchestrations.confirm.resumeTitle", { name: run.name, n: run.current_step + 1 })}
-      intro={t("orchestrations.confirm.resumeSummary", { steps: lines.length, count: total })}
+      intro={t("orchestrations.confirm.resumeSummary", {
+        steps: t("orchestrations.confirm.steps", { count: lines.length }),
+        count: total,
+      })}
       lines={lines}
       name={run.name}
       confirmLabel={t("orchestrations.confirm.resume")}
@@ -218,6 +251,63 @@ export function ResumeRunConfirmation({ run, onClose }: { run: Run; onClose: () 
       error={resume.error}
       onConfirm={() => {
         resume.mutate(undefined, { onSuccess: onClose });
+      }}
+      onClose={onClose}
+    />
+  );
+}
+
+/**
+ * The confirmation of going on past the failed or stopped step of a run: its
+ * outcome is acknowledged, with a comment saying why, which is required, then the next
+ * steps run with the targets resolved when the run started. After the last
+ * step, the run ends as succeeded.
+ */
+export function ContinueRunConfirmation({ run, onClose }: { run: Run; onClose: () => void }) {
+  const { t } = useTranslation();
+  const proceed = useContinueRun(run.id);
+  const failed = run.plan[run.current_step];
+  const lines = run.steps.flatMap((runStep) => {
+    const step = run.plan[runStep.step];
+    if (step === undefined || runStep.step <= run.current_step) return [];
+    const total = Object.values(runStep.counts).reduce((n, v) => n + v, 0);
+    return [{ index: runStep.step, step, targets: total, refused: 0 }];
+  });
+  const total = lines.reduce((n, line) => n + line.targets, 0);
+  const failedName = failed === undefined ? "" : failed.name === "" ? failed.action : failed.name;
+  return (
+    <RunConfirmDialog
+      title={t(
+        run.status === "stopped"
+          ? "orchestrations.confirm.continueTitleStopped"
+          : "orchestrations.confirm.continueTitle",
+        {
+          n: run.current_step + 1,
+          name: failedName,
+        },
+      )}
+      intro={
+        <>
+          {run.message !== "" && (
+            <span className="mb-1 block text-state-down">✕ {run.message}</span>
+          )}
+          {lines.length === 0
+            ? t("orchestrations.confirm.continueLast")
+            : t("orchestrations.confirm.continueSummary", {
+                steps: t("orchestrations.confirm.steps", { count: lines.length }),
+                count: total,
+              })}
+        </>
+      }
+      lines={lines}
+      name={run.name}
+      commentLabel={t("orchestrations.confirm.continueComment")}
+      confirmLabel={t("orchestrations.confirm.continue")}
+      pendingLabel={t("orchestrations.confirm.continuing")}
+      pending={proceed.isPending}
+      error={proceed.error}
+      onConfirm={(comment) => {
+        proceed.mutate(comment, { onSuccess: onClose });
       }}
       onClose={onClose}
     />

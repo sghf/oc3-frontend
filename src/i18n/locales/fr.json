@@ -4333,7 +4333,8 @@
       "ok": "ok",
       "refused": "refusée",
       "timed_out": "hors délai",
-      "cancelled": "annulée"
+      "cancelled": "annulée",
+      "acknowledged": "acquittée"
     },
     "step": {
       "name": "Nom de l'étape {{n}}",
@@ -4389,8 +4390,8 @@
     },
     "confirm": {
       "title": "Exécuter {{name}}",
-      "summary_one": "{{steps}} étapes, {{count}} action en tout, une étape après l'autre :",
-      "summary_other": "{{steps}} étapes, {{count}} actions en tout, une étape après l'autre :",
+      "summary_one": "{{steps}}, {{count}} action en tout, une étape après l'autre :",
+      "summary_other": "{{steps}}, {{count}} actions en tout, une étape après l'autre :",
       "targets_one": "{{count}} cible",
       "targets_other": "{{count}} cibles",
       "disruptive": "interrompt ce qui tourne",
@@ -4401,10 +4402,20 @@
       "again_one": "{{count}} cible à nouveau, sur {{total}}",
       "again_other": "{{count}} cibles à nouveau, sur {{total}}",
       "resumeTitle": "Reprendre {{name}} à l'étape {{n}}",
-      "resumeSummary_one": "{{steps}} étapes, {{count}} action en tout, avec les cibles résolues au démarrage de l'exécution :",
-      "resumeSummary_other": "{{steps}} étapes, {{count}} actions en tout, avec les cibles résolues au démarrage de l'exécution :",
+      "resumeSummary_one": "{{steps}}, {{count}} action en tout, avec les cibles résolues au démarrage de l'exécution :",
+      "resumeSummary_other": "{{steps}}, {{count}} actions en tout, avec les cibles résolues au démarrage de l'exécution :",
       "resume": "Reprendre l'exécution",
-      "resuming": "Reprise…"
+      "resuming": "Reprise…",
+      "continueTitle": "Acquitter l'échec de l'étape {{n}} · {{name}}",
+      "continueSummary_one": "Puis {{steps}} à mener, {{count}} action en tout, avec les cibles résolues au démarrage de l'exécution :",
+      "continueSummary_other": "Puis {{steps}} à mener, {{count}} actions en tout, avec les cibles résolues au démarrage de l'exécution :",
+      "continueLast": "C'était la dernière étape : l'exécution se termine comme réussie, l'échec acquitté.",
+      "continueComment": "Pourquoi passer outre cette étape ? (obligatoire)",
+      "continue": "Acquitter et continuer",
+      "continuing": "Poursuite…",
+      "continueTitleStopped": "Acquitter l'arrêt à l'étape {{n}} · {{name}}",
+      "steps_one": "{{count}} étape",
+      "steps_other": "{{count}} étapes"
     },
     "runs": {
       "title": "Exécutions",
@@ -4439,7 +4450,10 @@
       "detailsTitle": "Étape {{n}} · {{target}}",
       "action": "Action",
       "queued": "En file",
-      "ended": "Terminée"
+      "ended": "Terminée",
+      "continue": "Acquitter et continuer",
+      "continueHint": "Accepter l'issue de cette étape, avec un commentaire, et mener les étapes suivantes",
+      "acknowledgedBy": "Acquittée par {{by}}"
     }
   }
 }

@@ -15,6 +15,8 @@ const LOOKS: Record<AnyStatus, { glyph: string; box: string }> = {
   timed_out: { glyph: "✕", box: "bg-state-down-soft text-state-down" },
   cancelled: { glyph: "■", box: "bg-state-warn-soft text-state-warn" },
   stopped: { glyph: "■", box: "bg-state-warn-soft text-state-warn" },
+  // Failed, the failure accepted for the run to go on.
+  acknowledged: { glyph: "◆", box: "bg-state-warn-soft text-state-warn" },
   not_run: { glyph: "⊘", box: "border border-dashed border-line-strong text-ink-muted" },
 };
 
