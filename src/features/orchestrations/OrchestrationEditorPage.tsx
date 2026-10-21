@@ -8,12 +8,13 @@ import {
   useDeleteOrchestration,
   useOrchestration,
   useOrchestrationCheck,
-  useRuns,
   useSaveOrchestration,
   type CheckStep,
   type Orchestration,
   type OrchestrationInput,
 } from "./api";
+import { useRecentRuns } from "./list";
+import { isRunStatus } from "./run-status";
 import { RunStatusPill } from "./RunStatusPill";
 import { emptyStep } from "./helpers";
 import { StartRunConfirmation } from "./RunConfirmations";
@@ -55,7 +56,7 @@ export function OrchestrationEditorPage() {
   const saved = useOrchestration(id);
   const save = useSaveOrchestration(id);
   const remove = useDeleteOrchestration();
-  const runs = useRuns(id);
+  const runs = useRecentRuns(id);
   const [draft, setDraft] = useState<OrchestrationInput>(blank);
   const [loadedId, setLoadedId] = useState<number | undefined>(undefined);
   const [selected, setSelected] = useState(0);
@@ -254,14 +255,14 @@ export function OrchestrationEditorPage() {
                 {t("orchestrations.runs.recent")}
               </h2>
               <ul>
-                {(runs.data ?? []).slice(0, 5).map((run) => (
+                {(runs.data ?? []).map((run) => (
                   <li key={run.id} className="border-b border-line/60 last:border-b-0">
                     <Link
                       to="/orchestrations/runs/$runId"
-                      params={{ runId: String(run.id) }}
+                      params={{ runId: String(run.id ?? "") }}
                       className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-sunken/60"
                     >
-                      <RunStatusPill status={run.status} />
+                      {isRunStatus(run.status) && <RunStatusPill status={run.status} />}
                       <DateTime value={run.started} locale={i18n.language} />
                     </Link>
                   </li>

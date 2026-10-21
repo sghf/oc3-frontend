@@ -163,6 +163,7 @@ const orchestrationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/orchestrations",
   component: OrchestrationsPage,
+  validateSearch: parseListSearch,
 });
 
 const orchestrationRoute = createRoute({
@@ -175,6 +176,7 @@ const orchestrationRunsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/orchestrations/runs",
   component: RunsPage,
+  validateSearch: parseListSearch,
 });
 
 const orchestrationRunRoute = createRoute({

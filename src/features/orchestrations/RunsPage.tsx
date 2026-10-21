@@ -1,27 +1,139 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { DateTime } from "@/components/ui/DateTime";
 import { formatDuration } from "@/lib/format";
-import { useRuns, type Run } from "./api";
-import { elapsed } from "./helpers";
+import {
+  mergeSearch,
+  resetsScroll,
+  resolveListSearch,
+  visibleProps,
+  type ResolvedListSearch,
+} from "@/lib/list-search";
+import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import { fetchRuns, runStats, useRunList, type RunRow } from "./list";
+import { isRunStatus, RUN_STATUS_OPTIONS } from "./run-status";
 import { RunStatusPill } from "./RunStatusPill";
-import { CARD } from "./ui";
 
-/** Where a run stands: the step it is at, out of how many. */
-function progress(run: Run): string {
-  const done = run.steps.filter((step) => step.status === "succeeded").length;
-  return `${String(done)}/${String(run.steps.length)}`;
+/** The latest first, as the list was before it could be sorted. */
+const DEFAULT_SORT = ["-id"];
+
+const PROPS = [
+  "id",
+  "name",
+  "status",
+  "steps_done",
+  "step_count",
+  "current_step",
+  "started",
+  "started_by",
+  "ended",
+  "duration",
+  "message",
+  "orchestration_id",
+] as const satisfies readonly (keyof RunRow)[];
+
+const DEFAULT_COLS: string[] = [
+  "id",
+  "name",
+  "status",
+  "steps_done",
+  "started",
+  "started_by",
+  "duration",
+  "message",
+];
+
+function columns(): ListColumn<RunRow>[] {
+  return PROPS.map((prop): ListColumn<RunRow> => {
+    const base = { prop, labelKey: `orchestrations.runColumns.${prop}` };
+    switch (prop) {
+      case "id":
+      case "step_count":
+      case "orchestration_id":
+        return { ...base, family: "action", numeric: true, render: (row) => row[prop] };
+      case "current_step":
+        // Counted from 1, as the run page names its steps.
+        return {
+          ...base,
+          family: "action",
+          numeric: true,
+          render: (row) => (row.current_step === undefined ? "" : row.current_step + 1),
+        };
+      case "name":
+        return { ...base, family: "action", render: (row) => row.name };
+      case "status":
+        return {
+          ...base,
+          family: "state",
+          filter: { kind: "enum", options: RUN_STATUS_OPTIONS },
+          render: (row) => (isRunStatus(row.status) ? <RunStatusPill status={row.status} /> : null),
+        };
+      case "steps_done":
+        return {
+          ...base,
+          family: "state",
+          numeric: true,
+          render: (row) => `${String(row.steps_done ?? 0)}/${String(row.step_count ?? 0)}`,
+        };
+      case "started":
+      case "ended":
+        return {
+          ...base,
+          family: "time",
+          render: (row, locale) => <DateTime value={row[prop] ?? undefined} locale={locale} />,
+        };
+      case "duration":
+        return {
+          ...base,
+          family: "time",
+          numeric: true,
+          render: (row, locale) =>
+            row.duration === undefined ? (
+              "—"
+            ) : (
+              <span className="whitespace-nowrap">{formatDuration(row.duration, locale)}</span>
+            ),
+        };
+      case "started_by":
+        return { ...base, family: "team", render: (row) => row.started_by };
+      case "message":
+        return {
+          ...base,
+          family: "alert",
+          render: (row) => <span className="text-ink-muted">{row.message}</span>,
+        };
+    }
+  });
 }
 
-/** The runs of every orchestration, the latest first; a row opens the run. */
+/**
+ * The runs of every orchestration as a collector list — sorted, filtered and
+ * paged by the api, the columns chosen — the latest first by default; a row
+ * opens the run.
+ */
 export function RunsPage() {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const runs = useRuns();
-  const open = (id: number) => {
-    void navigate({ to: "/orchestrations/runs/$runId", params: { runId: String(id) } });
-  };
+  const { t } = useTranslation();
+  const prefs = useViewPrefs("orchestration-runs");
+  const search = resolveListSearch(
+    withSavedSearch(useSearch({ from: "/orchestrations/runs" }), prefs),
+    DEFAULT_SORT,
+  );
+  const navigate = useNavigate({ from: "/orchestrations/runs" });
+  // The progress reads both counts, whichever of the two is shown.
+  const shown = visibleProps(search.cols, DEFAULT_COLS, [...PROPS]);
+  const props = shown.includes("steps_done") ? [...shown, "step_count"] : shown;
+  const list = useRunList(search, props);
+
+  function update(next: Partial<ResolvedListSearch>) {
+    prefs.saveSearch(next);
+    void navigate({
+      search: (previous) => mergeSearch(previous, next),
+      resetScroll: resetsScroll(next),
+    });
+  }
+
   return (
     <section>
       <div className="mb-1 text-data text-ink-muted">
@@ -34,64 +146,26 @@ export function RunsPage() {
         <ObjectIcon kind="orchestration" className="h-5 w-5" />
         {t("orchestrations.runs.title")}
       </h1>
-      {runs.isPending && <p className="text-ink-muted">{t("detail.loading")}</p>}
-      {runs.isError && <p className="text-state-down">■ {runs.error.message}</p>}
-      {runs.data !== undefined && runs.data.length === 0 && (
-        <p className="text-ink-muted">{t("orchestrations.runs.empty")}</p>
-      )}
-      {runs.data !== undefined && runs.data.length > 0 && (
-        <div className={CARD}>
-          <table className="w-full border-collapse text-data">
-            <caption className="sr-only">{t("orchestrations.runs.title")}</caption>
-            <thead>
-              <tr className="border-b border-line text-left text-ink-muted">
-                <th className="px-3 py-1.5 font-medium">#</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.fields.name")}</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.runs.status")}</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.runs.steps")}</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.runs.started")}</th>
-                <th className="px-3 py-1.5 text-right font-medium">
-                  {t("orchestrations.runs.duration")}
-                </th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.runs.message")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.data.map((run) => {
-                const seconds = elapsed(run.started, run.ended);
-                return (
-                  <tr
-                    key={run.id}
-                    tabIndex={0}
-                    onClick={() => {
-                      open(run.id);
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") open(run.id);
-                    }}
-                    className="cursor-pointer border-b border-line/60 align-top last:border-b-0 hover:bg-surface-sunken/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
-                  >
-                    <td className="px-3 py-1.5 text-ink-muted tabular-nums">{run.id}</td>
-                    <td className="px-3 py-1.5 font-medium">{run.name}</td>
-                    <td className="px-3 py-1.5">
-                      <RunStatusPill status={run.status} />
-                    </td>
-                    <td className="px-3 py-1.5 tabular-nums">{progress(run)}</td>
-                    <td className="px-3 py-1.5 whitespace-nowrap">
-                      <DateTime value={run.started} locale={i18n.language} />
-                      <div className="text-ink-muted">{run.started_by}</div>
-                    </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">
-                      {seconds === undefined ? "—" : formatDuration(seconds, i18n.language)}
-                    </td>
-                    <td className="px-3 py-1.5 text-ink-muted">{run.message}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <CollectorList
+        columns={columns()}
+        defaultCols={DEFAULT_COLS}
+        rows={list.data?.rows ?? []}
+        rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
+        search={search}
+        onChange={update}
+        isPending={list.isPending}
+        isFetching={list.isFetching}
+        errorMessage={list.isError ? list.error.message : null}
+        hasMore={list.data?.hasMore ?? false}
+        total={list.data?.total}
+        exportPage={(page) => fetchRuns({ ...search, ...page }, page.cols)}
+        valueStats={runStats}
+        filterable
+        onRowOpen={(row) => {
+          if (row.id === undefined) return;
+          void navigate({ to: "/orchestrations/runs/$runId", params: { runId: String(row.id) } });
+        }}
+      />
     </section>
   );
 }

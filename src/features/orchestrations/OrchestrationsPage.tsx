@@ -1,30 +1,163 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
+import { CollectorList, type ListColumn } from "@/components/opensvc/CollectorList";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { DateTime } from "@/components/ui/DateTime";
-import { useOrchestrations, useRuns, type Run } from "./api";
+import {
+  mergeSearch,
+  resetsScroll,
+  resolveListSearch,
+  visibleProps,
+  type ResolvedListSearch,
+} from "@/lib/list-search";
+import { useViewPrefs, withSavedSearch } from "@/lib/user-prefs";
+import type { OrchestrationStep } from "./api";
+import {
+  fetchOrchestrations,
+  orchestrationStats,
+  useOrchestrationList,
+  type OrchestrationRow,
+} from "./list";
+import { isRunStatus, RUN_STATUS_OPTIONS } from "./run-status";
 import { RunStatusPill } from "./RunStatusPill";
-import { BUTTON, CARD, PRIMARY } from "./ui";
+import { BUTTON, PRIMARY } from "./ui";
+
+/** By name, as the list was before it could be sorted. */
+const DEFAULT_SORT = ["name"];
+
+const PROPS = [
+  "name",
+  "description",
+  "steps",
+  "step_count",
+  "last_run_status",
+  "last_run_started",
+  "run_count",
+  "created",
+  "updated",
+  "updated_by",
+  "id",
+] as const satisfies readonly (keyof OrchestrationRow)[];
+
+const DEFAULT_COLS: string[] = [
+  "name",
+  "description",
+  "steps",
+  "last_run_status",
+  "last_run_started",
+  "updated",
+  "updated_by",
+];
+
+/** The steps of a row, read from their JSON; none when it does not read. */
+function stepsOf(row: OrchestrationRow): OrchestrationStep[] {
+  try {
+    const steps: unknown = JSON.parse(row.steps ?? "[]");
+    return Array.isArray(steps) ? (steps as OrchestrationStep[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function columns(t: TFunction): ListColumn<OrchestrationRow>[] {
+  return PROPS.map((prop): ListColumn<OrchestrationRow> => {
+    const base = { prop, labelKey: `orchestrations.columns.${prop}` };
+    switch (prop) {
+      case "name":
+        return { ...base, family: "action", render: (row) => row.name };
+      case "description":
+        return {
+          ...base,
+          family: "action",
+          render: (row) => <span className="text-ink-muted">{row.description}</span>,
+        };
+      case "steps":
+        return {
+          ...base,
+          family: "action",
+          // The JSON of the steps does not sort; a filter reads their actions.
+          sortable: false,
+          render: (row) => (
+            <ol className="flex flex-wrap gap-x-3 gap-y-0.5">
+              {stepsOf(row).map((step, index) => (
+                <li key={index} className="whitespace-nowrap">
+                  <span className="text-ink-muted tabular-nums">{index + 1}.</span> {step.action}{" "}
+                  <span className="text-ink-muted">
+                    {t(`orchestrations.kinds.${step.kind}`, { count: 2 })}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ),
+        };
+      case "step_count":
+      case "run_count":
+      case "id":
+        return {
+          ...base,
+          family: "action",
+          numeric: true,
+          render: (row) => row[prop],
+        };
+      case "last_run_status":
+        return {
+          ...base,
+          family: "state",
+          filter: { kind: "enum", options: RUN_STATUS_OPTIONS },
+          render: (row) =>
+            isRunStatus(row.last_run_status) &&
+            row.last_run_id !== null &&
+            row.last_run_id !== undefined ? (
+              <Link
+                to="/orchestrations/runs/$runId"
+                params={{ runId: String(row.last_run_id) }}
+                className="hover:underline"
+              >
+                <RunStatusPill status={row.last_run_status} />
+              </Link>
+            ) : (
+              <span className="text-ink-muted">{t("orchestrations.neverRun")}</span>
+            ),
+        };
+      case "last_run_started":
+      case "created":
+      case "updated":
+        return {
+          ...base,
+          family: "time",
+          render: (row, locale) => <DateTime value={row[prop] ?? undefined} locale={locale} />,
+        };
+      case "updated_by":
+        return { ...base, family: "team", render: (row) => row.updated_by };
+    }
+  });
+}
 
 /**
  * The orchestrations: the plans of agent actions, step after step, that a
- * Manager writes once and runs when needed. Each row opens the editor; the last
- * run of each plan says how it went.
+ * Manager writes once and runs when needed, as a collector list — sorted,
+ * filtered and paged by the api, the columns chosen. Each row opens the
+ * editor; the last run of each plan says how it went, and opens it.
  */
 export function OrchestrationsPage() {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const list = useOrchestrations();
-  const runs = useRuns();
-  // The runs come the latest first: the first met is the last one.
-  const lastRun = new Map<number, Run>();
-  for (const run of runs.data ?? []) {
-    if (
-      run.orchestration_id !== null &&
-      run.orchestration_id !== undefined &&
-      !lastRun.has(run.orchestration_id)
-    )
-      lastRun.set(run.orchestration_id, run);
+  const { t } = useTranslation();
+  const prefs = useViewPrefs("orchestrations");
+  const search = resolveListSearch(
+    withSavedSearch(useSearch({ from: "/orchestrations" }), prefs),
+    DEFAULT_SORT,
+  );
+  const navigate = useNavigate({ from: "/orchestrations" });
+  // The last run's link needs its id, whatever the columns shown.
+  const props = [...visibleProps(search.cols, DEFAULT_COLS, [...PROPS]), "last_run_id"];
+  const list = useOrchestrationList(search, props);
+
+  function update(next: Partial<ResolvedListSearch>) {
+    prefs.saveSearch(next);
+    void navigate({
+      search: (previous) => mergeSearch(previous, next),
+      resetScroll: resetsScroll(next),
+    });
   }
 
   return (
@@ -47,91 +180,29 @@ export function OrchestrationsPage() {
         </Link>
       </div>
       <p className="mb-3 max-w-3xl text-ink-muted">{t("orchestrations.intro")}</p>
-      {list.isPending && <p className="text-ink-muted">{t("detail.loading")}</p>}
-      {list.isError && <p className="text-state-down">■ {list.error.message}</p>}
-      {list.data !== undefined && list.data.length === 0 && (
-        <p className="text-ink-muted">{t("orchestrations.empty")}</p>
-      )}
-      {list.data !== undefined && list.data.length > 0 && (
-        <div className={CARD}>
-          <table className="w-full border-collapse text-data">
-            <caption className="sr-only">{t("orchestrations.title")}</caption>
-            <thead>
-              <tr className="border-b border-line text-left text-ink-muted">
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.fields.name")}</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.fields.steps")}</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.fields.lastRun")}</th>
-                <th className="px-3 py-1.5 font-medium">{t("orchestrations.fields.updated")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.data.map((o) => {
-                const run = lastRun.get(o.id);
-                return (
-                  <tr
-                    key={o.id}
-                    tabIndex={0}
-                    onClick={(event) => {
-                      if (event.target instanceof Element && event.target.closest("a") !== null)
-                        return;
-                      void navigate({
-                        to: "/orchestrations/$orchestrationId",
-                        params: { orchestrationId: String(o.id) },
-                      });
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.target !== event.currentTarget || event.key !== "Enter") return;
-                      void navigate({
-                        to: "/orchestrations/$orchestrationId",
-                        params: { orchestrationId: String(o.id) },
-                      });
-                    }}
-                    className="cursor-pointer border-b border-line/60 align-top last:border-b-0 hover:bg-surface-sunken/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
-                  >
-                    <td className="px-3 py-1.5">
-                      <div className="font-medium">{o.name}</div>
-                      {o.description !== "" && (
-                        <div className="text-ink-muted">{o.description}</div>
-                      )}
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <ol className="flex flex-wrap gap-x-3 gap-y-0.5">
-                        {o.steps.map((step, index) => (
-                          <li key={index} className="whitespace-nowrap">
-                            <span className="text-ink-muted tabular-nums">{index + 1}.</span>{" "}
-                            {step.action}{" "}
-                            <span className="text-ink-muted">
-                              {t(`orchestrations.kinds.${step.kind}`, { count: 2 })}
-                            </span>
-                          </li>
-                        ))}
-                      </ol>
-                    </td>
-                    <td className="px-3 py-1.5 whitespace-nowrap">
-                      {run === undefined ? (
-                        <span className="text-ink-muted">{t("orchestrations.neverRun")}</span>
-                      ) : (
-                        <Link
-                          to="/orchestrations/runs/$runId"
-                          params={{ runId: String(run.id) }}
-                          className="inline-flex items-center gap-2 hover:underline"
-                        >
-                          <RunStatusPill status={run.status} />
-                          <DateTime value={run.started} locale={i18n.language} />
-                        </Link>
-                      )}
-                    </td>
-                    <td className="px-3 py-1.5 whitespace-nowrap text-ink-muted">
-                      <DateTime value={o.updated} locale={i18n.language} />
-                      <div>{o.updated_by}</div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <CollectorList
+        columns={columns(t)}
+        defaultCols={DEFAULT_COLS}
+        rows={list.data?.rows ?? []}
+        rowId={(row) => (row.id === undefined ? undefined : String(row.id))}
+        search={search}
+        onChange={update}
+        isPending={list.isPending}
+        isFetching={list.isFetching}
+        errorMessage={list.isError ? list.error.message : null}
+        hasMore={list.data?.hasMore ?? false}
+        total={list.data?.total}
+        exportPage={(page) => fetchOrchestrations({ ...search, ...page }, page.cols)}
+        valueStats={orchestrationStats}
+        filterable
+        onRowOpen={(row) => {
+          if (row.id === undefined) return;
+          void navigate({
+            to: "/orchestrations/$orchestrationId",
+            params: { orchestrationId: String(row.id) },
+          });
+        }}
+      />
     </section>
   );
 }

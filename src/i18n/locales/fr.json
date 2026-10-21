@@ -4294,7 +4294,6 @@
     "intro": "Des plans d'actions d'agent menés étape après étape sur des services, instances, nœuds ou clusters, choisis un par un ou par un filterset. Une étape démarre quand toutes les cibles de la précédente ont réussi ; le premier échec arrête l'exécution.",
     "new": "Nouveau workflow",
     "newTitle": "Nouveau workflow",
-    "empty": "Aucun workflow pour l'instant.",
     "neverRun": "jamais exécuté",
     "unsaved": "modifications non enregistrées",
     "save": "Enregistrer",
@@ -4307,10 +4306,7 @@
     "failureRule": "Une étape échoue quand l'une de ses cibles échoue, est refusée, est annulée ou dépasse son délai. L'exécution s'arrête alors : les étapes suivantes ne sont pas menées.",
     "fields": {
       "name": "Nom",
-      "description": "Description",
-      "steps": "Étapes",
-      "lastRun": "Dernière exécution",
-      "updated": "Modifié"
+      "description": "Description"
     },
     "kinds": {
       "service_one": "service",
@@ -4419,13 +4415,9 @@
     },
     "runs": {
       "title": "Exécutions",
-      "empty": "Aucune exécution pour l'instant.",
       "recent": "Exécutions récentes",
       "status": "État",
-      "steps": "Étapes faites",
-      "started": "Démarrée",
-      "duration": "Durée",
-      "message": "Message"
+      "duration": "Durée"
     },
     "run": {
       "stepOf": "étape {{n}} sur {{count}}",
@@ -4454,6 +4446,33 @@
       "continue": "Acquitter et continuer",
       "continueHint": "Accepter l'issue de cette étape, avec un commentaire, et mener les étapes suivantes",
       "acknowledgedBy": "Acquittée par {{by}}"
+    },
+    "columns": {
+      "name": "Nom",
+      "description": "Description",
+      "steps": "Étapes",
+      "step_count": "Nombre d'étapes",
+      "last_run_status": "Dernière exécution",
+      "last_run_started": "Début de la dernière exécution",
+      "run_count": "Exécutions",
+      "created": "Créé",
+      "updated": "Modifié",
+      "updated_by": "Modifié par",
+      "id": "Id"
+    },
+    "runColumns": {
+      "id": "N°",
+      "name": "Workflow",
+      "status": "État",
+      "steps_done": "Étapes faites",
+      "step_count": "Nombre d'étapes",
+      "current_step": "Étape en cours",
+      "started": "Lancée",
+      "started_by": "Lancée par",
+      "ended": "Terminée",
+      "duration": "Durée",
+      "message": "Message",
+      "orchestration_id": "Id du workflow"
     }
   },
   "notes": {

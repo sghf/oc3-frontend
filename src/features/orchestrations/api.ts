@@ -87,17 +87,6 @@ async function fail(error: unknown): Promise<never> {
   throw new Error(problemText(error));
 }
 
-export function useOrchestrations() {
-  return useQuery({
-    queryKey: ["orchestrations"],
-    queryFn: async () => {
-      const { data, error } = await api.GET("/orchestrations");
-      if (error !== undefined) return fail(error);
-      return data.data;
-    },
-  });
-}
-
 export function useOrchestration(id: number | undefined) {
   return useQuery({
     queryKey: ["orchestration", id],
@@ -188,19 +177,6 @@ export function useStartRun() {
     onSuccess: async (run) => {
       queryClient.setQueryData(["orchestration-run", run.id], run);
       await queryClient.invalidateQueries({ queryKey: ["orchestration-runs"] });
-    },
-  });
-}
-
-export function useRuns(orchestrationId?: number) {
-  return useQuery({
-    queryKey: ["orchestration-runs", orchestrationId ?? "all"],
-    queryFn: async () => {
-      const { data, error } = await api.GET("/orchestration_runs", {
-        params: { query: { orchestration_id: orchestrationId, limit: 100 } },
-      });
-      if (error !== undefined) return fail(error);
-      return data.data;
     },
   });
 }

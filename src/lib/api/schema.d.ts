@@ -4754,8 +4754,12 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description The runs of the orchestrations, the latest first, with the summary of their
-     *     steps but not their targets. Manager only.
+     * @description The runs of the orchestrations, the latest first unless sorted otherwise,
+     *     as a collector list: props, filters, sort, pagination and stats. Each with
+     *     the count of its steps and of those done, and its duration; the runs of
+     *     one orchestration with the filter orchestration_id:eq:<id>. The steps and
+     *     targets of a run are read by GET /orchestration_runs/{run_id}. Manager
+     *     only.
      */
     get: operations["GetOrchestrationRuns"];
     put?: never;
@@ -4875,7 +4879,12 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description The orchestrations, by name, each with its steps. Manager only. */
+    /**
+     * @description The orchestrations, by name unless sorted otherwise, as a collector list:
+     *     props, filters, sort, pagination and stats. Each with the JSON of its
+     *     steps (a filter on steps reads the actions of the steps) and its last
+     *     run. Manager only.
+     */
     get: operations["GetOrchestrations"];
     put?: never;
     /**
@@ -8580,7 +8589,34 @@ export interface components {
       steps: components["schemas"]["OrchestrationStep"][];
     };
     OrchestrationListResponse: {
-      data: components["schemas"]["Orchestration"][];
+      data:
+        | components["schemas"]["OrchestrationRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description An orchestration, as listed. Every property is optional: the `props` query
+     *     parameter selects which columns the server returns.
+     */
+    OrchestrationRow: {
+      created?: string;
+      description?: string;
+      id?: number;
+      last_run_id?: number | null;
+      last_run_started?: string | null;
+      /** @description The status of its last run, null when never run. */
+      last_run_status?: string | null;
+      name?: string;
+      run_count?: number;
+      step_count?: number;
+      /** @description The steps, as JSON (an array of OrchestrationStep). */
+      steps?: string;
+      updated?: string;
+      updated_by?: string;
     };
     OrchestrationRun: {
       current_step: number;
@@ -8603,7 +8639,35 @@ export interface components {
       comment: string;
     };
     OrchestrationRunListResponse: {
-      data: components["schemas"]["OrchestrationRun"][];
+      data:
+        | components["schemas"]["OrchestrationRunRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description A run, as listed. Every property is optional: the `props` query parameter
+     *     selects which columns the server returns.
+     */
+    OrchestrationRunRow: {
+      current_step?: number;
+      /** @description Seconds from its start to its end, or to now while it runs. */
+      duration?: number;
+      ended?: string | null;
+      id?: number;
+      message?: string;
+      name?: string;
+      orchestration_id?: number | null;
+      started?: string;
+      started_by?: string;
+      /** @description running, succeeded, failed or stopped. */
+      status?: string;
+      step_count?: number;
+      /** @description Its steps succeeded, or failed and acknowledged. */
+      steps_done?: number;
     };
     /** @enum {string} */
     OrchestrationRunStatus: "running" | "succeeded" | "failed" | "stopped";
@@ -24871,10 +24935,57 @@ export interface operations {
   GetOrchestrationRuns: {
     parameters: {
       query?: {
-        /** @description The runs of this orchestration only */
-        orchestration_id?: number;
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
         /** @description The maximum number of entries to return. 0 means no limit. */
         limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
       };
       header?: never;
       path?: never;
@@ -24891,6 +25002,7 @@ export interface operations {
           "application/json": components["schemas"]["OrchestrationRunListResponse"];
         };
       };
+      400: components["responses"]["400"];
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       500: components["responses"]["500"];
@@ -25014,7 +25126,59 @@ export interface operations {
   };
   GetOrchestrations: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -25030,6 +25194,7 @@ export interface operations {
           "application/json": components["schemas"]["OrchestrationListResponse"];
         };
       };
+      400: components["responses"]["400"];
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       500: components["responses"]["500"];

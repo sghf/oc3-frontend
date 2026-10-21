@@ -146,6 +146,7 @@ export function CollectorList<T>({
   reselect,
   valueStats,
   filtersetSource,
+  onRowOpen,
 }: {
   columns: ListColumn<T>[];
   /** Props shown as long as the user has not chosen their columns. */
@@ -210,6 +211,11 @@ export function CollectorList<T>({
    * offers to save the active filters as a filterset (see SaveAsFilterset).
    */
   filtersetSource?: FiltersetSource;
+  /**
+   * What a row opens, in place of the detail panel of `search.sel`: a page of its
+   * own, say. The row then announces no dialog.
+   */
+  onRowOpen?: (row: T) => void;
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
@@ -1049,6 +1055,10 @@ export function CollectorList<T>({
                 {table.getRowModel().rows.map((row) => {
                   const id = rowId(row.original);
                   const selected = id !== undefined && id === search.sel;
+                  const openRow = () => {
+                    if (onRowOpen === undefined) onChange({ sel: id });
+                    else onRowOpen(row.original);
+                  };
                   return (
                     <tr
                       key={row.id}
@@ -1056,15 +1066,18 @@ export function CollectorList<T>({
                       // a cell may hold its own buttons, and a button inside a button
                       // would be neither valid nor usable from the keyboard.
                       tabIndex={0}
-                      aria-haspopup="dialog"
-                      onClick={() => {
-                        onChange({ sel: id });
+                      aria-haspopup={onRowOpen === undefined ? "dialog" : undefined}
+                      onClick={(event) => {
+                        // A link in a cell keeps its own destination.
+                        if (event.target instanceof Element && event.target.closest("a") !== null)
+                          return;
+                        openRow();
                       }}
                       onKeyDown={(event) => {
                         if (event.target !== event.currentTarget) return;
                         if (event.key !== "Enter" && event.key !== " ") return;
                         event.preventDefault();
-                        onChange({ sel: id });
+                        openRow();
                       }}
                       aria-current={selected ? "true" : undefined}
                       className={`h-(--row-height) cursor-pointer border-b border-line last:border-b-0 hover:bg-surface-sunken focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-ring) ${
