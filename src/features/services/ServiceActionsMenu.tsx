@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ActionsMenu,
   type ActionEntry,
@@ -6,8 +7,8 @@ import {
   type DataActionEntry,
 } from "@/components/opensvc/ActionsMenu";
 import { objectDataActions } from "@/components/opensvc/object-data-actions";
+import { inBatches } from "@/lib/api/batch";
 import { api } from "@/lib/api/client";
-import { problemText } from "@/lib/api/problem";
 
 /**
  * Agent actions of a whole service, the service entries of the historical collector
@@ -49,21 +50,30 @@ export function ServiceActionsMenu({
   onCompare?: () => void;
   onDeleted?: (ids: string[]) => void;
 }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // A batch answer as the report wants it: the objects done, and why the others failed.
+  const report = (results: { item: ActionTarget; ok: boolean; message: string }[]) => ({
+    done: results.flatMap((r) => (r.ok ? [r.item] : [])),
+    failures: results.flatMap((r) =>
+      r.ok ? [] : [t("services.actions.failure", { name: r.item.name, message: r.message })],
+    ),
+  });
   const dataActions: DataActionEntry[] = [
     ...objectDataActions("service", queryClient),
     {
       key: "delete",
       separatorBefore: true,
       privileges: [],
-      run: async (target) => {
-        // Cascades on the collector side: instances, resources, alerts, tags,
-        // compliance attachments and the history of the service go with it.
-        const { error } = await api.DELETE("/services/{svc_id}", {
-          params: { path: { svc_id: target.id } },
-        });
-        return error === undefined ? null : problemText(error);
-      },
+      // Cascades on the collector side: instances, resources, alerts, tags,
+      // compliance attachments and the history of the service go with it. By
+      // batches: one request per few hundred services.
+      runAll: async (targets) =>
+        report(
+          await inBatches(targets, (batch) =>
+            api.POST("/services/delete", { body: { ids: batch.map((target) => target.id) } }),
+          ),
+        ),
       onDone: (done) => {
         if (done.length === 0) return;
         void queryClient.invalidateQueries({ queryKey: ["services"] });

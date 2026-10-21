@@ -30,7 +30,6 @@ import { CheckActionsMenu } from "./CheckActionsMenu";
 import { CheckDetailPanel } from "./CheckDetailPanel";
 
 type CheckRow = components["schemas"]["CheckRow"];
-type CheckKey = components["schemas"]["CheckKey"];
 
 /** By node, then type and instance, as the historical table. */
 const DEFAULT_SORT = ["nodes.nodename", "chk_type", "chk_instance"];
@@ -196,21 +195,14 @@ export function ChecksPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleted, setDeleted] = useState<string[]>([]);
 
-  // Names and keys from the page on display: the actions read those of the checks
-  // of the following pages a selection extends to.
+  // Names from the page on display, for the reports of the actions; a check of
+  // the following pages a selection extends to is named by its id.
   const names = new Map<string, string>();
-  const keys = new Map<string, CheckKey>();
   for (const row of data?.rows ?? []) {
     if (row.id === undefined || row.node_id === undefined || row.chk_type === undefined) continue;
     const id = String(row.id);
     const instance = row.chk_instance ?? "";
     names.set(id, `${row["nodes.nodename"] ?? row.node_id} ${row.chk_type}:${instance}`);
-    keys.set(id, {
-      node_id: row.node_id,
-      svc_id: row.svc_id ?? "",
-      chk_type: row.chk_type,
-      chk_instance: instance,
-    });
   }
 
   /** Ids of the whole selection, filters included, without pagination. */
@@ -244,7 +236,6 @@ export function ChecksPage() {
         {/* On the rows checked in the list; nothing checked, no menu. */}
         <CheckActionsMenu
           checks={selectedIds.map((id) => ({ id, name: names.get(id) ?? id }))}
-          keys={keys}
           onDeleted={(ids) => {
             setDeleted(ids);
             if (search.sel !== undefined && ids.includes(search.sel)) update({ sel: undefined });

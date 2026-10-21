@@ -92,6 +92,8 @@ export interface DataActionEntry {
   runAll?: (
     targets: ActionTarget[],
     choice: ComboboxOption | undefined,
+    values: Readonly<Record<string, number>>,
+    comment: string,
   ) => Promise<{ done: ActionTarget[]; failures: string[] }>;
   /** Called with the objects the action succeeded on. */
   onDone?: (done: ActionTarget[]) => void;
@@ -255,7 +257,7 @@ export function ActionsMenu({
       const done: ActionTarget[] = [];
       const failures: string[] = [];
       if (entry.runAll !== undefined) {
-        const result = await entry.runAll(targets, choice);
+        const result = await entry.runAll(targets, choice, values, comment);
         done.push(...result.done);
         failures.push(...result.failures);
       } else if (entry.run !== undefined) {

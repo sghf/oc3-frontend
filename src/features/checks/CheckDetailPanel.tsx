@@ -121,18 +121,6 @@ export function CheckDetailPanel({
     },
   });
 
-  const keys = new Map<string, components["schemas"]["CheckKey"]>();
-  if (
-    check?.node_id !== undefined &&
-    check.chk_type !== undefined &&
-    check.chk_instance !== undefined
-  )
-    keys.set(String(check.id), {
-      node_id: check.node_id,
-      svc_id: check.svc_id ?? "",
-      chk_type: check.chk_type,
-      chk_instance: check.chk_instance,
-    });
   const title =
     check?.chk_type === undefined
       ? label === ""
@@ -154,11 +142,7 @@ export function CheckDetailPanel({
       errorMessage={isError ? error.message : null}
       titleActions={
         checkId !== undefined && check !== null && check !== undefined ? (
-          <CheckActionsMenu
-            checks={[{ id: checkId, name: title }]}
-            keys={keys}
-            onDeleted={onClose}
-          />
+          <CheckActionsMenu checks={[{ id: checkId, name: title }]} onDeleted={onClose} />
         ) : undefined
       }
     />

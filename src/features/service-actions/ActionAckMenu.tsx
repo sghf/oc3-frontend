@@ -1,11 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ActionsMenu,
   type ActionTarget,
   type DataActionEntry,
 } from "@/components/opensvc/ActionsMenu";
+import { inBatches } from "@/lib/api/batch";
 import { api } from "@/lib/api/client";
-import { problemText } from "@/lib/api/problem";
 
 /**
  * Acknowledging failed actions of the agents, the historical "Data actions › On
@@ -16,21 +17,30 @@ import { problemText } from "@/lib/api/problem";
  * which its "action errors" alert follows.
  */
 export function ActionAckMenu({ actions }: { actions: ActionTarget[] }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // A batch answer as the report wants it: the objects done, and why the others failed.
+  const report = (results: { item: ActionTarget; ok: boolean; message: string }[]) => ({
+    done: results.flatMap((r) => (r.ok ? [r.item] : [])),
+    failures: results.flatMap((r) =>
+      r.ok ? [] : [t("serviceActions.actions.failure", { name: r.item.name, message: r.message })],
+    ),
+  });
   const entry: DataActionEntry = {
     key: "acknowledge",
     privileges: [],
     tone: "change",
     comment: true,
-    run: async (target, _choice, _values, comment) => {
-      const { data, error } = await api.POST("/services_actions/{action_id}", {
-        params: { path: { action_id: Number(target.id) } },
-        body: { ack: 1, acked_comment: comment },
-      });
-      if (error !== undefined) return problemText(error);
+    // By batches, the errors of each instance counted once per batch.
+    runAll: async (targets, _choice, _values, comment) => {
+      const results = await inBatches(targets, (batch) =>
+        api.POST("/services_actions/ack", {
+          body: { ids: batch.map((target) => Number(target.id)), acked_comment: comment },
+        }),
+      );
       // Skipped by the API, its answer saying why: not failed, or acknowledged
       // already. Reported with the refusals, as nothing changed.
-      return data.info?.startsWith("skip") === true ? data.info : null;
+      return report(results.map((r) => (r.message.startsWith("skip") ? { ...r, ok: false } : r)));
     },
     onDone: (done) => {
       if (done.length === 0) return;

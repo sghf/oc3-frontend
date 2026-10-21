@@ -1,12 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ActionsMenu,
   type ActionEntry,
   type ActionTarget,
   type DataActionEntry,
 } from "@/components/opensvc/ActionsMenu";
+import { inBatches } from "@/lib/api/batch";
 import { api } from "@/lib/api/client";
-import { problemText } from "@/lib/api/problem";
 import { fromInstanceId } from "./instance-id";
 
 /**
@@ -61,7 +62,15 @@ export function InstanceActionsMenu({
   /** Ids of the instances deleted, as given in `instances`, containers included. */
   onDeleted?: (ids: string[]) => void;
 }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // A batch answer as the report wants it: the objects done, and why the others failed.
+  const report = (results: { item: ActionTarget; ok: boolean; message: string }[]) => ({
+    done: results.flatMap((r) => (r.ok ? [r.item] : [])),
+    failures: results.flatMap((r) =>
+      r.ok ? [] : [t("instances.actions.failure", { name: r.item.name, message: r.message })],
+    ),
+  });
   const targets = [
     ...new Map(
       instances.map((target) => {
@@ -86,13 +95,23 @@ export function InstanceActionsMenu({
     {
       key: "delete",
       privileges: [],
-      run: async (target) => {
-        const key = fromInstanceId(target.id);
-        if (key === null) return "invalid instance id";
-        const { error } = await api.DELETE("/services/{svc_id}/instances/{node_id}", {
-          params: { path: { svc_id: key.svcId, node_id: key.nodeId } },
+      runAll: async (targets) => {
+        const valid = targets.flatMap((target) => {
+          const key = fromInstanceId(target.id);
+          return key === null ? [] : [{ target, key }];
         });
-        return error === undefined ? null : problemText(error);
+        const invalid = targets
+          .filter((target) => fromInstanceId(target.id) === null)
+          .map((target) => ({ item: target, ok: false, message: "invalid instance id" }));
+        // By batches: one request per few hundred instances.
+        const results = await inBatches(valid, (batch) =>
+          api.POST("/services_instances/delete", {
+            body: {
+              instances: batch.map(({ key }) => ({ svc_id: key.svcId, node_id: key.nodeId })),
+            },
+          }),
+        );
+        return report([...results.map((r) => ({ ...r, item: r.item.target })), ...invalid]);
       },
       onDone: (done) => {
         if (done.length === 0) return;
