@@ -10,7 +10,7 @@ import {
 } from "react";
 import { CloseIcon, PanelSideIcon } from "./icons";
 import { usePanelSide } from "./panel-side";
-import { RAIL_VISIBLE, RESIZE_VISIBLE, RESIZED_WIDTH } from "./slide-over-layout";
+import { RESIZE_VISIBLE, RESIZED_WIDTH, ROOM_BESIDE } from "./slide-over-layout";
 import { useShortcut } from "@/lib/shortcuts";
 import { panelOpened } from "./slide-over-open";
 import { leaveWidth, takeOverWidth } from "./slide-over-resize";
@@ -26,8 +26,8 @@ import { MODAL_BACKDROP } from "./Modal";
 
 /**
  * Side panel sliding in from an edge of the window: the right one, or the left one
- * when the shell says so (`PanelSideContext`), the panel then mirrored — its rail
- * against the left edge, its handle on its right edge. The shell may also give the
+ * when the shell says so (`PanelSideContext`), the panel then mirrored — its handle
+ * on its right edge. The shell may also give the
  * button, in the header, that moves every panel to the other edge.
  *
  * Not modal: the table stays readable and usable while it is open. It stays mounted
@@ -67,7 +67,7 @@ export function SlideOver({
   closeOnOutsideClick = true,
   actions,
   heading,
-  rail,
+  reopenable = false,
   resizeLabel,
   children,
 }: {
@@ -99,20 +99,16 @@ export function SlideOver({
    */
   heading?: ReactNode;
   /**
-   * A zone of its own against the window's edge, over its whole height: a history
-   * of what it showed, say. Against the edge of the window, it stays where it is
-   * when the record zone changes width. Its width adds to the panel's. Shown only while the panel is open, and only
-   * where the window is wider than the panel (`RAIL_VISIBLE`); the caller places a
-   * fallback in the header for the narrower windows. A click in it is a click in
-   * the panel: it does not close it.
+   * A record panel, which the "p" key reopens (`PanelAnchor`) and puts away: a form
+   * being filled is not closed by a stray key.
    */
-  rail?: ReactNode;
+  reopenable?: boolean;
   /**
    * Name of the handle on the inner edge — the left one of a panel on the right —
    * which makes the panel resizable: dragged
    * with the mouse, or moved with the arrow keys once focused; a double-click, or
    * Enter, gives the default width back. The handle is the left edge of the whole
-   * panel, `rail` included, and the width it sets is that of the record zone. It does not get narrower than its content
+   * panel. It does not get narrower than its content
    * allows without a horizontal scrollbar (`contentFloor`). The width is kept for every panel of the
    * same `size` (`slide-over-width.ts`). Without a name, no handle.
    */
@@ -122,8 +118,6 @@ export function SlideOver({
   const { side, switchSide, switchLabel } = usePanelSide();
   const left = side === "left";
   const panel = useRef<HTMLDivElement>(null);
-  // The two zones of the panel: the record, and what stands on its right (`rail`).
-  const railZone = useRef<HTMLDivElement>(null);
   const main = useRef<HTMLDivElement>(null);
   const opener = useRef<Element | null>(null);
   const mounted = useRef(false);
@@ -138,15 +132,11 @@ export function SlideOver({
   // the drag starts.
   const dragFloor = useRef<number | null>(null);
 
-  /**
-   * The edge follows the pointer: the panel is anchored to its edge of the window.
-   * The width chosen is that of the record zone; the rail keeps its own.
-   */
+  /** The edge follows the pointer: the panel is anchored to its edge of the window. */
   function onHandlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     if (dragFloor.current === null) return;
-    const railWidth = railZone.current?.offsetWidth ?? 0;
     const reach = left ? event.clientX : window.innerWidth - event.clientX;
-    setPanelWidth(size, reach - railWidth, false, dragFloor.current);
+    setPanelWidth(size, reach, false, dragFloor.current);
   }
 
   function onHandlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -194,7 +184,7 @@ export function SlideOver({
     setFit(null);
   }
 
-  // Widens the record zone when its content does not fit: a width chosen on a
+  // Widens the panel when its content does not fit: a width chosen on a
   // record with little to show would otherwise squeeze the next one. Measured once
   // the panel has settled, then each time its content changes — data arriving,
   // another tab. The panel only grows while the same record is on display: it does
@@ -238,11 +228,9 @@ export function SlideOver({
     };
   }, [open]);
 
-  // "p" opens the record panel from the keyboard (`PanelAnchor`) and puts it away
-  // again. Only a panel with a rail — a record, with its history — answers it: a
-  // form being filled is not closed by a stray key.
+  // "p" opens the record panel from the keyboard (`PanelAnchor`) and puts it away again.
   useShortcut("p", () => {
-    if (!open || rail === undefined) return false;
+    if (!open || !reopenable) return false;
     onClose();
     return true;
   });
@@ -316,9 +304,9 @@ export function SlideOver({
           ? undefined
           : ({ "--panel-width": `${String(width)}px` } as CSSProperties)
       }
-      // As wide as its two zones, within the window: the record zone gives way first.
+      // As wide as its content, within the window.
       className={`fixed inset-y-0 z-10 flex max-w-full border-line bg-surface-raised shadow-lg transition-transform duration-200 ease-out ${
-        left ? "left-0 flex-row-reverse border-r" : "right-0 border-l"
+        left ? "left-0 border-r" : "right-0 border-l"
       } ${open ? "translate-x-0" : left ? "-translate-x-full" : "translate-x-full"}`}
     >
       <div
@@ -341,7 +329,7 @@ export function SlideOver({
               type="button"
               onClick={switchSide}
               title={switchLabel}
-              className={`h-7 w-7 items-center justify-center rounded-(--radius-control) border border-line text-ink-muted hover:text-ink ${RAIL_VISIBLE[size]}`}
+              className={`h-7 w-7 items-center justify-center rounded-(--radius-control) border border-line text-ink-muted hover:text-ink ${ROOM_BESIDE[size]}`}
             >
               <PanelSideIcon side={left ? "right" : "left"} />
               <span className="sr-only">{switchLabel}</span>
@@ -360,11 +348,6 @@ export function SlideOver({
         {subheader}
         <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
       </div>
-      {open && rail !== undefined && (
-        <div ref={railZone} className={`shrink-0 flex-col ${RAIL_VISIBLE[size]}`}>
-          {rail}
-        </div>
-      )}
       {open && resizeLabel !== undefined && (
         <div
           role="separator"

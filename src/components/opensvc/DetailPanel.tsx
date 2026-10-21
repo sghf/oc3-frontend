@@ -11,9 +11,7 @@ import { problemText } from "@/lib/api/problem";
 import { matchesPattern } from "@/lib/pattern";
 import { BookmarkButton } from "./BookmarkButton";
 import { FlashScope, FlashValue } from "./Flash";
-import { PanelHistoryRail } from "./PanelHistory";
 import { PanelTitle } from "./PanelTitle";
-import { recordKey } from "./panel-history";
 import { BOOKMARK_KINDS } from "./bookmark-kinds";
 
 export interface DetailField<T> {
@@ -568,7 +566,7 @@ export function DetailPanel<T>({
           actions={titleActions}
         />
       }
-      rail={<PanelHistoryRail currentKey={recordKey(kind, recordId)} />}
+      reopenable
       actions={bookmarkable ? <BookmarkButton kind={kind} id={recordId} /> : undefined}
     >
       {/* Another record brings other values, which are not updates to flash. */}

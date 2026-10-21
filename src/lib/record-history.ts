@@ -106,17 +106,14 @@ export function useRecordHistory() {
     entries,
     /**
      * Notes that a record is shown. It enters the history with the time it is, or,
-     * already listed, takes that time and so comes back in front. With `touch`
-     * false, a record already listed keeps its time and its place: what a record
-     * picked in the history itself asks for, so that the list does not move under
-     * the pointer.
+     * already listed, takes that time and so comes back in front.
      */
-    record: (kind: string, id: string, touch = true) => {
+    record: (kind: string, id: string) => {
       if (user === "") return;
       const now = Date.now();
       const records = current(user, now);
       const listed = records.find((e) => e.kind === kind && e.id === id);
-      if (listed !== undefined && (!touch || now - listed.at < HISTORY_RETOUCH_MS)) return;
+      if (listed !== undefined && now - listed.at < HISTORY_RETOUCH_MS) return;
       write({
         user,
         records: [{ kind, id, at: now }, ...records.filter(other(kind, id))].slice(0, HISTORY_SIZE),

@@ -1,10 +1,10 @@
+import { useSyncExternalStore } from "react";
 import { useNow } from "@/lib/use-now";
 import type { PeekStep } from "@/lib/peek-trail";
 import { useRecordHistory } from "@/lib/record-history";
 import type { ObjectKind } from "./ObjectIcon";
 import { isPeekStep } from "./panel-trail";
 import { useObjectLabels } from "./object-label";
-import { usePeek } from "./use-peek";
 
 export const stepKey = (step: PeekStep) => `${step.kind}:${step.id}`;
 
@@ -61,6 +61,35 @@ function kindRank(kind: ObjectKind): number {
   return rank === -1 ? KIND_ORDER.length : rank;
 }
 
+/** The heading of a kind of record: the name of its list in the menu. */
+const KIND_LABEL: Partial<Record<ObjectKind, string>> = {
+  node: "nav.nodes",
+  cluster: "nav.clusters",
+  service: "nav.services",
+  instance: "nav.instances",
+  resource: "nav.resources",
+  network: "nav.networks",
+  disk: "nav.disks",
+  app: "nav.apps",
+  tag: "nav.tags",
+  moduleset: "nav.modulesets",
+  ruleset: "nav.rulesets",
+  safe: "nav.safe",
+  user: "nav.users",
+  group: "nav.groups",
+  filterset: "nav.filtersets",
+  form: "nav.forms",
+  metric: "nav.metrics",
+  chart: "nav.charts",
+  report: "nav.reports",
+};
+
+/** The name of a kind of record, as its list in the menu has it. */
+export function kindLabel(kind: ObjectKind, t: (key: string) => string): string {
+  const label = KIND_LABEL[kind];
+  return label === undefined ? kind : t(label);
+}
+
 /**
  * A group of the history: a time period, or a kind of object, by the grouping
  * chosen. `key` is unique among the groups of either grouping.
@@ -73,20 +102,31 @@ export type HistoryGroup =
 const TICK_MS = 30 * 1000;
 
 /**
- * The record last picked in the history itself. The panel title, which records
- * every record shown, leaves that one where it stands (`openedFromHistory`): the
- * list must not move under the pointer of who is going through it.
+ * The record a panel displays, as `recordKey` names it, empty when none is open:
+ * the history marks it among the records shown recently.
  */
-let picked: { key: string; at: number } | null = null;
+let shown = "";
+const shownListeners = new Set<() => void>();
 
-/** Long enough for the panel to mount and record, too short for another gesture. */
-const PICK_MS = 2000;
-
-export function openedFromHistory(key: string): boolean {
-  return picked !== null && picked.key === key && performance.now() - picked.at < PICK_MS;
+/** Notes the record a panel displays, or "" when it closes (`PanelTitle`). */
+export function setShownRecord(key: string): void {
+  if (key === shown) return;
+  shown = key;
+  for (const listener of shownListeners) listener();
 }
 
-/** An entry of the history, as the side panel and the menu show it. */
+/** The record a panel displays, "" when none does. */
+export function useShownRecord(): string {
+  return useSyncExternalStore(
+    (listener) => {
+      shownListeners.add(listener);
+      return () => shownListeners.delete(listener);
+    },
+    () => shown,
+  );
+}
+
+/** An entry of the history, as the search palette proposes it. */
 export interface HistoryEntry {
   key: string;
   step: PeekStep & { kind: ObjectKind };
@@ -102,12 +142,11 @@ export interface HistoryEntry {
  * The panel history, ready to be shown: the records displayed in this browser tab
  * during the last week, the most recently shown first, named, grouped by how long ago they were
  * shown or, with `grouping` "kind", by kind of object in the order of the menu —
- * only the groups that hold a record — and what opens one, removes one or clears
- * them all. Opening one from here leaves it where it stands.
+ * only the groups that hold a record — and what removes one or clears them all.
+ * One is opened as any record (`usePeek`), and comes back in front.
  */
 export function usePanelHistory(currentKey: string, grouping: "time" | "kind" = "time") {
   const history = useRecordHistory();
-  const peek = usePeek();
   const now = useNow(TICK_MS);
   const records = history.entries.filter((record): record is typeof record & { kind: ObjectKind } =>
     isPeekStep(record),
@@ -143,10 +182,6 @@ export function usePanelHistory(currentKey: string, grouping: "time" | "kind" = 
     entries,
     groups,
     now,
-    open: (entry: HistoryEntry) => {
-      picked = { key: entry.key, at: performance.now() };
-      peek(entry.step.kind, entry.step.id);
-    },
     remove: (entry: HistoryEntry) => {
       history.remove(entry.step.kind, entry.step.id);
     },

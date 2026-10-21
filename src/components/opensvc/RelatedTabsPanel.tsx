@@ -8,10 +8,8 @@ import type { ObjectKind } from "./ObjectIcon";
 import { RelatedCount } from "./RelatedCount";
 import { BookmarkButton } from "./BookmarkButton";
 import { BOOKMARK_KINDS } from "./bookmark-kinds";
-import { PanelHistoryRail } from "./PanelHistory";
 import { FlashScope } from "./Flash";
 import { PanelTitle } from "./PanelTitle";
-import { recordKey } from "./panel-history";
 import { PROPERTIES_TAB, type RelatedTab, type RelatedTabGroup } from "./related-tabs";
 import { RelatedTileNav, type ResolvedGroup } from "./RelatedTileNav";
 
@@ -100,11 +98,10 @@ export function RelatedTabsPanel({
           title={title}
           recordId={objectId}
           open={open}
-          size="wider"
           actions={titleActions}
         />
       }
-      rail={<PanelHistoryRail currentKey={recordKey(kind, objectId)} />}
+      reopenable
       actions={
         objectId !== undefined && BOOKMARK_KINDS.has(kind) ? (
           <BookmarkButton kind={kind} id={objectId} />

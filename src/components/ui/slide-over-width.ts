@@ -16,7 +16,7 @@ const STORAGE_KEY = "oc3.panel-width";
 /** Narrowest a panel gets, in pixels: its header and a form still fit. */
 export const MIN_WIDTH = 320;
 
-/** Room kept on the left of the record zone of a resized panel, in pixels: its rail stands there. */
+/** Room a resized panel leaves of the view beside it, in pixels: the panel is never the whole window. */
 export const LEFT_ROOM = 192;
 
 /** Width of each size before any resize, in pixels: what its `max-w-*` class gives. */
@@ -63,7 +63,7 @@ export function usePanelWidth(size: SlideOverSize): number | undefined {
 /**
  * The width a panel may take in the current window, `floor` being the narrowest its
  * content allows (`contentFloor`). The window wins over the content: a panel never
- * takes the room of the rail.
+ * takes the room left beside it.
  */
 export function clampWidth(width: number, floor = MIN_WIDTH): number {
   const max = Math.max(MIN_WIDTH, window.innerWidth - LEFT_ROOM);

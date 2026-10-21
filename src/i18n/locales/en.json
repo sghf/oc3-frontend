@@ -3525,7 +3525,8 @@
     "keys": {
       "move": "to move",
       "open": "to open",
-      "close": "to close"
+      "close": "to close",
+      "remove": "to remove"
     },
     "kinds": {
       "node": "Nodes",
@@ -3543,6 +3544,12 @@
       "ruleset": "Rulesets",
       "filterset": "Filtersets",
       "form": "Forms"
+    },
+    "recent": {
+      "title": "Recently opened",
+      "clear": "Clear",
+      "current": "open",
+      "noneOfKind": "Nothing of this kind opened recently."
     }
   },
   "panelSide": {
@@ -3550,26 +3557,19 @@
     "toRight": "Move the panels to the right"
   },
   "panelHistory": {
-    "label": "History of the records shown",
-    "title": "History",
     "sections": {
       "now": "Now",
       "hour": "Last Hour",
       "day": "Last Day",
       "week": "Last Week"
     },
-    "show": "Show {{name}}",
     "remove": "Remove {{name}} from the history",
-    "shownAt": "{{name}} · shown {{when}}",
-    "shownWhen": "shown {{when}}",
     "grouping": {
       "label": "Group the history",
       "time": "By time",
       "kind": "By kind"
     },
     "clear": "Clear the history",
-    "menu_one": "History, 1 record",
-    "menu_other": "History, {{count}} records",
     "reopen_one": "Reopen the panel on {{name}}",
     "reopen_other": "Reopen the panel on {{name}} ({{count}} records in the history)"
   },
