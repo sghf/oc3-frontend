@@ -50,8 +50,10 @@ export interface paths {
      *
      *     One entry answers with the queued action, as GET /actions/{id} does, or
      *     with a problem. A list always answers 200, with the queued actions in
-     *     data and one message per refused entry in error; entries differing only
-     *     by rid are merged into one action on those resources.
+     *     data and one message per refused entry in error, and in refusals the
+     *     index of each refused entry in the list with its reason; entries
+     *     differing only by rid are merged into one action on those resources, a
+     *     refusal then naming each of them.
      */
     put: operations["PutActions"];
     /**
@@ -135,6 +137,30 @@ export interface paths {
      *     AlertsManager privilege.
      */
     delete: operations["DeleteAlerts"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/alerts/delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Delete alerts by id, up to 10000 at once, as DELETE /alerts/{id} does
+     *     one by one: in one transaction, a single entry in the audit log naming
+     *     their count and types, and a single change event. The ids not found, deleted
+     *     already say, are told in not_found and do not stop the others. Requires
+     *     the AlertsManager privilege. The checks that raised an alert raise it again
+     *     at their next run if the cause remains.
+     */
+    post: operations["PostAlertsDelete"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -6512,6 +6538,19 @@ export interface components {
       /** @description Target node by name, in place of node_id, for an encapsulated node */
       vmname?: string;
     };
+    /** @description The answer to a list of entries of PUT /actions. */
+    ActionEnqueueListResult: {
+      /** @description The queued actions, as GET /actions/{id} returns them */
+      data: Record<string, never>[];
+      /** @description One message per refused entry, naming its target */
+      error: string[];
+      info: string[];
+      refusals: {
+        /** @description Index of the refused entry in the list sent, from 0 */
+        index: number;
+        message: string;
+      }[];
+    };
     AlertEvent: {
       /** @description The start of the occurrence, "YYYY-MM-DD HH:MM:SS" in the collector time zone. */
       begin: string;
@@ -6554,6 +6593,13 @@ export interface components {
       "nodes.nodename"?: string | null;
       "services.svcname"?: string | null;
       svc_id?: string;
+    };
+    AlertsDeleteInput: {
+      ids: number[];
+    };
+    AlertsDeleteResult: {
+      deleted: number;
+      not_found: number[];
     };
     AppListResponse: {
       data:
@@ -9499,14 +9545,16 @@ export interface operations {
     responses: {
       /**
        * @description The queued action for one entry; for a list, an object with the
-       *     queued actions in data and the refusals in error.
+       *     queued actions in data and the refusals in error and refusals.
        */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json":
+            | components["schemas"]["ListResponse"]
+            | components["schemas"]["ActionEnqueueListResult"];
         };
       };
       400: components["responses"]["400"];
@@ -9831,6 +9879,34 @@ export interface operations {
           };
         };
       };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostAlertsDelete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AlertsDeleteInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AlertsDeleteResult"];
+        };
+      };
+      400: components["responses"]["400"];
       401: components["responses"]["401"];
       403: components["responses"]["403"];
       500: components["responses"]["500"];
