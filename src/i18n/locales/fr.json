@@ -4540,5 +4540,23 @@
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "unchanged": "Rien n'a changé"
+  },
+  "logLines": {
+    "search": "Rechercher dans les lignes",
+    "levels": "Niveaux",
+    "allLevels": "tous",
+    "level": {
+      "error": "Erreur",
+      "warn": "Avertissement",
+      "info": "Info",
+      "debug": "Débogage"
+    },
+    "filtered": "Filtré",
+    "clearFilters": "Effacer les filtres",
+    "count": "{{shown}} / {{total}} lignes",
+    "download": "Télécharger les lignes affichées",
+    "lines": "Lignes du journal",
+    "noMatch": "Aucune ligne ne correspond.",
+    "showInContext": "Montrer cette ligne parmi les autres"
   }
 }

@@ -1,6 +1,7 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { OutputLines } from "@/components/opensvc/LogLines";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { DateTime } from "@/components/ui/DateTime";
@@ -446,9 +447,10 @@ function TargetDetails({
         target[key] === undefined || target[key] === "" ? null : (
           <div key={key} className="mb-2">
             <h3 className="mb-1 font-medium">{key}</h3>
-            <pre className="max-h-80 overflow-auto rounded-(--radius-control) bg-surface-sunken p-2 font-mono text-data whitespace-pre-wrap">
-              {target[key]}
-            </pre>
+            <OutputLines
+              output={target[key] ?? ""}
+              filename={`run-${String(run.id)}-target-${String(target.id)}-${key}`}
+            />
           </div>
         ),
       )}

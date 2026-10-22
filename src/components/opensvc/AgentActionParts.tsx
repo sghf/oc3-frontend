@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { LogLines } from "./LogLines";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
-import { AnsiText } from "@/components/ui/AnsiText";
 import { ClockIcon } from "@/components/ui/icons";
 import { StatusBadge } from "./StatusBadge";
 import { TARGETS_SHOWN, actionState, actionTargets, type AgentAction } from "./agent-action";
@@ -88,26 +88,16 @@ export function ActionLogLines({ action }: { action: AgentAction }) {
     );
   if (lines.length === 0) return <p className="text-ink-muted">{t("agentActions.noLog")}</p>;
   return (
-    <ol className="max-h-96 overflow-auto rounded-(--radius-control) bg-surface-sunken p-2 text-data">
-      {lines.map((line) => {
-        const { state, labelKey } = actionState(line.status);
-        return (
-          <li key={line.id} className="flex items-start gap-2 py-0.5">
-            <span className="shrink-0 text-ink-muted tabular-nums">
-              {(line.begin ?? "").slice(11)}
-            </span>
-            {line.status !== null && line.status !== undefined && line.status !== "" && (
-              <StatusBadge state={state} label={t(labelKey)} className="w-auto shrink-0" />
-            )}
-            {line.rid !== null && line.rid !== undefined && line.rid !== "" && (
-              <span className="shrink-0 text-ink-muted">{line.rid}</span>
-            )}
-            <span className="min-w-0 break-words whitespace-pre-wrap">
-              <AnsiText text={line.status_log ?? ""} />
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+    <LogLines
+      filename={`action-${String(action.id ?? "")}-log`}
+      lines={lines.map((line) => ({
+        key: String(line.id),
+        at: line.begin ?? undefined,
+        // The status of a log line is its level, as the agent wrote it.
+        level: line.status === "err" ? "error" : line.status === "warn" ? "warn" : "info",
+        message: line.status_log ?? "",
+        meta: line.rid === null || line.rid === undefined || line.rid === "" ? [] : [line.rid],
+      }))}
+    />
   );
 }

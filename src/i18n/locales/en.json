@@ -4540,5 +4540,23 @@
     "save": "Save",
     "saving": "Saving…",
     "unchanged": "Nothing changed"
+  },
+  "logLines": {
+    "search": "Search the lines",
+    "levels": "Levels",
+    "allLevels": "all",
+    "level": {
+      "error": "Error",
+      "warn": "Warning",
+      "info": "Info",
+      "debug": "Debug"
+    },
+    "filtered": "Filtered",
+    "clearFilters": "Clear the filters",
+    "count": "{{shown}} / {{total}} lines",
+    "download": "Download the lines shown",
+    "lines": "Log lines",
+    "noMatch": "No line matches.",
+    "showInContext": "Show this line among the others"
   }
 }

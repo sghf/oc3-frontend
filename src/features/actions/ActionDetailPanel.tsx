@@ -3,22 +3,19 @@ import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { CrossLink } from "@/components/opensvc/CrossLink";
+import { OutputLines } from "@/components/opensvc/LogLines";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { StatusBadge } from "@/components/opensvc/StatusBadge";
 import { SlideOver } from "@/components/ui/SlideOver";
 import { DateTime } from "@/components/ui/DateTime";
-import { AnsiText } from "@/components/ui/AnsiText";
 import { ActionQueueMenu } from "./ActionQueueMenu";
 import { isPending, realDate, toActionRows, type ActionRow } from "./action-row";
-
-const OUTPUT =
-  "max-h-64 overflow-auto rounded-(--radius-control) bg-surface-sunken p-2 text-data whitespace-pre-wrap";
 
 /**
  * Detail of an action in the queue: what the agent received, and what it returned.
  *
  * A panel written by hand rather than built on `DetailPanel`: the standard output and
- * the error output read as preformatted blocks, not as a list of properties.
+ * the error output read as logs (`OutputLines`), not as a list of properties.
  */
 export function ActionDetailPanel({
   actionId,
@@ -131,17 +128,13 @@ export function ActionDetailPanel({
           {row.stdout !== "" && (
             <section className="mb-4">
               <h3 className="mb-1 font-semibold text-ink-muted">{t("actions.fields.stdout")}</h3>
-              <pre className={OUTPUT}>
-                <AnsiText text={row.stdout} />
-              </pre>
+              <OutputLines output={row.stdout} filename={`action-${row.id}-stdout`} />
             </section>
           )}
           {row.stderr !== "" && (
             <section>
               <h3 className="mb-1 font-semibold text-ink-muted">{t("actions.fields.stderr")}</h3>
-              <pre className={`${OUTPUT} text-state-down`}>
-                <AnsiText text={row.stderr} />
-              </pre>
+              <OutputLines output={row.stderr} filename={`action-${row.id}-stderr`} />
             </section>
           )}
           {row.stdout === "" && row.stderr === "" && (
