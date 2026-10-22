@@ -4,7 +4,10 @@ import { api } from "@/lib/api/client";
 
 export type AssistantConversation = components["schemas"]["AssistantConversation"];
 export type AssistantMessage = components["schemas"]["AssistantMessage"];
-export type AssistantStreamEvent = components["schemas"]["AssistantStreamEvent"];
+export type AssistantRunEvent = components["schemas"]["AssistantRunEvent"];
+export type AssistantInterrupt = components["schemas"]["AssistantInterrupt"];
+type AssistantRunInput = components["schemas"]["AssistantRunInput"];
+type AssistantRunMessage = components["schemas"]["AssistantRunMessage"];
 export type AssistantConfirmation = components["schemas"]["AssistantConfirmation"];
 export type AssistantFeedback = components["schemas"]["AssistantFeedback"];
 export type AssistantFeedbackRequest = components["schemas"]["AssistantFeedbackRequest"];
@@ -101,20 +104,33 @@ export async function pendingConfirmation(id: string): Promise<AssistantConfirma
   return data.pending_confirmation;
 }
 
+/** The version of AG-UI this client speaks, sent with each run. */
+const AGUI_VERSION = "1.0";
+
 /**
- * Reads a stream of server-sent events, calling `onEvent` with each event of the
- * turn as it arrives: `event: <type>`, then `data: <JSON>`, ended by an empty line.
+ * A new id for a run or a message: 128 random bits in hex. Not
+ * `crypto.randomUUID`, which a page served over plain HTTP lacks.
+ */
+function newId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Reads the AG-UI events of a run as they arrive, calling `onEvent` with each:
+ * `data: <JSON>` then an empty line, without event names. The `: keepalive`
+ * comments of an idle stream are skipped.
  */
 async function readEvents(
   stream: ReadableStream<Uint8Array>,
-  onEvent: (event: AssistantStreamEvent) => void,
+  onEvent: (event: AssistantRunEvent) => void,
 ): Promise<void> {
   const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
-    buffer += value;
+    buffer += value.replace(/\r\n/g, "\n");
     let end = buffer.indexOf("\n\n");
     while (end !== -1) {
       const block = buffer.slice(0, end);
@@ -126,9 +142,9 @@ async function readEvents(
         .join("\n");
       if (data !== "") {
         try {
-          onEvent(JSON.parse(data) as AssistantStreamEvent);
+          onEvent(JSON.parse(data) as AssistantRunEvent);
         } catch {
-          // A malformed event is skipped; the turn goes on.
+          // A malformed event is skipped; the run goes on.
         }
       }
       end = buffer.indexOf("\n\n");
@@ -136,18 +152,31 @@ async function readEvents(
   }
 }
 
-/** Sends a prompt and streams the turn, until completed, error or a confirmation. */
-export async function streamTurn(
+/**
+ * Runs the agent on a conversation (`POST …/runs`, AG-UI) and streams its events
+ * until RUN_FINISHED or RUN_ERROR. The agent keeps the history: of the messages,
+ * it reads the last one, a prompt, and the ids of the others, which tell whether
+ * this client holds the conversation as stored; out of phase, it first sends a
+ * MESSAGES_SNAPSHOT, which this interface does not need, reading the stored
+ * messages again after each run.
+ */
+async function run(
   conversationId: string,
-  prompt: string,
-  onEvent: (event: AssistantStreamEvent) => void,
+  input: Pick<AssistantRunInput, "messages" | "resume">,
+  onEvent: (event: AssistantRunEvent) => void,
   signal: AbortSignal,
 ): Promise<void> {
+  const body: AssistantRunInput = {
+    threadId: conversationId,
+    runId: newId(),
+    protocolVersion: AGUI_VERSION,
+    ...input,
+  };
   const { data, error, response } = await api.POST(
-    "/assistant/conversations/{conversation_id}/turns",
+    "/assistant/conversations/{conversation_id}/runs",
     {
       params: { path: { conversation_id: conversationId } },
-      body: { prompt },
+      body,
       parseAs: "stream",
       signal,
     },
@@ -158,27 +187,44 @@ export async function streamTurn(
   await readEvents(data, onEvent);
 }
 
-/** Approves or rejects the action a turn waits on, and streams the rest of the turn. */
-export async function streamConfirmation(
+/**
+ * Sends a prompt and streams the run. `last` is the last stored message of the
+ * conversation this client shows, by which the agent knows it is in phase.
+ */
+export async function streamPrompt(
   conversationId: string,
-  confirmation: AssistantConfirmation,
-  decision: "approve" | "reject",
-  onEvent: (event: AssistantStreamEvent) => void,
+  prompt: string,
+  last: Pick<AssistantRunMessage, "id" | "role"> | undefined,
+  onEvent: (event: AssistantRunEvent) => void,
   signal: AbortSignal,
 ): Promise<void> {
-  const { data, error, response } = await api.POST(
-    "/assistant/conversations/{conversation_id}/turns/{turn_id}/confirmation",
+  const messages: AssistantRunMessage[] = [
+    ...(last === undefined ? [] : [last]),
+    { id: newId(), role: "user", content: prompt },
+  ];
+  await run(conversationId, { messages }, onEvent, signal);
+}
+
+/**
+ * Approves or rejects the action the conversation waits on, a run whose
+ * `resume` names its confirmation, and streams the rest of the turn.
+ */
+export async function streamDecision(
+  conversationId: string,
+  confirmationId: string,
+  approved: boolean,
+  onEvent: (event: AssistantRunEvent) => void,
+  signal: AbortSignal,
+): Promise<void> {
+  await run(
+    conversationId,
     {
-      params: { path: { conversation_id: conversationId, turn_id: confirmation.turn_id } },
-      body: { confirmation_id: confirmation.id, decision },
-      parseAs: "stream",
-      signal,
+      messages: [],
+      resume: [{ interruptId: confirmationId, status: "resolved", payload: { approved } }],
     },
+    onEvent,
+    signal,
   );
-  if (error !== undefined || data === null || data === undefined) {
-    throw failure(error as AssistantError | undefined, response.status);
-  }
-  await readEvents(data, onEvent);
 }
 
 /** Gives or replaces the feedback of the user on a completed turn. */

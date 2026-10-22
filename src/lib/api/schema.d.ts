@@ -516,6 +516,32 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/assistant/capabilities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What the runs can do, as an AG-UI AgentCapabilities: streaming, the tools
+     *     of the client, the interrupts without edits.
+     *
+     *     Relayed by oc3 to the AI agent, at the base_url and path of
+     *     server.assistant, with the access token of the caller's single sign-on
+     *     session, or the bearer token of the request; nothing else of the
+     *     browser's request is forwarded. The agent's answers and error codes are
+     *     returned as they are.
+     */
+    get: operations["GetAssistantCapabilities"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/assistant/conversations": {
     parameters: {
       query?: never;
@@ -618,7 +644,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/assistant/conversations/{conversation_id}/turns": {
+  "/assistant/conversations/{conversation_id}/runs": {
     parameters: {
       query?: never;
       header?: never;
@@ -628,40 +654,23 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Send a prompt and stream the turn of the agent; send the new prompt only, the agent keeps the history.
+     * @description Run the agent on a conversation, in the AG-UI protocol
+     *     (https://docs.ag-ui.com): a new prompt, the last message, a message of
+     *     the user; or the decision on the action the conversation waits on,
+     *     `resume`. The agent keeps the history of the conversation and reads
+     *     none of the other messages but their ids, which tell it whether the
+     *     client holds its last stored message. The run is streamed as AG-UI
+     *     events, and ends with RUN_FINISHED, whose outcome is a success or an
+     *     interrupt for a confirmation, or RUN_ERROR.
      *
      *     Relayed by oc3 to the AI agent, at the base_url and path of
      *     server.assistant, with the access token of the caller's single sign-on
      *     session, or the bearer token of the request; nothing else of the
      *     browser's request is forwarded. The agent's answers and error codes are
      *     returned as they are.
+     *     The body is relayed as it is, up to 4 MiB, the agent's own bound.
      */
-    post: operations["PostAssistantTurn"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/assistant/conversations/{conversation_id}/turns/{turn_id}/confirmation": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * @description Approve or reject the action a turn waits on, and stream the rest of the turn.
-     *
-     *     Relayed by oc3 to the AI agent, at the base_url and path of
-     *     server.assistant, with the access token of the caller's single sign-on
-     *     session, or the bearer token of the request; nothing else of the
-     *     browser's request is forwarded. The agent's answers and error codes are
-     *     returned as they are.
-     */
-    post: operations["PostAssistantConfirmation"];
+    post: operations["PostAssistantRun"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6895,6 +6904,10 @@ export interface components {
       id?: number;
       updated?: string;
     };
+    /** @description The AG-UI AgentCapabilities of the agent. */
+    AssistantCapabilities: {
+      [key: string]: unknown;
+    };
     AssistantConfirmation: {
       /**
        * @description The MIME type of the arguments whose value is text in a known format,
@@ -6917,12 +6930,6 @@ export interface components {
         title: string;
       };
       turn_id: string;
-    };
-    AssistantConfirmationRequest: {
-      /** @description The `id` of the confirmation. */
-      confirmation_id: string;
-      /** @enum {string} */
-      decision: "approve" | "reject";
     };
     AssistantConversation: {
       /** Format: date-time */
@@ -6988,6 +6995,30 @@ export interface components {
       /** @description Only with down. */
       reasons?: components["schemas"]["AssistantFeedbackReason"][];
     };
+    /** @description The confirmation an action waits on; answer it with a run whose resume names its id. */
+    AssistantInterrupt: {
+      /** Format: date-time */
+      expiresAt?: string;
+      /** @description The id of the confirmation. */
+      id: string;
+      message?: string;
+      metadata?: {
+        /** @description The media types of the text arguments, by argument name. */
+        argumentTypes?: {
+          [key: string]: string;
+        };
+        tool?: {
+          destructive: boolean;
+          name: string;
+          title: string;
+        };
+        turnId?: string;
+      };
+      reason: string;
+      responseSchema?: Record<string, never>;
+      /** @description The call to confirm, whose TOOL_CALL_ARGS are the exact arguments that run. */
+      toolCallId?: string;
+    };
     AssistantMessage: {
       /** Format: date-time */
       created_at: string;
@@ -7004,6 +7035,125 @@ export interface components {
       /** @description Pass it as `before` to read the previous page; empty when there is none. */
       next_cursor: string;
     };
+    /**
+     * @description One AG-UI event of a run. RUN_STARTED, then the answers of the model
+     *     (TEXT_MESSAGE_START, _CONTENT, _END), the tools it calls
+     *     (TOOL_CALL_START, _ARGS, _END, then TOOL_CALL_RESULT), a
+     *     MESSAGES_SNAPSHOT for a client out of phase, CUSTOM notes for the
+     *     developer, and RUN_FINISHED or RUN_ERROR.
+     */
+    AssistantRunEvent: {
+      /** @description RUN_ERROR, why the run failed (tool_call_limit, request_timeout, tool_name_conflict, agent_failed). */
+      code?: string;
+      /** @description TOOL_CALL_RESULT, the JSON result the model read. */
+      content?: string;
+      /** @description TEXT_MESSAGE_CONTENT, a piece of the answer; TOOL_CALL_ARGS, the JSON arguments of the call. */
+      delta?: string;
+      /** @description RUN_ERROR, for the developer. */
+      message?: string;
+      /** @description The message of a text, `<turn id>:<sequence>`, or of a tool result. */
+      messageId?: string;
+      /** @description MESSAGES_SNAPSHOT, the thread as the model reads it. */
+      messages?: components["schemas"]["AssistantRunMessage"][];
+      /** @description CUSTOM, its name, such as opensvc.warning. */
+      name?: string;
+      outcome?: components["schemas"]["AssistantRunOutcome"];
+      parentMessageId?: string;
+      /** @description RUN_STARTED, the version of AG-UI of the agent. */
+      protocolVersion?: string;
+      /** @description RUN_FINISHED of a completed turn, its id, for its feedback. */
+      result?: {
+        turnId?: string;
+      };
+      role?: string;
+      runId?: string;
+      threadId?: string;
+      /**
+       * Format: int64
+       * @description Milliseconds since the epoch.
+       */
+      timestamp?: number;
+      toolCallId?: string;
+      toolCallName?: string;
+      /** @enum {string} */
+      type:
+        | "RUN_STARTED"
+        | "MESSAGES_SNAPSHOT"
+        | "TEXT_MESSAGE_START"
+        | "TEXT_MESSAGE_CONTENT"
+        | "TEXT_MESSAGE_END"
+        | "TOOL_CALL_START"
+        | "TOOL_CALL_ARGS"
+        | "TOOL_CALL_END"
+        | "TOOL_CALL_RESULT"
+        | "CUSTOM"
+        | "RUN_FINISHED"
+        | "RUN_ERROR";
+      usage?: {
+        inputTokens?: number;
+        outputTokens?: number;
+        totalTokens?: number;
+      }[];
+      /** @description CUSTOM, its value. */
+      value?: unknown;
+    };
+    /**
+     * @description The AG-UI RunAgentInput of a run. The agent reads threadId, runId,
+     *     protocolVersion, the last message, a message of the user, the ids of the
+     *     others, the tools of the client and resume; not the state, the context or
+     *     the forwarded properties.
+     */
+    AssistantRunInput: {
+      messages: components["schemas"]["AssistantRunMessage"][];
+      /** @description The version of AG-UI the client speaks, MAJOR.MINOR. */
+      protocolVersion?: string;
+      /** @description The decision on the action the conversation waits on. */
+      resume?: {
+        /** @description The id of the interrupt, that of the confirmation. */
+        interruptId: string;
+        payload?: {
+          approved: boolean;
+        };
+        /** @description resolved, the payload approving the call or not; or cancelled, rejecting it. */
+        status: string;
+      }[];
+      /** @description The id the client gives the run, printable, without spaces. */
+      runId: string;
+      /** @description The id of the conversation of the route. */
+      threadId: string;
+      /** @description The tools of the client, offered to the model and run by the client. */
+      tools?: {
+        description?: string;
+        name: string;
+        parameters?: Record<string, never>;
+      }[];
+    } & {
+      [key: string]: unknown;
+    };
+    /** @description A message of the thread, as AG-UI gives it; the agent reads the text of the last one, a prompt, and the ids of the others. */
+    AssistantRunMessage: {
+      content?: string;
+      error?: string;
+      id: string;
+      /** @description user, assistant, tool, system or developer. */
+      role: string;
+      toolCallId?: string;
+      toolCalls?: {
+        function: {
+          arguments: string;
+          name: string;
+        };
+        id: string;
+        type?: string;
+      }[];
+    };
+    /** @description How RUN_FINISHED ends the run, a success, or an interrupt on the action to confirm. */
+    AssistantRunOutcome: {
+      interrupts?: components["schemas"]["AssistantInterrupt"][];
+      pendingToolCallIds?: string[];
+      /** @enum {string} */
+      type: "success" | "interrupt";
+    };
     AssistantStatus: {
       /** @description Whether the caller can use it now. */
       available: boolean;
@@ -7015,52 +7165,9 @@ export interface components {
        */
       reason?: "disabled" | "password_sign_in" | "impersonating" | "token_unavailable";
     };
-    /** @description One event of a streamed turn. The SSE event name equals `type`. */
-    AssistantStreamEvent: {
-      /**
-       * @description `error`: why the turn failed. `tool_call_limit`: the model asked for more than 8 tools in one answer, or more than 16 in the turn.
-       * @enum {string}
-       */
-      code?: "agent_failed" | "request_timeout" | "tool_call_limit";
-      confirmation?: components["schemas"]["AssistantConfirmation"];
-      /**
-       * @description `completed`: why the model stopped.
-       * @enum {string}
-       */
-      finish_reason?: "completed" | "tool_calls" | "length" | "content_filter" | "other";
-      /** @description The model iteration of the turn. */
-      iteration?: number;
-      /** @description `error`: a human-readable message. */
-      message?: string;
-      /** @description `text_delta`: the next piece of the answer. */
-      text_delta?: string;
-      /** @description `tool_finished`: whether the tool failed. */
-      tool_error?: boolean;
-      /** @description `tool_started`, `tool_finished`: the MCP tool. */
-      tool_name?: string;
-      /** @enum {string} */
-      type:
-        | "text_delta"
-        | "tool_started"
-        | "tool_finished"
-        | "usage"
-        | "completed"
-        | "confirmation_required"
-        | "error";
-      /** @description `usage`: the tokens of one model call. */
-      usage?: {
-        input_tokens?: number;
-        output_tokens?: number;
-        total_tokens?: number;
-      };
-    };
     AssistantTitleRequest: {
       /** @description Control characters are replaced by spaces and whitespace is normalized. */
       title: string;
-    };
-    AssistantTurnRequest: {
-      /** @description The question of the user, at most 32 KiB, not blank. */
-      prompt: string;
     };
     AuthInfo: {
       /**
@@ -11558,6 +11665,71 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  GetAssistantCapabilities: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The capabilities. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantCapabilities"];
+        };
+      };
+      /** @description No access token for the caller (assistant_token_unavailable), or the agent refused it. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description Not while impersonating (assistant_forbidden). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The assistant is not configured (assistant_disabled). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The agent could not be reached, or answered badly (assistant_unreachable). */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+      /** @description The agent is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssistantError"];
+        };
+      };
+    };
+  };
   GetAssistantConversations: {
     parameters: {
       query?: never;
@@ -12007,7 +12179,7 @@ export interface operations {
       };
     };
   };
-  PostAssistantTurn: {
+  PostAssistantRun: {
     parameters: {
       query?: never;
       header?: never;
@@ -12018,20 +12190,20 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["AssistantTurnRequest"];
+        "application/json": components["schemas"]["AssistantRunInput"];
       };
     };
     responses: {
-      /** @description The turn, streamed as server-sent events. */
+      /** @description The run, streamed as server-sent events. */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "text/event-stream": components["schemas"]["AssistantStreamEvent"];
+          "text/event-stream": components["schemas"]["AssistantRunEvent"];
         };
       };
-      /** @description Invalid request. */
+      /** @description Invalid input: not a RunAgentInput, another thread, an invalid run id, prompt, decision or protocol version (invalid_request, thread_mismatch, invalid_run_id, invalid_prompt, invalid_decision, invalid_protocol_version, unsupported_protocol_version, invalid_tools, invalid_tool_results). */
       400: {
         headers: {
           [name: string]: unknown;
@@ -12058,7 +12230,7 @@ export interface operations {
           "application/json": components["schemas"]["AssistantError"];
         };
       };
-      /** @description The assistant is not configured (assistant_disabled), or the conversation does not exist. */
+      /** @description The assistant is not configured (assistant_disabled), or the conversation does not exist (conversation_not_found). */
       404: {
         headers: {
           [name: string]: unknown;
@@ -12067,7 +12239,7 @@ export interface operations {
           "application/json": components["schemas"]["AssistantError"];
         };
       };
-      /** @description A turn is running, an action waits a decision, or a limit is reached. */
+      /** @description A turn is running or an action waits a decision (conversation_busy), or the conversation waits on no such confirmation (confirmation_not_pending). */
       409: {
         headers: {
           [name: string]: unknown;
@@ -12076,7 +12248,7 @@ export interface operations {
           "application/json": components["schemas"]["AssistantError"];
         };
       };
-      /** @description The conversation has expired. */
+      /** @description The conversation, or its confirmation, has expired (conversation_expired, confirmation_expired). */
       410: {
         headers: {
           [name: string]: unknown;
@@ -12085,115 +12257,7 @@ export interface operations {
           "application/json": components["schemas"]["AssistantError"];
         };
       };
-      /** @description The prompt is too large. */
-      413: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description The agent could not be reached, or answered badly (assistant_unreachable). */
-      502: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description The agent is unavailable. */
-      503: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-    };
-  };
-  PostAssistantConfirmation: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        conversation_id: string;
-        turn_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AssistantConfirmationRequest"];
-      };
-    };
-    responses: {
-      /** @description The turn, streamed as server-sent events. */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "text/event-stream": components["schemas"]["AssistantStreamEvent"];
-        };
-      };
-      /** @description Invalid request. */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description No access token for the caller - a password sign-in, or a single sign-on session to open again (assistant_token_unavailable) - or the agent refused it. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description Not while impersonating (assistant_forbidden). */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description The assistant is not configured (assistant_disabled), or the conversation does not exist. */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description A turn is running, an action waits a decision, or a limit is reached. */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description The conversation has expired. */
-      410: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AssistantError"];
-        };
-      };
-      /** @description The prompt is too large. */
+      /** @description The body exceeds 4 MiB, or the prompt 32 KiB (request_too_large, prompt_too_large). */
       413: {
         headers: {
           [name: string]: unknown;

@@ -4043,7 +4043,11 @@
       "token": "Votre session d'authentification unique ne détient plus de jeton d'accès : déconnectez-vous puis reconnectez-vous.",
       "unreachable": "L'agent IA est injoignable. Réessayez plus tard.",
       "stopped": "Arrêté.",
-      "unknown": "L'assistant n'a pas pu répondre."
+      "unknown": "L'assistant n'a pas pu répondre.",
+      "cut": "La connexion à l'assistant a été coupée : cette réponse n'est pas conservée. Reposez la question.",
+      "clientTools": "L'assistant a demandé des actions de cette interface, qui n'en propose pas.",
+      "toolCallLimit": "La question demande plus d'appels d'outils que l'assistant n'en fait pour une réponse : posez une question plus précise.",
+      "timeout": "L'assistant a mis trop de temps à répondre."
     },
     "confirmation": {
       "label": "Action en attente de votre décision",
@@ -4051,7 +4055,9 @@
       "destructive": "L'assistant veut exécuter une action destructrice : {{title}}. Approuver ?",
       "approve": "Approuver",
       "reject": "Refuser",
-      "noArguments": "Aucun argument."
+      "noArguments": "Aucun argument.",
+      "expires": "Cette demande expire {{when}}.",
+      "expired": "Cette demande a expiré : l'action n'a pas été exécutée."
     },
     "feedback": {
       "question": "Cette réponse vous a-t-elle aidé ?",

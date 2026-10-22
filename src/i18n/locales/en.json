@@ -4043,7 +4043,11 @@
       "token": "Your single sign-on session no longer holds an access token: sign out and sign in again.",
       "unreachable": "The AI agent cannot be reached. Try again later.",
       "stopped": "Stopped.",
-      "unknown": "The assistant could not answer."
+      "unknown": "The assistant could not answer.",
+      "cut": "The connection to the assistant was cut off: this answer is not kept. Ask again.",
+      "clientTools": "The assistant asked for actions of this interface, which it does not offer.",
+      "toolCallLimit": "The question needs more tool calls than the assistant runs in one answer: ask a narrower question.",
+      "timeout": "The assistant took too long to answer."
     },
     "confirmation": {
       "label": "Action waiting for your decision",
@@ -4051,7 +4055,9 @@
       "destructive": "The assistant wants to run a destructive action: {{title}}. Approve?",
       "approve": "Approve",
       "reject": "Reject",
-      "noArguments": "No argument."
+      "noArguments": "No argument.",
+      "expires": "This request expires {{when}}.",
+      "expired": "This request has expired: the action did not run."
     },
     "feedback": {
       "question": "Was this answer helpful?",

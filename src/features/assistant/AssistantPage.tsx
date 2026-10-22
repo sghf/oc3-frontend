@@ -20,15 +20,18 @@ import {
   createConversation,
   deleteConversation,
   pendingConfirmation,
-  streamConfirmation,
-  streamTurn,
+  streamDecision,
+  streamPrompt,
   useAssistantStatus,
   useConversations,
   useMessages,
   type AssistantConfirmation,
-  type AssistantStreamEvent,
+  type AssistantInterrupt,
+  type AssistantRunEvent,
 } from "./use-assistant";
 import { dateTimeFormat } from "@/lib/date-format";
+import { formatRelativeInstant } from "@/lib/format";
+import { useNow } from "@/lib/use-now";
 
 /** The questions the empty conversation suggests, keys of `assistant.suggestions`. */
 const SUGGESTIONS = ["servicesDown", "criticalAlerts", "silentNodes", "compliance"] as const;
@@ -36,9 +39,11 @@ const SUGGESTIONS = ["servicesDown", "criticalAlerts", "silentNodes", "complianc
 /** The composer grows with its text up to this many lines, then scrolls. */
 const MAX_LINES = 8;
 
-/** A tool the agent called during the turn on display. */
+/** A tool the agent called during the turn on display, with its JSON arguments as streamed. */
 interface ToolActivity {
+  id: string;
   name: string;
+  args: string;
   done: boolean;
   failed: boolean;
 }
@@ -49,8 +54,61 @@ interface LiveTurn {
   answer: string;
   tools: ToolActivity[];
   streaming: boolean;
+  /** RUN_FINISHED or RUN_ERROR came: a stream ending without either was cut off. */
+  ended: boolean;
   error: string | null;
   confirmation: AssistantConfirmation | null;
+}
+
+const newTurn = (prompt: string): LiveTurn => ({
+  prompt,
+  answer: "",
+  tools: [],
+  streaming: true,
+  ended: false,
+  error: null,
+  confirmation: null,
+});
+
+/** Whether the JSON result of a tool tells an error, as an MCP result does with isError. */
+function toolFailed(content: string | undefined): boolean {
+  try {
+    const result: unknown = JSON.parse(content ?? "");
+    return (
+      typeof result === "object" &&
+      result !== null &&
+      (result as { isError?: unknown }).isError === true
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The confirmation of an interrupt: the tool and the exact arguments of its call,
+ * those of its TOOL_CALL_ARGS, never the text of the model, which may describe it
+ * otherwise. Arguments that do not read as JSON are shown as they came.
+ */
+function confirmationOf(
+  interrupt: AssistantInterrupt,
+  tools: ToolActivity[],
+): AssistantConfirmation {
+  const call = tools.find((tool) => tool.id === interrupt.toolCallId);
+  let args: unknown = call?.args ?? "";
+  try {
+    args = JSON.parse(call?.args ?? "");
+  } catch {
+    // Kept as the text streamed.
+  }
+  const metadata = interrupt.metadata;
+  return {
+    id: interrupt.id,
+    turn_id: metadata?.turnId ?? "",
+    tool: metadata?.tool ?? { name: call?.name ?? "", title: call?.name ?? "", destructive: true },
+    arguments: args,
+    argument_types: metadata?.argumentTypes,
+    expires_at: interrupt.expiresAt ?? "",
+  };
 }
 
 function errorText(t: (key: string) => string, err: unknown): string {
@@ -271,14 +329,7 @@ function Conversation({
     void pendingConfirmation(conversationId)
       .then((confirmation) => {
         if (!cancelled && confirmation !== undefined)
-          setLive({
-            prompt: "",
-            answer: "",
-            tools: [],
-            streaming: false,
-            error: null,
-            confirmation,
-          });
+          setLive({ ...newTurn(""), streaming: false, ended: true, confirmation });
       })
       .catch(() => undefined);
     return () => {
@@ -309,36 +360,81 @@ function Conversation({
     [],
   );
 
-  function onEvent(event: AssistantStreamEvent) {
+  function onEvent(event: AssistantRunEvent) {
     setLive((turn) => {
       if (turn === null) return turn;
       switch (event.type) {
-        case "text_delta":
-          return { ...turn, answer: turn.answer + (event.text_delta ?? "") };
-        case "tool_started":
+        case "TEXT_MESSAGE_START":
+          // One message per answer of the model: the next one starts a paragraph.
+          return turn.answer === "" ? turn : { ...turn, answer: `${turn.answer}\n\n` };
+        case "TEXT_MESSAGE_CONTENT":
+          return { ...turn, answer: turn.answer + (event.delta ?? "") };
+        case "TOOL_CALL_START":
           return {
             ...turn,
-            tools: [...turn.tools, { name: event.tool_name ?? "", done: false, failed: false }],
+            tools: [
+              ...turn.tools,
+              {
+                id: event.toolCallId ?? "",
+                name: event.toolCallName ?? "",
+                args: "",
+                done: false,
+                failed: false,
+              },
+            ],
           };
-        case "tool_finished": {
-          const tools = [...turn.tools];
-          const index = tools.map((tool) => tool.name).lastIndexOf(event.tool_name ?? "");
-          const tool = tools[index];
-          if (tool !== undefined)
-            tools[index] = { ...tool, done: true, failed: event.tool_error === true };
-          return { ...turn, tools };
+        case "TOOL_CALL_ARGS":
+          return {
+            ...turn,
+            tools: turn.tools.map((tool) =>
+              tool.id === event.toolCallId
+                ? { ...tool, args: tool.args + (event.delta ?? "") }
+                : tool,
+            ),
+          };
+        case "TOOL_CALL_RESULT":
+          return {
+            ...turn,
+            tools: turn.tools.map((tool) =>
+              tool.id === event.toolCallId
+                ? { ...tool, done: true, failed: toolFailed(event.content) }
+                : tool,
+            ),
+          };
+        case "RUN_FINISHED": {
+          const outcome = event.outcome;
+          const interrupt = outcome?.type === "interrupt" ? outcome.interrupts?.[0] : undefined;
+          if (interrupt !== undefined)
+            return {
+              ...turn,
+              streaming: false,
+              ended: true,
+              confirmation: confirmationOf(interrupt, turn.tools),
+            };
+          // Calls of tools of the interface, which this interface does not offer.
+          if ((outcome?.pendingToolCallIds ?? []).length > 0)
+            return {
+              ...turn,
+              streaming: false,
+              ended: true,
+              error: t("assistant.errors.clientTools"),
+            };
+          return { ...turn, streaming: false, ended: true };
         }
-        case "confirmation_required":
-          return { ...turn, streaming: false, confirmation: event.confirmation ?? null };
-        case "error":
+        case "RUN_ERROR":
           return {
             ...turn,
             streaming: false,
-            error: event.message ?? t("assistant.errors.unknown"),
+            ended: true,
+            error:
+              event.code === "tool_call_limit"
+                ? t("assistant.errors.toolCallLimit")
+                : event.code === "request_timeout"
+                  ? t("assistant.errors.timeout")
+                  : t("assistant.errors.unknown"),
           };
-        case "completed":
-          return { ...turn, streaming: false };
         default:
+          // RUN_STARTED, MESSAGES_SNAPSHOT and CUSTOM notes for the developer.
           return turn;
       }
     });
@@ -358,7 +454,15 @@ function Conversation({
     abort.current = controller;
     try {
       await call(controller.signal);
-      setLive((turn) => (turn === null ? turn : { ...turn, streaming: false }));
+      // A stream ended without RUN_FINISHED nor RUN_ERROR was cut off: the agent
+      // does not resume it, and the turn is not stored.
+      setLive((turn) =>
+        turn === null
+          ? turn
+          : turn.ended
+            ? { ...turn, streaming: false }
+            : { ...turn, streaming: false, error: t("assistant.errors.cut") },
+      );
       await finish(conversation);
     } catch (err) {
       setLive((turn) =>
@@ -373,7 +477,7 @@ function Conversation({
     const prompt = text.trim();
     if (prompt === "" || live?.streaming === true) return;
     setDraft("");
-    setLive({ prompt, answer: "", tools: [], streaming: true, error: null, confirmation: null });
+    setLive(newTurn(prompt));
     let conversation = id;
     if (conversation === null) {
       try {
@@ -388,18 +492,23 @@ function Conversation({
       onCreated(conversation);
     }
     const target = conversation;
-    await run(target, (signal) => streamTurn(target, prompt, onEvent, signal));
+    // The last message this client shows, by which the agent knows it is in phase.
+    const stored = history.data?.messages.at(-1);
+    const last = stored === undefined ? undefined : { id: stored.id, role: stored.role };
+    await run(target, (signal) => streamPrompt(target, prompt, last, onEvent, signal));
   }
 
   async function decide(decision: "approve" | "reject") {
     const confirmation = live?.confirmation;
     if (id === null || confirmation === null || confirmation === undefined) return;
     setLive((turn) =>
-      turn === null ? turn : { ...turn, confirmation: null, streaming: true, error: null },
+      turn === null
+        ? turn
+        : { ...turn, confirmation: null, streaming: true, ended: false, error: null },
     );
     const target = id;
     await run(target, (signal) =>
-      streamConfirmation(target, confirmation, decision, onEvent, signal),
+      streamDecision(target, confirmation.id, decision === "approve", onEvent, signal),
     );
   }
 
@@ -490,7 +599,7 @@ function Conversation({
                   <ul className="flex flex-wrap gap-1.5" aria-label={t("assistant.tools")}>
                     {live.tools.map((tool, index) => (
                       <li
-                        key={`${tool.name}-${String(index)}`}
+                        key={tool.id === "" ? `${tool.name}-${String(index)}` : tool.id}
                         className="inline-flex items-center gap-1 rounded-(--radius-pill) border border-line bg-surface px-2 text-ink-muted"
                       >
                         <span
@@ -729,8 +838,12 @@ function ConfirmationCard({
   confirmation: AssistantConfirmation;
   onDecide: (decision: "approve" | "reject") => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const destructive = confirmation.tool.destructive;
+  // The confirmation lasts 10 minutes: past its expiry, the call does not run.
+  const now = useNow(1000);
+  const expiresAt = Date.parse(confirmation.expires_at);
+  const expired = !Number.isNaN(expiresAt) && expiresAt <= now;
   return (
     <div
       role="group"
@@ -749,9 +862,19 @@ function ConfirmationCard({
         args={confirmation.arguments}
         types={confirmation.argument_types ?? {}}
       />
+      {!Number.isNaN(expiresAt) && (
+        <p className={expired ? "text-state-down" : "text-ink-muted"}>
+          {expired
+            ? `■ ${t("assistant.confirmation.expired")}`
+            : t("assistant.confirmation.expires", {
+                when: formatRelativeInstant(expiresAt, i18n.language, now),
+              })}
+        </p>
+      )}
       <div className="flex gap-2">
         <button
           type="button"
+          disabled={expired}
           onClick={() => {
             onDecide("approve");
           }}
