@@ -4050,7 +4050,8 @@
       "question": "L'assistant veut exécuter : {{title}}. Approuver ?",
       "destructive": "L'assistant veut exécuter une action destructrice : {{title}}. Approuver ?",
       "approve": "Approuver",
-      "reject": "Refuser"
+      "reject": "Refuser",
+      "noArguments": "Aucun argument."
     },
     "feedback": {
       "question": "Cette réponse vous a-t-elle aidé ?",

@@ -5546,7 +5546,14 @@ export interface paths {
     /** @description List services */
     get: operations["GetServices"];
     put?: never;
-    /** @description Create or update a service (by svcname or svc_id) */
+    /**
+     * @description Create or update a service. The service is the one of svc_id when given;
+     *     else the one of svcname in cluster_id when given; else the one service
+     *     named svcname the caller may see (409 when several are, in different
+     *     clusters). Updating a service requires being responsible for it;
+     *     creating one requires the Manager privilege (403 otherwise), as creating
+     *     a node does, and a cluster_id the collector knows (400 otherwise).
+     */
     post: operations["PostServices"];
     /** @description Delete a service. */
     delete: operations["DeleteServices"];
@@ -6889,6 +6896,16 @@ export interface components {
       updated?: string;
     };
     AssistantConfirmation: {
+      /**
+       * @description The MIME type of the arguments whose value is text in a known format,
+       *     by argument name: application/yaml for the definition of a form given
+       *     to create_form or update_form, say. An argument absent from it is
+       *     plain text, or a JSON value when it is not a string. A client renders
+       *     each argument after its type, never after its content.
+       */
+      argument_types?: {
+        [key: string]: string;
+      };
       /** @description The exact arguments of the call that runs if the user approves it. */
       arguments: unknown;
       /** Format: date-time */

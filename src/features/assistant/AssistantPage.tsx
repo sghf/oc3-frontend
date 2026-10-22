@@ -10,6 +10,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Markdown } from "@/components/ui/Markdown";
+import { YamlCode } from "@/components/ui/YamlCode";
 import { AnswerFeedback } from "./AnswerFeedback";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { RelativeTime } from "@/components/ui/RelativeTime";
@@ -671,6 +672,55 @@ function AssistantMessage({ children }: { children: ReactNode }) {
   );
 }
 
+/** The MIME types shown as YAML: the registered one and its usual aliases. */
+const YAML_TYPES = new Set(["application/yaml", "application/x-yaml", "text/yaml", "text/x-yaml"]);
+
+/**
+ * The arguments of an action waiting a decision, one by one under their name,
+ * each as its MIME type says (`argument_types`), never as its content looks: YAML
+ * as code, coloured, indentation kept; any other text as written, its line breaks
+ * and spaces kept; a value other than text as JSON. Arguments that are not an
+ * object of named values show as JSON whole.
+ */
+function ConfirmationArguments({ args, types }: { args: unknown; types: Record<string, string> }) {
+  const { t } = useTranslation();
+  const box = "rounded-(--radius-control) bg-surface-sunken p-2 font-mono text-data";
+  if (typeof args !== "object" || args === null || Array.isArray(args))
+    return (
+      <pre className={`max-h-80 overflow-auto whitespace-pre-wrap ${box}`}>
+        {JSON.stringify(args, null, 2)}
+      </pre>
+    );
+  const entries = Object.entries(args as Record<string, unknown>);
+  if (entries.length === 0)
+    return <p className="text-ink-muted">{t("assistant.confirmation.noArguments")}</p>;
+  return (
+    <dl className="flex max-h-96 flex-col gap-2 overflow-auto">
+      {entries.map(([name, value]) => {
+        const type = types[name];
+        const yaml = typeof value === "string" && type !== undefined && YAML_TYPES.has(type);
+        return (
+          <div key={name} className="flex flex-col gap-0.5">
+            <dt className="flex items-baseline gap-2">
+              <code className="font-mono font-medium">{name}</code>
+              {type !== undefined && <span className="text-data text-ink-muted">{type}</span>}
+            </dt>
+            <dd>
+              {yaml ? (
+                <YamlCode text={value} lineNumbers className={`overflow-x-auto ${box}`} />
+              ) : (
+                <pre className={`break-words whitespace-pre-wrap ${box}`}>
+                  {typeof value === "string" ? value : JSON.stringify(value, null, 2)}
+                </pre>
+              )}
+            </dd>
+          </div>
+        );
+      })}
+    </dl>
+  );
+}
+
 /** An action waiting the user's decision: what runs, with its exact arguments. */
 function ConfirmationCard({
   confirmation,
@@ -695,9 +745,10 @@ function ConfirmationCard({
           title: confirmation.tool.title,
         })}
       </p>
-      <pre className="max-h-48 overflow-auto rounded-(--radius-control) bg-surface-sunken p-2 font-mono text-data">
-        {JSON.stringify(confirmation.arguments, null, 2)}
-      </pre>
+      <ConfirmationArguments
+        args={confirmation.arguments}
+        types={confirmation.argument_types ?? {}}
+      />
       <div className="flex gap-2">
         <button
           type="button"

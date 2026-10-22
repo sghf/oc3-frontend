@@ -4050,7 +4050,8 @@
       "question": "The assistant wants to run: {{title}}. Approve?",
       "destructive": "The assistant wants to run a destructive action: {{title}}. Approve?",
       "approve": "Approve",
-      "reject": "Reject"
+      "reject": "Reject",
+      "noArguments": "No argument."
     },
     "feedback": {
       "question": "Was this answer helpful?",
