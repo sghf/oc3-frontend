@@ -130,8 +130,7 @@ const COLUMNS: ListColumn<DiskRow>[] = DISK_PROPS.map((prop) => ({
         </CrossLink>
       );
     if (SIZE_PROPS.has(prop) && typeof value === "number") return formatSizeMiB(value, locale);
-    if (DATE_PROPS.has(prop) && typeof value === "string")
-      return <DateTime value={value} locale={locale} />;
+    if (DATE_PROPS.has(prop) && typeof value === "string") return <DateTime value={value} />;
     return value;
   },
 }));

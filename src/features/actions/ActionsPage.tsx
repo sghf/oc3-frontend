@@ -108,7 +108,7 @@ const COLUMNS: ListColumn<ActionRow>[] = ACTION_PROPS.map((prop) => ({
     if (prop === "date_queued") return <RelativeTime value={realDate(value)} locale={locale} />;
     if (prop === "date_dequeued") {
       const date = realDate(value);
-      return date === undefined ? undefined : <DateTime value={date} locale={locale} />;
+      return date === undefined ? undefined : <DateTime value={date} />;
     }
     if (LONG_PROPS.has(prop))
       return (

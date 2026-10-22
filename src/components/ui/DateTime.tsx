@@ -34,15 +34,13 @@ export function DateStamp({
  */
 export function DateTime({
   value,
-  locale,
   dateOnly = false,
 }: {
   value: string | undefined;
-  locale: string;
   dateOnly?: boolean;
 }) {
   const parsed = parseCollectorDate(value);
-  const text = dateOnly ? formatDate(value, locale) : formatDateTime(value, locale);
+  const text = dateOnly ? formatDate(value) : formatDateTime(value);
   // Empty or unreadable value: this is not a date, so no icon.
   if (parsed === null) return text;
   return <DateStamp date={parsed}>{text}</DateStamp>;

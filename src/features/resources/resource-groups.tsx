@@ -19,8 +19,8 @@ const flag = (prop: keyof ResourceRow) => ({ ...field(prop), input: "boolean" as
 
 const date = (prop: "changed" | "updated", relative: boolean) => ({
   prop,
-  format: (row: ResourceRow, locale: string) =>
-    row[prop] === undefined || row[prop] === "" ? undefined : formatDateTime(row[prop], locale),
+  format: (row: ResourceRow) =>
+    row[prop] === undefined || row[prop] === "" ? undefined : formatDateTime(row[prop]),
   render: relative
     ? (row: ResourceRow, locale: string) => <RelativeTime value={row[prop]} locale={locale} />
     : undefined,

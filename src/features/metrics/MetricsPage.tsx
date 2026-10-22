@@ -71,10 +71,10 @@ const COLUMNS: ListColumn<MetricRow>[] = METRIC_PROPS.map((prop) => ({
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "state",
   filter: prop === "metric_historize" ? { kind: "enum", options: FLAG_FILTER_OPTIONS } : undefined,
-  render: (row: MetricRow, locale: string) => {
+  render: (row: MetricRow) => {
     if (prop === "metric_historize")
       return <FlagSwitch value={row.metric_historize} labelKey="metrics.fields.metric_historize" />;
-    if (prop === "metric_created") return <DateTime value={row.metric_created} locale={locale} />;
+    if (prop === "metric_created") return <DateTime value={row.metric_created} />;
     if (prop === "metric_sql")
       // Two lines of the request at most: the whole of it is in the detail.
       return (

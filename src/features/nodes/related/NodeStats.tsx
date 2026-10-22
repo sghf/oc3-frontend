@@ -5,6 +5,7 @@ import type { components, paths } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { TimeChart, type TimeSeries } from "@/components/ui/TimeChart";
+import { dateTimeFormat } from "@/lib/date-format";
 
 type NodeStatSeries = components["schemas"]["NodeStatSeries"];
 type Group = NonNullable<paths["/nodes/{node_id}/stats"]["get"]["parameters"]["query"]>["group"];
@@ -139,7 +140,7 @@ export function NodeStats({ nodeId, locale }: { nodeId: string; locale: string }
   });
   const byGroup = new Map(GROUPS.map((group, index) => [group, queries[index]]));
   const pending = !invalidRange && queries.some((query) => query.isPending);
-  const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateFormat = dateTimeFormat({ dateStyle: "medium" });
   const periodLabel =
     "days" in range
       ? t("nodes.stats.days", { count: range.days })

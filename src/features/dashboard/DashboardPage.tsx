@@ -90,13 +90,13 @@ const COLUMNS: ListColumn<AlertRow>[] = [
     prop: "dash_created",
     labelKey: "alerts.fields.dash_created",
     family: "time",
-    render: (r, locale) => <DateTime value={r.dash_created} locale={locale} />,
+    render: (r) => <DateTime value={r.dash_created} />,
   },
   {
     prop: "dash_updated",
     labelKey: "alerts.fields.dash_updated",
     family: "time",
-    render: (r, locale) => <DateTime value={r.dash_updated} locale={locale} />,
+    render: (r) => <DateTime value={r.dash_updated} />,
   },
 ];
 

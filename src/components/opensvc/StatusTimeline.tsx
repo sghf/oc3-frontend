@@ -6,6 +6,7 @@ import { Timeline, type TimelineRange, type TimelineTrack } from "@/components/u
 import { Switch } from "@/components/ui/Switch";
 import { AlertTriangleIcon, CloseIcon, PencilIcon } from "@/components/ui/icons";
 import { statusBadge } from "./status";
+import { dateTimeFormat } from "@/lib/date-format";
 
 /** The justification of a period: why, whether it still counts, by whom and when. */
 export interface StatusLogAck {
@@ -188,7 +189,7 @@ export function StatusTimeline({
             <span className="text-ink-muted">
               {" "}
               {t("statusTimeline.rateSince", {
-                since: new Intl.DateTimeFormat(locale, {
+                since: dateTimeFormat({
                   dateStyle: "medium",
                   timeStyle: "short",
                 }).format(parseCollectorDate(availability.from) ?? new Date()),
@@ -233,7 +234,6 @@ export function StatusTimeline({
                       period={period}
                       justifiable={!range.ongoing && !AVAILABLE.has(period.values[track.key] ?? "")}
                       justify={justify}
-                      locale={locale}
                       onChanged={refresh}
                     />
                   );
@@ -303,13 +303,11 @@ function JustifyCell({
   period,
   justifiable,
   justify,
-  locale,
   onChanged,
 }: {
   period: StatusLogPeriod;
   justifiable: boolean;
   justify: StatusJustify;
-  locale: string;
   onChanged: () => Promise<void>;
 }) {
   const { t } = useTranslation();
@@ -436,7 +434,7 @@ function JustifyCell({
           {ack.account ? t("statusTimeline.counted") : t("statusTimeline.excluded")} ·{" "}
           {t("statusTimeline.by", {
             by: ack.by,
-            on: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
+            on: dateTimeFormat({ dateStyle: "medium" }).format(
               parseCollectorDate(ack.on) ?? new Date(),
             ),
           })}
@@ -488,7 +486,7 @@ function PeriodDetails({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const dateTime = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "medium" });
+  const dateTime = dateTimeFormat({ dateStyle: "medium", timeStyle: "medium" });
   const period = range.period;
   const value = period === undefined ? undefined : Object.values(period.values)[0];
   const status = range.label ?? value ?? "";
@@ -550,7 +548,6 @@ function PeriodDetails({
                   period={period}
                   justifiable={justifiable}
                   justify={justify}
-                  locale={locale}
                   onChanged={onChanged}
                 />
               )}

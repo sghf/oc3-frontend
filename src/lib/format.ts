@@ -1,3 +1,5 @@
+import { dateTimeFormat } from "./date-format";
+
 /**
  * Formatting of collector values. The units and date formats come from the historical
  * database: this is where their quirks are absorbed.
@@ -30,23 +32,26 @@ export function parseCollectorDate(value: string | undefined): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-/** Localised date and time, or the value as it is when it is not one. */
-export function formatDateTime(value: string | undefined, locale: string): string {
+/**
+ * Date and time as the user's preferences read them (`dateTimeFormat`), or the
+ * value as it is when it is not one.
+ */
+export function formatDateTime(value: string | undefined): string {
   if (value === undefined || value === "") return "";
   const parsed = parseCollectorDate(value);
   if (parsed === null) return value;
-  return parsed.toLocaleString(locale, { dateStyle: "short", timeStyle: "medium" });
+  return dateTimeFormat({ dateStyle: "short", timeStyle: "medium" }).format(parsed);
 }
 
 /**
  * Date alone, localised, for deadlines whose time says nothing: obsolescence dates
  * are entered by the day and stored at midnight.
  */
-export function formatDate(value: string | undefined, locale: string): string {
+export function formatDate(value: string | undefined): string {
   if (value === undefined || value === "") return "";
   const parsed = parseCollectorDate(value);
   if (parsed === null) return value;
-  return parsed.toLocaleDateString(locale, { dateStyle: "medium" });
+  return dateTimeFormat({ dateStyle: "medium" }).format(parsed);
 }
 
 /** Steps from the largest to the smallest, in seconds. */

@@ -82,7 +82,7 @@ export function ClaimMappingDetailPanel({
       family: "time",
       fields: [
         { prop: "author", format: text("author") },
-        { prop: "updated", format: (row, locale) => formatDateTime(row.updated, locale) },
+        { prop: "updated", format: (row) => formatDateTime(row.updated) },
         { prop: "id", format: text("id") },
       ],
     },

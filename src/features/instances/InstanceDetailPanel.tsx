@@ -37,9 +37,9 @@ const nonZero = (prop: keyof InstanceRow) => ({
 
 const date = (prop: keyof InstanceRow) => ({
   prop,
-  format: (row: InstanceRow, locale: string) => {
+  format: (row: InstanceRow) => {
     const value = row[prop];
-    return typeof value === "string" ? formatDateTime(value, locale) : undefined;
+    return typeof value === "string" ? formatDateTime(value) : undefined;
   },
 });
 

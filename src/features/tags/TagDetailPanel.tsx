@@ -31,7 +31,7 @@ function groups(editable: boolean): DetailGroup<TagRow>[] {
         { prop: "tag_id", format: (row) => row.tag_id },
         {
           prop: "tag_created",
-          format: (row, locale) => formatDateTime(row.tag_created, locale),
+          format: (row) => formatDateTime(row.tag_created),
         },
       ],
     },

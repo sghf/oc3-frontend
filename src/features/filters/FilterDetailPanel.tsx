@@ -34,7 +34,7 @@ const GROUPS: DetailGroup<FilterRow>[] = [
     family: "time",
     fields: [
       { prop: "f_author", format: text("f_author") },
-      { prop: "f_updated", format: (row, locale) => formatDateTime(row.f_updated, locale) },
+      { prop: "f_updated", format: (row) => formatDateTime(row.f_updated) },
       { prop: "id", format: text("id") },
       { prop: "f_cksum", format: text("f_cksum") },
     ],

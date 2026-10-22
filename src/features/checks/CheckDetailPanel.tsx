@@ -34,8 +34,8 @@ const GROUPS: DetailGroup<CheckRow>[] = [
         format: text("chk_err"),
         render: (row) => <CheckState err={row.chk_err} />,
       },
-      field("chk_updated", (row, locale) => formatDateTime(row.chk_updated, locale)),
-      field("chk_created", (row, locale) => formatDateTime(row.chk_created, locale)),
+      field("chk_updated", (row) => formatDateTime(row.chk_updated)),
+      field("chk_created", (row) => formatDateTime(row.chk_created)),
     ],
   },
   {

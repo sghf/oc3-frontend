@@ -83,10 +83,10 @@ const ACTION_OPTIONS: ColumnFilterOption[] = [
   { value: "fix" },
 ];
 
-function renderCell(prop: LogProp, row: ComplianceLogRow, locale: string) {
+function renderCell(prop: LogProp, row: ComplianceLogRow) {
   switch (prop) {
     case "run_date":
-      return <DateTime value={row.run_date} locale={locale} />;
+      return <DateTime value={row.run_date} />;
     case "nodes.nodename":
       return row["nodes.nodename"] === null || row["nodes.nodename"] === undefined ? null : (
         <CrossLink kind="node" id={row.node_id}>
@@ -123,7 +123,7 @@ const COLUMNS: ListColumn<ComplianceLogRow>[] = LOG_PROPS.map((prop) => ({
       : prop === "run_action"
         ? { kind: "enum" as const, options: ACTION_OPTIONS }
         : undefined,
-  render: (row, locale) => renderCell(prop, row, locale),
+  render: (row) => renderCell(prop, row),
 }));
 
 const ALL_PROPS: string[] = [...LOG_PROPS];

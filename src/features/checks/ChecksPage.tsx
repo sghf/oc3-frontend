@@ -98,7 +98,7 @@ const COLUMNS: ListColumn<CheckRow>[] = CHECK_PROPS.map((prop) => ({
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "state",
   filter: prop === "chk_err" ? { kind: "enum" as const, options: STATE_OPTIONS } : undefined,
-  render: (row: CheckRow, locale: string) => {
+  render: (row: CheckRow) => {
     const value = row[prop];
     if (prop === "nodes.nodename")
       return (
@@ -113,8 +113,7 @@ const COLUMNS: ListColumn<CheckRow>[] = CHECK_PROPS.map((prop) => ({
         </CrossLink>
       );
     if (prop === "chk_err") return <CheckState err={row.chk_err} />;
-    if (DATE_PROPS.has(prop) && typeof value === "string")
-      return <DateTime value={value} locale={locale} />;
+    if (DATE_PROPS.has(prop) && typeof value === "string") return <DateTime value={value} />;
     return value;
   },
 }));

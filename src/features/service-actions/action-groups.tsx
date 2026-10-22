@@ -13,11 +13,11 @@ const field = (prop: keyof AgentAction) => ({ prop, format: text(prop) });
 
 const date = (prop: "begin" | "end" | "acked_date") => ({
   prop,
-  format: (row: AgentAction, locale: string) => {
+  format: (row: AgentAction) => {
     const value = row[prop];
     return value === undefined || value === null || value === ""
       ? undefined
-      : formatDateTime(value, locale);
+      : formatDateTime(value);
   },
 });
 

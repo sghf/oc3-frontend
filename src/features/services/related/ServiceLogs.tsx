@@ -23,7 +23,7 @@ type LogRow = components["schemas"]["LogRow"];
  * `SERVICE_LOGS_LIMIT` show here; the Logs view, filtered on the service, has them
  * all.
  */
-export function ServiceLogs({ svcId, locale }: { svcId: string; locale: string }) {
+export function ServiceLogs({ svcId }: { svcId: string; locale: string }) {
   const { t } = useTranslation();
   const logs = useServiceLogs(svcId);
   const all = logs.data?.rows ?? [];
@@ -49,7 +49,7 @@ export function ServiceLogs({ svcId, locale }: { svcId: string; locale: string }
     {
       key: "log_date",
       label: t("logs.fields.log_date"),
-      render: (row) => <DateTime value={row.log_date} locale={locale} />,
+      render: (row) => <DateTime value={row.log_date} />,
     },
     {
       key: "log_level",

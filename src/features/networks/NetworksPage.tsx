@@ -126,7 +126,7 @@ const COLUMNS: ListColumn<IpRow>[] = IP_PROPS.map((prop) => ({
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
   filter: FILTERS[prop],
-  render: (row: IpRow, locale: string) => {
+  render: (row: IpRow) => {
     const value = row[prop];
     if (prop === "nodename")
       return (
@@ -134,8 +134,7 @@ const COLUMNS: ListColumn<IpRow>[] = IP_PROPS.map((prop) => ({
           {value}
         </CrossLink>
       );
-    if (DATE_PROPS.has(prop) && typeof value === "string")
-      return <DateTime value={value} locale={locale} />;
+    if (DATE_PROPS.has(prop) && typeof value === "string") return <DateTime value={value} />;
     return value;
   },
 }));

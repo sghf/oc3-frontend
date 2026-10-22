@@ -42,7 +42,7 @@ const drafts = new Map<string, Draft>();
  * Managers write them. A save names the revision it edits: when someone saved
  * meanwhile, nothing is saved and the draft is kept.
  */
-export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; locale: string }) {
+export function ObjectNotes({ kind, id }: { kind: WikiKind; id: string }) {
   const { t } = useTranslation();
   const page = useWiki(kind, id);
   const draftKey = `${kind}:${id}`;
@@ -79,7 +79,6 @@ export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; 
         id={id}
         draft={draft}
         latest={revision}
-        locale={locale}
         onChange={setDraft}
         onDone={() => {
           setDraft(undefined);
@@ -95,7 +94,7 @@ export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; 
           {revision === null ? (
             t("notes.none", { context: kind })
           ) : (
-            <RevisionLine revision={revision} locale={locale} labelKey="notes.lastEdited" />
+            <RevisionLine revision={revision} labelKey="notes.lastEdited" />
           )}
         </p>
         {total > 0 && (
@@ -142,7 +141,7 @@ export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; 
                   }}
                   className={`flex w-full flex-wrap items-center gap-x-2 px-3 py-1.5 text-left ${current ? "bg-accent-soft" : "hover:bg-surface-sunken/60"}`}
                 >
-                  <DateTime value={r.saved_on} locale={locale} />
+                  <DateTime value={r.saved_on} />
                   <span>{r.author === "" ? t("notes.unknownAuthor") : r.author}</span>
                   {index === 0 && (
                     <span className="rounded-full bg-surface-sunken px-2 text-data text-ink-muted">
@@ -174,7 +173,7 @@ export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; 
             {shown.data === undefined ? (
               t("detail.loading")
             ) : (
-              <RevisionLine revision={shown.data} locale={locale} labelKey="notes.pastRevision" />
+              <RevisionLine revision={shown.data} labelKey="notes.pastRevision" />
             )}
           </span>
           {writable && shown.data !== undefined && (
@@ -183,7 +182,7 @@ export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; 
               onClick={() => {
                 edit(
                   shown.data.body ?? "",
-                  t("notes.restoredNote", { date: formatDateTime(shown.data.saved_on, locale) }),
+                  t("notes.restoredNote", { date: formatDateTime(shown.data.saved_on) }),
                 );
               }}
               className={BUTTON}
@@ -224,22 +223,14 @@ export function ObjectNotes({ kind, id, locale }: { kind: WikiKind; id: string; 
 }
 
 /** "Last edited by …, on …", or of a past revision, with its change note. */
-function RevisionLine({
-  revision,
-  locale,
-  labelKey,
-}: {
-  revision: WikiRevision;
-  locale: string;
-  labelKey: string;
-}) {
+function RevisionLine({ revision, labelKey }: { revision: WikiRevision; labelKey: string }) {
   const { t } = useTranslation();
   return (
     <>
       {t(labelKey, {
         author: revision.author === "" ? t("notes.unknownAuthor") : revision.author,
       })}{" "}
-      <DateTime value={revision.saved_on} locale={locale} />
+      <DateTime value={revision.saved_on} />
       {revision.change_note !== "" && <> — {revision.change_note}</>}
     </>
   );
@@ -255,7 +246,6 @@ function NotesEditor({
   id,
   draft,
   latest,
-  locale,
   onChange,
   onDone,
 }: {
@@ -263,7 +253,6 @@ function NotesEditor({
   id: string;
   draft: Draft;
   latest: WikiRevision | null;
-  locale: string;
   onChange: (draft: Draft) => void;
   onDone: () => void;
 }) {
@@ -293,7 +282,7 @@ function NotesEditor({
   };
 
   const insertSignature = () => {
-    const signature = `*${formatDateTime(new Date().toISOString(), locale)} — ${user ?? ""}*`;
+    const signature = `*${formatDateTime(new Date().toISOString())} — ${user ?? ""}*`;
     const element = area.current;
     const start = element?.selectionStart ?? draft.body.length;
     const end = element?.selectionEnd ?? draft.body.length;
@@ -395,7 +384,7 @@ function NotesEditor({
           className="flex flex-col gap-2 rounded-(--radius-panel) border border-state-warn/40 bg-state-warn-soft px-3 py-2"
         >
           <p className="text-state-warn">
-            ▲ <RevisionLine revision={latest} locale={locale} labelKey="notes.conflict" />
+            ▲ <RevisionLine revision={latest} labelKey="notes.conflict" />
           </p>
           <p>{t("notes.conflictHelp")}</p>
         </div>

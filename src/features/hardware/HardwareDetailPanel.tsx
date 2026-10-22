@@ -64,7 +64,7 @@ function groups(typeLabel: (code: string) => string): DetailGroup<NodeHardwareRo
       family: "time",
       fields: [
         // Date of the agent's last asset push.
-        { prop: "updated", format: (row, locale) => formatDateTime(row.updated, locale) },
+        { prop: "updated", format: (row) => formatDateTime(row.updated) },
         field("id"),
       ],
     },

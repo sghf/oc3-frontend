@@ -62,7 +62,7 @@ export const NODE_RELATED_TABS: RelatedTab[] = [
     descriptionKey: "notes.description",
     icon: <BookIcon className="h-4 w-4 shrink-0 text-icon-node" />,
     useSummary: () => ({ count: undefined }),
-    render: (id, locale) => <ObjectNotes kind="node" id={id} locale={locale} />,
+    render: (id) => <ObjectNotes kind="node" id={id} />,
   },
   {
     key: "services",

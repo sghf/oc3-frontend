@@ -41,7 +41,7 @@ function groups(editable: boolean): DetailGroup<AppRow>[] {
         { prop: "id", format: text("id") },
         {
           prop: "updated",
-          format: (row, locale) => formatDateTime(row.updated, locale),
+          format: (row) => formatDateTime(row.updated),
         },
       ],
     },

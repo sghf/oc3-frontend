@@ -308,7 +308,7 @@ export function toHit(
           last === name ? "" : last,
           text(item, "status"),
           text(item, "creator"),
-          formatDate(text(item, "last_update"), locale),
+          formatDate(text(item, "last_update")),
         ),
         ref: `#${id}`,
         target: list("/requests/all", "id", `eq:${id}`),

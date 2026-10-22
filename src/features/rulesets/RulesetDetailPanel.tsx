@@ -443,7 +443,7 @@ function VariableItem({
   onEdit: (on: boolean) => void;
   change: RunChange;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const path = { rset_id: rsetId, var_id: String(variable.id) };
   return (
     <li className="rounded-(--radius-control) border border-line p-2">
@@ -468,7 +468,7 @@ function VariableItem({
         </span>
         <span className="flex items-center gap-1 text-ink-muted">
           <UserLink name={variable.author} />
-          <DateTime value={variable.updated} locale={i18n.language} />
+          <DateTime value={variable.updated} />
         </span>
         {editable && (
           <span className="ml-auto flex items-center gap-1">

@@ -36,7 +36,7 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
     descriptionKey: "notes.description",
     icon: <BookIcon className="h-4 w-4 shrink-0 text-icon-service" />,
     useSummary: () => ({ count: undefined }),
-    render: (id, locale) => <ObjectNotes kind="service" id={id} locale={locale} />,
+    render: (id) => <ObjectNotes kind="service" id={id} />,
   },
   {
     key: "resources",

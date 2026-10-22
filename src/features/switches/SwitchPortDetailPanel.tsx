@@ -81,10 +81,7 @@ const GROUPS: DetailGroup<SwitchPortRow>[] = [
   {
     key: "record",
     family: "time",
-    fields: [
-      { prop: "sw_updated", format: (row, locale) => formatDateTime(row.sw_updated, locale) },
-      field("id"),
-    ],
+    fields: [{ prop: "sw_updated", format: (row) => formatDateTime(row.sw_updated) }, field("id")],
   },
 ];
 

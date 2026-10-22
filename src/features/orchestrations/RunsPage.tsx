@@ -82,7 +82,7 @@ function columns(): ListColumn<RunRow>[] {
         return {
           ...base,
           family: "time",
-          render: (row, locale) => <DateTime value={row[prop] ?? undefined} locale={locale} />,
+          render: (row) => <DateTime value={row[prop] ?? undefined} />,
         };
       case "duration":
         return {

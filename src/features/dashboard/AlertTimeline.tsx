@@ -4,6 +4,7 @@ import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { formatDuration, parseCollectorDate } from "@/lib/format";
 import { Timeline, type TimelineRange } from "@/components/ui/Timeline";
+import { dateTimeFormat } from "@/lib/date-format";
 
 const seconds = (value: string | null | undefined) => {
   const date = parseCollectorDate(value ?? undefined);
@@ -67,9 +68,7 @@ export function AlertTimeline({
         <p className="text-ink-muted">
           {t("dashboard.timeline.summary", {
             count: ranges.length,
-            since: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
-              new Date(first.start * 1000),
-            ),
+            since: dateTimeFormat({ dateStyle: "medium" }).format(new Date(first.start * 1000)),
             total: formatDuration(total, locale),
           })}
           {events.data.truncated === true && ` ${t("dashboard.timeline.truncated")}`}

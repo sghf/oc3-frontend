@@ -73,11 +73,11 @@ const FAMILY: Partial<Record<ModulesetProp, ColumnFamily>> = {
 /** The id props, keys of the rows. */
 const KEY_PROPS = ["id", "modset_id"];
 
-function renderCell(prop: ModulesetProp, row: ModulesetRow, locale: string) {
+function renderCell(prop: ModulesetProp, row: ModulesetRow) {
   switch (prop) {
     case "modset_updated":
     case "modset_mod_updated":
-      return <DateTime value={row[prop]} locale={locale} />;
+      return <DateTime value={row[prop]} />;
     case "teams_responsible":
     case "teams_publication":
       return <TeamLinks value={row[prop]} />;
@@ -100,7 +100,7 @@ const COLUMNS: ListColumn<ModulesetRow>[] = MODULESET_PROPS.map((prop) => ({
   numeric: KEY_PROPS.includes(prop),
   family: FAMILY[prop] ?? "moduleset",
   filter: prop === "autofix" ? { kind: "enum" as const, options: FLAG_FILTER_OPTIONS } : undefined,
-  render: (row, locale) => renderCell(prop, row, locale),
+  render: (row) => renderCell(prop, row),
 }));
 
 const ALL_PROPS: string[] = [...MODULESET_PROPS];

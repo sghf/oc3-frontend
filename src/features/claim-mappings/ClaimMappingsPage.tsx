@@ -108,8 +108,8 @@ const COLUMNS: ListColumn<ClaimMappingRow>[] = PROPS.map((prop) => ({
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "state",
   filter: prop === "allow_access" ? { kind: "enum", options: ACCESS_OPTIONS } : undefined,
-  render: (row: ClaimMappingRow, locale: string) => {
-    if (prop === "updated") return <DateTime value={row.updated} locale={locale} />;
+  render: (row: ClaimMappingRow) => {
+    if (prop === "updated") return <DateTime value={row.updated} />;
     if (prop === "allow_access") return <AccessCell value={row.allow_access} />;
     // The claim and its value read in a monospace font: a space must not go unnoticed.
     if (prop === "claim" || prop === "value")

@@ -22,6 +22,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { useDesigner } from "./designer-context";
 import { planRestore } from "./restore";
 import { BUTTON } from "./ui";
+import { dateTimeFormat } from "@/lib/date-format";
 
 /** Versions read at first, and added by "show older". */
 const PAGE = 50;
@@ -196,7 +197,7 @@ function VersionList({
   versions: ComplianceVersion[];
   onSelect: (commit: string) => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const dayOf = (iso: string) => new Date(iso).toDateString();
   const today = new Date().toDateString();
   const yesterday = new Date(Date.now() - 86_400_000).toDateString();
@@ -208,7 +209,7 @@ function VersionList({
         ? t("designer.historyPanel.today")
         : day === yesterday
           ? t("designer.historyPanel.yesterday")
-          : new Date(version.date).toLocaleDateString(i18n.language, { dateStyle: "full" });
+          : dateTimeFormat({ dateStyle: "full" }).format(new Date(version.date));
     const last = days.at(-1);
     if (last?.label === label) last.versions.push(version);
     else days.push({ label, versions: [version] });
@@ -247,9 +248,9 @@ function VersionList({
                       </span>
                       <span className="block text-ink-muted">
                         <code className="font-mono">{version.id.slice(0, 7)}</code> ·{" "}
-                        {new Date(version.date).toLocaleTimeString(i18n.language, {
+                        {dateTimeFormat({
                           timeStyle: "short",
-                        })}{" "}
+                        }).format(new Date(version.date))}{" "}
                         · {authorName(version.author)}
                       </span>
                     </span>
@@ -279,7 +280,7 @@ function VersionView({
   /** The restore is staged in the sandbox: the panel gives way to it. */
   onRestored: () => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const designer = useDesigner();
   const detail = useComplianceVersion(commit);
   const [raw, setRaw] = useState(false);
@@ -343,10 +344,10 @@ function VersionView({
         </p>
         <p className="text-ink-muted">
           <code className="font-mono">{version.id.slice(0, 7)}</code> ·{" "}
-          {new Date(version.date).toLocaleString(i18n.language, {
+          {dateTimeFormat({
             dateStyle: "medium",
             timeStyle: "short",
-          })}{" "}
+          }).format(new Date(version.date))}{" "}
           · {version.author}
         </p>
       </header>

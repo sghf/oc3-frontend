@@ -31,7 +31,7 @@ const GROUPS: DetailGroup<FormRow>[] = [
     family: "time",
     fields: [
       { prop: "form_author", format: text("form_author") },
-      { prop: "form_created", format: (row, locale) => formatDateTime(row.form_created, locale) },
+      { prop: "form_created", format: (row) => formatDateTime(row.form_created) },
       { prop: "id", format: text("id") },
     ],
   },

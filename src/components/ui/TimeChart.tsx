@@ -6,6 +6,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
+import { dateTimeFormat } from "@/lib/date-format";
 
 export interface TimeSeries {
   key: string;
@@ -214,14 +215,12 @@ export function TimeChart({
   // Points closer than a day carry their time: the axis and the tooltip show it.
   const intraday = dates.some((t, i) => i > 0 && t - (dates[i - 1] ?? t) < 24 * 3600);
   const shortSpan = (dates[dates.length - 1] ?? 0) - (dates[0] ?? 0) <= 2 * 24 * 3600;
-  const dayFormat = new Intl.DateTimeFormat(
-    locale,
+  const dayFormat = dateTimeFormat(
     shortSpan && intraday
       ? { hour: "2-digit", minute: "2-digit" }
       : { month: "short", day: "numeric" },
   );
-  const fullDate = new Intl.DateTimeFormat(
-    locale,
+  const fullDate = dateTimeFormat(
     intraday ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" },
   );
 

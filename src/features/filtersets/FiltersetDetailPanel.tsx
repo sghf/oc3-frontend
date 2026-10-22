@@ -31,7 +31,7 @@ const GROUPS: DetailGroup<FiltersetRow>[] = [
       { prop: "fset_name", format: text("fset_name"), editable: true },
       { prop: "fset_stats", format: text("fset_stats"), editable: true, input: "boolean" },
       { prop: "fset_author", format: text("fset_author") },
-      { prop: "fset_updated", format: (row, locale) => formatDateTime(row.fset_updated, locale) },
+      { prop: "fset_updated", format: (row) => formatDateTime(row.fset_updated) },
       { prop: "id", format: text("id") },
     ],
   },

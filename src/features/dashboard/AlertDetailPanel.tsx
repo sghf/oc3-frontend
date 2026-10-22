@@ -18,9 +18,9 @@ const text = (prop: keyof AlertRow) => (row: AlertRow) => {
   return value === undefined || value === null ? undefined : String(value);
 };
 
-const date = (prop: keyof AlertRow) => (row: AlertRow, locale: string) => {
+const date = (prop: keyof AlertRow) => (row: AlertRow) => {
   const value = row[prop];
-  return typeof value === "string" ? formatDateTime(value, locale) : undefined;
+  return typeof value === "string" ? formatDateTime(value) : undefined;
 };
 
 const field = (

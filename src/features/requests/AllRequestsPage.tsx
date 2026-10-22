@@ -104,8 +104,7 @@ function columns(t: (key: string) => string): ListColumn<WorkflowRow>[] {
             label={value in STATUS ? t(`allRequests.status.${value}`) : value}
           />
         );
-      if (prop === "create_date" && typeof value === "string")
-        return <DateTime value={value} locale={locale} />;
+      if (prop === "create_date" && typeof value === "string") return <DateTime value={value} />;
       // Date of the latest step: its age reads better as a distance.
       if (prop === "last_update" && typeof value === "string")
         return <RelativeTime value={value} locale={locale} />;

@@ -15,6 +15,7 @@ import {
   useThemePref,
   useLanguagePref,
   usePanelSidePref,
+  useDateFormatPref,
   PANEL_SIDES,
   useUserPrefs,
 } from "@/lib/user-prefs";
@@ -22,6 +23,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { ResetIcon } from "@/components/ui/icons";
 import { PALETTES, THEMES } from "@/lib/theme";
 import { LANGUAGES, browserLanguage } from "@/lib/language";
+import { DATE_FORMATS, HOUR_CYCLES, formatExample } from "@/lib/date-format";
 import { UserGroupsParts } from "@/features/users/UserGroupsParts";
 import { useUserGroups } from "@/features/users/use-user-groups";
 import { isSession, useCredentials } from "@/lib/api/auth";
@@ -199,6 +201,7 @@ function AppearanceCard() {
   const palette = usePalettePref();
   const language = useLanguagePref();
   const panelSide = usePanelSidePref();
+  const dates = useDateFormatPref();
   return (
     <ProfileCard
       title={t("profile.appearance.title")}
@@ -243,6 +246,31 @@ function AppearanceCard() {
             choice={language}
           />
           <p className="mt-1 text-ink-muted">{t("profile.language.hint")}</p>
+        </div>
+        <div>
+          <p className="mb-1 font-medium">{t("profile.dateFormat.title")}</p>
+          <ChoiceGroup
+            name="dateFormat"
+            label={t("profile.dateFormat.title")}
+            options={DATE_FORMATS}
+            // Each convention said with a moment it shows, under the clock chosen.
+            optionLabel={(value) =>
+              t("profile.dateFormat.option", {
+                name: t(`profile.dateFormat.options.${value}`),
+                example: formatExample({ format: value, hourCycle: dates.hourCycle.value }),
+              })
+            }
+            choice={dates.format}
+          />
+          <p className="mt-2 mb-1 font-medium">{t("profile.hourCycle.title")}</p>
+          <ChoiceGroup
+            name="hourCycle"
+            label={t("profile.hourCycle.title")}
+            options={HOUR_CYCLES}
+            optionLabel={(value) => t(`profile.hourCycle.options.${value}`)}
+            choice={dates.hourCycle}
+          />
+          <p className="mt-1 text-ink-muted">{t("profile.dateFormat.hint")}</p>
         </div>
         <div>
           <p className="mb-1 font-medium">{t("profile.panelSide.title")}</p>

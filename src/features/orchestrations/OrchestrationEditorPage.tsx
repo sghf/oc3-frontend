@@ -48,7 +48,7 @@ function toInput(o: Orchestration): OrchestrationInput {
  * runs after a confirmation that names what it will do.
  */
 export function OrchestrationEditorPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const params = useParams({ strict: false });
   const raw = (params as { orchestrationId?: string }).orchestrationId;
@@ -263,7 +263,7 @@ export function OrchestrationEditorPage() {
                       className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-sunken/60"
                     >
                       {isRunStatus(run.status) && <RunStatusPill status={run.status} />}
-                      <DateTime value={run.started} locale={i18n.language} />
+                      <DateTime value={run.started} />
                     </Link>
                   </li>
                 ))}

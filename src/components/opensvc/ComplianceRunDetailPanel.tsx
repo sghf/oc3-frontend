@@ -37,7 +37,7 @@ function groups(source: ComplianceRunSource): DetailGroup<RunRow>[] {
       key: "run",
       family: "moduleset",
       fields: [
-        { prop: "run_date", format: (row, locale) => formatDateTime(row.run_date, locale) },
+        { prop: "run_date", format: (row) => formatDateTime(row.run_date) },
         field("run_module"),
         field("run_action"),
         {

@@ -67,7 +67,7 @@ const GROUPS: DetailGroup<SafeFileRow>[] = [
     fields: [
       { prop: "uploader_name", format: text("uploader_name") },
       { prop: "uploaded_from", format: text("uploaded_from") },
-      { prop: "uploaded_date", format: (row, locale) => formatDateTime(row.uploaded_date, locale) },
+      { prop: "uploaded_date", format: (row) => formatDateTime(row.uploaded_date) },
       { prop: "id", format: text("id") },
     ],
   },
@@ -161,7 +161,7 @@ function SafeHistory({ fileId }: { fileId: string }) {
         {history.data.map((row) => (
           <tr key={row.id} className="border-t border-line">
             <td className="py-1 pr-3">
-              <DateTime value={row.uploaded_date} locale={i18n.language} />
+              <DateTime value={row.uploaded_date} />
             </td>
             <td className="py-1 pr-3">{row.uploader_name}</td>
             <td className="py-1 pr-3 text-right">{formatBytes(row.size, i18n.language)}</td>

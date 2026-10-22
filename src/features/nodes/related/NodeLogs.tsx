@@ -22,7 +22,7 @@ type LogRow = components["schemas"]["LogRow"];
  * values. The latest `NODE_LOGS_LIMIT` show here; the Logs view, filtered on the
  * node, has them all.
  */
-export function NodeLogs({ nodeId, locale }: { nodeId: string; locale: string }) {
+export function NodeLogs({ nodeId }: { nodeId: string; locale: string }) {
   const { t } = useTranslation();
   const logs = useNodeLogs(nodeId);
   const all = logs.data?.rows ?? [];
@@ -48,7 +48,7 @@ export function NodeLogs({ nodeId, locale }: { nodeId: string; locale: string })
     {
       key: "log_date",
       label: t("logs.fields.log_date"),
-      render: (row) => <DateTime value={row.log_date} locale={locale} />,
+      render: (row) => <DateTime value={row.log_date} />,
     },
     {
       key: "log_level",

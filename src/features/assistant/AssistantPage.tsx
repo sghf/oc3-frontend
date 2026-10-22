@@ -27,6 +27,7 @@ import {
   type AssistantConfirmation,
   type AssistantStreamEvent,
 } from "./use-assistant";
+import { dateTimeFormat } from "@/lib/date-format";
 
 /** The questions the empty conversation suggests, keys of `assistant.suggestions`. */
 const SUGGESTIONS = ["servicesDown", "criticalAlerts", "silentNodes", "compliance"] as const;
@@ -250,7 +251,7 @@ function Conversation({
   conversationId: string | null;
   onCreated: (id: string) => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [id, setId] = useState(conversationId);
   const history = useMessages(id);
@@ -414,7 +415,7 @@ function Conversation({
     }
   }
 
-  const time = new Intl.DateTimeFormat(i18n.language, { hour: "2-digit", minute: "2-digit" });
+  const time = dateTimeFormat({ hour: "2-digit", minute: "2-digit" });
   const messages = history.data?.messages ?? [];
   // The feedback goes under the last answer of each turn, which a confirmation
   // may have split.

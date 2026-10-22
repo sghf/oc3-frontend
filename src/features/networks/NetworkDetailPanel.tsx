@@ -34,7 +34,7 @@ const GROUPS: DetailGroup<IpRow>[] = [
       linkedField<IpRow>("nodename", "node", (row) => row.node_id, text("nodename")),
       field("node_id"),
       { ...field("flag_deprecated"), input: "boolean" as const },
-      field("updated", (row, locale) => formatDateTime(row.updated, locale)),
+      field("updated", (row) => formatDateTime(row.updated)),
       field("id"),
     ],
   },

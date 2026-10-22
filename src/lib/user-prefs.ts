@@ -1,3 +1,12 @@
+import {
+  applyDateFormat,
+  cachedDateFormat,
+  isDateFormatChoice,
+  isHourCycleChoice,
+  type DateFormatChoice,
+  type DateFormatPrefs,
+  type HourCycleChoice,
+} from "./date-format";
 import { useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { api } from "./api/client";
@@ -96,6 +105,13 @@ export interface UserPrefs {
    * right one. The old interface has no such choice.
    */
   panelSide?: string;
+  /**
+   * How dates read: a convention of `DATE_FORMATS` (`src/lib/date-format.ts`);
+   * absent, the browser's regional settings. The old interface has no such choice.
+   */
+  dateFormat?: string;
+  /** The clock of the times, "h23" or "h12"; absent, the one of the date format. */
+  hourCycle?: string;
   [key: string]: unknown;
 }
 
@@ -330,6 +346,11 @@ export function useAppearance(): void {
   }, [language]);
   useEffect(() => watchBrowserLanguage(() => currentChoice.current), []);
 
+  const dates = currentDateFormatPrefs(prefs);
+  useEffect(() => {
+    applyDateFormat({ format: dates.format, hourCycle: dates.hourCycle });
+  }, [dates.format, dates.hourCycle]);
+
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
@@ -424,6 +445,66 @@ export function useLanguagePref() {
     },
     isSaving: save.isPending,
     errorMessage: save.isError ? save.error.message : null,
+  };
+}
+
+/** The date format of the account, or the local cache until its preferences arrive. */
+function currentDateFormatPrefs(prefs: ReturnType<typeof useUserPrefs>): DateFormatPrefs {
+  if (!prefs.isSuccess) return cachedDateFormat();
+  const { dateFormat, hourCycle } = prefs.data;
+  return {
+    format: isDateFormatChoice(dateFormat) ? dateFormat : "system",
+    hourCycle: isHourCycleChoice(hourCycle) ? hourCycle : "auto",
+  };
+}
+
+/**
+ * The date format and the clock chosen by the account, as the profile page edits
+ * them, each in the shape of the appearance choices. The defaults are not stored:
+ * choosing one removes its key.
+ */
+export function useDateFormatPref() {
+  const queryClient = useQueryClient();
+  const stored = currentDateFormatPrefs(useUserPrefs());
+  const save = useMutation({
+    mutationFn: async (next: DateFormatPrefs) => {
+      applyDateFormat(next);
+      await savePrefs(queryClient, (currentPrefs) => {
+        const rest = { ...currentPrefs };
+        delete rest.dateFormat;
+        delete rest.hourCycle;
+        return {
+          ...rest,
+          ...(next.format === "system" ? {} : { dateFormat: next.format }),
+          ...(next.hourCycle === "auto" ? {} : { hourCycle: next.hourCycle }),
+        };
+      });
+    },
+    onError: () => {
+      applyDateFormat(stored);
+    },
+  });
+  // The choice being saved shows at once, rather than when the server confirms it.
+  const value = save.isPending ? save.variables : stored;
+  const common = {
+    isSaving: save.isPending,
+    errorMessage: save.isError ? save.error.message : null,
+  };
+  return {
+    format: {
+      ...common,
+      value: value.format,
+      set: (format: DateFormatChoice) => {
+        save.mutate({ ...value, format });
+      },
+    },
+    hourCycle: {
+      ...common,
+      value: value.hourCycle,
+      set: (hourCycle: HourCycleChoice) => {
+        save.mutate({ ...value, hourCycle });
+      },
+    },
   };
 }
 

@@ -128,7 +128,7 @@ const COLUMNS: ListColumn<ResourceRow>[] = RESOURCE_PROPS.map((prop) => ({
     if (prop === "updated" && typeof value === "string" && value !== "")
       return <RelativeTime value={value} locale={locale} />;
     if (prop === "changed" && typeof value === "string" && value !== "")
-      return <DateTime value={value} locale={locale} />;
+      return <DateTime value={value} />;
     return value;
   },
 }));

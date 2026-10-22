@@ -99,8 +99,7 @@ export function RunPage() {
           }
         />
         <span className="text-ink-muted">
-          {t("orchestrations.run.startedBy", { by: r.started_by })}{" "}
-          <DateTime value={r.started} locale={i18n.language} />
+          {t("orchestrations.run.startedBy", { by: r.started_by })} <DateTime value={r.started} />
           {seconds !== undefined && ` · ${formatDuration(seconds, i18n.language)}`}
         </span>
         {/* Beside the title: the right edge is where the panel anchor floats (`PanelAnchor`). */}
@@ -290,7 +289,7 @@ export function RunPage() {
                     ◆ {t("orchestrations.run.acknowledgedBy", { by: step.acked_by })}{" "}
                     {step.acked_at !== null && step.acked_at !== undefined && (
                       <span className="text-ink-muted">
-                        <DateTime value={step.acked_at} locale={i18n.language} />
+                        <DateTime value={step.acked_at} />
                       </span>
                     )}
                   </p>
@@ -416,19 +415,13 @@ function TargetDetails({
   run: Run;
   onClose: () => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const plan = run.plan[target.step];
   const facts: [string, React.ReactNode][] = [
     [t("orchestrations.runs.status"), <RunStatusPill key="s" status={target.status} />],
     [t("orchestrations.run.action"), plan?.action ?? "—"],
-    [
-      t("orchestrations.run.queued"),
-      target.queued ? <DateTime value={target.queued} locale={i18n.language} /> : "—",
-    ],
-    [
-      t("orchestrations.run.ended"),
-      target.ended ? <DateTime value={target.ended} locale={i18n.language} /> : "—",
-    ],
+    [t("orchestrations.run.queued"), target.queued ? <DateTime value={target.queued} /> : "—"],
+    [t("orchestrations.run.ended"), target.ended ? <DateTime value={target.ended} /> : "—"],
     [t("orchestrations.run.ret"), target.ret ?? "—"],
   ];
   return (

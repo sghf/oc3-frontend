@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { formatDuration } from "@/lib/format";
+import { dateTimeFormat } from "@/lib/date-format";
 
 /** The colour of a range: a state, read with its label rather than alone. */
 export type TimelineTone = "up" | "down" | "warn" | "unknown";
@@ -136,9 +137,8 @@ export function Timeline({
   const x = (t: number) => left + ((Math.max(t, first) - first) / span) * inner;
   const y = (track: number) => PAD.top + track * (TRACK_HEIGHT + TRACK_GAP);
   const height = y(tracks.length) - TRACK_GAP + AXIS;
-  const dateTime = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "medium" });
-  const axisFormat = new Intl.DateTimeFormat(
-    locale,
+  const dateTime = dateTimeFormat({ dateStyle: "medium", timeStyle: "medium" });
+  const axisFormat = dateTimeFormat(
     span <= 2 * 86400 ? { hour: "2-digit", minute: "2-digit" } : { month: "short", day: "numeric" },
   );
   const tickCount = Math.max(2, Math.min(6, Math.floor(inner / 110)));

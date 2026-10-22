@@ -126,7 +126,7 @@ function columns(t: TFunction): ListColumn<OrchestrationRow>[] {
         return {
           ...base,
           family: "time",
-          render: (row, locale) => <DateTime value={row[prop] ?? undefined} locale={locale} />,
+          render: (row) => <DateTime value={row[prop] ?? undefined} />,
         };
       case "updated_by":
         return { ...base, family: "team", render: (row) => row.updated_by };

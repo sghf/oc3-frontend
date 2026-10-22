@@ -1793,7 +1793,7 @@
         "right": "À droite",
         "left": "À gauche"
       },
-      "hint": "Le bord de la fenêtre contre lequel s'ouvrent les panneaux de détail et leur historique. Le bouton de l'en-tête d'un panneau le change aussi."
+      "hint": "Le bord de la fenêtre contre lequel s'ouvrent les panneaux de détail. Le bouton de l'en-tête d'un panneau le change aussi."
     },
     "language": {
       "title": "Langue",
@@ -1803,6 +1803,27 @@
         "fr": "Français"
       },
       "hint": "Système suit la langue du navigateur. Une langue choisie suit le compte, sur tous les navigateurs."
+    },
+    "dateFormat": {
+      "title": "Dates et heures",
+      "option": "{{name}} — {{example}}",
+      "options": {
+        "system": "Réglages du navigateur",
+        "en-US": "États-Unis",
+        "en-GB": "Royaume-Uni",
+        "fr-FR": "France",
+        "de-DE": "Allemagne",
+        "iso": "ISO 8601"
+      },
+      "hint": "La façon dont les dates et les heures s'écrivent partout dans le collector, quelle que soit la langue de l'interface. Par défaut, les réglages régionaux de votre navigateur."
+    },
+    "hourCycle": {
+      "title": "Horloge",
+      "options": {
+        "auto": "Selon le format",
+        "h23": "24 heures",
+        "h12": "12 heures"
+      }
     }
   },
   "instances": {

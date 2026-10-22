@@ -84,8 +84,7 @@ const COLUMNS: ListColumn<SafeFileRow>[] = SAFE_PROPS.map((prop) => ({
     const value = row[prop];
     if (prop === "size") return formatBytes(row.size, locale);
     if (prop === "encrypted") return <EncryptionMark encrypted={row.encrypted === true} />;
-    if (prop === "uploaded_date" && typeof value === "string")
-      return <DateTime value={value} locale={locale} />;
+    if (prop === "uploaded_date" && typeof value === "string") return <DateTime value={value} />;
     if ((prop === "md5" || prop === "sha256" || prop === "uuid") && typeof value === "string")
       return <span className="font-mono text-data break-all">{value}</span>;
     if (typeof value === "boolean") return String(value);

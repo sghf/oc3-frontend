@@ -211,9 +211,9 @@ export function LogsPage() {
     // The message filters on the format and the values filling it together (the
     // API compares both): a node or tag name typed there is among the values.
     filter: prop === "log_level" ? { kind: "enum", options: LEVEL_OPTIONS } : undefined,
-    render: (row: LogRow, locale: string) => {
+    render: (row: LogRow) => {
       const value = row[prop];
-      if (prop === "log_date") return <DateTime value={row.log_date} locale={locale} />;
+      if (prop === "log_date") return <DateTime value={row.log_date} />;
       if (prop === "log_level")
         return row.log_level === undefined ? undefined : (
           <StatusBadge state={logLevelState(row.log_level)} label={row.log_level} />

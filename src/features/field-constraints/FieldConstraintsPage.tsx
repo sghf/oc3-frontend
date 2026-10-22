@@ -178,12 +178,12 @@ const COLUMNS: ListColumn<FieldConstraintRow>[] = PROPS.map((prop) => ({
       : prop === "object_kind"
         ? { kind: "enum", options: KIND_OPTIONS }
         : undefined,
-  render: (row: FieldConstraintRow, locale: string) => {
+  render: (row: FieldConstraintRow) => {
     if (prop === "object_kind") return <KindLabel kind={row.object_kind} />;
     if (prop === "field") return <FieldLabel kind={row.object_kind} field={row.field} />;
     if (prop === "mode") return <ModeLabel mode={row.mode} />;
     if (prop === "allowed") return <AllowedCell row={row} />;
-    if (prop === "updated") return <DateTime value={row.updated} locale={locale} />;
+    if (prop === "updated") return <DateTime value={row.updated} />;
     // A pattern has no list: no count rather than 0.
     if (prop === "value_count" && row.mode === "regex") return undefined;
     if (prop === "pattern" || prop === "values")

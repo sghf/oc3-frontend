@@ -10,7 +10,7 @@ import { formatDateTime, formatRelativeTime, parseCollectorDate } from "@/lib/fo
  */
 export function RelativeTime({ value, locale }: { value: string | undefined; locale: string }) {
   const parsed = parseCollectorDate(value);
-  const exact = formatDateTime(value, locale);
+  const exact = formatDateTime(value);
   // Empty or unreadable value: nothing to place in time, so the raw text is rendered.
   if (parsed === null) return exact;
   return (

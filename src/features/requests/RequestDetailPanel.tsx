@@ -54,7 +54,7 @@ export function RequestDetailPanel({
   workflowId: string | undefined;
   onClose: () => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const request = useRequest(workflowId);
   const steps = useRequestSteps(request.data?.form_head_id);
   const open = workflowId !== undefined;
@@ -108,7 +108,7 @@ export function RequestDetailPanel({
             <dd>{row.creator?.trim()}</dd>
             <dt className="text-ink-muted">{t("allRequests.fields.create_date")}</dt>
             <dd>
-              <DateTime value={row.create_date} locale={i18n.language} />
+              <DateTime value={row.create_date} />
             </dd>
             <dt className="text-ink-muted">{t("allRequests.fields.steps")}</dt>
             <dd>{row.steps}</dd>
@@ -172,7 +172,7 @@ export function RequestDetailPanel({
  * tab showed the results of each step.
  */
 function Step({ step, index, current }: { step: StoredFormRow; index: number; current: boolean }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [showLogs, setShowLogs] = useState(false);
   const resultsId =
     typeof step.results_id === "number" && step.results_id > 0 ? step.results_id : null;
@@ -192,7 +192,7 @@ function Step({ step, index, current }: { step: StoredFormRow; index: number; cu
       </div>
       <p className="text-ink-muted">
         {t("requestDetail.submitted", { who: step.form_submitter?.trim() ?? "" })}{" "}
-        <DateTime value={step.form_submit_date} locale={i18n.language} />
+        <DateTime value={step.form_submit_date} />
         {step.form_assignee !== null && step.form_assignee !== undefined && (
           <> · {t("requestDetail.assignedTo", { who: step.form_assignee.trim() })}</>
         )}

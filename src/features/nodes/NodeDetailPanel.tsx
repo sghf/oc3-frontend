@@ -100,9 +100,9 @@ const text = (prop: keyof NodeRow) => (row: NodeRow) => {
   return value === undefined || value === null ? undefined : String(value);
 };
 
-const date = (prop: keyof NodeRow) => (row: NodeRow, locale: string) => {
+const date = (prop: keyof NodeRow) => (row: NodeRow) => {
   const value = row[prop];
-  return typeof value === "string" ? formatDateTime(value, locale) : undefined;
+  return typeof value === "string" ? formatDateTime(value) : undefined;
 };
 
 /**

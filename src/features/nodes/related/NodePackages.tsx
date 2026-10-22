@@ -68,7 +68,7 @@ export function NodePackages({
         row.pkg_install_date === undefined ||
         row.pkg_install_date === null ||
         row.pkg_install_date === "" ? null : (
-          <DateTime value={row.pkg_install_date} locale={locale} dateOnly />
+          <DateTime value={row.pkg_install_date} dateOnly />
         ),
     },
   ];

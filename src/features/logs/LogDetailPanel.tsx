@@ -24,7 +24,7 @@ const GROUPS: DetailGroup<LogRow>[] = [
     key: "event",
     family: "alert",
     fields: [
-      { prop: "log_date", format: (row, locale) => formatDateTime(row.log_date, locale) },
+      { prop: "log_date", format: (row) => formatDateTime(row.log_date) },
       field("log_level"),
       field("log_action"),
       field("log_user"),

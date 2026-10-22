@@ -74,8 +74,8 @@ const COLUMNS: ListColumn<FilterRow>[] = FILTER_PROPS.map((prop) => ({
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "state",
   filter: prop === "f_op" ? { kind: "enum", options: OPERATOR_OPTIONS } : undefined,
-  render: (row: FilterRow, locale: string) => {
-    if (prop === "f_updated") return <DateTime value={row.f_updated} locale={locale} />;
+  render: (row: FilterRow) => {
+    if (prop === "f_updated") return <DateTime value={row.f_updated} />;
     // The operator and the value read in a monospace font: a space or a LIKE "%" must
     // not go unnoticed.
     if (prop === "f_op" || prop === "f_value")

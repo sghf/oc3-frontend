@@ -30,9 +30,9 @@ const text = (prop: keyof ServiceRow) => (row: ServiceRow) => {
   return value === undefined ? undefined : String(value);
 };
 
-const date = (prop: keyof ServiceRow) => (row: ServiceRow, locale: string) => {
+const date = (prop: keyof ServiceRow) => (row: ServiceRow) => {
   const value = row[prop];
-  return typeof value === "string" ? formatDateTime(value, locale) : undefined;
+  return typeof value === "string" ? formatDateTime(value) : undefined;
 };
 
 const field = (

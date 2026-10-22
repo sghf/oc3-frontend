@@ -75,7 +75,7 @@ const NUMERIC_PROPS: SwitchProp[] = ["sw_index", "sw_slot", "sw_port", "sw_ports
 /** Port names are WWNs or IQNs: compared character by character, hence monospaced. */
 const ADDRESS_PROPS: SwitchProp[] = ["sw_fabric", "sw_portname", "sw_rportname"];
 
-function renderCell(prop: SwitchProp, row: SwitchPortRow, locale: string) {
+function renderCell(prop: SwitchProp, row: SwitchPortRow) {
   const value = row[prop];
   if (prop === "sw_rname")
     // What is plugged on the other end is a node when the collector knows its HBA;
@@ -92,8 +92,7 @@ function renderCell(prop: SwitchProp, row: SwitchPortRow, locale: string) {
     return value === "T" || value === "F" ? (
       <FlagSwitch value={value} labelKey="switches.fields.sw_portnego" />
     ) : null;
-  if (prop === "sw_updated" && typeof value === "string")
-    return <DateTime value={value} locale={locale} />;
+  if (prop === "sw_updated" && typeof value === "string") return <DateTime value={value} />;
   if (ADDRESS_PROPS.includes(prop) && typeof value === "string" && value !== "")
     return <code>{value}</code>;
   return value;
@@ -109,7 +108,7 @@ const COLUMNS: ListColumn<SwitchPortRow>[] = SWITCH_PROPS.map((prop) => ({
   numeric: NUMERIC_PROPS.includes(prop),
   family: prop === "sw_updated" ? "time" : prop === "node_id" ? "node" : "network",
   filter: prop === "sw_portnego" ? { kind: "enum", options: FLAG_FILTER_OPTIONS } : undefined,
-  render: (row, locale) => renderCell(prop, row, locale),
+  render: (row) => renderCell(prop, row),
 }));
 
 const ALL_PROPS: string[] = [...SWITCH_PROPS];

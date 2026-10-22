@@ -27,8 +27,7 @@ export function ActionDetailPanel({
   actionId: string | undefined;
   onClose: () => void;
 }) {
-  const { t, i18n } = useTranslation();
-  const locale = i18n.language;
+  const { t } = useTranslation();
   const {
     data,
     isPending: loading,
@@ -117,13 +116,13 @@ export function ActionDetailPanel({
             {field(
               "actions.fields.date_queued",
               realDate(row.date_queued) === undefined ? undefined : (
-                <DateTime value={realDate(row.date_queued)} locale={locale} />
+                <DateTime value={realDate(row.date_queued)} />
               ),
             )}
             {field(
               "actions.fields.date_dequeued",
               realDate(row.date_dequeued) === undefined ? undefined : (
-                <DateTime value={realDate(row.date_dequeued)} locale={locale} />
+                <DateTime value={realDate(row.date_dequeued)} />
               ),
             )}
             {field("actions.fields.ret", isPending(row.status) ? undefined : row.ret)}

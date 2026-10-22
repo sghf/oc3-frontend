@@ -97,10 +97,10 @@ const NUMERIC_PROPS: string[] = [...KEY_PROPS, "chain_len", "fset_id"];
 /** The two kinds of ruleset: the values are their own labels, as in the cells. */
 const TYPE_OPTIONS = [{ value: "explicit" }, { value: "contextual" }];
 
-function renderCell(prop: RulesetProp, row: RulesetRow, locale: string) {
+function renderCell(prop: RulesetProp, row: RulesetRow) {
   switch (prop) {
     case "var_updated":
-      return <DateTime value={row.var_updated} locale={locale} />;
+      return <DateTime value={row.var_updated} />;
     case "teams_responsible":
     case "teams_publication":
       return <TeamLinks value={row[prop]} />;
@@ -132,7 +132,7 @@ const COLUMNS: ListColumn<RulesetRow>[] = RULESET_PROPS.map((prop) => ({
       : prop === "ruleset_type"
         ? { kind: "enum" as const, options: TYPE_OPTIONS }
         : undefined,
-  render: (row, locale) => renderCell(prop, row, locale),
+  render: (row) => renderCell(prop, row),
 }));
 
 const ALL_PROPS: string[] = [...RULESET_PROPS];

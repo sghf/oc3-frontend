@@ -87,10 +87,10 @@ const FAMILY: Record<StatusProp, ColumnFamily> = {
   run_log: "alert",
 };
 
-function renderCell(prop: StatusProp, row: StatusRow, locale: string) {
+function renderCell(prop: StatusProp, row: StatusRow) {
   switch (prop) {
     case "run_date":
-      return <DateTime value={row.run_date} locale={locale} />;
+      return <DateTime value={row.run_date} />;
     case "nodes.nodename":
       return row["nodes.nodename"] === null || row["nodes.nodename"] === undefined ? null : (
         <CrossLink kind="node" id={row.node_id}>
@@ -124,7 +124,7 @@ const COLUMNS: ListColumn<StatusRow>[] = STATUS_PROPS.map((prop) => ({
   family: FAMILY[prop],
   filter:
     prop === "run_status" ? { kind: "enum" as const, options: RUN_STATUS_OPTIONS } : undefined,
-  render: (row, locale) => renderCell(prop, row, locale),
+  render: (row) => renderCell(prop, row),
 }));
 
 const ALL_PROPS: string[] = [...STATUS_PROPS];

@@ -160,8 +160,8 @@ export function FiltersetsPage() {
     family: FAMILY[prop] ?? "state",
     filter:
       prop === "fset_stats" ? { kind: "enum" as const, options: FLAG_FILTER_OPTIONS } : undefined,
-    render: (row: FiltersetRow, locale: string) => {
-      if (prop === "fset_updated") return <DateTime value={row.fset_updated} locale={locale} />;
+    render: (row: FiltersetRow) => {
+      if (prop === "fset_updated") return <DateTime value={row.fset_updated} />;
       if (prop === "fset_stats")
         return row.fset_stats === "T"
           ? t("detail.yes")

@@ -47,8 +47,8 @@ const COLUMNS: ListColumn<TagRow>[] = TAG_PROPS.map((prop) => ({
   prop,
   labelKey: `tags.fields.${prop}`,
   family: FAMILY[prop] ?? "team",
-  render: (row: TagRow, locale: string) =>
-    prop === "tag_created" ? <DateTime value={row.tag_created} locale={locale} /> : row[prop],
+  render: (row: TagRow) =>
+    prop === "tag_created" ? <DateTime value={row.tag_created} /> : row[prop],
 }));
 
 const ALL_PROPS = COLUMNS.map((column) => column.prop);

@@ -88,7 +88,7 @@ const COLUMNS: ListColumn<PackageRow>[] = PACKAGE_PROPS.map((prop) => ({
     if (prop === "pkg_updated" && typeof value === "string")
       return <RelativeTime value={value} locale={locale} />;
     if (prop === "pkg_install_date" && typeof value === "string" && value !== "")
-      return <DateTime value={value} locale={locale} />;
+      return <DateTime value={value} />;
     return value;
   },
 }));

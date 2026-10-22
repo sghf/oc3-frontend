@@ -66,10 +66,10 @@ export const CLUSTER_GROUPS: DetailGroup<ClusterRow>[] = [
       field("listener_port"),
       {
         prop: "cluster_updated",
-        format: (row: ClusterRow, locale: string) =>
+        format: (row: ClusterRow) =>
           row.cluster_updated === undefined || row.cluster_updated === ""
             ? undefined
-            : formatDateTime(row.cluster_updated, locale),
+            : formatDateTime(row.cluster_updated),
         // The age first: whether the cluster still reports is what it says.
         render: (row: ClusterRow, locale: string) => (
           <RelativeTime value={row.cluster_updated} locale={locale} />

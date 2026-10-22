@@ -100,8 +100,8 @@ const COLUMNS: ListColumn<FormRow>[] = FORM_PROPS.map((prop) => ({
   numeric: prop === "id",
   family: FAMILY[prop] ?? "state",
   filter: prop === "form_type" ? { kind: "enum" as const, options: TYPE_OPTIONS } : undefined,
-  render: (row: FormRow, locale: string) => {
-    if (prop === "form_created") return <DateTime value={row.form_created} locale={locale} />;
+  render: (row: FormRow) => {
+    if (prop === "form_created") return <DateTime value={row.form_created} />;
     if (prop === "form_folder") return <code>{row.form_folder}</code>;
     if (prop === "form_yaml") return <DefinitionPreview yaml={row.form_yaml} />;
     return row[prop];

@@ -28,7 +28,7 @@ const GROUPS: DetailGroup<DiskRow>[] = [
       field("disk_devid"),
       field("disk_vendor"),
       field("disk_model"),
-      field("updated", (row, locale) => formatDateTime(row.updated, locale)),
+      field("updated", (row) => formatDateTime(row.updated)),
     ],
   },
   {

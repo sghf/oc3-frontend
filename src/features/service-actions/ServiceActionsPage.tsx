@@ -154,7 +154,7 @@ const COLUMNS: ListColumn<AgentAction>[] = ACTION_PROPS.map((prop) => ({
     if (prop === "rid") return <ActionTargets subset={undefined} rid={row.rid} />;
     if (prop === "status") return <ActionStatus status={row.status} />;
     if ((prop === "begin" || prop === "end" || prop === "acked_date") && typeof value === "string")
-      return <DateTime value={value} locale={locale} />;
+      return <DateTime value={value} />;
     if (prop === "time") {
       const seconds = actionDuration(row);
       return seconds === undefined ? null : formatDuration(seconds, locale);

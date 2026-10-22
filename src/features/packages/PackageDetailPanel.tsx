@@ -18,12 +18,12 @@ const field = (prop: keyof PackageRow) => ({ prop, format: text(prop) });
 
 const date = (prop: "pkg_install_date" | "pkg_updated") => ({
   prop,
-  format: (row: PackageRow, locale: string) => {
+  format: (row: PackageRow) => {
     // The install date is null when the package manager does not record it.
     const value = row[prop];
     return value === undefined || value === null || value === ""
       ? undefined
-      : formatDateTime(value, locale);
+      : formatDateTime(value);
   },
 });
 

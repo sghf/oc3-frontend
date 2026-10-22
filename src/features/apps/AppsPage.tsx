@@ -66,10 +66,9 @@ const COLUMNS: ListColumn<AppRow>[] = APP_PROPS.map((prop) => ({
   labelKey: `apps.fields.${prop}`,
   numeric: NUMERIC_PROPS.has(prop),
   family: FAMILY[prop] ?? "node",
-  render: (row: AppRow, locale: string) => {
+  render: (row: AppRow) => {
     const value = row[prop];
-    if (DATE_PROPS.has(prop) && typeof value === "string")
-      return <DateTime value={value} locale={locale} />;
+    if (DATE_PROPS.has(prop) && typeof value === "string") return <DateTime value={value} />;
     return value;
   },
 }));

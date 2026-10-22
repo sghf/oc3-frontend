@@ -77,7 +77,7 @@ export function ServiceActions({
     {
       key: "begin",
       label: t("services.actions.fields.begin"),
-      render: (row) => <DateTime value={row.begin} locale={locale} />,
+      render: (row) => <DateTime value={row.begin} />,
     },
     {
       key: "services.svcname",
@@ -315,16 +315,13 @@ function ActionFacts({
       ),
     ],
     [t("services.actions.fields.status"), <ActionStatus key="status" status={action.status} />],
-    [
-      t("services.actions.fields.begin"),
-      <DateTime key="begin" value={action.begin} locale={locale} />,
-    ],
+    [t("services.actions.fields.begin"), <DateTime key="begin" value={action.begin} />],
     [
       t("services.actions.timeline.end"),
       action.end === undefined || action.end === null ? (
         t("services.actions.timeline.ongoing")
       ) : (
-        <DateTime key="end" value={action.end} locale={locale} />
+        <DateTime key="end" value={action.end} />
       ),
     ],
     [

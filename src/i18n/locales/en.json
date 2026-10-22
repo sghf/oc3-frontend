@@ -1793,7 +1793,7 @@
         "right": "On the right",
         "left": "On the left"
       },
-      "hint": "The edge of the window the detail panels and their history open against. The button in the header of a panel switches it too."
+      "hint": "The edge of the window the detail panels open against. The button in the header of a panel switches it too."
     },
     "language": {
       "title": "Language",
@@ -1803,6 +1803,27 @@
         "fr": "Français"
       },
       "hint": "System follows the language of the browser. A chosen language follows the account, on every browser."
+    },
+    "dateFormat": {
+      "title": "Dates and times",
+      "option": "{{name}} — {{example}}",
+      "options": {
+        "system": "Browser settings",
+        "en-US": "United States",
+        "en-GB": "United Kingdom",
+        "fr-FR": "France",
+        "de-DE": "Germany",
+        "iso": "ISO 8601"
+      },
+      "hint": "How dates and times read everywhere in the collector, whatever the language of the interface. By default, the regional settings of your browser."
+    },
+    "hourCycle": {
+      "title": "Clock",
+      "options": {
+        "auto": "As the format",
+        "h23": "24-hour",
+        "h12": "12-hour"
+      }
     }
   },
   "instances": {

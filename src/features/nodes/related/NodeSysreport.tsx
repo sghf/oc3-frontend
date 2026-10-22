@@ -25,6 +25,7 @@ import {
 import { periodBegin, type Period } from "./sysreport-period";
 import { SysreportPurgeForm, SysreportPurgeTracker, type PurgeTarget } from "./SysreportPurge";
 import { useEffectivePrivileges } from "@/lib/api/effective-privileges";
+import { dateTimeFormat } from "@/lib/date-format";
 
 type Mode = "changes" | "files";
 type Kind = "file" | "command";
@@ -247,7 +248,7 @@ export function NodeSysreport({ nodeId, locale }: { nodeId: string; locale: stri
             <p className="text-ink-muted">
               {at === null
                 ? t("nodes.sysreport.files.latest")
-                : t("nodes.sysreport.files.at", { date: formatMoment(at.date, locale) })}
+                : t("nodes.sysreport.files.at", { date: formatMoment(at.date) })}
             </p>
             {at !== null && (
               <button
@@ -268,7 +269,6 @@ export function NodeSysreport({ nodeId, locale }: { nodeId: string; locale: stri
         {mode === "changes" ? (
           <Changes
             nodeId={nodeId}
-            locale={locale}
             changes={timeline.data?.changes}
             total={timeline.data?.total ?? 0}
             isPending={timeline.isPending}
@@ -331,17 +331,16 @@ function useDebounced(value: string, delay: number): string {
   return debounced;
 }
 
-function formatMoment(date: string, locale: string): string {
+function formatMoment(date: string): string {
   const parsed = new Date(date);
   return Number.isNaN(parsed.getTime())
     ? date
-    : new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(parsed);
+    : dateTimeFormat({ dateStyle: "medium", timeStyle: "short" }).format(parsed);
 }
 
 /** The reports that changed something, grouped by day, each unfolding in place. */
 function Changes({
   nodeId,
-  locale,
   changes,
   total,
   isPending,
@@ -354,7 +353,6 @@ function Changes({
   onBrowse,
 }: {
   nodeId: string;
-  locale: string;
   changes: SysreportChange[] | undefined;
   total: number;
   isPending: boolean;
@@ -393,9 +391,9 @@ function Changes({
       </p>
     );
 
-  const day = new Intl.DateTimeFormat(locale, { dateStyle: "full" });
-  const time = new Intl.DateTimeFormat(locale, { timeStyle: "short" });
-  const moment = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+  const day = dateTimeFormat({ dateStyle: "full" });
+  const time = dateTimeFormat({ timeStyle: "short" });
+  const moment = dateTimeFormat({ dateStyle: "medium", timeStyle: "short" });
   const days: { label: string; entries: typeof shown }[] = [];
   for (const entry of shown) {
     const label = day.format(new Date(entry.change.date));
@@ -409,7 +407,6 @@ function Changes({
       {comparing && (
         <Comparison
           nodeId={nodeId}
-          locale={locale}
           picked={picked}
           kinds={kinds}
           needle={needle}
@@ -601,14 +598,12 @@ function FileDiffList({ files }: { files: SysreportFileDiff[] }) {
  */
 function Comparison({
   nodeId,
-  locale,
   picked,
   kinds,
   needle,
   onClear,
 }: {
   nodeId: string;
-  locale: string;
   picked: SysreportChange[];
   kinds: Record<Kind, boolean>;
   needle: string;
@@ -630,7 +625,7 @@ function Comparison({
         <p className="text-ink-muted">{t("nodes.sysreport.compare.none")}</p>
       ) : !ready ? (
         <p className="flex flex-wrap items-center gap-2 text-ink-muted">
-          {t("nodes.sysreport.compare.one", { date: formatMoment(begin.date, locale) })}
+          {t("nodes.sysreport.compare.one", { date: formatMoment(begin.date) })}
           <button
             type="button"
             onClick={() => {
@@ -644,7 +639,6 @@ function Comparison({
       ) : (
         <ComparisonResult
           nodeId={nodeId}
-          locale={locale}
           begin={begin}
           end={end}
           kinds={kinds}
@@ -661,7 +655,6 @@ function Comparison({
 
 function ComparisonResult({
   nodeId,
-  locale,
   begin,
   end,
   kinds,
@@ -669,7 +662,6 @@ function ComparisonResult({
   onClear,
 }: {
   nodeId: string;
-  locale: string;
   begin: SysreportChange;
   end: SysreportChange | undefined;
   kinds: Record<Kind, boolean>;
@@ -699,8 +691,8 @@ function ComparisonResult({
       <div className="flex flex-wrap items-center gap-3">
         <h3 className="font-semibold">
           {t("nodes.sysreport.compare.title", {
-            begin: formatMoment(diff.data.begin.date, locale),
-            end: formatMoment(diff.data.end.date, locale),
+            begin: formatMoment(diff.data.begin.date),
+            end: formatMoment(diff.data.end.date),
           })}
         </h3>
         <span className="text-ink-muted">

@@ -40,25 +40,25 @@ function groups(t: (key: string) => string): DetailGroup<ObsolescenceSettingRow>
       fields: [
         {
           prop: "obs_warn_date",
-          format: (row, locale) => formatDate(row.obs_warn_date, locale),
+          format: (row) => formatDate(row.obs_warn_date),
           editable: true,
           input: "date",
         },
         { prop: "obs_warn_date_updated_by", format: text("obs_warn_date_updated_by") },
         {
           prop: "obs_warn_date_updated",
-          format: (row, locale) => formatDateTime(row.obs_warn_date_updated, locale),
+          format: (row) => formatDateTime(row.obs_warn_date_updated),
         },
         {
           prop: "obs_alert_date",
-          format: (row, locale) => formatDate(row.obs_alert_date, locale),
+          format: (row) => formatDate(row.obs_alert_date),
           editable: true,
           input: "date",
         },
         { prop: "obs_alert_date_updated_by", format: text("obs_alert_date_updated_by") },
         {
           prop: "obs_alert_date_updated",
-          format: (row, locale) => formatDateTime(row.obs_alert_date_updated, locale),
+          format: (row) => formatDateTime(row.obs_alert_date_updated),
         },
       ],
     },

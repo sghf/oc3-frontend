@@ -206,14 +206,13 @@ export function ObsolescencePage() {
     numeric: NUMERIC_PROPS.has(prop),
     family: FAMILY[prop] ?? "node",
     filter: prop === "obs_type" ? { kind: "enum" as const, options: TYPE_OPTIONS } : undefined,
-    render: (row: ObsolescenceSettingRow, locale: string) => {
+    render: (row: ObsolescenceSettingRow) => {
       const value = row[prop];
       if (prop === "obs_type" && row.obs_type !== undefined)
         return t(`obsolescence.type.${row.obs_type}`);
       if (DEADLINE_PROPS.has(prop) && typeof value === "string")
-        return <DateTime value={value} locale={locale} dateOnly />;
-      if (TIMESTAMP_PROPS.has(prop) && typeof value === "string")
-        return <DateTime value={value} locale={locale} />;
+        return <DateTime value={value} dateOnly />;
+      if (TIMESTAMP_PROPS.has(prop) && typeof value === "string") return <DateTime value={value} />;
       return value;
     },
   }));
