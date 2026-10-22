@@ -81,7 +81,12 @@ function toPositiveInt(value: unknown): number | undefined {
   return Math.floor(parsed);
 }
 
+/**
+ * The router reads a bare `?sel=14598355`, typed or pasted, as a number: kept as
+ * its string, as the links of the application quote it.
+ */
 function toNonEmptyString(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
   return typeof value === "string" && value !== "" ? value : undefined;
 }
 
