@@ -181,6 +181,8 @@ export function InstanceDetailPanel({
       objectId={instanceId}
       tabs={INSTANCE_RELATED_TABS}
       groups={INSTANCE_TAB_GROUPS}
+      // The boxes as a horizontal masonry, as on the node.
+      tileLayout="masonry"
       tab={tab}
       onTabChange={onTabChange}
       propertiesFamily="service"

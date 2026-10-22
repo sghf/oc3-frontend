@@ -18,6 +18,7 @@ import {
   contentFloor,
   DEFAULT_WIDTH,
   MIN_WIDTH,
+  PANEL_MIN_WIDTH_ATTR,
   setPanelWidth,
   usePanelWidth,
   widthToFit,
@@ -208,7 +209,13 @@ export function SlideOver({
     };
     schedule();
     const observer = new MutationObserver(schedule);
-    observer.observe(zone, { childList: true, subtree: true });
+    // The widths an element declares (`PANEL_MIN_WIDTH_ATTR`) as well as the content.
+    observer.observe(zone, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [PANEL_MIN_WIDTH_ATTR],
+    });
     return () => {
       window.clearTimeout(timer);
       observer.disconnect();

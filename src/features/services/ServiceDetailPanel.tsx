@@ -222,6 +222,8 @@ export function ServiceDetailPanel({
       objectId={svcId}
       tabs={SERVICE_RELATED_TABS}
       groups={SERVICE_TAB_GROUPS}
+      // The boxes as a horizontal masonry, as on the node.
+      tileLayout="masonry"
       tab={tab}
       onTabChange={onTabChange}
       propertiesFamily="service"

@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { PANEL_MIN_WIDTH_ATTR } from "@/components/ui/slide-over-width";
 import { RelatedCount } from "./RelatedCount";
 import { PROPERTIES_TAB, type RelatedTab, type RelatedTabGroup } from "./related-tabs";
 
@@ -24,6 +25,7 @@ export function RelatedTileNav({
   onSelect,
   label,
   propertiesIcon,
+  layout = "columns",
 }: {
   groups: ResolvedGroup[];
   /** The tab on display, PROPERTIES_TAB for the properties. */
@@ -33,8 +35,25 @@ export function RelatedTileNav({
   /** Accessible name of the navigation. */
   label: string;
   propertiesIcon: ReactNode;
+  /**
+   * How the boxes are laid out: in columns of two rows, the tiles lined up from
+   * one column to the next (the default), or as a horizontal masonry
+   * (`MasonryTileNav`).
+   */
+  layout?: "columns" | "masonry";
 }) {
   const { t } = useTranslation();
+  if (layout === "masonry")
+    return (
+      <MasonryTileNav
+        groups={groups}
+        active={active}
+        objectId={objectId}
+        onSelect={onSelect}
+        label={label}
+        propertiesIcon={propertiesIcon}
+      />
+    );
   const columns = tileColumns(groups);
   // The rows every column shares, for the tiles to line up across them.
   const tracks = Math.max(
@@ -213,4 +232,172 @@ function tileColumns(groups: ResolvedGroup[]): ResolvedGroup[][] {
   for (let i = 0; i < low.length; i += 2)
     pairs.push(low.slice(i, i + 2).sort((a, b) => rank(a) - rank(b)));
   return [...tall, ...pairs].sort((a, b) => rank(a[0]) - rank(b[0]));
+}
+
+/**
+ * The boxes as a horizontal masonry: each box one row of tiles, so that every box
+ * is as tall as the others, the boxes side by side in the order of the groups and
+ * wrapping onto the next line when the panel is too narrow for them, as bricks.
+ * The boxes of a line share what is left of its width, each growing from its own
+ * width, and their tiles spread over it; a box wider than the panel wraps its
+ * own tiles. The properties stand first in the overview box, as in the columns.
+ *
+ * It declares to its panel the narrowest width keeping the boxes on two lines
+ * (`twoLineWidth`, `PANEL_MIN_WIDTH_ATTR`): the panel is not resized below it, and
+ * widens to it, within the window, when a width chosen before is narrower.
+ */
+function MasonryTileNav({
+  groups,
+  active,
+  objectId,
+  onSelect,
+  label,
+  propertiesIcon,
+}: {
+  groups: ResolvedGroup[];
+  active: string;
+  objectId: string | undefined;
+  onSelect: (tab: string | undefined) => void;
+  label: string;
+  propertiesIcon: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const nav = useRef<HTMLElement>(null);
+  const overview: ResolvedGroup = groups.find((group) => group.key === OVERVIEW_GROUP) ?? {
+    key: OVERVIEW_GROUP,
+    labelKey: "related.groups.overview",
+    tabs: [],
+    entries: [],
+  };
+  const all = [overview, ...groups.filter((group) => group.key !== OVERVIEW_GROUP)];
+
+  // Measured again each time the tiles change: their counts arrive, the language
+  // changes. Measuring changes only styles, which the observer does not watch.
+  useLayoutEffect(() => {
+    const element = nav.current;
+    if (element === null) return;
+    const update = () => {
+      element.setAttribute(PANEL_MIN_WIDTH_ATTR, String(twoLineWidth(element)));
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(element, { childList: true, subtree: true, characterData: true });
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <nav
+      ref={nav}
+      aria-label={label}
+      className="flex flex-wrap gap-x-1.5 gap-y-2.5 border-b border-line px-2 pt-3 pb-2"
+    >
+      {all.map((group) => (
+        // A named group, not a section: no landmark per box.
+        <div
+          key={group.key}
+          role="group"
+          aria-label={t(group.labelKey)}
+          className="flex min-w-0 grow flex-col rounded-(--radius-panel) border border-line px-1.5 pb-1.5"
+        >
+          <span
+            aria-hidden="true"
+            className="-mt-2 mb-1 flex h-4 w-fit items-center bg-surface-raised px-1 text-[0.6875rem] font-semibold tracking-wider whitespace-nowrap text-ink-muted uppercase"
+          >
+            {t(group.labelKey)}
+          </span>
+          <ul className="flex flex-wrap justify-between gap-y-1">
+            {group.key === OVERVIEW_GROUP && (
+              <li className={masonryCell(0)}>
+                <button
+                  type="button"
+                  aria-current={active === PROPERTIES_TAB ? "page" : undefined}
+                  onClick={() => {
+                    onSelect(undefined);
+                  }}
+                  className={masonryTile(active === PROPERTIES_TAB)}
+                >
+                  <span className="shrink-0">{propertiesIcon}</span>
+                  {t("related.properties")}
+                </button>
+              </li>
+            )}
+            {group.entries.map((entry, index) => {
+              const rank = index + (group.key === OVERVIEW_GROUP ? 1 : 0);
+              const current = entry.key === active;
+              const description =
+                entry.descriptionKey === undefined ? undefined : t(entry.descriptionKey);
+              return (
+                <li key={entry.key} className={masonryCell(rank)}>
+                  <button
+                    type="button"
+                    title={description}
+                    aria-current={current ? "page" : undefined}
+                    onClick={() => {
+                      onSelect(entry.key);
+                    }}
+                    className={masonryTile(current)}
+                  >
+                    <span className="shrink-0">{entry.icon}</span>
+                    {t(entry.labelKey)}
+                    {entry.hideCount !== true && (
+                      <RelatedCount tab={entry} id={objectId} active={current} />
+                    )}
+                    {description !== undefined && <span className="sr-only">{description}</span>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/** A tile of the masonry: a dotted line before each but the first of its box. */
+const masonryCell = (rank: number) =>
+  `flex grow px-0.5 ${rank > 0 ? "border-l border-dotted border-line-strong" : ""}`;
+
+/**
+ * A tile of the masonry, as wide as its content: a box stretched to fill its line
+ * spreads its tiles rather than widening the one on display.
+ */
+const masonryTile = (current: boolean) => tileClass(current).replace("w-full ", "");
+
+/**
+ * The narrowest width of the masonry keeping its boxes on two lines, in their
+ * order: each box measured at its own width — neither stretched nor wrapped, for
+ * the time of a layout, never painted — then the best place to break the line.
+ * The line breaks as flex-wrap does, as many boxes as fit first: two lines are
+ * enough whenever some break gives two lines that fit.
+ */
+function twoLineWidth(nav: HTMLElement): number {
+  const boxes = Array.from(nav.children).filter(
+    (child): child is HTMLElement => child instanceof HTMLElement,
+  );
+  const wrap = nav.style.flexWrap;
+  const saved = boxes.map((box) => [box.style.flexGrow, box.style.flexShrink] as const);
+  nav.style.flexWrap = "nowrap";
+  for (const box of boxes) {
+    box.style.flexGrow = "0";
+    box.style.flexShrink = "0";
+  }
+  const widths = boxes.map((box) => box.getBoundingClientRect().width);
+  nav.style.flexWrap = wrap;
+  boxes.forEach((box, index) => {
+    box.style.flexGrow = saved[index]?.[0] ?? "";
+    box.style.flexShrink = saved[index]?.[1] ?? "";
+  });
+  const style = getComputedStyle(nav);
+  const gap = parseFloat(style.columnGap) || 0;
+  const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+  const line = (part: number[]) =>
+    part.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, part.length - 1);
+  let best = line(widths);
+  for (let at = 1; at < widths.length; at++)
+    best = Math.min(best, Math.max(line(widths.slice(0, at)), line(widths.slice(at))));
+  // One more pixel: the widths are fractional, the panel's is rounded.
+  return Math.ceil(best + padding) + 1;
 }

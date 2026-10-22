@@ -340,6 +340,8 @@ export function NodeDetailPanel({
       objectId={nodeId}
       tabs={NODE_RELATED_TABS}
       groups={NODE_TAB_GROUPS}
+      // The boxes as a horizontal masonry rather than in columns.
+      tileLayout="masonry"
       tab={currentTab(tab, search.diff)}
       onTabChange={onTabChange}
       propertiesFamily="node"

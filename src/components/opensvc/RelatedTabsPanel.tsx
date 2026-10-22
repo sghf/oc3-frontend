@@ -34,6 +34,7 @@ export function RelatedTabsPanel({
   propertiesFamily,
   label,
   titleActions,
+  tileLayout,
   children,
 }: {
   open: boolean;
@@ -53,6 +54,8 @@ export function RelatedTabsPanel({
   label: string;
   /** The actions on the object, beside its title in the header, whatever the tab. */
   titleActions?: ReactNode;
+  /** How the boxes of tiles are laid out, with `groups` (see `RelatedTileNav`). */
+  tileLayout?: "columns" | "masonry";
   /** Content of the properties tab. */
   children: ReactNode;
 }) {
@@ -126,6 +129,7 @@ export function RelatedTabsPanel({
             onSelect={onTabChange}
             label={label}
             propertiesIcon={<ColumnFamilyIcon family={propertiesFamily} />}
+            layout={tileLayout}
           />
         )
       }
