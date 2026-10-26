@@ -1252,6 +1252,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/compliance/designer/commits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Save the changes of the compliance designer, all or nothing: the operations
+     *     are applied in their order, in one transaction, each with the checks of its
+     *     single route, which see the changes of the operations before it. The first
+     *     refused rolls them all back: the answer is its status, with its index. An
+     *     operation with nothing to do (a group or a child already attached) is no
+     *     refusal.
+     *
+     *     An object created by an operation (create, clone) is named by the next ones
+     *     by the temporary reference the operation gives it in `as`, starting with
+     *     "tmp:"; the answer maps each to the id of the object created. Any other
+     *     object is named by its id or its name, as it is before the operation.
+     *
+     *     Around the changes, the compliance history records two versions: before,
+     *     the changes made elsewhere since its last version (`baseline_message`),
+     *     after, those of this commit (`message`). No version is recorded when
+     *     nothing changed. A failure to record a version does not undo the changes:
+     *     it is told in `version_error`. Requires the CompManager privilege.
+     */
+    post: operations["PostComplianceDesignerCommits"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/compliance/history": {
     parameters: {
       query?: never;
@@ -7595,6 +7630,117 @@ export interface components {
     ComplianceAttachmentsResponse: {
       data: components["schemas"]["ComplianceAttachmentOutcome"][];
     };
+    ComplianceDesignerCommitInput: {
+      /**
+       * @description The message of the version recording the changes made elsewhere since the
+       *     last version, if any. "Changes made outside the designer" by default.
+       */
+      baseline_message?: string;
+      /** @description The message of the version recording the changes, its first line a summary. */
+      message: string;
+      operations: components["schemas"]["ComplianceDesignerOperation"][];
+    };
+    ComplianceDesignerCommitResult: {
+      /** @description The number of operations applied. */
+      applied: number;
+      /** @description The id of each object created, by its "tmp:" reference. */
+      ids: {
+        [key: string]: number;
+      };
+      /** @description The version recording the changes; changed is false when none was. */
+      version?: {
+        changed: boolean;
+        commit: string;
+      };
+      /** @description Why no version could be recorded, the changes being saved all the same. */
+      version_error?: string;
+    };
+    /** @enum {string} */
+    ComplianceDesignerKind: "ruleset" | "moduleset";
+    /**
+     * @description A change of the compliance designer. `ref` names the object it applies to, a
+     *     ruleset or a moduleset of kind `kind` (rulesets for the operations on
+     *     variables and on the ruleset type, publicity and filterset; modulesets for
+     *     those on modules). The other properties:
+     *
+     *     - create: `name`, `as`;
+     *     - rename: `name`;
+     *     - clone: `as`, `name` (the collector's "<name>_clone" when absent);
+     *     - delete;
+     *     - set_type: `ruleset_type`;
+     *     - set_public: `ruleset_public`;
+     *     - set_filterset: `filterset` (id or name), absent or empty to remove it;
+     *       a filterset makes the ruleset contextual;
+     *     - add_variable: `var_name`, `var_class`, `var_value`;
+     *     - update_variable: `variable`, and the `var_name`, `var_class`, `var_value`
+     *       changed;
+     *     - delete_variable: `variable`;
+     *     - copy_variable: `variable`, `dst` (a ruleset), `move`;
+     *     - include, detach: `child_kind`, `child`, the parent being `ref`;
+     *     - add_module: `name`;
+     *     - rename_module: `module`, `name`;
+     *     - set_autofix: `module`, `autofix`;
+     *     - delete_module: `module`;
+     *     - add_team, remove_team: `role`, `team` (a group id or role);
+     *     - move_team: `role`, `to_role`, `team`.
+     */
+    ComplianceDesignerOperation: {
+      /** @description The "tmp:" reference the next operations name the object created by. */
+      as?: string;
+      autofix?: boolean;
+      child?: string;
+      child_kind?: components["schemas"]["ComplianceDesignerKind"];
+      /** @description The ruleset a variable is copied or moved to. */
+      dst?: string;
+      filterset?: string;
+      kind: components["schemas"]["ComplianceDesignerKind"];
+      /** @description The module, by id or name. */
+      module?: string;
+      move?: boolean;
+      name?: string;
+      /** @enum {string} */
+      op:
+        | "create"
+        | "rename"
+        | "clone"
+        | "delete"
+        | "set_type"
+        | "set_public"
+        | "set_filterset"
+        | "add_variable"
+        | "update_variable"
+        | "delete_variable"
+        | "copy_variable"
+        | "include"
+        | "detach"
+        | "add_module"
+        | "rename_module"
+        | "set_autofix"
+        | "delete_module"
+        | "add_team"
+        | "remove_team"
+        | "move_team";
+      /** @description The object, by id, name, or the "tmp:" reference an earlier operation gave it. */
+      ref?: string;
+      role?: components["schemas"]["ComplianceDesignerTeamRole"];
+      ruleset_public?: boolean;
+      /** @enum {string} */
+      ruleset_type?: "explicit" | "contextual";
+      team?: string;
+      to_role?: components["schemas"]["ComplianceDesignerTeamRole"];
+      var_class?: string;
+      var_name?: string;
+      var_value?: string;
+      /** @description The variable, by id or name. */
+      variable?: string;
+    };
+    ComplianceDesignerRefusal: {
+      /** @description The index of the operation refused; absent when the body itself is. */
+      index?: number;
+      text: string;
+    };
+    /** @enum {string} */
+    ComplianceDesignerTeamRole: "publication" | "responsible";
     /** @description The compliance export a version recorded, in the format of the import. */
     ComplianceExport: {
       filtersets: components["schemas"]["FiltersetExportItem"][];
@@ -13604,6 +13750,68 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceDesignerCommits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceDesignerCommitInput"];
+      };
+    };
+    responses: {
+      /** @description The operations are all applied. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceDesignerCommitResult"];
+        };
+      };
+      /** @description The body is invalid, or an operation was refused as such. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceDesignerRefusal"];
+        };
+      };
+      401: components["responses"]["401"];
+      /** @description The user is no CompManager, or an operation was refused. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceDesignerRefusal"];
+        };
+      };
+      /** @description An object an operation names does not exist. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceDesignerRefusal"];
+        };
+      };
+      /** @description An operation conflicts with the current state, a name taken say. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceDesignerRefusal"];
+        };
+      };
       500: components["responses"]["500"];
     };
   };

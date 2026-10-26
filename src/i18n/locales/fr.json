@@ -3108,17 +3108,18 @@
       "commit": "Enregistrer",
       "commitQuestion_one": "Enregistrer {{count}} modification dans le collector ?",
       "commitQuestion_other": "Enregistrer {{count}} modifications dans le collector ?",
-      "commitDetails": "Elles sont appliquées dans l'ordre où elles ont été faites. Si le collector en refuse une, celles d'avant sont enregistrées et elle reste dans le bac à sable avec les suivantes.",
-      "committing": "Enregistrement… {{done}}/{{total}}",
+      "commitDetails": "Elles sont enregistrées ensemble, dans l'ordre où elles ont été faites : si le collector en refuse une, aucune n'est enregistrée et toutes restent dans le bac à sable.",
+      "committing": "Enregistrement…",
       "committed_one": "{{count}} modification enregistrée dans le collector.",
       "committed_other": "{{count}} modifications enregistrées dans le collector.",
-      "commitFailed": "{{saved}} modifications sur {{total}} enregistrées. Le collector a refusé « {{change}} » : {{message}}. Elle et les suivantes restent dans le bac à sable.",
+      "commitFailed": "Rien n'a été enregistré : {{message}}. Toutes les modifications restent dans le bac à sable.",
       "restoring": "Restauration de la version {{commit}} : relisez les modifications en attente, puis enregistrez-les dans le collector.",
       "none": "Aucune modification en attente.",
       "commitConfirm_one": "Enregistrer {{count}} modification",
       "commitConfirm_other": "Enregistrer {{count}} modifications",
       "resetConfirm_one": "Abandonner {{count}} modification",
-      "resetConfirm_other": "Abandonner {{count}} modifications"
+      "resetConfirm_other": "Abandonner {{count}} modifications",
+      "commitRefused": "Rien n'a été enregistré : le collector a refusé « {{change}} » : {{message}}. Toutes les modifications restent dans le bac à sable."
     },
     "welcome": {
       "missing": "L'objet sélectionné n'est plus dans le brouillon.",
@@ -3210,8 +3211,6 @@
     "history": {
       "subject_one": "{{count}} modification depuis le designer de conformité",
       "subject_other": "{{count}} modifications depuis le designer de conformité",
-      "subjectPartial_one": "{{count}} modification sur {{total}} depuis le designer de conformité, arrêté à un refus",
-      "subjectPartial_other": "{{count}} modifications sur {{total}} depuis le designer de conformité, arrêté à un refus",
       "recorded": "Enregistrées dans l'historique de conformité comme version {{commit}}.",
       "failed": "L'historique de conformité n'a pas pu enregistrer cette version : {{message}}.",
       "baseline": "Export de conformité tel que trouvé avant un enregistrement du designer : les modifications faites ailleurs depuis la dernière version",

@@ -3108,17 +3108,18 @@
       "commit": "Commit",
       "commitQuestion_one": "Save {{count}} change to the collector?",
       "commitQuestion_other": "Save {{count}} changes to the collector?",
-      "commitDetails": "They are applied in the order they were made. If the collector refuses one, the changes before it are saved and it stays in the sandbox with the ones after it.",
-      "committing": "Saving… {{done}}/{{total}}",
+      "commitDetails": "They are saved together, in the order they were made: if the collector refuses one, none is saved and they all stay in the sandbox.",
+      "committing": "Saving…",
       "committed_one": "{{count}} change saved to the collector.",
       "committed_other": "{{count}} changes saved to the collector.",
-      "commitFailed": "{{saved}} of {{total}} changes saved. The collector refused “{{change}}”: {{message}}. It and the following changes are still in the sandbox.",
+      "commitFailed": "Nothing was saved: {{message}}. All the changes are still in the sandbox.",
       "restoring": "Restoring version {{commit}}: review the pending changes, then commit them to the collector.",
       "none": "No pending change.",
       "commitConfirm_one": "Commit {{count}} change",
       "commitConfirm_other": "Commit {{count}} changes",
       "resetConfirm_one": "Discard {{count}} change",
-      "resetConfirm_other": "Discard {{count}} changes"
+      "resetConfirm_other": "Discard {{count}} changes",
+      "commitRefused": "Nothing was saved: the collector refused “{{change}}”: {{message}}. All the changes are still in the sandbox."
     },
     "welcome": {
       "missing": "The selected object is not in the draft anymore.",
@@ -3210,8 +3211,6 @@
     "history": {
       "subject_one": "{{count}} change from the compliance designer",
       "subject_other": "{{count}} changes from the compliance designer",
-      "subjectPartial_one": "{{count}} of {{total}} changes from the compliance designer, stopped at a refusal",
-      "subjectPartial_other": "{{count}} of {{total}} changes from the compliance designer, stopped at a refusal",
       "recorded": "Recorded in the compliance history as version {{commit}}.",
       "failed": "The compliance history could not record this version: {{message}}.",
       "baseline": "Compliance export as found before a designer commit: the changes made elsewhere since the last version",

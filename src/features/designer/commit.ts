@@ -1,46 +1,30 @@
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
-import {
-  cloneName,
-  type Draft,
-  type ObjectKind,
-  type ObjectRef,
-  type Operation,
-  type TeamRole,
-} from "./model";
+import type { components } from "@/lib/api/schema";
+import { cloneName, type Draft, type ObjectRef, type Operation, type TeamRole } from "./model";
+
+type DesignerOperation = components["schemas"]["ComplianceDesignerOperation"];
 
 /**
- * Committing the sandbox: the operations of its history are replayed against the
- * collector, in the order they were made, each with the API calls doing the same.
+ * Committing the sandbox: the operations of its history are sent at once to the
+ * collector (POST /compliance/designer/commits), which applies them in their
+ * order, all or nothing.
  *
- * An object is named on the server as it was just before the operation, in the
- * draft that operation started from: by its id when it came from the collector
- * (the draft keeps the collector's ids, which a rename does not change), by its
- * name when the sandbox created it, since the collector gave it an id of its own.
- * The API takes a name wherever it takes an id. Modules always go by name: the
- * export gives them none.
+ * An object is named as it was just before the operation, in the draft that
+ * operation started from: by its id when it came from the collector (the draft
+ * keeps the collector's ids, which a rename does not change); by "tmp:<its draft
+ * id>" when the sandbox created it, the collector mapping that reference to the
+ * object it creates. Variables the sandbox created go by name, modules always
+ * do: the export gives them no id.
  */
 
-/**
- * The names the collector gave to the objects the sandbox cloned, when they differ
- * from the draft's: the draft picks a free "<name>_clone…", the collector its own.
- */
-export type Aliases = Map<string, string>;
-
-function aliasKey(kind: ObjectKind, name: string): string {
-  return `${kind}:${name}`;
+/** How the API names an object of the draft. */
+function objectRef(ref: ObjectRef): string {
+  return ref.id > 0 ? String(ref.id) : `tmp:${String(ref.id)}`;
 }
 
-/** How the API names an object of the draft `before`. */
-function objectRef(before: Draft, ref: ObjectRef, aliases: Aliases): string {
-  if (ref.id > 0) return String(ref.id);
-  const object = ref.kind === "ruleset" ? before.rulesets[ref.id] : before.modulesets[ref.id];
-  if (object === undefined) throw new Error(`unknown ${ref.kind} ${String(ref.id)}`);
-  return aliases.get(aliasKey(ref.kind, object.name)) ?? object.name;
-}
-
-function rulesetRef(before: Draft, id: number, aliases: Aliases): string {
-  return objectRef(before, { kind: "ruleset", id }, aliases);
+function rulesetRef(id: number): string {
+  return objectRef({ kind: "ruleset", id });
 }
 
 function variableRef(before: Draft, rulesetId: number, variableId: number): string {
@@ -56,381 +40,196 @@ function moduleRef(before: Draft, modulesetId: number, moduleId: number): string
   return module.name;
 }
 
-/** The error of a call, as the collector words it. */
-function check(response: { error?: unknown; response: Response }): void {
-  if (response.error !== undefined) throw new Error(problemText(response.error));
-  if (!response.response.ok) throw new Error(response.response.statusText);
-}
+const ROLES: Record<TeamRole, DesignerOperation["role"]> = {
+  publications: "publication",
+  responsibles: "responsible",
+};
 
-/** The name the collector gave a clone, from its answer: "clone done. new … name X". */
-function cloneNameOf(data: unknown): string | undefined {
-  const info =
-    typeof data === "object" && data !== null && "info" in data
-      ? (data as { info: unknown }).info
-      : undefined;
-  const text = Array.isArray(info) ? info.join(" ") : typeof info === "string" ? info : "";
-  return /new (?:ruleset|moduleset) name (.+)$/.exec(text.trim())?.[1];
-}
-
-async function setTeam(ref: ObjectRef, object: string, role: TeamRole, team: string, on: boolean) {
-  if (ref.kind === "ruleset") {
-    const params = { path: { rset_id: object, group_id: team } };
-    if (role === "responsibles")
-      check(
-        on
-          ? await api.POST("/compliance/rulesets/{rset_id}/responsibles/{group_id}", { params })
-          : await api.DELETE("/compliance/rulesets/{rset_id}/responsibles/{group_id}", { params }),
-      );
-    else
-      check(
-        on
-          ? await api.POST("/compliance/rulesets/{rset_id}/publications/{group_id}", { params })
-          : await api.DELETE("/compliance/rulesets/{rset_id}/publications/{group_id}", { params }),
-      );
-    return;
-  }
-  const params = { path: { modset_id: object, group_id: team } };
-  if (role === "responsibles")
-    check(
-      on
-        ? await api.POST("/compliance/modulesets/{modset_id}/responsibles/{group_id}", { params })
-        : await api.DELETE("/compliance/modulesets/{modset_id}/responsibles/{group_id}", {
-            params,
-          }),
-    );
-  else
-    check(
-      on
-        ? await api.POST("/compliance/modulesets/{modset_id}/publications/{group_id}", { params })
-        : await api.DELETE("/compliance/modulesets/{modset_id}/publications/{group_id}", {
-            params,
-          }),
-    );
-}
-
-/**
- * Applies one operation to the collector, the draft `before` being the one it
- * started from; throws the collector's refusal.
- */
-export async function commitOperation(
-  before: Draft,
-  operation: Operation,
-  aliases: Aliases,
-): Promise<void> {
+/** An operation of the draft `before`, as the API takes it. */
+export function toDesignerOperation(before: Draft, operation: Operation): DesignerOperation {
   switch (operation.op) {
-    case "create": {
-      const name = operation.name.trim();
-      // The draft's defaults, which are the collector's too, said explicitly.
-      if (operation.kind === "ruleset")
-        check(
-          await api.POST("/compliance/rulesets", {
-            body: { ruleset_name: name, ruleset_type: "explicit", ruleset_public: true },
-          }),
-        );
-      else check(await api.POST("/compliance/modulesets", { body: { modset_name: name } }));
-      return;
-    }
-    case "rename": {
-      const object = objectRef(before, operation.ref, aliases);
-      const name = operation.name.trim();
-      if (operation.ref.kind === "ruleset")
-        check(
-          await api.POST("/compliance/rulesets/{rset_id}", {
-            params: { path: { rset_id: object } },
-            body: { ruleset_name: name },
-          }),
-        );
-      else
-        check(
-          await api.POST("/compliance/modulesets/{modset_id}", {
-            params: { path: { modset_id: object } },
-            body: { modset_name: name },
-          }),
-        );
-      return;
-    }
+    case "create":
+      return {
+        op: "create",
+        kind: operation.kind,
+        name: operation.name.trim(),
+        // The id the draft gives the object it creates: its next one.
+        as: objectRef({ kind: operation.kind, id: before.nextId }),
+      };
+    case "rename":
+      return {
+        op: "rename",
+        kind: operation.ref.kind,
+        ref: objectRef(operation.ref),
+        name: operation.name.trim(),
+      };
     case "clone": {
-      const object = objectRef(before, operation.ref, aliases);
-      const response =
-        operation.ref.kind === "ruleset"
-          ? await api.PUT("/compliance/rulesets/{rset_id}", {
-              params: { path: { rset_id: object } },
-              body: { action: "clone" },
-            })
-          : await api.PUT("/compliance/modulesets/{modset_id}", {
-              params: { path: { modset_id: object } },
-              body: { action: "clone" },
-            });
-      check(response);
-      // The name the draft gave the clone: the one the next operations know it by.
       const source =
         operation.ref.kind === "ruleset"
           ? before.rulesets[operation.ref.id]
           : before.modulesets[operation.ref.id];
-      const draftName = cloneName(before, operation.ref.kind, source?.name ?? "");
-      const serverName = cloneNameOf(response.data);
-      if (serverName !== undefined && serverName !== draftName)
-        aliases.set(aliasKey(operation.ref.kind, draftName), serverName);
-      return;
+      return {
+        op: "clone",
+        kind: operation.ref.kind,
+        ref: objectRef(operation.ref),
+        as: objectRef({ kind: operation.ref.kind, id: before.nextId }),
+        // The name the draft gave the clone, the one the next operations know.
+        name: cloneName(before, operation.ref.kind, source?.name ?? ""),
+      };
     }
-    case "delete": {
-      const object = objectRef(before, operation.ref, aliases);
-      if (operation.ref.kind === "ruleset")
-        check(
-          await api.DELETE("/compliance/rulesets/{rset_id}", {
-            params: { path: { rset_id: object } },
-          }),
-        );
-      else
-        check(
-          await api.DELETE("/compliance/modulesets/{modset_id}", {
-            params: { path: { modset_id: object } },
-          }),
-        );
-      return;
-    }
+    case "delete":
+      return { op: "delete", kind: operation.ref.kind, ref: objectRef(operation.ref) };
     case "setType":
-      check(
-        await api.POST("/compliance/rulesets/{rset_id}", {
-          params: { path: { rset_id: rulesetRef(before, operation.id, aliases) } },
-          body: { ruleset_type: operation.type },
-        }),
-      );
-      return;
+      return {
+        op: "set_type",
+        kind: "ruleset",
+        ref: rulesetRef(operation.id),
+        ruleset_type: operation.type,
+      };
     case "setPublic":
-      check(
-        await api.POST("/compliance/rulesets/{rset_id}", {
-          params: { path: { rset_id: rulesetRef(before, operation.id, aliases) } },
-          body: { ruleset_public: operation.isPublic },
-        }),
-      );
-      return;
-    case "setFilterset": {
-      const ruleset = rulesetRef(before, operation.id, aliases);
-      const previous = before.rulesets[operation.id];
-      if (operation.filterset === null) {
-        if (previous?.filterset === null || previous?.filterset === undefined) return;
-        check(
-          await api.DELETE("/compliance/rulesets/{rset_id}/filtersets/{fset_id}", {
-            params: { path: { rset_id: ruleset, fset_id: previous.filterset } },
-          }),
-        );
-        return;
-      }
-      // A filterset goes to a contextual ruleset: the draft makes it one at once.
-      if (previous?.type !== "contextual")
-        check(
-          await api.POST("/compliance/rulesets/{rset_id}", {
-            params: { path: { rset_id: ruleset } },
-            body: { ruleset_type: "contextual" },
-          }),
-        );
-      check(
-        await api.POST("/compliance/rulesets/{rset_id}/filtersets/{fset_id}", {
-          params: { path: { rset_id: ruleset, fset_id: operation.filterset } },
-        }),
-      );
-      return;
-    }
+      return {
+        op: "set_public",
+        kind: "ruleset",
+        ref: rulesetRef(operation.id),
+        ruleset_public: operation.isPublic,
+      };
+    case "setFilterset":
+      return {
+        op: "set_filterset",
+        kind: "ruleset",
+        ref: rulesetRef(operation.id),
+        ...(operation.filterset === null ? {} : { filterset: operation.filterset }),
+      };
     case "addVariable":
-      check(
-        await api.POST("/compliance/rulesets/{rset_id}/variables", {
-          params: { path: { rset_id: rulesetRef(before, operation.rulesetId, aliases) } },
-          body: {
-            var_name: operation.name.trim(),
-            var_class: operation.varClass,
-            var_value: operation.value,
-          },
-        }),
-      );
-      return;
+      return {
+        op: "add_variable",
+        kind: "ruleset",
+        ref: rulesetRef(operation.rulesetId),
+        var_name: operation.name.trim(),
+        var_class: operation.varClass,
+        var_value: operation.value,
+      };
     case "updateVariable": {
       const { patch } = operation;
-      check(
-        await api.POST("/compliance/rulesets/{rset_id}/variables/{var_id}", {
-          params: {
-            path: {
-              rset_id: rulesetRef(before, operation.rulesetId, aliases),
-              var_id: variableRef(before, operation.rulesetId, operation.variableId),
-            },
-          },
-          body: {
-            ...(patch.name === undefined ? {} : { var_name: patch.name.trim() }),
-            ...(patch.varClass === undefined ? {} : { var_class: patch.varClass }),
-            ...(patch.value === undefined ? {} : { var_value: patch.value }),
-          },
-        }),
-      );
-      return;
+      return {
+        op: "update_variable",
+        kind: "ruleset",
+        ref: rulesetRef(operation.rulesetId),
+        variable: variableRef(before, operation.rulesetId, operation.variableId),
+        ...(patch.name === undefined ? {} : { var_name: patch.name.trim() }),
+        ...(patch.varClass === undefined ? {} : { var_class: patch.varClass }),
+        ...(patch.value === undefined ? {} : { var_value: patch.value }),
+      };
     }
     case "deleteVariable":
-      check(
-        await api.DELETE("/compliance/rulesets/{rset_id}/variables/{var_id}", {
-          params: {
-            path: {
-              rset_id: rulesetRef(before, operation.rulesetId, aliases),
-              var_id: variableRef(before, operation.rulesetId, operation.variableId),
-            },
-          },
-        }),
-      );
-      return;
+      return {
+        op: "delete_variable",
+        kind: "ruleset",
+        ref: rulesetRef(operation.rulesetId),
+        variable: variableRef(before, operation.rulesetId, operation.variableId),
+      };
     case "copyVariable":
-      check(
-        await api.PUT("/compliance/rulesets/{rset_id}/variables/{var_id}", {
-          params: {
-            path: {
-              rset_id: rulesetRef(before, operation.fromId, aliases),
-              var_id: variableRef(before, operation.fromId, operation.variableId),
-            },
-          },
-          body: {
-            action: operation.move ? "move" : "copy",
-            dst_ruleset: rulesetRef(before, operation.toId, aliases),
-          },
-        }),
-      );
-      return;
+      return {
+        op: "copy_variable",
+        kind: "ruleset",
+        ref: rulesetRef(operation.fromId),
+        variable: variableRef(before, operation.fromId, operation.variableId),
+        dst: rulesetRef(operation.toId),
+        move: operation.move,
+      };
     case "include":
-    case "detach": {
-      const on = operation.op === "include";
-      const parent = objectRef(before, operation.parent, aliases);
-      const child = objectRef(before, operation.child, aliases);
-      if (operation.parent.kind === "ruleset") {
-        const params = { path: { rset_id: parent, child_rset_id: child } };
-        check(
-          on
-            ? await api.POST("/compliance/rulesets/{rset_id}/rulesets/{child_rset_id}", { params })
-            : await api.DELETE("/compliance/rulesets/{rset_id}/rulesets/{child_rset_id}", {
-                params,
-              }),
-        );
-      } else if (operation.child.kind === "ruleset") {
-        const params = { path: { modset_id: parent, rset_id: child } };
-        check(
-          on
-            ? await api.POST("/compliance/modulesets/{modset_id}/rulesets/{rset_id}", { params })
-            : await api.DELETE("/compliance/modulesets/{modset_id}/rulesets/{rset_id}", { params }),
-        );
-      } else {
-        const params = { path: { modset_id: parent, child_modset_id: child } };
-        check(
-          on
-            ? await api.POST("/compliance/modulesets/{modset_id}/modulesets/{child_modset_id}", {
-                params,
-              })
-            : await api.DELETE("/compliance/modulesets/{modset_id}/modulesets/{child_modset_id}", {
-                params,
-              }),
-        );
-      }
-      return;
-    }
+    case "detach":
+      return {
+        op: operation.op,
+        kind: operation.parent.kind,
+        ref: objectRef(operation.parent),
+        child_kind: operation.child.kind,
+        child: objectRef(operation.child),
+      };
     case "addModule":
-      check(
-        await api.POST("/compliance/modulesets/{modset_id}/modules", {
-          params: {
-            path: {
-              modset_id: objectRef(
-                before,
-                { kind: "moduleset", id: operation.modulesetId },
-                aliases,
-              ),
-            },
-          },
-          body: { modset_mod_name: operation.name.trim(), autofix: false },
-        }),
-      );
-      return;
+      return {
+        op: "add_module",
+        kind: "moduleset",
+        ref: objectRef({ kind: "moduleset", id: operation.modulesetId }),
+        name: operation.name.trim(),
+      };
     case "renameModule":
     case "setAutofix":
-      check(
-        await api.POST("/compliance/modulesets/{modset_id}/modules/{mod_id}", {
-          params: {
-            path: {
-              modset_id: objectRef(
-                before,
-                { kind: "moduleset", id: operation.modulesetId },
-                aliases,
-              ),
-              mod_id: moduleRef(before, operation.modulesetId, operation.moduleId),
-            },
-          },
-          body:
-            operation.op === "renameModule"
-              ? { modset_mod_name: operation.name.trim() }
-              : { autofix: operation.autofix },
-        }),
-      );
-      return;
-    case "deleteModule":
-      check(
-        await api.DELETE("/compliance/modulesets/{modset_id}/modules/{mod_id}", {
-          params: {
-            path: {
-              modset_id: objectRef(
-                before,
-                { kind: "moduleset", id: operation.modulesetId },
-                aliases,
-              ),
-              mod_id: moduleRef(before, operation.modulesetId, operation.moduleId),
-            },
-          },
-        }),
-      );
-      return;
+    case "deleteModule": {
+      const target = {
+        kind: "moduleset" as const,
+        ref: objectRef({ kind: "moduleset", id: operation.modulesetId }),
+        module: moduleRef(before, operation.modulesetId, operation.moduleId),
+      };
+      if (operation.op === "renameModule")
+        return { op: "rename_module", ...target, name: operation.name.trim() };
+      if (operation.op === "setAutofix")
+        return { op: "set_autofix", ...target, autofix: operation.autofix };
+      return { op: "delete_module", ...target };
+    }
     case "addTeam":
     case "removeTeam":
-      await setTeam(
-        operation.ref,
-        objectRef(before, operation.ref, aliases),
-        operation.role,
-        operation.team,
-        operation.op === "addTeam",
-      );
-      return;
-    case "moveTeam": {
-      const object = objectRef(before, operation.ref, aliases);
-      await setTeam(operation.ref, object, operation.from, operation.team, false);
-      await setTeam(operation.ref, object, operation.to, operation.team, true);
-      return;
-    }
+      return {
+        op: operation.op === "addTeam" ? "add_team" : "remove_team",
+        kind: operation.ref.kind,
+        ref: objectRef(operation.ref),
+        role: ROLES[operation.role],
+        team: operation.team,
+      };
+    case "moveTeam":
+      return {
+        op: "move_team",
+        kind: operation.ref.kind,
+        ref: objectRef(operation.ref),
+        role: ROLES[operation.from],
+        to_role: ROLES[operation.to],
+        team: operation.team,
+      };
   }
 }
 
 /**
- * The outcome of a commit: how many operations were saved, the refusal that
- * stopped it, and the version of the compliance export recording what was saved.
+ * The outcome of a commit, all or nothing: the version of the compliance export
+ * recording the changes once saved; otherwise the refusal, with the index of the
+ * operation refused when the collector names one.
  */
-export interface CommitResult {
-  saved: number;
-  total: number;
-  failure?: { index: number; message: string };
-  version?: RecordedVersion;
-}
+export type CommitResult =
+  | { saved: true; version: RecordedVersion }
+  | { saved: false; failure: { index?: number; message: string } };
 
 /**
- * Replays the operations in order, stopping at the first the collector refuses:
- * those before it are saved, the refused one and the next ones are not.
+ * Sends the operations of the sandbox history, with the messages of the versions
+ * of the compliance history recorded around them: the changes made elsewhere
+ * before, those of the commit after.
  */
 export async function commitAll(
   history: readonly { before: Draft; operation: Operation }[],
-  onProgress: (done: number) => void,
+  message: string,
+  baselineMessage: string,
 ): Promise<CommitResult> {
-  const aliases: Aliases = new Map();
-  for (const [index, entry] of history.entries()) {
-    try {
-      await commitOperation(entry.before, entry.operation, aliases);
-    } catch (error) {
+  try {
+    const operations = history.map((entry) => toDesignerOperation(entry.before, entry.operation));
+    const { data, error } = await api.POST("/compliance/designer/commits", {
+      body: { message, baseline_message: baselineMessage, operations },
+    });
+    if (error !== undefined)
       return {
-        saved: index,
-        total: history.length,
-        failure: { index, message: error instanceof Error ? error.message : String(error) },
+        saved: false,
+        failure: { index: "index" in error ? error.index : undefined, message: problemText(error) },
       };
-    }
-    onProgress(index + 1);
+    return {
+      saved: true,
+      version:
+        data.version === undefined
+          ? { error: data.version_error ?? "" }
+          : { commit: data.version.commit, changed: data.version.changed },
+    };
+  } catch (failure) {
+    return {
+      saved: false,
+      failure: { message: failure instanceof Error ? failure.message : String(failure) },
+    };
   }
-  return { saved: history.length, total: history.length };
 }
 
 /** The version of the compliance export a commit recorded, or why none was. */

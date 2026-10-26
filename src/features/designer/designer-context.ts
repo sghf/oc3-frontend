@@ -32,10 +32,10 @@ export interface Designer {
    * refuses; those saved leave the sandbox, the others stay pending, and the
    * compliance export is recorded as a version of its git history.
    */
+  /** Saves all the pending changes, or none. */
   commit: (
-    onProgress: (done: number) => void,
-    /** The message of the version recording the changes saved, out of `total`. */
-    historyMessage: (saved: LogLine[], total: number) => string,
+    /** The message of the version recording the changes saved. */
+    historyMessage: (saved: LogLine[]) => string,
     /** The message of the version of the export as found before saving, if it changed. */
     baselineMessage: string,
   ) => Promise<CommitResult>;

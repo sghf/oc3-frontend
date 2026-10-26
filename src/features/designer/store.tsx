@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useReducer, useState, type ReactNode } from "react";
 import { DesignerContext, type Designer, type Notice } from "./designer-context";
-import { commitAll, recordVersion, type CommitResult, type RecordedVersion } from "./commit";
+import { commitAll, type CommitResult, type RecordedVersion } from "./commit";
 import { apply, describe, refusal, type Draft, type LogLine, type Operation } from "./model";
 
 /**
@@ -21,7 +21,7 @@ type Action =
   | { type: "apply"; operation: Operation; author: string }
   | { type: "undo" }
   | { type: "reset" }
-  | { type: "committed"; count: number }
+  | { type: "committed" }
   | { type: "restore"; operations: Operation[]; author: string; commit: string };
 
 function reducer(state: State, action: Action): State {
@@ -60,17 +60,10 @@ function reducer(state: State, action: Action): State {
         next = reducer(next, { type: "apply", operation, author: action.author });
       return { ...next, restoredFrom: action.commit };
     }
-    case "committed": {
-      // The operations saved leave the sandbox: the collector now holds the draft
-      // the first one left pending started from. The draft itself is unchanged.
-      const pending = state.history.slice(action.count);
-      return {
-        ...state,
-        original: pending[0]?.before ?? state.draft,
-        history: pending,
-        restoredFrom: pending.length === 0 ? undefined : state.restoredFrom,
-      };
-    }
+    case "committed":
+      // All the operations saved leave the sandbox: the collector now holds the
+      // draft. The draft itself is unchanged.
+      return { ...state, original: state.draft, history: [], restoredFrom: undefined };
   }
 }
 
@@ -92,7 +85,7 @@ export function DesignerProvider({
   /** The name stamped on the variables changed in the draft. */
   author: string;
   /**
-   * Called once every pending change is saved, with their number and the version
+   * Called once the pending changes are saved, with their number and the version
    * of the compliance export recording them: the page reads the collector again.
    */
   onCommitted: (count: number, version: RecordedVersion | undefined) => void;
@@ -141,23 +134,17 @@ export function DesignerProvider({
 
   const commit = useCallback(
     async (
-      onProgress: (done: number) => void,
-      historyMessage: (saved: LogLine[], total: number) => string,
+      historyMessage: (saved: LogLine[]) => string,
       baselineMessage: string,
     ): Promise<CommitResult> => {
-      // The export as found first: what changed since the last version came from
-      // elsewhere (another view, an import), and must not be counted as this
-      // commit's. The collector records nothing when nothing changed.
-      await recordVersion(baselineMessage, "elsewhere");
-      const result = await commitAll(state.history, onProgress);
-      if (result.saved === 0) return result;
-      // What was saved becomes a version of the compliance export, even when a
-      // refusal stopped the commit: the collector holds those changes.
-      const saved = state.history.slice(0, result.saved).map((h) => h.line);
-      const version = await recordVersion(historyMessage(saved, result.total), "designer");
-      dispatch({ type: "committed", count: result.saved });
-      if (result.failure === undefined) onCommitted(result.saved, version);
-      return { ...result, version };
+      // All or nothing: the collector applies the whole history in one change,
+      // between a version of what changed elsewhere and one of these changes.
+      const lines = state.history.map((h) => h.line);
+      const result = await commitAll(state.history, historyMessage(lines), baselineMessage);
+      if (!result.saved) return result;
+      dispatch({ type: "committed" });
+      onCommitted(lines.length, result.version);
+      return result;
     },
     [state.history, onCommitted],
   );

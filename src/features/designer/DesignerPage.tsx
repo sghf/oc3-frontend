@@ -375,7 +375,7 @@ function Workspace({
 
 /**
  * The reminder that nothing is saved yet, with the changes made, undo, reset and
- * the commit that saves them, its progress, and the change the collector refused.
+ * the commit that saves them all or none, and the change the collector refused.
  */
 function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
   const { t } = useTranslation();
@@ -384,16 +384,11 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
   // The action waiting for its confirmation, asked in a row of its own under the
   // toolbar rather than in it: the buttons stay where they are.
   const [confirming, setConfirming] = useState<"commit" | "reset" | null>(null);
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
-  const [failure, setFailure] = useState<{
-    saved: number;
-    total: number;
-    change: string;
-    message: string;
-    version: string;
-  } | null>(null);
+  const [committing, setCommitting] = useState(false);
+  // The refusal of the last commit: the change refused, when the collector names
+  // it, and why. Nothing was saved.
+  const [failure, setFailure] = useState<{ change: string; message: string } | null>(null);
   const count = designer.log.length;
-  const committing = progress !== null;
   // The confirmation opens on its safe choice, for the keyboard.
   const cancelRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -406,24 +401,16 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
     onCommitStart();
     setConfirming(null);
     setFailure(null);
-    setProgress({ done: 0, total: lines.length });
+    setCommitting(true);
     const result = await designer.commit(
-      (done) => {
-        setProgress({ done, total: lines.length });
-      },
-      (saved, total) => historyMessage(saved, total, designer.restoredFrom),
+      (saved) => historyMessage(saved, designer.restoredFrom),
       i18n.getFixedT("en")("designer.history.baseline"),
     );
-    setProgress(null);
-    if (result.failure !== undefined) {
-      const line = lines[result.failure.index];
-      setFailure({
-        saved: result.saved,
-        total: result.total,
-        change: line === undefined ? "" : t(line.key, line.values),
-        message: result.failure.message,
-        version: versionText(t, result.version),
-      });
+    setCommitting(false);
+    if (!result.saved) {
+      const { index, message } = result.failure;
+      const line = index === undefined ? undefined : lines[index];
+      setFailure({ change: line === undefined ? "" : t(line.key, line.values), message });
     }
   }
 
@@ -489,12 +476,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
                 setConfirming(confirming === "commit" ? null : "commit");
               }}
             >
-              {committing
-                ? t("designer.sandbox.committing", {
-                    done: progress.done,
-                    total: progress.total,
-                  })
-                : t("designer.sandbox.commit")}
+              {committing ? t("designer.sandbox.committing") : t("designer.sandbox.commit")}
             </button>
           </div>
         )}
@@ -554,13 +536,12 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
       {failure !== null && (
         <p role="alert" className={`${ROW} text-state-down`}>
           ■{" "}
-          {t("designer.sandbox.commitFailed", {
-            saved: failure.saved,
-            total: failure.total,
-            change: failure.change,
-            message: failure.message,
-          })}
-          {failure.version !== "" && ` ${failure.version}`}
+          {failure.change === ""
+            ? t("designer.sandbox.commitFailed", { message: failure.message })
+            : t("designer.sandbox.commitRefused", {
+                change: failure.change,
+                message: failure.message,
+              })}
         </p>
       )}
 
@@ -732,12 +713,9 @@ function Welcome({ missing }: { missing: boolean }) {
  * language of the page: the history is shared. The subject counts the changes,
  * the body lists them, one per line.
  */
-function historyMessage(saved: LogLine[], total: number, restoredFrom?: string): string {
+function historyMessage(saved: LogLine[], restoredFrom?: string): string {
   const en = i18n.getFixedT("en");
-  const base =
-    saved.length === total
-      ? en("designer.history.subject", { count: saved.length })
-      : en("designer.history.subjectPartial", { count: saved.length, total });
+  const base = en("designer.history.subject", { count: saved.length });
   // A restore says which version it brings back.
   const subject =
     restoredFrom === undefined
