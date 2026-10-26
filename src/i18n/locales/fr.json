@@ -2564,7 +2564,8 @@
       "succeeded": "terminée",
       "failed": "terminée en erreur (code {{code}})",
       "running": "en cours ({{status}})",
-      "noLog": "Rien de journalisé."
+      "noLog": "Rien de journalisé.",
+      "data": "Données renvoyées"
     },
     "empty": "Aucun formulaire ne vous est proposé.",
     "folderCount_one": "{{count}} formulaire",

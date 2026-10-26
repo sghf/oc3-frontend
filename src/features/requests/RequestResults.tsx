@@ -27,13 +27,15 @@ function format(fmt: string, dict: unknown): string {
 interface Results {
   status: string;
   returncode: number;
-  outputs: { id: string; lines: LogLine[] }[];
+  /** Each output's log, and the data it returned (an external API's answer say). */
+  outputs: { id: string; lines: LogLine[]; data: unknown }[];
 }
 
 /** Reads the results structure of a submission, as the collector stores it. */
 function parseResults(raw: unknown): Results {
   const r = isRecord(raw) ? raw : {};
   const log = isRecord(r.log) ? r.log : {};
+  const data = isRecord(r.outputs) ? r.outputs : {};
   const order = Array.isArray(r.outputs_order) ? r.outputs_order.map(String) : Object.keys(log);
   // Lines logged before the outputs run, under an empty id, come first.
   const ids = "" in log && !order.includes("") ? ["", ...order] : order;
@@ -42,6 +44,7 @@ function parseResults(raw: unknown): Results {
     returncode: typeof r.returncode === "number" ? r.returncode : 0,
     outputs: ids.map((id) => ({
       id,
+      data: id === "" ? undefined : data[id],
       lines: (Array.isArray(log[id]) ? log[id] : []).map((entry: unknown) => {
         const [ret, fmt, dict] = Array.isArray(entry) ? entry : [];
         return { error: ret === 1, text: format(typeof fmt === "string" ? fmt : "", dict) };
@@ -116,6 +119,16 @@ export function RequestResults({
                 </li>
               ))}
             </ul>
+          )}
+          {output.data !== undefined && output.data !== null && (
+            <details className="mt-1">
+              <summary className="cursor-pointer text-ink-muted">
+                {t("requests.results.data")}
+              </summary>
+              <pre className="mt-1 max-h-64 overflow-auto rounded-(--radius-control) bg-surface-sunken p-2 font-mono text-data whitespace-pre-wrap">
+                {JSON.stringify(output.data, null, 2)}
+              </pre>
+            </details>
           )}
         </div>
       ))}

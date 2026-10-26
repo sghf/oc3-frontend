@@ -2564,7 +2564,8 @@
       "succeeded": "completed",
       "failed": "completed with errors (code {{code}})",
       "running": "in progress ({{status}})",
-      "noLog": "Nothing logged."
+      "noLog": "Nothing logged.",
+      "data": "Data returned"
     },
     "empty": "No form is available to you.",
     "folderCount_one": "{{count}} form",
