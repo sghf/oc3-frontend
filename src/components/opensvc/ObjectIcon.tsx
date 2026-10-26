@@ -73,6 +73,7 @@ export type ObjectKind =
   | "claimMapping"
   | "fieldConstraint"
   | "compAttachment"
+  | "formConnector"
   | "orchestration";
 
 /**
@@ -154,6 +155,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   fieldConstraint: { Icon: ListChecksIcon, className: "text-icon-node" },
   // A link in the tint of compliance: modulesets and rulesets tied to their targets.
   compAttachment: { Icon: LinkIcon, className: "text-icon-compliance" },
+  // A link in the tint of the forms: the external APIs they call.
+  formConnector: { Icon: LinkIcon, className: "text-icon-form" },
 };
 
 export function ObjectIcon({ kind, className }: { kind: ObjectKind; className?: string }) {

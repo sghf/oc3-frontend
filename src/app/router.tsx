@@ -28,6 +28,7 @@ import { ResourcesPage } from "@/features/resources/ResourcesPage";
 import { ServiceActionsPage } from "@/features/service-actions/ServiceActionsPage";
 import { FiltersPage } from "@/features/filters/FiltersPage";
 import { ClaimMappingsPage } from "@/features/claim-mappings/ClaimMappingsPage";
+import { FormConnectorsPage } from "@/features/form-connectors/FormConnectorsPage";
 import { FieldConstraintsPage } from "@/features/field-constraints/FieldConstraintsPage";
 import { FiltersetsPage } from "@/features/filtersets/FiltersetsPage";
 import { FormsPage } from "@/features/forms/FormsPage";
@@ -285,6 +286,14 @@ const filtersRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+// The external APIs the forms call through oc3: Manager only, as the api.
+const formConnectorsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/form-connectors",
+  component: FormConnectorsPage,
+  validateSearch: parseListSearch,
+});
+
 const claimMappingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/claim-mappings",
@@ -457,6 +466,7 @@ const routeTree = rootRoute.addChildren([
   logsRoute,
   filtersRoute,
   claimMappingsRoute,
+  formConnectorsRoute,
   fieldConstraintsRoute,
   filtersetsRoute,
   formsRoute,

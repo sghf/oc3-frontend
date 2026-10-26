@@ -402,6 +402,7 @@ function NextStepForm({
       {def.desc !== "" && <p className="text-ink-muted">{def.desc}</p>}
       <FormRender
         def={def}
+        formId={form.data?.id}
         user={user.data}
         onSubmit={(data) => {
           submit.mutate(data);

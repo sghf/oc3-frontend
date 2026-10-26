@@ -52,6 +52,7 @@ export function FormPreview({ formId }: { formId: string }) {
         // A new definition starts a new form rather than keeping stale values.
         key={JSON.stringify(form.data?.form_definition ?? null)}
         def={def}
+        formId={form.data?.id}
         user={user.data}
         onSubmit={(data) => {
           setSubmitted(JSON.stringify(data, null, 2));

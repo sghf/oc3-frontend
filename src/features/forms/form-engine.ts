@@ -29,6 +29,13 @@ export interface FormInput {
   candidates: { value: string; label: string }[] | null;
   /** Rest path of the dynamic candidates, "#key" references included. */
   fn: string;
+  /**
+   * The connector of an external API the candidates come from: oc3 calls it,
+   * fn being relative to its base url. Empty for the collector's own API.
+   */
+  connector: string;
+  /** Where the list is in the external API's answer, "items" or "data.results". */
+  resultPath: string;
   /** Whether a Function key is present, even empty: it enables dynamic defaults. */
   hasFunctionKey: boolean;
   args: string[];
@@ -167,6 +174,8 @@ export function parseDefinition(raw: unknown): FormDefinition | null {
       default: def,
       candidates,
       fn,
+      connector: str(item.Connector),
+      resultPath: str(item.ResultPath),
       hasFunctionKey: "Function" in item,
       args,
       value: str(item.Value),

@@ -70,7 +70,8 @@
     "checkContextual": "Contextual thresholds",
     "complianceAttachments": "Attachments",
     "orchestrations": "Workflows",
-    "orchestrationRuns": "Runs"
+    "orchestrationRuns": "Runs",
+    "formConnectors": "Form connectors"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -2527,7 +2528,8 @@
       "subFormNotFound": "Sub-form {{name}} not found.",
       "noCandidateMatch": "No candidate matches.",
       "entryName": "{{label}} {{index}}",
-      "removeEntry": "Remove entry {{index}}"
+      "removeEntry": "Remove entry {{index}}",
+      "connectorUnsaved": "Its choices come from an external API through a connector: they show once the form is saved."
     },
     "definitionMore_one": "+{{count}} more line",
     "definitionMore_other": "+{{count}} more lines",
@@ -4557,5 +4559,105 @@
     "lines": "Log lines",
     "noMatch": "No line matches.",
     "showInContext": "Show this line among the others"
+  },
+  "formConnectors": {
+    "title": "Form connectors",
+    "new": "New connector",
+    "intro": "The external APIs the forms call through the collector, never from the browser: the candidates of their inputs and their rest outputs. A form names a connector in its Connector key, with a path relative to its base URL in Function. Only the groups listed here may use a connector, through the forms they are responsible for.",
+    "empty": "No connector yet.",
+    "mtls": "+ client certificate",
+    "anyPath": "any path",
+    "noGroup": "no group: no form may use it",
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "base_url": "Base URL",
+      "methods": "Methods allowed",
+      "paths": "Paths allowed",
+      "networks": "Private networks allowed",
+      "timeout": "Timeout (seconds)",
+      "max_kib": "Largest answer (KiB)",
+      "headers": "Headers",
+      "auth_type": "Authentication",
+      "username": "Username",
+      "api_key_in": "Key sent in",
+      "api_key_name": "Header or parameter name",
+      "token_url": "Token URL",
+      "client_id": "Client ID",
+      "auth_style": "Client credentials sent in",
+      "scopes": "Scopes",
+      "audience": "Audience",
+      "ca_bundle": "Certificate authorities",
+      "client_cert": "Client certificate",
+      "server_name": "Server name",
+      "groups": "Groups allowed",
+      "updated": "Updated"
+    },
+    "auth": {
+      "none": "None",
+      "basic": "Basic (username and password)",
+      "bearer": "Bearer token",
+      "api_key": "API key",
+      "oauth2_client_credentials": "OAuth 2 client credentials"
+    },
+    "apiKeyIn": {
+      "header": "a header",
+      "query": "a query parameter"
+    },
+    "authStyle": {
+      "header": "the Authorization header",
+      "params": "the request body"
+    },
+    "secret": {
+      "password": "Password",
+      "token": "Token",
+      "api_key": "API key",
+      "client_secret": "Client secret",
+      "client_key": "Client certificate key",
+      "set": "set",
+      "unset": "not set",
+      "removed": "removed when saving",
+      "keep": "Keep it",
+      "remove": "Remove",
+      "keepHint": "Leave empty to keep the one set"
+    },
+    "form": {
+      "editTitle": "Connector {{name}}",
+      "createTitle": "New connector",
+      "general": "General",
+      "nameHint": "The name the forms give in their Connector key: letters, digits, \".\", \"_\" or \"-\".",
+      "baseUrlHint": "The paths of the forms are relative to it. HTTPS is required as soon as the connector sends credentials.",
+      "calls": "What the forms may call",
+      "pathsHint": "One path prefix per line, \"/servers\" allowing \"/servers/12\". None: any path under the base URL.",
+      "networksHint": "The collector refuses the loopback, private and reserved addresses, and always the link-local ones (cloud metadata). One CIDR prefix per line lets the host resolve to one of them, an internal CMDB say.",
+      "headersHint": "\"Name: value\", one per line, sent with each call. No credentials here: they go in the authentication.",
+      "auth": "Authentication",
+      "scopesHint": "Separated by spaces.",
+      "tls": "TLS",
+      "caHint": "PEM certificates trusted instead of the system ones, for a private authority.",
+      "clientCertHint": "PEM certificate of a mutual TLS; its key is a secret, below.",
+      "groupsHint": "A form may use the connector when one of the groups responsible for it is listed here.",
+      "removeGroup": "Remove {{group}}",
+      "addGroup": "Add a group",
+      "saving": "Saving…",
+      "saveEdit": "Save",
+      "saveCreate": "Create",
+      "saved": "Saved",
+      "delete": "Delete the connector",
+      "deleteQuestion": "Delete the connector {{name}}? The forms naming it will fail to call it.",
+      "deleteConfirm": "Delete",
+      "deleting": "Deleting…"
+    },
+    "test": {
+      "title": "Test a call",
+      "intro": "Calls the API once, as a form would, with the settings saved: save your changes first.",
+      "method": "Method",
+      "path": "Path",
+      "query": "Query, \"name=value\" per line",
+      "run": "Call",
+      "running": "Calling…",
+      "failed": "No answer: {{message}}",
+      "answered": "Answered {{status}} in {{ms}} ms"
+    }
   }
 }

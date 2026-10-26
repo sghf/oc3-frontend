@@ -878,7 +878,16 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Register a node authentication */
+    /**
+     * @description Register a node authentication
+     *
+     *     A node authenticated by its own credentials, the enroller, may
+     *     register another node joining its cluster, when server.allow_node_enroll
+     *     is set. The joining node must be already registered: it is found by its
+     *     nodename and its previous uuid, else it registers itself. It moves to
+     *     the app, the team responsible and the cluster of the enroller, and gets
+     *     a new uuid, which the enroller hands to it.
+     */
     post: operations["PostAuthNode"];
     delete?: never;
     options?: never;
@@ -2968,6 +2977,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/form_connectors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The connectors of the forms: the external APIs their inputs and rest outputs
+     *     call through oc3. The secrets are never returned, only whether each one is
+     *     set. For the Managers and the FormsManagers.
+     */
+    get: operations["GetFormConnectors"];
+    put?: never;
+    /**
+     * @description Create a connector. Its secrets are sealed with the safe master key
+     *     (safe.keys_file): without one, a connector with secrets is refused. For the
+     *     Managers.
+     */
+    post: operations["PostFormConnectors"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/form_connectors/{connector_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetFormConnector"];
+    /**
+     * @description Replace a connector. A secret given replaces the one set, null removes it,
+     *     absent keeps it. For the Managers.
+     */
+    put: operations["PutFormConnector"];
+    post?: never;
+    /** @description Delete a connector. For the Managers. */
+    delete: operations["DeleteFormConnector"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/form_connectors/{connector_id}/test": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Call the connector once, as a form would, and tell how it answered: its
+     *     status, the time taken, the start of its answer. The method and the path
+     *     must be ones the connector allows. For the Managers.
+     */
+    post: operations["PostFormConnectorTest"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/form_output_results/{results_id}": {
     parameters: {
       query?: never;
@@ -3095,6 +3172,32 @@ export interface paths {
     get: operations["GetFormDiff"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/forms/{form_id}/inputs/{input_id}/candidates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description The candidates of an input of a form calling a connector (its Connector
+     *     key), resolved by oc3 from the form as stored: the path is the input's
+     *     Function, relative to the connector's base url, its references replaced by
+     *     the values of data, each escaped as one path segment; the query, its Args.
+     *     The list is read from the answer at ResultPath ("items", "data.results"),
+     *     else the answer itself when a list, else its data. The form must be
+     *     published to the user, the connector to one of the groups responsible for
+     *     the form.
+     */
+    post: operations["PostFormInputCandidates"];
     delete?: never;
     options?: never;
     head?: never;
@@ -8159,6 +8262,144 @@ export interface components {
       fset_name: string;
       id: number;
     };
+    FormCandidatesInput: {
+      /** @description The values of the form, which the references of the path and arguments read. */
+      data?: {
+        [key: string]: unknown;
+      };
+    };
+    FormConnector: {
+      auth: components["schemas"]["FormConnectorAuth"];
+      /** @description The absolute url the paths of the forms are relative to; https, unless the connector sends no credential. */
+      base_url: string;
+      created: string;
+      description: string;
+      /** @description The groups the connector is published to. */
+      groups: {
+        /** Format: int64 */
+        id: number;
+        role: string;
+      }[];
+      /** @description Headers sent with each call, without credential. */
+      headers: {
+        [key: string]: string;
+      };
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description The largest answer read, 1 KiB to 50 MiB.
+       */
+      max_bytes: number;
+      methods: components["schemas"]["FormConnectorMethod"][];
+      /** @description The name the forms give in their Connector key, letters, digits, ".", "_" and "-". */
+      name: string;
+      /** @description The loopback, private or reserved networks the host may resolve to, as CIDR prefixes. */
+      networks: string[];
+      /** @description The path prefixes the forms may call, "/servers"; none, any path under the base url. */
+      paths: string[];
+      /** @description Whether each secret is set; their values are never returned. */
+      secrets: {
+        api_key: boolean;
+        client_key: boolean;
+        client_secret: boolean;
+        password: boolean;
+        token: boolean;
+      };
+      /** @description Seconds, 1 to 300. */
+      timeout: number;
+      tls: components["schemas"]["FormConnectorTLS"];
+      updated: string;
+      updated_by: string;
+    };
+    /**
+     * @description How the connector authenticates, its settings without the secrets:
+     *     basic, username (secret password); bearer (secret token); api_key, in and
+     *     name, the header or query parameter (secret api_key);
+     *     oauth2_client_credentials, token_url, client_id, scopes (space-separated),
+     *     audience, auth_style (secret client_secret).
+     */
+    FormConnectorAuth: {
+      audience?: string;
+      /** @enum {string} */
+      auth_style?: "header" | "params";
+      client_id?: string;
+      /** @enum {string} */
+      in?: "header" | "query";
+      name?: string;
+      scopes?: string;
+      token_url?: string;
+      type: components["schemas"]["FormConnectorAuthType"];
+      username?: string;
+    };
+    /** @enum {string} */
+    FormConnectorAuthType: "none" | "basic" | "bearer" | "api_key" | "oauth2_client_credentials";
+    FormConnectorInput: {
+      auth: components["schemas"]["FormConnectorAuth"];
+      /** @description The absolute url the paths of the forms are relative to; https, unless the connector sends no credential. */
+      base_url: string;
+      description?: string;
+      /** @description The ids of the groups the connector is published to. */
+      groups?: number[];
+      /** @description Headers sent with each call, without credential. */
+      headers?: {
+        [key: string]: string;
+      };
+      /**
+       * Format: int64
+       * @description The largest answer read, 1 KiB to 50 MiB.
+       */
+      max_bytes?: number;
+      methods?: components["schemas"]["FormConnectorMethod"][];
+      /** @description The name the forms give in their Connector key, letters, digits, ".", "_" and "-". */
+      name: string;
+      /** @description The loopback, private or reserved networks the host may resolve to, as CIDR prefixes. */
+      networks?: string[];
+      /** @description The path prefixes the forms may call, "/servers"; none, any path under the base url. */
+      paths?: string[];
+      /** @description The secrets to set; null removes one, absent keeps it. */
+      secrets?: {
+        api_key?: string | null;
+        client_key?: string | null;
+        client_secret?: string | null;
+        password?: string | null;
+        token?: string | null;
+      };
+      /** @description Seconds, 1 to 300. */
+      timeout?: number;
+      tls?: components["schemas"]["FormConnectorTLS"];
+    };
+    /** @enum {string} */
+    FormConnectorMethod: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    /**
+     * @description The TLS settings: the PEM certificates of the authorities to trust instead
+     *     of the system ones, the PEM client certificate of a mutual TLS (its key a
+     *     secret, client_key), the name to check the server certificate against.
+     */
+    FormConnectorTLS: {
+      ca_bundle?: string;
+      client_cert?: string;
+      server_name?: string;
+    };
+    FormConnectorTestInput: {
+      method?: components["schemas"]["FormConnectorMethod"];
+      /** @description Relative to the base url, "/servers". */
+      path: string;
+      query?: {
+        [key: string]: string;
+      };
+    };
+    FormConnectorTestResult: {
+      /** @description The start of the answer, 4 KiB at most. */
+      body?: string;
+      content_type?: string;
+      duration_ms: number;
+      /** @description Why the call failed before an answer, a refused address say. */
+      error?: string;
+      status?: number;
+      /** @description The url called, without the query parameter carrying an api key. */
+      url: string;
+    };
     FormListResponse: {
       data:
         | components["schemas"]["FormRow"][]
@@ -12812,8 +13053,24 @@ export interface operations {
     requestBody?: {
       content: {
         "application/json": {
+          /**
+           * @description The app of the node. Ignored for a joining node, which
+           *     takes the app of the enroller.
+           */
           app?: string;
+          /**
+           * @description The cluster id of the node, set on the node so it is
+           *     known before its first daemon status. Absent or empty, the
+           *     node cluster id is left untouched. Ignored for a joining
+           *     node, which takes the cluster id of the enroller.
+           */
+          cluster_id?: string;
           nodename: string;
+          /**
+           * @description The previous uuid of the joining node, required to
+           *     register a joining node.
+           */
+          uuid?: string;
         };
       };
     };
@@ -19648,6 +19905,173 @@ export interface operations {
       500: components["responses"]["500"];
     };
   };
+  GetFormConnectors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            data: components["schemas"]["FormConnector"][];
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostFormConnectors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FormConnectorInput"];
+      };
+    };
+    responses: {
+      /** @description The connector created. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FormConnector"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetFormConnector: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        connector_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FormConnector"];
+        };
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PutFormConnector: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        connector_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FormConnectorInput"];
+      };
+    };
+    responses: {
+      /** @description The connector replaced. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FormConnector"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  DeleteFormConnector: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        connector_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostFormConnectorTest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        connector_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FormConnectorTestInput"];
+      };
+    };
+    responses: {
+      /** @description The outcome of the call, a refusal of the API included. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FormConnectorTestResult"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
   GetFormOutputResults: {
     parameters: {
       query?: never;
@@ -20092,6 +20516,49 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       500: components["responses"]["500"];
+    };
+  };
+  PostFormInputCandidates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        form_id: number;
+        input_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FormCandidatesInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            data: unknown[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+      /** @description The external API failed, or its answer is unusable. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Problem"];
+        };
+      };
     };
   };
   GetFormPublications: {

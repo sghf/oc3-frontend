@@ -37,6 +37,7 @@ export type MenuId =
   | "adm-usr"
   | "adm-groups"
   | "adm-claim-mappings"
+  | "adm-form-connectors"
   | "adm-field-constraints"
   | "view-app"
   | "adm-tags"
@@ -81,6 +82,7 @@ export interface NavEntry {
     | "/logs"
     | "/filters"
     | "/claim-mappings"
+    | "/form-connectors"
     | "/field-constraints"
     | "/metrics"
     | "/reports"
@@ -383,6 +385,15 @@ export const NAV_CATEGORIES: NavCategory[] = [
         labelKey: "nav.forms",
         icon: "form",
         privileges: ["FormsManager"],
+      },
+      // Manager only, as the api: a connector decides what oc3 calls on the
+      // network, and with which credentials.
+      {
+        to: "/form-connectors",
+        menuId: "adm-form-connectors",
+        labelKey: "nav.formConnectors",
+        icon: "formConnector",
+        privileges: ["Manager"],
       },
     ],
   },

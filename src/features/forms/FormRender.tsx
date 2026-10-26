@@ -1,4 +1,6 @@
 import {
+  createContext,
+  useContext,
   useEffect,
   useId,
   useMemo,
@@ -9,7 +11,7 @@ import {
 } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiGetDynamic } from "@/lib/api/client";
+import { api, apiGetDynamic } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { LegacyCssIcon } from "@/components/opensvc/LegacyCssIcon";
 import { parseLegacyCss } from "@/components/opensvc/legacy-css";
@@ -170,6 +172,7 @@ export function FormRender({
   initialData,
   stickySubmit = false,
   secondaryAction,
+  formId,
 }: {
   def: FormDefinition;
   user: FormUser;
@@ -185,6 +188,11 @@ export function FormRender({
   stickySubmit?: boolean;
   /** Placed before the submit button, a cancel for instance. */
   secondaryAction?: ReactNode;
+  /**
+   * The id of the stored form: its inputs calling a connector get their
+   * candidates from oc3, which reads them in the stored definition.
+   */
+  formId?: number;
 }) {
   const { t } = useTranslation();
   const repeated = isRepeated(def);
@@ -249,150 +257,158 @@ export function FormRender({
   const single = repeated && def.inputs.length === 1 ? def.inputs[0] : undefined;
 
   return (
-    <div className="flex flex-col gap-4">
-      {single !== undefined ? (
-        <div className="flex flex-col gap-2">
-          <p className="font-medium text-ink">
-            <LegacyCssIcon css={single.labelCss} className="mr-1.5 inline h-4 w-4 align-[-2px]" />
-            {single.label}
-            {single.mandatory && (
-              <span className="text-state-down" title={t("forms.render.mandatory")}>
-                {" "}
-                *<span className="sr-only">{t("forms.render.mandatory")}</span>
-              </span>
-            )}
-          </p>
-          {single.help !== "" && <p className="text-ink-muted">{single.help}</p>}
-          <ol className="flex flex-col gap-2">
-            {groups.map((group, index) => (
-              <li key={group.uid ?? index}>
-                {visible[index]?.has(single.id) === true && (
-                  <InputRow
-                    input={single}
-                    group={group}
-                    data={datas[index] ?? {}}
-                    user={user}
-                    vertical={def.vertical}
-                    style={controlStyle(def, single)}
-                    onChange={(value, optionData) => {
-                      change(index, single.id, value, optionData);
-                    }}
-                    entry={{
-                      index,
-                      onRemove: removable
-                        ? () => {
-                            remove(index);
-                          }
-                        : undefined,
-                    }}
-                  />
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : (
-        groups.map((group, index) => (
-          <div
-            key={group.uid ?? index}
-            className={
-              repeated
-                ? `relative rounded-(--radius-panel) border border-line p-3 ${removable ? "pr-11" : ""}`
-                : undefined
-            }
-          >
-            {/* In the corner of its entry, rather than on a line of its own. */}
-            {removable && (
-              <button
-                type="button"
-                onClick={() => {
-                  remove(index);
-                }}
-                aria-label={t("forms.render.removeEntry", { index: index + 1 })}
-                title={t("forms.render.removeEntry", { index: index + 1 })}
-                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-(--radius-control) border border-line bg-surface text-ink-muted hover:bg-surface-sunken hover:text-ink"
-              >
-                <CloseIcon className="h-3.5 w-3.5" />
-              </button>
-            )}
+    <FormIdContext.Provider value={formId}>
+      <div className="flex flex-col gap-4">
+        {single !== undefined ? (
+          <div className="flex flex-col gap-2">
+            <p className="font-medium text-ink">
+              <LegacyCssIcon css={single.labelCss} className="mr-1.5 inline h-4 w-4 align-[-2px]" />
+              {single.label}
+              {single.mandatory && (
+                <span className="text-state-down" title={t("forms.render.mandatory")}>
+                  {" "}
+                  *<span className="sr-only">{t("forms.render.mandatory")}</span>
+                </span>
+              )}
+            </p>
+            {single.help !== "" && <p className="text-ink-muted">{single.help}</p>}
+            <ol className="flex flex-col gap-2">
+              {groups.map((group, index) => (
+                <li key={group.uid ?? index}>
+                  {visible[index]?.has(single.id) === true && (
+                    <InputRow
+                      input={single}
+                      group={group}
+                      data={datas[index] ?? {}}
+                      user={user}
+                      vertical={def.vertical}
+                      style={controlStyle(def, single)}
+                      onChange={(value, optionData) => {
+                        change(index, single.id, value, optionData);
+                      }}
+                      entry={{
+                        index,
+                        onRemove: removable
+                          ? () => {
+                              remove(index);
+                            }
+                          : undefined,
+                      }}
+                    />
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : (
+          groups.map((group, index) => (
             <div
+              key={group.uid ?? index}
               className={
-                def.vertical
-                  ? "flex flex-col gap-3"
-                  : "grid grid-cols-[minmax(8rem,max-content)_1fr] items-start gap-x-4 gap-y-3"
+                repeated
+                  ? `relative rounded-(--radius-panel) border border-line p-3 ${removable ? "pr-11" : ""}`
+                  : undefined
               }
             >
-              {def.inputs
-                .filter((input) => visible[index]?.has(input.id))
-                .map((input) => (
-                  <InputRow
-                    key={input.id}
-                    input={input}
-                    group={group}
-                    data={datas[index] ?? {}}
-                    user={user}
-                    vertical={def.vertical}
-                    style={controlStyle(def, input)}
-                    onChange={(value, optionData) => {
-                      change(index, input.id, value, optionData);
-                    }}
-                  />
-                ))}
+              {/* In the corner of its entry, rather than on a line of its own. */}
+              {removable && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    remove(index);
+                  }}
+                  aria-label={t("forms.render.removeEntry", { index: index + 1 })}
+                  title={t("forms.render.removeEntry", { index: index + 1 })}
+                  className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-(--radius-control) border border-line bg-surface text-ink-muted hover:bg-surface-sunken hover:text-ink"
+                >
+                  <CloseIcon className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <div
+                className={
+                  def.vertical
+                    ? "flex flex-col gap-3"
+                    : "grid grid-cols-[minmax(8rem,max-content)_1fr] items-start gap-x-4 gap-y-3"
+                }
+              >
+                {def.inputs
+                  .filter((input) => visible[index]?.has(input.id))
+                  .map((input) => (
+                    <InputRow
+                      key={input.id}
+                      input={input}
+                      group={group}
+                      data={datas[index] ?? {}}
+                      user={user}
+                      vertical={def.vertical}
+                      style={controlStyle(def, input)}
+                      onChange={(value, optionData) => {
+                        change(index, input.id, value, optionData);
+                      }}
+                    />
+                  ))}
+              </div>
             </div>
+          ))
+        )}
+
+        {repeated && (maxEntries === null || groups.length < maxEntries) && (
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                setGroups((previous) => [...previous, newGroup(def, user)]);
+              }}
+              className="flex h-8 items-center gap-1.5 rounded-(--radius-control) border border-line px-3 text-ink hover:bg-surface-sunken"
+            >
+              <PlusIcon />
+              {t("forms.render.addGroup")}
+            </button>
           </div>
-        ))
-      )}
+        )}
 
-      {repeated && (maxEntries === null || groups.length < maxEntries) && (
-        <div>
-          <button
-            type="button"
-            onClick={() => {
-              setGroups((previous) => [...previous, newGroup(def, user)]);
-            }}
-            className="flex h-8 items-center gap-1.5 rounded-(--radius-control) border border-line px-3 text-ink hover:bg-surface-sunken"
+        {onSubmit !== undefined && (
+          <div
+            className={
+              stickySubmit
+                ? "sticky bottom-0 z-10 -mx-4 -mb-4 flex flex-wrap items-center justify-end gap-2 rounded-b-(--radius-panel) border-t border-line bg-surface-raised px-4 py-3"
+                : // A cancel beside the submit button keeps its distance.
+                  "flex flex-wrap items-center gap-2"
+            }
           >
-            <PlusIcon />
-            {t("forms.render.addGroup")}
-          </button>
-        </div>
-      )}
-
-      {onSubmit !== undefined && (
-        <div
-          className={
-            stickySubmit
-              ? "sticky bottom-0 z-10 -mx-4 -mb-4 flex flex-wrap items-center justify-end gap-2 rounded-b-(--radius-panel) border-t border-line bg-surface-raised px-4 py-3"
-              : // A cancel beside the submit button keeps its distance.
-                "flex flex-wrap items-center gap-2"
-          }
-        >
-          {violations.length > 0 && stickySubmit && (
-            <p role="status" className="mr-auto text-state-down">
-              ■ {t("forms.render.violations", { count: violations.length })}
-            </p>
-          )}
-          {secondaryAction}
-          <button
-            type="button"
-            disabled={violations.length > 0}
-            onClick={() => {
-              onSubmit(data);
-            }}
-            className="h-8 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink disabled:opacity-60"
-          >
-            {submitLabel ?? t("forms.render.submit")}
-          </button>
-          {violations.length > 0 && !stickySubmit && (
-            <p role="status" className="basis-full text-state-down">
-              ■ {t("forms.render.violations", { count: violations.length })}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+            {violations.length > 0 && stickySubmit && (
+              <p role="status" className="mr-auto text-state-down">
+                ■ {t("forms.render.violations", { count: violations.length })}
+              </p>
+            )}
+            {secondaryAction}
+            <button
+              type="button"
+              disabled={violations.length > 0}
+              onClick={() => {
+                onSubmit(data);
+              }}
+              className="h-8 rounded-(--radius-control) bg-accent px-3 font-medium text-accent-ink disabled:opacity-60"
+            >
+              {submitLabel ?? t("forms.render.submit")}
+            </button>
+            {violations.length > 0 && !stickySubmit && (
+              <p role="status" className="basis-full text-state-down">
+                ■ {t("forms.render.violations", { count: violations.length })}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </FormIdContext.Provider>
   );
 }
+
+/**
+ * The id of the stored form rendered, for the candidates of its inputs calling a
+ * connector. Each FormRender sets its own: a sub-form is another form.
+ */
+const FormIdContext = createContext<number | undefined>(undefined);
 
 /** One input: its label, its control, its help, and its problems. */
 function InputRow({
@@ -519,16 +535,30 @@ function useRestCandidates(
   user: FormUser,
   enabled: boolean,
 ) {
+  const formId = useContext(FormIdContext);
   const path = candidatesPath(input, data, user);
   const args = prepareArgs(input.args, data, user);
   const query = Object.fromEntries(
     Object.entries(args).filter(([, v]) => (Array.isArray(v) ? v.length > 0 : true)),
   );
+  const external = input.connector !== "";
   return useQuery({
-    queryKey: ["form-candidates", path, query],
-    enabled: enabled && path !== null,
+    queryKey: external
+      ? ["form-connector-candidates", formId, input.id, path, query]
+      : ["form-candidates", path, query],
+    // Through a connector, oc3 builds the call from the stored form: a form
+    // not stored yet has none.
+    enabled: enabled && path !== null && (!external || formId !== undefined),
     staleTime: 60 * 1000,
     queryFn: async (): Promise<Candidate[]> => {
+      if (external) {
+        const { data: answer, error } = await api.POST(
+          "/forms/{form_id}/inputs/{input_id}/candidates",
+          { params: { path: { form_id: formId ?? 0, input_id: input.id } }, body: { data } },
+        );
+        if (error !== undefined) throw new Error(problemText(error));
+        return restCandidates(input, answer.data, args);
+      }
       const response = await apiGetDynamic(path ?? "", query);
       if (response.status >= 300) throw new Error(problemText(response.body));
       const body = response.body;
@@ -590,6 +620,7 @@ function InputControl({
     "aria-describedby": describedBy,
   };
   const rest = useRestCandidates(input, data, user, input.fn !== "");
+  const formId = useContext(FormIdContext);
 
   // Candidates fetched: the first one is chosen when nothing is, unless disabled.
   const candidates = rest.data;
@@ -630,6 +661,8 @@ function InputControl({
       <p className="mt-1 text-ink-muted">{t("forms.render.candidatesLoading")}</p>
     ) : candidatesPath(input, data, user) === null ? (
       <p className="mt-1 text-ink-muted">{t("forms.render.candidatesWaiting")}</p>
+    ) : input.connector !== "" && formId === undefined ? (
+      <p className="mt-1 text-ink-muted">{t("forms.render.connectorUnsaved")}</p>
     ) : null;
 
   switch (input.type) {

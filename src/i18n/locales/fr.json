@@ -70,7 +70,8 @@
     "checkContextual": "Seuils contextuels",
     "complianceAttachments": "Attachements",
     "orchestrations": "Workflows",
-    "orchestrationRuns": "Exécutions"
+    "orchestrationRuns": "Exécutions",
+    "formConnectors": "Connecteurs de formulaires"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -2527,7 +2528,8 @@
       "subFormNotFound": "Sous-formulaire {{name}} introuvable.",
       "noCandidateMatch": "Aucun candidat ne correspond.",
       "entryName": "{{label}} {{index}}",
-      "removeEntry": "Retirer l'entrée {{index}}"
+      "removeEntry": "Retirer l'entrée {{index}}",
+      "connectorUnsaved": "Ses choix viennent d'une API externe, par un connecteur : ils s'affichent une fois le formulaire enregistré."
     },
     "definitionMore_one": "+{{count}} ligne",
     "definitionMore_other": "+{{count}} lignes",
@@ -4557,5 +4559,105 @@
     "lines": "Lignes du journal",
     "noMatch": "Aucune ligne ne correspond.",
     "showInContext": "Montrer cette ligne parmi les autres"
+  },
+  "formConnectors": {
+    "title": "Connecteurs de formulaires",
+    "new": "Nouveau connecteur",
+    "intro": "Les API externes que les formulaires appellent par le collector, jamais depuis le navigateur : les choix de leurs champs et leurs sorties rest. Un formulaire désigne un connecteur dans sa clé Connector, avec un chemin relatif à son URL de base dans Function. Seuls les groupes listés ici peuvent se servir d'un connecteur, par les formulaires dont ils sont responsables.",
+    "empty": "Aucun connecteur pour l'instant.",
+    "mtls": "+ certificat client",
+    "anyPath": "tout chemin",
+    "noGroup": "aucun groupe : aucun formulaire ne peut s'en servir",
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "base_url": "URL de base",
+      "methods": "Méthodes autorisées",
+      "paths": "Chemins autorisés",
+      "networks": "Réseaux privés autorisés",
+      "timeout": "Délai (secondes)",
+      "max_kib": "Réponse maximale (Kio)",
+      "headers": "En-têtes",
+      "auth_type": "Authentification",
+      "username": "Utilisateur",
+      "api_key_in": "Clé envoyée dans",
+      "api_key_name": "Nom de l'en-tête ou du paramètre",
+      "token_url": "URL du jeton",
+      "client_id": "Identifiant client",
+      "auth_style": "Identifiants client envoyés dans",
+      "scopes": "Portées",
+      "audience": "Audience",
+      "ca_bundle": "Autorités de certification",
+      "client_cert": "Certificat client",
+      "server_name": "Nom du serveur",
+      "groups": "Groupes autorisés",
+      "updated": "Modifié"
+    },
+    "auth": {
+      "none": "Aucune",
+      "basic": "Basic (utilisateur et mot de passe)",
+      "bearer": "Jeton Bearer",
+      "api_key": "Clé d'API",
+      "oauth2_client_credentials": "OAuth 2 client credentials"
+    },
+    "apiKeyIn": {
+      "header": "un en-tête",
+      "query": "un paramètre de requête"
+    },
+    "authStyle": {
+      "header": "l'en-tête Authorization",
+      "params": "le corps de la requête"
+    },
+    "secret": {
+      "password": "Mot de passe",
+      "token": "Jeton",
+      "api_key": "Clé d'API",
+      "client_secret": "Secret client",
+      "client_key": "Clé du certificat client",
+      "set": "défini",
+      "unset": "non défini",
+      "removed": "retiré à l'enregistrement",
+      "keep": "Le garder",
+      "remove": "Retirer",
+      "keepHint": "Laisser vide pour garder celui défini"
+    },
+    "form": {
+      "editTitle": "Connecteur {{name}}",
+      "createTitle": "Nouveau connecteur",
+      "general": "Général",
+      "nameHint": "Le nom que les formulaires donnent dans leur clé Connector : lettres, chiffres, « . », « _ » ou « - ».",
+      "baseUrlHint": "Les chemins des formulaires lui sont relatifs. HTTPS est obligatoire dès que le connecteur envoie des identifiants.",
+      "calls": "Ce que les formulaires peuvent appeler",
+      "pathsHint": "Un préfixe de chemin par ligne, « /servers » autorisant « /servers/12 ». Aucun : tout chemin sous l'URL de base.",
+      "networksHint": "Le collector refuse les adresses de bouclage, privées et réservées, et toujours celles de lien local (métadonnées du cloud). Un préfixe CIDR par ligne permet à l'hôte de résoudre vers l'une d'elles, une CMDB interne par exemple.",
+      "headersHint": "« Nom: valeur », un par ligne, envoyés à chaque appel. Pas d'identifiants ici : ils vont dans l'authentification.",
+      "auth": "Authentification",
+      "scopesHint": "Séparées par des espaces.",
+      "tls": "TLS",
+      "caHint": "Certificats PEM de confiance à la place de ceux du système, pour une autorité privée.",
+      "clientCertHint": "Certificat PEM d'un TLS mutuel ; sa clé est un secret, ci-dessous.",
+      "groupsHint": "Un formulaire peut se servir du connecteur quand l'un des groupes qui en sont responsables est listé ici.",
+      "removeGroup": "Retirer {{group}}",
+      "addGroup": "Ajouter un groupe",
+      "saving": "Enregistrement…",
+      "saveEdit": "Enregistrer",
+      "saveCreate": "Créer",
+      "saved": "Enregistré",
+      "delete": "Supprimer le connecteur",
+      "deleteQuestion": "Supprimer le connecteur {{name}} ? Les formulaires qui le désignent ne pourront plus l'appeler.",
+      "deleteConfirm": "Supprimer",
+      "deleting": "Suppression…"
+    },
+    "test": {
+      "title": "Tester un appel",
+      "intro": "Appelle l'API une fois, comme le ferait un formulaire, avec les réglages enregistrés : enregistrez d'abord vos modifications.",
+      "method": "Méthode",
+      "path": "Chemin",
+      "query": "Requête, « nom=valeur » par ligne",
+      "run": "Appeler",
+      "running": "Appel…",
+      "failed": "Pas de réponse : {{message}}",
+      "answered": "Réponse {{status}} en {{ms}} ms"
+    }
   }
 }
