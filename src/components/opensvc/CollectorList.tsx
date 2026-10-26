@@ -19,6 +19,7 @@ import {
   FilterIcon,
   ResetIcon,
   SearchIcon,
+  SlidersIcon,
 } from "@/components/ui/icons";
 import type { ListPage } from "@/lib/api/page";
 import { download, toCsv, toXlsx, type ExportFormat } from "@/lib/export/table";
@@ -31,7 +32,13 @@ import type { FiltersetSource } from "@/lib/filterset-entries";
 import { SaveAsFilterset } from "./SaveAsFilterset";
 import { nextNoticeId } from "@/components/ui/use-auto-dismiss";
 import { describeFilter, isFilterable } from "./list-filter-describe";
-import { PAGE_SIZES, visibleProps, type ResolvedListSearch } from "@/lib/list-search";
+import {
+  DEFAULT_LIMIT,
+  PAGE_SIZES,
+  visibleProps,
+  type ResolvedListSearch,
+} from "@/lib/list-search";
+import type { ViewPrefsControl } from "@/lib/user-prefs";
 import { readProp } from "@/lib/row";
 import { labelMatches, normalizeSearch } from "@/lib/label-search";
 import { FlashCell, FlashScope } from "./Flash";
@@ -147,6 +154,7 @@ export function CollectorList<T>({
   valueStats,
   filtersetSource,
   onRowOpen,
+  viewPrefs,
 }: {
   columns: ListColumn<T>[];
   /** Props shown as long as the user has not chosen their columns. */
@@ -216,6 +224,12 @@ export function CollectorList<T>({
    * own, say. The row then announces no dialog.
    */
   onRowOpen?: (row: T) => void;
+  /**
+   * The settings of the list in this tab and the user's defaults (`useViewPrefs`):
+   * with it, the toolbar offers to save the tab's columns, sort, filters and page
+   * size as the defaults, or to go back to them.
+   */
+  viewPrefs?: ViewPrefsControl;
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
@@ -242,6 +256,57 @@ export function CollectorList<T>({
   function setExportNotice(next: { tone: NoticeTone; text: string } | null) {
     setExportNoticeState(next === null ? null : { ...next, id: nextNoticeId() });
   }
+  const viewMenu = useRef<HTMLDetailsElement>(null);
+  const [savingDefault, setSavingDefault] = useState(false);
+  // The report of the last save of the defaults, numbered as the export's.
+  const [viewNotice, setViewNoticeState] = useState<{
+    id: number;
+    tone: NoticeTone;
+    text: string;
+  } | null>(null);
+  function setViewNotice(next: { tone: NoticeTone; text: string } | null) {
+    setViewNoticeState(next === null ? null : { ...next, id: nextNoticeId() });
+  }
+
+  /** Saves the columns, sort, filters and page size shown as the user's defaults. */
+  async function saveAsDefault() {
+    if (viewPrefs === undefined) return;
+    setSavingDefault(true);
+    try {
+      await viewPrefs.saveAsDefault({
+        cols: search.cols,
+        sort: search.sort,
+        filters: search.filters,
+        limit: search.limit,
+      });
+      setViewNotice({ tone: "success", text: t("list.view.saved") });
+      if (viewMenu.current !== null) viewMenu.current.open = false;
+    } catch (error) {
+      setViewNotice({
+        tone: "error",
+        text: t("list.view.saveFailed", {
+          message: error instanceof Error ? error.message : String(error),
+        }),
+      });
+    } finally {
+      setSavingDefault(false);
+    }
+  }
+
+  /** Shows the user's defaults again, the settings of the tab forgotten. */
+  function restoreDefault() {
+    if (viewPrefs === undefined) return;
+    const { defaults } = viewPrefs;
+    onChange({
+      cols: defaults.cols,
+      sort: defaults.sort,
+      filters: defaults.filters ?? {},
+      limit: defaults.limit ?? DEFAULT_LIMIT,
+    });
+    // After the change, which the tab records: the tab follows the defaults again.
+    viewPrefs.restoreDefault();
+    if (viewMenu.current !== null) viewMenu.current.open = false;
+  }
 
   /**
    * Escape closes the column picker and gives the focus back to its button.
@@ -260,12 +325,13 @@ export function CollectorList<T>({
   }
 
   /**
-   * A click outside the open column picker closes it, as the other menus close; the
-   * click then does what it does anywhere else. `<details>` stays open by itself.
+   * A click outside an open menu of the toolbar — columns, export, view — closes
+   * it, as the other menus close; the click then does what it does anywhere else.
+   * `<details>` stays open by itself.
    */
   useEffect(() => {
     function onPointerDown(event: PointerEvent) {
-      for (const element of [picker.current, exportMenu.current]) {
+      for (const element of [picker.current, exportMenu.current, viewMenu.current]) {
         if (element === null || !element.open) continue;
         if (event.target instanceof Node && element.contains(event.target)) continue;
         element.open = false;
@@ -709,6 +775,47 @@ export function CollectorList<T>({
           </details>
         )}
 
+        {viewPrefs !== undefined && (
+          <details ref={viewMenu} onKeyDown={onPickerKeyDown} className="relative">
+            <summary className="flex h-7 cursor-pointer list-none items-center gap-1.5 rounded-(--radius-control) border border-line px-2 text-ink-muted hover:text-ink">
+              <SlidersIcon />
+              {t("list.view.label")}
+              {viewPrefs.customized && (
+                // A mark and a word: the view of this tab is its own.
+                <span className="text-accent">
+                  <span aria-hidden="true">●</span> {t("list.view.modified")}
+                </span>
+              )}
+            </summary>
+            <div className="absolute z-20 mt-1 w-80 rounded-(--radius-panel) border border-line bg-surface-raised p-1 shadow-lg">
+              <p className="px-2 py-1.5 text-ink-muted">
+                {viewPrefs.customized ? t("list.view.customized") : t("list.view.asDefault")}
+              </p>
+              <button
+                type="button"
+                disabled={savingDefault}
+                onClick={() => {
+                  void saveAsDefault();
+                }}
+                className="flex w-full items-center rounded-(--radius-control) px-2 py-1 text-left hover:bg-surface-sunken disabled:opacity-40"
+              >
+                {savingDefault ? t("list.view.saving") : t("list.view.save")}
+              </button>
+              <button
+                type="button"
+                disabled={!viewPrefs.customized}
+                onClick={restoreDefault}
+                className="flex w-full items-center rounded-(--radius-control) px-2 py-1 text-left hover:bg-surface-sunken disabled:opacity-40"
+              >
+                {t("list.view.restore")}
+              </button>
+              <p className="border-t border-line px-2 pt-1.5 pb-1 text-data text-ink-muted">
+                {t("list.view.hint")}
+              </p>
+            </div>
+          </details>
+        )}
+
         {selectedCount > 0 && (
           <span className="flex items-center gap-2 text-ink">
             {/* In red: rows are ticked, and an action would apply to them. */}
@@ -911,6 +1018,17 @@ export function CollectorList<T>({
         </div>
       )}
 
+      {viewNotice !== null && (
+        <TransientNotice
+          id={viewNotice.id}
+          tone={viewNotice.tone}
+          text={viewNotice.text}
+          dismissLabel={t("list.export.dismiss")}
+          onDismiss={() => {
+            setViewNotice(null);
+          }}
+        />
+      )}
       {exportNotice !== null && (
         <TransientNotice
           id={exportNotice.id}

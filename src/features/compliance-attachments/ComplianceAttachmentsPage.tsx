@@ -266,6 +266,7 @@ export function ComplianceAttachmentsPage() {
         />
       </div>
       <CollectorList
+        viewPrefs={prefs}
         key={table.key}
         columns={columns}
         defaultCols={defaults}

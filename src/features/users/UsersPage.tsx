@@ -224,6 +224,7 @@ export function UsersPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={userStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

@@ -259,6 +259,7 @@ export function RulesetsPage() {
       </h1>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={rulesetStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

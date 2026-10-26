@@ -258,6 +258,7 @@ export function LogsPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         columns={columns}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

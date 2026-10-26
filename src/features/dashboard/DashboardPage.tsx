@@ -246,6 +246,7 @@ export function DashboardPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={alertStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

@@ -186,6 +186,7 @@ export function ReportsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("reports.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={reportStats}
         columns={columns(t)}
         defaultCols={DEFAULT_COLS}

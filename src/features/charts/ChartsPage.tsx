@@ -187,6 +187,7 @@ export function ChartsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("charts.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={chartStats}
         columns={columns(t)}
         defaultCols={DEFAULT_COLS}

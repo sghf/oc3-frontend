@@ -254,6 +254,7 @@ export function FiltersPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("filters.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={filterStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

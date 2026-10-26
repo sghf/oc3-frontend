@@ -254,6 +254,7 @@ export function ClustersPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("clusters.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={clusterStats}
         columns={columns()}
         defaultCols={DEFAULT_COLS}

@@ -870,6 +870,18 @@
       "values": "Valeurs",
       "show": "Afficher les valeurs",
       "nearlyUnique": "Presque chaque ligne a sa propre valeur."
+    },
+    "view": {
+      "label": "Vue",
+      "modified": "cet onglet",
+      "customized": "Cet onglet affiche ses propres colonnes, tri, filtres ou taille de page : les autres onglets et les nouveaux gardent votre vue par défaut.",
+      "asDefault": "Cet onglet affiche votre vue par défaut.",
+      "save": "Enregistrer comme ma vue par défaut",
+      "saving": "Enregistrement…",
+      "restore": "Revenir à ma vue par défaut",
+      "hint": "Les changements de colonnes, de tri, de filtres et de taille de page ne valent que pour cet onglet. Votre vue par défaut est celle des nouveaux onglets.",
+      "saved": "Enregistrée comme votre vue par défaut : les nouveaux onglets s'ouvrent avec.",
+      "saveFailed": "La vue par défaut n'a pas pu être enregistrée : {{message}}"
     }
   },
   "detail": {
@@ -1743,14 +1755,14 @@
       }
     },
     "viewPrefs": {
-      "title": "Réglages de vue enregistrés",
-      "hint": "Les colonnes, le tri, les filtres et le nombre de lignes par page choisis dans chaque liste suivent votre compte.",
-      "reset": "Oublier les colonnes, le tri, les filtres et les tailles de page",
-      "question": "Oublier les colonnes, le tri, les filtres et la taille de page enregistrés pour toutes les vues ?",
+      "title": "Vues par défaut",
+      "hint": "Les listes s'ouvrent dans un nouvel onglet avec les colonnes, le tri, les filtres et la taille de page enregistrés comme votre vue par défaut (menu Vue de chaque liste). Les changements faits dans un onglet restent dans cet onglet.",
+      "reset": "Oublier mes vues par défaut",
+      "question": "Oublier la vue par défaut enregistrée pour chaque liste ? Les nouveaux onglets ouvriront les listes avec leurs réglages d'origine.",
       "confirm": "Oublier",
       "pending": "Effacement…",
-      "done": "Colonnes, tri, filtres et tailles de page oubliés. Chaque liste retrouve ses réglages par défaut.",
-      "none": "Aucune vue n'a de colonnes, de tri, de filtres ou de taille de page enregistrés."
+      "done": "Vues par défaut oubliées. Les nouveaux onglets ouvrent les listes avec leurs réglages d'origine.",
+      "none": "Aucune liste n'a de vue par défaut enregistrée."
     },
     "password": {
       "managedByProvider": "Votre mot de passe est géré par votre fournisseur d'identité : changez-le là-bas.",

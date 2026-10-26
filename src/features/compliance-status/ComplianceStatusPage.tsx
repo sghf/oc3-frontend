@@ -506,6 +506,7 @@ export function ComplianceStatusPage() {
       >
         {section === "runs" ? (
           <CollectorList
+            viewPrefs={prefs}
             columns={COLUMNS}
             defaultCols={DEFAULT_COLS}
             rows={runs.data?.rows ?? []}

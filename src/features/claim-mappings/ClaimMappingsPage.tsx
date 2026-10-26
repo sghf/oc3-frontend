@@ -257,6 +257,7 @@ export function ClaimMappingsPage() {
       />
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={mappingStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

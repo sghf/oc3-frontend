@@ -276,6 +276,7 @@ export function ObsolescencePage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("obsolescence.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={obsolescenceStats}
         columns={columns}
         defaultCols={DEFAULT_COLS}

@@ -230,6 +230,7 @@ export function FiltersetsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("filtersets.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={filtersetStats}
         columns={columns}
         defaultCols={DEFAULT_COLS}

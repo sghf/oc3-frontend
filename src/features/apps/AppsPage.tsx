@@ -230,6 +230,7 @@ export function AppsPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={appStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

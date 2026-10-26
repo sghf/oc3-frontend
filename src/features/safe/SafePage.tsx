@@ -209,6 +209,7 @@ export function SafePage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("safe.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={safeFileStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

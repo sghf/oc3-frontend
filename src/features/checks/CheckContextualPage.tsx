@@ -215,6 +215,7 @@ export function CheckContextualPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("checkContextual.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={contextualStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

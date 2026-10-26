@@ -218,6 +218,7 @@ export function ActionsPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={queuedActionStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

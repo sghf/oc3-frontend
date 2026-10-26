@@ -199,6 +199,7 @@ export function CheckDefaultsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("checkDefaults.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={checkDefaultStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

@@ -870,6 +870,18 @@
       "values": "Values",
       "show": "Show the values",
       "nearlyUnique": "Nearly every row holds its own value."
+    },
+    "view": {
+      "label": "View",
+      "modified": "this tab",
+      "customized": "This tab shows its own columns, sort, filters or page size: other tabs and new ones keep your default view.",
+      "asDefault": "This tab shows your default view.",
+      "save": "Save as my default view",
+      "saving": "Saving…",
+      "restore": "Restore my default view",
+      "hint": "Changes to the columns, sort, filters and page size apply to this tab only. Your default view is what new tabs open with.",
+      "saved": "Saved as your default view: new tabs open with it.",
+      "saveFailed": "The default view could not be saved: {{message}}"
     }
   },
   "detail": {
@@ -1743,14 +1755,14 @@
       }
     },
     "viewPrefs": {
-      "title": "Saved view settings",
-      "hint": "The columns, sort order, filters and page size you chose in each list follow your account.",
-      "reset": "Forget saved columns, sorting, filters and page sizes",
-      "question": "Forget the columns, sort order, filters and page size saved for every view?",
+      "title": "Default views",
+      "hint": "The lists open in a new tab with the columns, sort order, filters and page size you saved as your default view (View menu of each list). Changes made in a tab stay in that tab.",
+      "reset": "Forget my default views",
+      "question": "Forget the default view saved for every list? New tabs will open the lists with their built-in settings.",
       "confirm": "Forget",
       "pending": "Forgetting…",
-      "done": "Saved columns, sorting, filters and page sizes forgotten. Every list is back to its defaults.",
-      "none": "No view has saved columns, sort order, filters or page size."
+      "done": "Default views forgotten. New tabs open the lists with their built-in settings.",
+      "none": "No list has a default view saved."
     },
     "password": {
       "managedByProvider": "Your password is managed by your identity provider: change it there.",

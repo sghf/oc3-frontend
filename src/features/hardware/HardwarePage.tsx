@@ -207,6 +207,7 @@ export function HardwarePage() {
       </h1>
 
       <CollectorList
+        viewPrefs={prefs}
         columns={columns(t, (key) => i18n.exists(key))}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}

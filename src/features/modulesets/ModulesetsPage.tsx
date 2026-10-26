@@ -227,6 +227,7 @@ export function ModulesetsPage() {
       </h1>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={modulesetStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

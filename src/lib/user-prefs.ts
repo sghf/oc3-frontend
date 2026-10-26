@@ -13,6 +13,7 @@ import { api } from "./api/client";
 import { problemText } from "./api/problem";
 import { FILTER_KEY_PREFIX, filterKey, type ColumnFilters } from "./column-filters";
 import { DEFAULT_LIMIT, PAGE_SIZES, type ListSearch, type ResolvedListSearch } from "./list-search";
+import { useTabViewPrefs, type TabViewPrefs } from "./tab-view-prefs";
 import {
   applyPalette,
   applyTheme,
@@ -48,7 +49,7 @@ import {
  * The rest of the object — the old column filters, live mode, hidden menu entries —
  * belongs to the old interface: it is read back and stored again untouched.
  */
-/** Preferences of a view: what follows the account rather than the URL. */
+/** The defaults of a view, kept with the account: what new tabs open the list with. */
 export interface ViewPrefs {
   visible_columns?: string[];
   /** Sort keys, prefixed with `-` for descending order, as in the URL. */
@@ -123,9 +124,6 @@ export interface Bookmark {
 
 const PREFS_KEY = ["user", "self", "prefs"];
 
-/** Write delay, as in the old collector: ticking three columns writes only once. */
-const SAVE_DELAY = 1500;
-
 function asPrefs(value: unknown): UserPrefs {
   return typeof value === "object" && value !== null ? (value as UserPrefs) : {};
 }
@@ -143,110 +141,119 @@ export function useUserPrefs() {
   return useQuery({ queryKey: PREFS_KEY, queryFn: fetchPrefs, staleTime: 5 * 60 * 1000 });
 }
 
+/** The settings of a list: what the URL may leave out, filled in from the defaults. */
+export interface ViewSettings {
+  cols?: string[];
+  sort?: string[];
+  filters?: ColumnFilters;
+  limit?: number;
+}
+
+/** Whether two settings of a list are the same, an empty one being no setting. */
+function sameSetting(a: unknown, b: unknown): boolean {
+  const norm = (v: unknown) =>
+    v === null ||
+    v === undefined ||
+    (Array.isArray(v) && v.length === 0) ||
+    (typeof v === "object" && Object.keys(v).length === 0)
+      ? undefined
+      : JSON.stringify(v);
+  return norm(a) === norm(b);
+}
+
 /**
- * Columns, sort, filters and page size saved for a view, and what it takes to update
- * them.
+ * Columns, sort, filters and page size of a list, and what it takes to change them.
+ *
+ * A change applies to this browser tab only (`useTabViewPrefs`): two tabs may show
+ * the same list their own way. The account keeps the user's defaults, under
+ * `tables.<view>`, which a tab follows for whatever it did not change, and which
+ * change only when the user saves a tab's settings as their default
+ * (`saveAsDefault`), new tabs then opening with them.
  *
  * The URL keeps priority: a shared link shows its columns, its sort and its filters,
- * not those of whoever opens it. Preferences therefore only serve when the URL carries
- * none, and going back to the defaults clears the saved entry.
+ * not those of whoever opens it. These settings therefore only serve when the URL
+ * carries none.
  */
 export function useViewPrefs(view: string) {
   const queryClient = useQueryClient();
   const prefs = useUserPrefs();
-
-  function save<K extends keyof ViewPrefs>(key: K, value: ViewPrefs[K]) {
-    const empty =
-      value === undefined ||
-      (typeof value === "object" &&
-        (Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0));
-    schedule(queryClient, `${view}:${key}`, (current) => {
-      const tables = { ...current.tables };
-      const entry: ViewPrefs = { ...tables[view] };
-      if (empty) {
-        delete entry[key];
-      } else {
-        entry[key] = value;
-      }
-      if (Object.keys(entry).length === 0) {
-        delete tables[view];
-      } else {
-        tables[view] = entry;
-      }
-      return { ...current, tables };
-    });
-  }
-
+  const tab = useTabViewPrefs(view);
   const entry = prefs.data?.tables?.[view];
-  const saveCols = (cols: string[] | undefined) => {
-    save("visible_columns", cols);
-  };
-  const saveSort = (sort: string[] | undefined) => {
-    save("sort", sort);
-  };
-  const saveFilters = (filters: ColumnFilters | undefined) => {
-    save("column_filters", filters);
-  };
-  /** The default page size is not saved: it clears the entry. */
-  const saveLimit = (limit: number | undefined) => {
-    save("perpage", limit === DEFAULT_LIMIT ? undefined : limit);
-  };
-  return {
+  const defaults: ViewSettings = {
     cols: entry?.visible_columns,
     sort: entry?.sort,
     filters: entry?.column_filters,
     limit: savedLimit(entry?.perpage),
-    saveCols,
-    saveSort,
-    saveFilters,
-    saveLimit,
+  };
+  const own = tab.entry;
+  // A setting changed in the tab overrides the default, null meaning the built-in.
+  const pick = <K extends keyof ViewSettings>(key: K): ViewSettings[K] =>
+    own !== undefined && key in own ? ((own[key] ?? undefined) as ViewSettings[K]) : defaults[key];
+  const customized =
+    own !== undefined &&
+    (Object.keys(own) as (keyof ViewSettings)[]).some(
+      (key) => !sameSetting(pick(key), defaults[key]),
+    );
+
+  return {
+    cols: pick("cols"),
+    sort: pick("sort"),
+    filters: pick("filters"),
+    limit: pick("limit"),
+    /** The account's defaults, which new tabs open with. */
+    defaults,
+    /** Whether the settings of this tab differ from the defaults. */
+    customized,
     /**
-     * Saves what follows the account in a list update — columns, sort, filters and
-     * page size — the other states staying in the URL only.
+     * Records in the tab what a list update changes of its columns, sort, filters
+     * and page size, the other states staying in the URL only.
      */
     saveSearch: (next: Partial<ResolvedListSearch>) => {
-      if ("cols" in next) saveCols(next.cols);
-      if ("sort" in next) saveSort(next.sort);
-      if ("filters" in next) saveFilters(next.filters);
-      if ("limit" in next) saveLimit(next.limit);
+      const patch: TabViewPrefs = {};
+      if ("cols" in next) patch.cols = next.cols?.length ? next.cols : null;
+      if ("sort" in next) patch.sort = next.sort?.length ? next.sort : null;
+      if ("filters" in next)
+        patch.filters = next.filters && Object.keys(next.filters).length > 0 ? next.filters : null;
+      // The default page size is no setting.
+      if ("limit" in next) patch.limit = next.limit === DEFAULT_LIMIT ? null : (next.limit ?? null);
+      if (Object.keys(patch).length > 0) tab.set(patch);
+    },
+    /**
+     * Saves settings, those the tab shows, as the user's defaults, then lets the tab
+     * follow them. Empty settings and the default page size are not saved.
+     */
+    saveAsDefault: async (settings: ViewSettings): Promise<void> => {
+      const saved: ViewPrefs = {};
+      if (settings.cols?.length) saved.visible_columns = settings.cols;
+      if (settings.sort?.length) saved.sort = settings.sort;
+      if (settings.filters && Object.keys(settings.filters).length > 0)
+        saved.column_filters = settings.filters;
+      if (settings.limit !== undefined && settings.limit !== DEFAULT_LIMIT)
+        saved.perpage = settings.limit;
+      await savePrefs(queryClient, (current) => {
+        const tables = { ...current.tables };
+        // What the old interface keeps under the view, its filters say, stays.
+        const rest: ViewPrefs = { ...tables[view] };
+        delete rest.visible_columns;
+        delete rest.sort;
+        delete rest.column_filters;
+        delete rest.perpage;
+        const next = { ...rest, ...saved };
+        if (Object.keys(next).length === 0) delete tables[view];
+        else tables[view] = next;
+        return { ...current, tables };
+      });
+      tab.clear();
+    },
+    /** Forgets the settings of the tab: it follows the defaults again. */
+    restoreDefault: () => {
+      tab.clear();
     },
   };
 }
 
-type PrefsChange = (current: UserPrefs) => UserPrefs;
-
-/** Changes waiting to be written, one per view and key: a newer one replaces it. */
-const pending = new Map<string, PrefsChange>();
-let flushTimer: ReturnType<typeof setTimeout> | undefined;
-
-/** Changes scheduled but not written yet, over a state read from the server. */
-function applyPending(prefs: UserPrefs): UserPrefs {
-  return [...pending.values()].reduce((current, change) => change(current), prefs);
-}
-
-/**
- * Applies a change at once to the cached preferences and writes it a little later.
- *
- * The view reads its state from the cache: without the immediate update, a filter
- * just cleared from the URL would come back from the saved preferences until the
- * write lands. The write itself waits, as in the old collector, so that ticking three
- * columns or typing a filter writes only once.
- */
-function schedule(queryClient: QueryClient, id: string, change: PrefsChange) {
-  pending.set(id, change);
-  queryClient.setQueryData<UserPrefs>(PREFS_KEY, (current) => change(asPrefs(current)));
-  clearTimeout(flushTimer);
-  flushTimer = setTimeout(() => {
-    const changes = [...pending.values()];
-    pending.clear();
-    savePrefs(queryClient, (current) =>
-      changes.reduce((prefs, apply) => apply(prefs), current),
-    ).catch(() => {
-      // The cache holds a state the server refused: read the stored one again.
-      void queryClient.invalidateQueries({ queryKey: PREFS_KEY });
-    });
-  }, SAVE_DELAY);
-}
+/** What `useViewPrefs` gives a list. */
+export type ViewPrefsControl = ReturnType<typeof useViewPrefs>;
 
 /**
  * Keys this interface once saved with the account and no longer reads: the panel
@@ -269,9 +276,7 @@ let saving: Promise<void> = Promise.resolve();
  * Applies a change to the preferences object and saves it.
  *
  * The object is read back before being written again: the server replaces the whole
- * of it, and another tab may have saved its columns in the meantime. It is read
- * outside the cache, which holds changes not written yet; those are applied again
- * over the stored state once it is saved.
+ * of it, and another tab may have saved its own preferences in the meantime.
  *
  * The saves of this tab run one after another, each reading what the one before
  * wrote: two saves started together, by two hooks say, read the same state, and
@@ -297,7 +302,7 @@ async function writePrefs(
     body: { data: next },
   });
   if (error !== undefined) throw new Error(problemText(error));
-  queryClient.setQueryData(PREFS_KEY, applyPending(next));
+  queryClient.setQueryData(PREFS_KEY, next);
 }
 
 /**

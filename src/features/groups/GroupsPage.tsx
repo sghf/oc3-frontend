@@ -222,6 +222,7 @@ export function GroupsPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={groupStats}
         columns={columns}
         defaultCols={DEFAULT_COLS}

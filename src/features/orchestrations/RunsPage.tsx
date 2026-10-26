@@ -147,6 +147,7 @@ export function RunsPage() {
         {t("orchestrations.runs.title")}
       </h1>
       <CollectorList
+        viewPrefs={prefs}
         columns={columns()}
         defaultCols={DEFAULT_COLS}
         rows={list.data?.rows ?? []}

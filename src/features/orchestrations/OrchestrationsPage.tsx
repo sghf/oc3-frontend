@@ -181,6 +181,7 @@ export function OrchestrationsPage() {
       </div>
       <p className="mb-3 max-w-3xl text-ink-muted">{t("orchestrations.intro")}</p>
       <CollectorList
+        viewPrefs={prefs}
         columns={columns(t)}
         defaultCols={DEFAULT_COLS}
         rows={list.data?.rows ?? []}

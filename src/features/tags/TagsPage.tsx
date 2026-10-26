@@ -195,6 +195,7 @@ export function TagsPage() {
       </div>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={tagStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

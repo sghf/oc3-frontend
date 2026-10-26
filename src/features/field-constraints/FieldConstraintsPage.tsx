@@ -311,6 +311,7 @@ export function FieldConstraintsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("fieldConstraints.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={constraintStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

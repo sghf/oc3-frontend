@@ -210,6 +210,7 @@ export function MetricsPage() {
       <p className="mb-3 max-w-3xl text-ink-muted">{t("metrics.intro")}</p>
 
       <CollectorList
+        viewPrefs={prefs}
         valueStats={metricStats}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}

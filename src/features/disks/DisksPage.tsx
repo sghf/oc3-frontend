@@ -240,6 +240,7 @@ export function DisksPage() {
       </h1>
 
       <CollectorList
+        viewPrefs={prefs}
         columns={COLUMNS}
         defaultCols={DEFAULT_COLS}
         rows={data?.rows ?? []}
