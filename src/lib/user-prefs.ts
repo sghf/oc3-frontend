@@ -262,6 +262,9 @@ function withoutObsolete(prefs: UserPrefs): UserPrefs {
   return kept;
 }
 
+/** The last save started: the next one waits for it (`savePrefs`). */
+let saving: Promise<void> = Promise.resolve();
+
 /**
  * Applies a change to the preferences object and saves it.
  *
@@ -269,8 +272,22 @@ function withoutObsolete(prefs: UserPrefs): UserPrefs {
  * of it, and another tab may have saved its columns in the meantime. It is read
  * outside the cache, which holds changes not written yet; those are applied again
  * over the stored state once it is saved.
+ *
+ * The saves of this tab run one after another, each reading what the one before
+ * wrote: two saves started together, by two hooks say, read the same state, and
+ * the second write dropped the change of the first. A save that fails does not
+ * stop the next ones.
  */
-export async function savePrefs(
+export function savePrefs(
+  queryClient: QueryClient,
+  change: (current: UserPrefs) => UserPrefs,
+): Promise<void> {
+  const run = saving.then(() => writePrefs(queryClient, change));
+  saving = run.catch(() => undefined);
+  return run;
+}
+
+async function writePrefs(
   queryClient: QueryClient,
   change: (current: UserPrefs) => UserPrefs,
 ): Promise<void> {
