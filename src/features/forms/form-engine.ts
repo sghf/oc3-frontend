@@ -275,30 +275,36 @@ export function isEmptyValue(v: unknown): boolean {
  * subst_refs_from_data() does: a reference without a scalar value stays.
  */
 export function substRefs(data: unknown, s: string): string {
-  if (!isRecord(data)) return s;
-  return s.replace(/#[\w.]+/g, (ref) => {
-    const path = ref.slice(1);
-    // oc3 returns the columns of a joined table under flat keys, "stor_array.id",
-    // where the historical API nested them: the whole reference first, then its
-    // path, a trailing dot left as text.
-    const flat = path.replace(/\.$/, "");
-    const direct = data[flat];
-    if (typeof direct === "string" || typeof direct === "number" || typeof direct === "boolean")
-      return String(direct) + (flat === path ? "" : ".");
-    let finalDot = "";
-    let val: unknown = data;
-    for (const key of path.split(".")) {
-      if (key === "") {
-        finalDot = ".";
-        break;
-      }
-      if (isRecord(val) && key in val) val = val[key];
+  return s.replace(REF, (ref) => refValue(data, ref) ?? ref);
+}
+
+/** A "#key" or "#a.b" reference to the data of a form. */
+const REF = /#[\w.]+/g;
+
+/** The value of a reference in data, as substRefs reads it; undefined without a scalar one. */
+function refValue(data: unknown, ref: string): string | undefined {
+  if (!isRecord(data)) return undefined;
+  const path = ref.slice(1);
+  // oc3 returns the columns of a joined table under flat keys, "stor_array.id",
+  // where the historical API nested them: the whole reference first, then its
+  // path, a trailing dot left as text.
+  const flat = path.replace(/\.$/, "");
+  const direct = data[flat];
+  if (typeof direct === "string" || typeof direct === "number" || typeof direct === "boolean")
+    return String(direct) + (flat === path ? "" : ".");
+  let finalDot = "";
+  let val: unknown = data;
+  for (const key of path.split(".")) {
+    if (key === "") {
+      finalDot = ".";
+      break;
     }
-    if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
-      return String(val) + finalDot;
-    }
-    return ref;
-  });
+    if (isRecord(val) && key in val) val = val[key];
+  }
+  if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+    return String(val) + finalDot;
+  }
+  return undefined;
 }
 
 /**
@@ -331,14 +337,36 @@ export function prepareArgs(
 /**
  * The rest path of dynamic candidates, references replaced; null while data is
  * missing to build it, as getUrlFunc() cancels the call.
+ *
+ * A value replacing a reference is data, a user's answer say: it is encoded as
+ * the text of one path segment (encodeURIComponent), so that a "/", "?" or "%"
+ * in it cannot change the endpoint called or add a query; a value holding a "#"
+ * makes the path wait, as an unresolved reference does. The path is refused,
+ * null, when a segment ends up empty, is a dot segment (".." or "%2e%2e", which
+ * the URL parser resolves alike), or holds a question mark or a backslash written
+ * in the form itself: the call stays on the endpoint the form names.
  */
 export function candidatesPath(input: FormInput, data: unknown, user: FormUser): string | null {
-  if (input.fn === "") return null;
-  const fn = substRefs(data, input.fn.replaceAll("#user_id", user.id));
+  const fn = input.fn.trim();
   if (!fn.startsWith("/")) return null;
-  if (fn.includes("//") || fn.includes("/undefined/") || fn.endsWith("/") || fn.includes("#"))
-    return null;
-  return fn;
+  const segments = fn
+    .slice(1)
+    .split("/")
+    .map((segment) =>
+      segment.replaceAll("#user_id", encodeURIComponent(user.id)).replace(REF, (ref) => {
+        const value = refValue(data, ref);
+        // A value holding a "#" is a reference not resolved yet, the text of an
+        // empty input say: the path waits, as getUrlFunc() waits on a "#".
+        return value === undefined || value.includes("#") ? ref : encodeURIComponent(value);
+      }),
+    );
+  for (const segment of segments) {
+    // A reference left unresolved: the data to build the path is missing yet.
+    if (segment.includes("#")) return null;
+    if (segment === "" || segment === "undefined") return null;
+    if (/^(?:\.|%2e){1,2}$/i.test(segment) || /[?\\]/.test(segment)) return null;
+  }
+  return `/${segments.join("/")}`;
 }
 
 /** A candidate of a select: its id, its label, and the row it comes from. */

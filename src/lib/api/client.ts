@@ -55,15 +55,30 @@ export interface DynamicResponse {
 }
 
 /**
+ * Whether path names an API endpoint and nothing else: absolute, without query,
+ * fragment, backslash, empty or dot segment ("." or "..", encoded or not, which
+ * the URL parser resolves before the request leaves).
+ */
+export function isApiPath(path: string): boolean {
+  if (!path.startsWith("/") || /[?#\\]/.test(path)) return false;
+  return path
+    .slice(1)
+    .split("/")
+    .every((segment) => segment !== "" && !/^(?:\.|%2e){1,2}$/i.test(segment));
+}
+
+/**
  * GET on an API path known only at runtime, such as the candidates a form
  * definition fetches from any collector endpoint: the typed client needs the path
  * at compile time. Same credentials and same handling of a refused session as
- * `api`. Repeated query keys carry a list.
+ * `api`. Repeated query keys carry a list. A path that is not a plain API
+ * path (isApiPath) is refused before any request.
  */
 export async function apiGetDynamic(
   path: string,
   query: Record<string, string | string[]>,
 ): Promise<DynamicResponse> {
+  if (!isApiPath(path)) throw new Error(`invalid API path: ${path}`);
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     for (const item of Array.isArray(value) ? value : [value]) params.append(key, item);
