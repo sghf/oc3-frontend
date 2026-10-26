@@ -23,6 +23,11 @@ export interface ConnectorDraft {
   headers: string;
   timeout: string;
   maxKiB: string;
+  /**
+   * The largest answer as saved, in bytes: kept as is while maxKiB, which rounds
+   * it, is left unchanged.
+   */
+  maxBytes: number;
   authType: AuthType;
   username: string;
   apiKeyIn: "header" | "query";
@@ -52,6 +57,7 @@ export const EMPTY_DRAFT: ConnectorDraft = {
   headers: "",
   timeout: "10",
   maxKiB: "5120",
+  maxBytes: 5120 * 1024,
   authType: "none",
   username: "",
   apiKeyIn: "header",
@@ -83,6 +89,7 @@ export function draftOf(c: FormConnector): ConnectorDraft {
       .join("\n"),
     timeout: String(c.timeout),
     maxKiB: String(Math.round(c.max_bytes / 1024)),
+    maxBytes: c.max_bytes,
     authType: c.auth.type,
     username: c.auth.username ?? "",
     apiKeyIn: c.auth.in ?? "header",
@@ -137,7 +144,8 @@ export function inputOf(d: ConnectorDraft): FormConnectorInput {
     networks: lines(d.networks),
     headers: headersOf(d.headers),
     timeout: Number(d.timeout),
-    max_bytes: Number(d.maxKiB) * 1024,
+    max_bytes:
+      d.maxKiB === String(Math.round(d.maxBytes / 1024)) ? d.maxBytes : Number(d.maxKiB) * 1024,
     auth: {
       type: d.authType,
       ...(d.authType === "basic" ? { username: opt(d.username) } : {}),
