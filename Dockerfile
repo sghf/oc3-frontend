@@ -6,7 +6,7 @@
 #     --build-arg BUILDTIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
 #     -t opensvc/oc3-frontend .
 
-FROM node:20.19-alpine AS builder
+FROM node:24.22-alpine AS builder
 
 WORKDIR /app
 

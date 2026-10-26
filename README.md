@@ -70,7 +70,7 @@ changes in real time over the websocket of the oc3 messenger.
 
 ## Requirements
 
-- **Node.js** 18 or later (20 LTS recommended) and npm;
+- **Node.js** 24 LTS or later (see `.nvmrc`) and npm;
 - a reachable **oc3** instance: its API (`server`) and its messenger (websocket);
 - a collector account to sign in with.
 
