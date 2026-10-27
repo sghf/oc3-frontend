@@ -1,28 +1,46 @@
-import { useCallback, useMemo, useReducer, useState, type ReactNode } from "react";
-import { DesignerContext, type Designer, type Notice } from "./designer-context";
+import { useCallback, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
+import { DesignerContext, type Designer, type Notice, type Resumed } from "./designer-context";
 import { commitAll, type CommitResult, type RecordedVersion } from "./commit";
 import { apply, describe, refusal, type Draft, type LogLine, type Operation } from "./model";
+import {
+  isSavedDraft,
+  readSavedDraft,
+  watchSavedDraft,
+  writeSavedDraft,
+  type SavedDraft,
+} from "./saved-draft";
 
 /**
  * The state of the designer sandbox: the draft as loaded, the draft as edited, and
  * the history of the operations applied to it, for the change log, for undo and
- * for the commit, which replays them against the collector. Nothing leaves the
- * browser tab until then.
+ * for the commit, which replays them against the collector. Nothing reaches the
+ * collector until then; the operations are kept in the browser meanwhile
+ * (`saved-draft.ts`), and replayed when the designer opens again.
  */
 interface State {
   original: Draft;
   draft: Draft;
-  history: { before: Draft; operation: Operation; line: LogLine }[];
+  history: {
+    before: Draft;
+    operation: Operation;
+    line: LogLine;
+    /** When it was made and by whom, stamped again when it is replayed. */
+    at: string;
+    author: string;
+  }[];
   /** The version of the compliance history the pending changes restore, if they do. */
   restoredFrom?: string;
+  /** The changes found kept in the browser when the sandbox started, until dismissed. */
+  resumed?: Resumed;
 }
 
 type Action =
-  | { type: "apply"; operation: Operation; author: string }
+  | { type: "apply"; operation: Operation; author: string; at: string }
   | { type: "undo" }
   | { type: "reset" }
   | { type: "committed" }
-  | { type: "restore"; operations: Operation[]; author: string; commit: string };
+  | { type: "restore"; operations: Operation[]; author: string; at: string; commit: string }
+  | { type: "dismissResumed" };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -31,13 +49,16 @@ function reducer(state: State, action: Action): State {
       const line = describe(state.draft, action.operation);
       const { draft } = apply(state.draft, action.operation, {
         author: action.author,
-        now: localTimestamp(new Date()),
+        now: action.at,
       });
-      return {
-        ...state,
-        draft,
-        history: [...state.history, { before: state.draft, operation: action.operation, line }],
+      const entry = {
+        before: state.draft,
+        operation: action.operation,
+        line,
+        at: action.at,
+        author: action.author,
       };
+      return { ...state, draft, history: [...state.history, entry] };
     }
     case "undo": {
       const last = state.history.at(-1);
@@ -52,19 +73,68 @@ function reducer(state: State, action: Action): State {
       };
     }
     case "reset":
-      return { ...state, draft: state.original, history: [], restoredFrom: undefined };
+      return {
+        ...state,
+        draft: state.original,
+        history: [],
+        restoredFrom: undefined,
+        resumed: undefined,
+      };
     case "restore": {
       // The plan's operations, applied in turn as they were planned.
       let next: State = state;
       for (const operation of action.operations)
-        next = reducer(next, { type: "apply", operation, author: action.author });
+        next = reducer(next, { type: "apply", operation, author: action.author, at: action.at });
       return { ...next, restoredFrom: action.commit };
     }
     case "committed":
       // All the operations saved leave the sandbox: the collector now holds the
       // draft. The draft itself is unchanged.
-      return { ...state, original: state.draft, history: [], restoredFrom: undefined };
+      return {
+        ...state,
+        original: state.draft,
+        history: [],
+        restoredFrom: undefined,
+        resumed: undefined,
+      };
+    case "dismissResumed":
+      return { ...state, resumed: undefined };
   }
+}
+
+/**
+ * The sandbox on the collector's data, with the changes kept in the browser
+ * applied again in turn; those the data no longer allows, because it changed
+ * meanwhile, are left out and reported.
+ */
+function resume(original: Draft, saved: SavedDraft | null): State {
+  let state: State = { original, draft: original, history: [] };
+  if (saved === null || saved.entries.length === 0) return state;
+  const dropped: LogLine[] = [];
+  for (const { operation, author, at } of saved.entries) {
+    let line: LogLine = { key: "designer.resume.unknown", values: {} };
+    try {
+      line = describe(state.draft, operation);
+      const next = reducer(state, { type: "apply", operation, author, at });
+      if (next === state) dropped.push(line);
+      else state = next;
+    } catch {
+      // An operation the model cannot read any more, kept by an older version.
+      dropped.push(line);
+    }
+  }
+  return {
+    ...state,
+    restoredFrom: state.history.length > 0 ? saved.restoredFrom : undefined,
+    resumed: { count: state.history.length, at: saved.entries.at(-1)?.at ?? "", dropped },
+  };
+}
+
+function toSaved(state: State): SavedDraft {
+  return {
+    entries: state.history.map(({ operation, at, author }) => ({ operation, at, author })),
+    restoredFrom: state.restoredFrom,
+  };
 }
 
 /** "YYYY-MM-DD HH:MM:SS", as apicollector gives its dates. */
@@ -78,20 +148,47 @@ let noticeId = 0;
 export function DesignerProvider({
   original,
   author,
+  user,
   onCommitted,
+  onReload,
   children,
 }: {
   original: Draft;
   /** The name stamped on the variables changed in the draft. */
   author: string;
+  /** Whose changes are kept in the browser; null keeps none. */
+  user: string | null;
   /**
    * Called once the pending changes are saved, with their number and the version
    * of the compliance export recording them: the page reads the collector again.
    */
   onCommitted: (count: number, version: RecordedVersion | undefined) => void;
+  /** Reads the collector again and starts a new sandbox, from the changes kept. */
+  onReload: () => void;
   children: ReactNode;
 }) {
-  const [state, dispatch] = useReducer(reducer, { original, draft: original, history: [] });
+  const [state, dispatch] = useReducer(reducer, null, () =>
+    resume(original, user === null ? null : readSavedDraft(user)),
+  );
+
+  // Every change kept at once, a commit or a reset forgetting them all: the
+  // sandbox survives leaving the page, a reload or a closed browser.
+  useEffect(() => {
+    if (user !== null) writeSavedDraft(user, toSaved(state));
+  }, [user, state]);
+
+  // Another tab of the same user changed the changes kept: told, and offered to
+  // load them, rather than overwritten unseen by the next change made here. The
+  // warning holds for the state it was raised on: the next change made here
+  // replaces what the other tab kept, and that tab is told in turn.
+  const [elsewhere, setElsewhere] = useState<State | null>(null);
+  const changedElsewhere = elsewhere === state;
+  useEffect(() => {
+    if (user === null) return;
+    return watchSavedDraft(user, () => {
+      setElsewhere(isSavedDraft(user, toSaved(state)) ? null : state);
+    });
+  }, [user, state]);
 
   const run = useCallback(
     (operation: Operation) => {
@@ -104,7 +201,7 @@ export function DesignerProvider({
           : operation.op === "clone"
             ? { kind: operation.ref.kind, id: state.draft.nextId }
             : undefined;
-      dispatch({ type: "apply", operation, author });
+      dispatch({ type: "apply", operation, author, at: localTimestamp(new Date()) });
       return { refused: null, created };
     },
     [state.draft, author],
@@ -169,14 +266,20 @@ export function DesignerProvider({
       commit,
       restoredFrom: state.restoredFrom,
       restore: (commit: string, operations: Operation[]) => {
-        dispatch({ type: "restore", operations, author, commit });
+        dispatch({ type: "restore", operations, author, at: localTimestamp(new Date()), commit });
       },
+      resumed: state.resumed,
+      dismissResumed: () => {
+        dispatch({ type: "dismissResumed" });
+      },
+      changedElsewhere,
+      reload: onReload,
       author,
       notices,
       notify,
       dismiss,
     }),
-    [state, run, runAndTell, commit, author, notices, notify, dismiss],
+    [state, run, runAndTell, commit, author, notices, notify, dismiss, changedElsewhere, onReload],
   );
 
   return <DesignerContext.Provider value={value}>{children}</DesignerContext.Provider>;

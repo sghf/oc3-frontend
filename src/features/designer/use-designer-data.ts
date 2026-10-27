@@ -18,6 +18,10 @@ export function useDesignerDraft() {
     // The sandbox starts from one snapshot: a refetch would not reach the draft.
     staleTime: Infinity,
     refetchOnWindowFocus: false,
+    // Forgotten once the designer is left: on return, the pending changes kept in
+    // the browser are replayed on the collector's data as it is then, not on the
+    // snapshot of the last visit.
+    gcTime: 0,
     queryFn: async (): Promise<Draft> => {
       const [rulesets, modulesets] = await Promise.all([
         api.GET("/compliance/rulesets/export"),

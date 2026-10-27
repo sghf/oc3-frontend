@@ -3121,7 +3121,7 @@
     },
     "sandbox": {
       "title": "Bac à sable",
-      "text": "Les modifications restent dans cet onglet jusqu'à ce que vous les enregistriez dans le collector.",
+      "text": "Les modifications sont conservées dans ce navigateur, d'une visite à l'autre, jusqu'à ce que vous les enregistriez dans le collector ou les abandonniez.",
       "changes_one": "{{count}} modification",
       "changes_other": "{{count}} modifications",
       "undo": "Annuler",
@@ -3351,7 +3351,17 @@
     "moduleUsedBy": "Modulesets qui le nomment",
     "addToModuleset": "Ajouter à un moduleset",
     "pickModule": "Ajouter un module du dépôt",
-    "moduleNotInRepo": "{{name}} n'est pas dans le dépôt des modules : les agents n'y trouvent aucun module de ce nom"
+    "moduleNotInRepo": "{{name}} n'est pas dans le dépôt des modules : les agents n'y trouvent aucun module de ce nom",
+    "resume": {
+      "restored_one": "{{count}} modification en attente conservée dans ce navigateur, faite le {{at}}, a été réappliquée aux données actuelles du collector.",
+      "restored_other": "{{count}} modifications en attente conservées dans ce navigateur, la dernière faite le {{at}}, ont été réappliquées aux données actuelles du collector.",
+      "dropped_one": "{{count}} modification en attente conservée dans ce navigateur ne s'applique plus, les données du collector ayant changé entre-temps : elle a été écartée.",
+      "dropped_other": "{{count}} modifications en attente conservées dans ce navigateur ne s'appliquent plus, les données du collector ayant changé entre-temps : elles ont été écartées.",
+      "unknown": "Une modification que cette version du designer ne sait pas lire",
+      "dismiss": "Masquer",
+      "elsewhere": "Un autre onglet a modifié les changements en attente conservés dans ce navigateur. Chargez-les, sinon la prochaine modification faite ici les remplacera.",
+      "load": "Les charger"
+    }
   },
   "bookmarks": {
     "title": "Signets",

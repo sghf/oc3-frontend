@@ -12,6 +12,16 @@ export interface Notice {
   tone: "done" | "refused";
 }
 
+/** The changes of an earlier visit, replayed on the collector's current data. */
+export interface Resumed {
+  /** How many were applied again. */
+  count: number;
+  /** When the last of them was made, "YYYY-MM-DD HH:MM:SS". */
+  at: string;
+  /** Those the current data no longer allows, left out. */
+  dropped: LogLine[];
+}
+
 /** The designer sandbox as the components see it, provided by `DesignerProvider`. */
 export interface Designer {
   original: Draft;
@@ -43,6 +53,13 @@ export interface Designer {
   restoredFrom: string | undefined;
   /** Adds the operations restoring a version to the pending changes. */
   restore: (commit: string, operations: Operation[]) => void;
+  /** The changes of an earlier visit the sandbox started from, until dismissed. */
+  resumed: Resumed | undefined;
+  dismissResumed: () => void;
+  /** Another tab changed the changes kept in the browser since this one last did. */
+  changedElsewhere: boolean;
+  /** Reads the collector again and starts over from the changes kept in the browser. */
+  reload: () => void;
   /** The name stamped on the variables changed in the draft. */
   author: string;
   notices: Notice[];

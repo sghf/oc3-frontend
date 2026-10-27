@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/icons";
 import { ImportExportPanel, type ImportResult } from "./ImportExportPanel";
 import { useFormUser } from "@/features/forms/use-form-user";
+import { useEffectiveUser } from "@/lib/api/impersonation";
+import { formatDateTime } from "@/lib/format";
 import type { RecordedVersion } from "./commit";
-import { useDesigner, type Notice } from "./designer-context";
+import { useDesigner, type Notice, type Resumed as ResumedChanges } from "./designer-context";
 import { DragHint, DragProvider } from "./dnd";
 import { ModulesetEditor } from "./ModulesetEditor";
 import type { LogLine, ObjectKind, Operation } from "./model";
@@ -63,6 +65,8 @@ export function DesignerPage() {
   const queryClient = useQueryClient();
   const draft = useDesignerDraft();
   const user = useFormUser();
+  // Whose pending changes the browser keeps: the user the requests are made as.
+  const storageUser = useEffectiveUser();
   // The changes the last complete commit saved, told once the designer is read again.
   const [committed, setCommitted] = useState<{
     at: number;
@@ -131,6 +135,10 @@ export function DesignerPage() {
           key={generation}
           original={draft.data}
           author={user.data?.name.trim() ?? ""}
+          user={storageUser}
+          onReload={() => {
+            void reload();
+          }}
           onCommitted={(count, version) => {
             // The collector's data read again, then a new sandbox starts from it.
             void queryClient.refetchQueries({ queryKey: ["designer", "exports"] }).then(() => {
@@ -546,6 +554,21 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
         </div>
       )}
 
+      {designer.changedElsewhere && (
+        <div role="alert" className={`${ROW} flex flex-wrap items-center gap-x-4 gap-y-2`}>
+          <p className="min-w-0 flex-1">
+            <span aria-hidden="true">▲</span> {t("designer.resume.elsewhere")}
+          </p>
+          <button type="button" className={BUTTON} onClick={designer.reload}>
+            {t("designer.resume.load")}
+          </button>
+        </div>
+      )}
+
+      {designer.resumed !== undefined && (
+        <Resumed resumed={designer.resumed} onDismiss={designer.dismissResumed} />
+      )}
+
       {failure !== null && (
         <p role="alert" className={`${ROW} text-state-down`}>
           ■{" "}
@@ -565,6 +588,46 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
           ))}
         </ol>
       )}
+    </div>
+  );
+}
+
+/**
+ * The changes of an earlier visit the sandbox started from, and those left out
+ * because the collector's data no longer allows them, listed for the user to
+ * make again if they still mean to.
+ */
+function Resumed({ resumed, onDismiss }: { resumed: ResumedChanges; onDismiss: () => void }) {
+  const { t } = useTranslation();
+  const dropped = resumed.dropped.length;
+  return (
+    <div className="mt-2 flex items-start gap-x-4 border-t border-state-warn/30 pt-2">
+      <div className="min-w-0 flex-1">
+        {resumed.count > 0 && (
+          <p>
+            <span aria-hidden="true">↺</span>{" "}
+            {t("designer.resume.restored", {
+              count: resumed.count,
+              at: formatDateTime(resumed.at),
+            })}
+          </p>
+        )}
+        {dropped > 0 && (
+          <>
+            <p role="alert" className="text-state-down">
+              ■ {t("designer.resume.dropped", { count: dropped })}
+            </p>
+            <ul className="max-h-32 list-disc overflow-y-auto pl-6">
+              {resumed.dropped.map((line, i) => (
+                <li key={i}>{t(line.key, line.values)}</li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+      <button type="button" className={BUTTON} onClick={onDismiss}>
+        {t("designer.resume.dismiss")}
+      </button>
     </div>
   );
 }

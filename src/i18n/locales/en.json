@@ -3121,7 +3121,7 @@
     },
     "sandbox": {
       "title": "Sandbox",
-      "text": "Changes stay in this browser tab until you commit them to the collector.",
+      "text": "Changes are kept in this browser, from one visit to the next, until you commit them to the collector or discard them.",
       "changes_one": "{{count}} change",
       "changes_other": "{{count}} changes",
       "undo": "Undo",
@@ -3351,7 +3351,17 @@
     "moduleUsedBy": "Modulesets naming it",
     "addToModuleset": "Add to a moduleset",
     "pickModule": "Add a module of the repository",
-    "moduleNotInRepo": "{{name}} is not in the module repository: the agents get no such module from it"
+    "moduleNotInRepo": "{{name}} is not in the module repository: the agents get no such module from it",
+    "resume": {
+      "restored_one": "{{count}} pending change kept in this browser, made on {{at}}, was applied again to the collector's current data.",
+      "restored_other": "{{count}} pending changes kept in this browser, the last made on {{at}}, were applied again to the collector's current data.",
+      "dropped_one": "{{count}} pending change kept in this browser no longer applies, the collector's data having changed meanwhile: it was left out.",
+      "dropped_other": "{{count}} pending changes kept in this browser no longer apply, the collector's data having changed meanwhile: they were left out.",
+      "unknown": "A change this version of the designer cannot read",
+      "dismiss": "Dismiss",
+      "elsewhere": "Another tab changed the pending changes kept in this browser. Load them, or the next change made here replaces them.",
+      "load": "Load them"
+    }
   },
   "bookmarks": {
     "title": "Bookmarks",
