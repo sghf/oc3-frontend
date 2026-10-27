@@ -45,6 +45,7 @@ export type MenuId =
   | "adm-chk-def"
   | "adm-chk-ctx"
   | "comp-modsets"
+  | "comp-modules"
   | "comp-rsets"
   | "comp-designer"
   | "comp-attachments"
@@ -97,6 +98,7 @@ export interface NavEntry {
     | "/safe"
     | "/ai"
     | "/compliance/modulesets"
+    | "/compliance/modules"
     | "/compliance/rulesets"
     | "/compliance/status"
     | "/compliance/logs"
@@ -347,6 +349,12 @@ export const NAV_CATEGORIES: NavCategory[] = [
         menuId: "comp-modsets",
         labelKey: "nav.modulesets",
         icon: "moduleset",
+      },
+      {
+        to: "/compliance/modules",
+        menuId: "comp-modules",
+        labelKey: "nav.compModules",
+        icon: "compModule",
       },
       {
         to: "/compliance/rulesets",

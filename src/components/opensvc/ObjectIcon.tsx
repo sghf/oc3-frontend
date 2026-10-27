@@ -31,6 +31,7 @@ import {
   FirewallIcon,
   LinkIcon,
   ListChecksIcon,
+  TerminalIcon,
 } from "@/components/ui/icons";
 
 /** Collector object kinds that have a visual identity of their own. */
@@ -65,6 +66,7 @@ export type ObjectKind =
   | "report"
   | "chart"
   | "moduleset"
+  | "compModule"
   | "ruleset"
   | "complianceStatus"
   | "check"
@@ -138,6 +140,8 @@ const KINDS: Record<ObjectKind, { Icon: typeof ServerIcon; className: string }> 
   switch: { Icon: SwitchIcon, className: "text-icon-network" },
   // The cogs of the historical collector (`modset16`), in its compliance crimson.
   moduleset: { Icon: GearIcon, className: "text-icon-compliance" },
+  // A terminal in the compliance crimson: the scripts the modulesets name.
+  compModule: { Icon: TerminalIcon, className: "text-icon-compliance" },
   // The cube of the historical collector (`rset16`), in its compliance crimson.
   ruleset: { Icon: CubeIcon, className: "text-icon-compliance" },
   // The check mark of the historical compliance status (`compstatus`), in its crimson.

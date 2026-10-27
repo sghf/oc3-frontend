@@ -14,6 +14,7 @@ export type DragItem =
   | { type: "moduleset"; id: number }
   | { type: "filterset"; id: number; name: string }
   | { type: "group"; id: number; role: string }
+  | { type: "module"; name: string }
   | { type: "variable"; rulesetId: number; variableId: number }
   | { type: "team"; kind: "ruleset" | "moduleset"; id: number; role: TeamRole; team: string };
 

@@ -28,14 +28,17 @@ import { DesignerProvider } from "./store";
 import { FiltersetView } from "./FiltersetView";
 import { GroupView } from "./GroupView";
 import { BUTTON, OpenHistoryContext, SelectContext, type Selection } from "./ui";
+import { ModuleView } from "./ModuleView";
 import { HistoryPanel } from "./HistoryPanel";
 import type { HistoryObject } from "./use-compliance-history";
 import { useDesignerDraft } from "./use-designer-data";
 
 type CopyVariable = Extract<Operation, { op: "copyVariable" }>;
 
-/** "ruleset:12" in the URL: the object shown in the editor. */
+/** "ruleset:12", or "module:linux.sshd", in the URL: the object shown in the editor. */
 function parseSel(sel: string | undefined): Selection | null {
+  const module = /^module:(.+)$/.exec(sel ?? "");
+  if (module?.[1] !== undefined) return { kind: "module", name: module[1] };
   const m = /^(ruleset|moduleset|filterset|group):(-?\d+)$/.exec(sel ?? "");
   if (m === null) return null;
   const kind =
@@ -233,7 +236,12 @@ function Workspace({
     void navigate({
       search: (previous) => ({
         ...previous,
-        sel: ref === null ? undefined : `${ref.kind}:${String(ref.id)}`,
+        sel:
+          ref === null
+            ? undefined
+            : ref.kind === "module"
+              ? `module:${ref.name}`
+              : `${ref.kind}:${String(ref.id)}`,
       }),
       resetScroll: false,
     });
@@ -261,7 +269,10 @@ function Workspace({
   }, [undo]);
 
   const obj =
-    selected === null || selected.kind === "filterset" || selected.kind === "group"
+    selected === null ||
+    selected.kind === "filterset" ||
+    selected.kind === "group" ||
+    selected.kind === "module"
       ? undefined
       : selected.kind === "ruleset"
         ? designer.draft.rulesets[selected.id]
@@ -301,7 +312,9 @@ function Workspace({
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-[19rem_1fr]">
           <Navigator selected={selected} onVariableDrop={onVariableDrop} />
           <div className="min-h-0 overflow-y-auto pr-1">
-            {selected?.kind === "group" ? (
+            {selected?.kind === "module" ? (
+              <ModuleView key={`c${selected.name}`} name={selected.name} />
+            ) : selected?.kind === "group" ? (
               <GroupView key={`g${String(selected.id)}`} id={selected.id} />
             ) : selected?.kind === "filterset" ? (
               <FiltersetView key={`f${String(selected.id)}`} id={selected.id} />

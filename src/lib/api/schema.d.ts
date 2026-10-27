@@ -1412,6 +1412,286 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/compliance/modules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description List the compliance modules of the repository oc3 keeps them in, by order
+     *     then name: the entries of the compliance directory of the agents named
+     *     S<order>-<name>, an executable script or a directory holding main or
+     *     scripts/main. Each with the last commit that changed it.
+     */
+    get: operations["GetComplianceModules"];
+    put?: never;
+    /**
+     * @description Create a compliance module, S<order>-<name>, in a commit authored by the user:
+     *     a script (kind script, the default), one executable file starting with #!; or
+     *     a directory (kind directory) holding files, one of them its entry, main or
+     *     scripts/main, executable. The name starts with a letter, followed by letters,
+     *     digits and _.+- (64 at most); the order is 0 to 99999. A file holds 1 MiB at
+     *     most, a directory 500 files and 10 MiB. A module of that name, whatever its
+     *     order, is a 409, as is a change of the repository made meanwhile. Requires
+     *     the CompManager privilege. Logged.
+     */
+    post: operations["PostComplianceModules"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Display a compliance module: its files, its last 100 commits, and the
+     *     modulesets naming it.
+     */
+    get: operations["GetComplianceModule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The module as a gzipped tarball rooted at its entry, S<order>-<name>: what an
+     *     upload replacing it takes back.
+     */
+    get: operations["GetComplianceModuleArchive"];
+    /**
+     * @description Replace every file of a module with those of an archive, a .tar.gz or a .zip,
+     *     in a commit authored by the user: a script module becomes a directory. The
+     *     rules of a directory module apply. base is the revision the change was made
+     *     from. Requires the CompManager privilege. Logged.
+     */
+    put: operations["PutComplianceModuleArchive"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/convert": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Turn a script module into a directory module whose entry, scripts/main, is the
+     *     script, in a commit authored by the user. base is the revision the change was
+     *     made from. Requires the CompManager privilege. Logged.
+     */
+    post: operations["PostComplianceModuleConvert"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/file": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Return the content of a file of a compliance module, the first 1 MiB of it. */
+    get: operations["GetComplianceModuleFile"];
+    /**
+     * @description Create or replace a file of a module, in a commit authored by the user: the
+     *     script of a script module (path empty, kept executable), or a file of a
+     *     directory module. base is the revision the change was made from, the last
+     *     commit of the module as read: the module changed since is a 412. Requires the
+     *     CompManager privilege. Logged.
+     */
+    put: operations["PutComplianceModuleFile"];
+    post?: never;
+    /**
+     * @description Remove a file of a directory module, in a commit authored by the user; its
+     *     entry cannot go. base is the revision the change was made from. Requires the
+     *     CompManager privilege. Logged.
+     */
+    delete: operations["DeleteComplianceModuleFile"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/mode": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Make a file of a directory module executable, or not, in a commit authored by
+     *     the user, from the revision base: a binary file, say. The entry stays
+     *     executable. Requires the CompManager privilege. Logged.
+     */
+    post: operations["PostComplianceModuleMode"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Rename a file of a directory module, in a commit authored by the user. base is
+     *     the revision the change was made from. Requires the CompManager privilege.
+     *     Logged.
+     */
+    post: operations["PostComplianceModuleMove"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/rename": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Give a module another name or order, its entry becoming S<order>-<name>, in a
+     *     commit authored by the user, from the revision base. The modulesets naming the
+     *     module name it under the new name. The name of another module is a 409.
+     *     Requires the CompManager privilege. Logged.
+     */
+    post: operations["PostComplianceModuleRename"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Bring a module back to one of its versions, rev, a commit of its history: a
+     *     new commit authored by the user, from the revision base, the history keeping
+     *     every version. The rules of a module apply to the version restored. Requires
+     *     the CompManager privilege. Logged.
+     */
+    post: operations["PostComplianceModuleRestore"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules/{name}/versions/{rev}/diff": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What changed in a module since one of its versions, rev, a commit of its
+     *     history: file by file, from rev to the current version, each with its unified
+     *     diff (hunks only, 256 KiB at most).
+     */
+    get: operations["GetComplianceModuleVersionDiff"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules_import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Create a directory module from an archive, a .tar.gz or a .zip, holding its
+     *     files; an archive holding one directory at its root is read from inside it.
+     *     Only regular files are taken: a link, a device or a path out of the module
+     *     is refused. The rules of a directory module apply. Requires the CompManager
+     *     privilege. Logged.
+     */
+    post: operations["PostComplianceModulesImport"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/compliance/modules_repo/current": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The compliance modules as the agents install them: a gzipped tarball of the
+     *     repository, rooted at compliance/, its files owned by root. Set node.repocomp
+     *     to the URL of /compliance/modules_repo for om node updatecomp to fetch it.
+     *     For an authenticated node, or user. 404 before the first module.
+     */
+    get: operations["GetComplianceModulesArchive"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/compliance/modulesets": {
     parameters: {
       query?: never;
@@ -7881,6 +8161,177 @@ export interface components {
       "services.svcname"?: string | null;
       svc_id?: string;
     };
+    ComplianceModule: {
+      changed?: components["schemas"]["ComplianceModuleCommit"];
+      /** @description The file the agent runs, relative to path; empty for a script, and for a directory holding neither main nor scripts/main */
+      entry: string;
+      issue: components["schemas"]["ComplianceModuleIssue"];
+      /** @enum {string} */
+      kind: "script" | "directory";
+      name: string;
+      order: number;
+      /** @description The name of its entry in the compliance directory, S<order>-<name> */
+      path: string;
+      /** @description Whether an agent can run it, an executable file */
+      runnable: boolean;
+    };
+    ComplianceModuleChange: {
+      /** @description The last commit of the module as read */
+      base: string;
+      /** @description The message of the commit */
+      message?: string;
+    };
+    ComplianceModuleCommit: {
+      /** @description "Name <email>" */
+      author: string;
+      /** @description ISO 8601 */
+      date: string;
+      id: string;
+      subject: string;
+    };
+    ComplianceModuleCreate: {
+      /** @description The script of a script module, starting with "#!" */
+      content?: string;
+      /** @description The files of a directory module */
+      files?: components["schemas"]["ComplianceModuleFileInput"][];
+      /**
+       * @description script by default
+       * @enum {string}
+       */
+      kind?: "script" | "directory";
+      /** @description The message of the commit; "add <name>" when empty */
+      message?: string;
+      name: string;
+      order: number;
+    };
+    ComplianceModuleDetail: {
+      changed?: components["schemas"]["ComplianceModuleCommit"];
+      entry: string;
+      files: components["schemas"]["ComplianceModuleFile"][];
+      history: components["schemas"]["ComplianceModuleCommit"][];
+      issue: components["schemas"]["ComplianceModuleIssue"];
+      /** @enum {string} */
+      kind: "script" | "directory";
+      /** @description The modulesets naming the module, visible to the user or not */
+      modulesets: components["schemas"]["ComplianceModuleModuleset"][];
+      name: string;
+      order: number;
+      path: string;
+      runnable: boolean;
+    };
+    ComplianceModuleFile: {
+      executable: boolean;
+      /** @description Relative to the module, empty for a script */
+      path: string;
+      /** Format: int64 */
+      size: number;
+    };
+    ComplianceModuleFileContent: {
+      binary: boolean;
+      /** @description The text of the file; empty for a binary file */
+      content: string;
+      path: string;
+      /** @description Cut at 1 MiB */
+      truncated: boolean;
+    };
+    ComplianceModuleFileDiff: {
+      added: number;
+      binary: boolean;
+      deleted: number;
+      /** @description The unified diff from the earlier version to the current one, hunks only */
+      diff: string;
+      /** @description For a file whose mode changed, executable now */
+      is_executable?: boolean;
+      /** @description Relative to the module, empty for the script of a script module */
+      path: string;
+      /**
+       * @description added, in the current version only; removed, in the earlier one only
+       * @enum {string}
+       */
+      status: "added" | "removed" | "modified";
+      truncated: boolean;
+      /** @description For a file whose mode changed, executable in the earlier version */
+      was_executable?: boolean;
+    };
+    ComplianceModuleFileInput: {
+      content: string;
+      /**
+       * @description text by default; base64 for a binary file
+       * @enum {string}
+       */
+      encoding?: "text" | "base64";
+      executable?: boolean;
+      /** @description Relative to the module */
+      path: string;
+    };
+    ComplianceModuleFileMode: {
+      /** @description The last commit of the module as read */
+      base: string;
+      executable: boolean;
+      /** @description The message of the commit */
+      message?: string;
+      path: string;
+    };
+    ComplianceModuleFileMove: {
+      /** @description The last commit of the module as read */
+      base: string;
+      from: string;
+      /** @description The message of the commit */
+      message?: string;
+      to: string;
+    };
+    ComplianceModuleFileWrite: {
+      /** @description The last commit of the module as read */
+      base: string;
+      content: string;
+      /**
+       * @description text by default; base64 for a binary file
+       * @enum {string}
+       */
+      encoding?: "text" | "base64";
+      executable?: boolean;
+      /** @description The message of the commit */
+      message?: string;
+      /** @description Relative to the module; empty for the script of a script module */
+      path: string;
+    };
+    /**
+     * @description Why an agent cannot run the module, empty when it can: not_executable, the
+     *     file to run is not; no_entry, a directory holding neither main nor
+     *     scripts/main; two_entries, a directory holding both, which the agents refuse
+     *     to choose between.
+     * @enum {string}
+     */
+    ComplianceModuleIssue: "" | "not_executable" | "no_entry" | "two_entries";
+    ComplianceModuleList: {
+      data: components["schemas"]["ComplianceModule"][];
+    };
+    ComplianceModuleModuleset: {
+      id: number;
+      name: string;
+    };
+    ComplianceModuleRename: {
+      /** @description The last commit of the module as read */
+      base: string;
+      /** @description The message of the commit */
+      message?: string;
+      /** @description The new name, or the same */
+      name: string;
+      /** @description The new order, or the same */
+      order: number;
+    };
+    ComplianceModuleRestore: {
+      /** @description The last commit of the module as read */
+      base: string;
+      /** @description The message of the commit */
+      message?: string;
+      /** @description The version to restore, a commit of the history of the module */
+      rev: string;
+    };
+    ComplianceModuleVersionDiff: {
+      files: components["schemas"]["ComplianceModuleFileDiff"][];
+      version: components["schemas"]["ComplianceModuleCommit"];
+    };
     /**
      * @description Check runs by state: ok, not ok and not applicable among the runs of the last
      *     7 days, obsolete past them. `total` is their sum; `pct` the share of ok and
@@ -14313,6 +14764,579 @@ export interface operations {
         };
       };
       400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleList"];
+        };
+      };
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleCreate"];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      409: components["responses"]["409"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModuleArchive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The archive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/gzip": string;
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PutComplianceModuleArchive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          archive: string;
+          base: string;
+          message?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModuleConvert: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleChange"];
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModuleFile: {
+    parameters: {
+      query?: {
+        /** @description The path of the file in the module, as the module lists it; empty for a script module */
+        path?: string;
+      };
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleFileContent"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PutComplianceModuleFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleFileWrite"];
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  DeleteComplianceModuleFile: {
+    parameters: {
+      query: {
+        path: string;
+        /** @description The last commit of the module as read */
+        base: string;
+        /** @description The message of the commit */
+        message?: string;
+      };
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModuleMode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleFileMode"];
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModuleMove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleFileMove"];
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModuleRename: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleRename"];
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModuleRestore: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplianceModuleRestore"];
+      };
+    };
+    responses: {
+      /** @description The module as changed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      409: components["responses"]["409"];
+      /** @description The module changed since the revision given, base. */
+      412: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModuleVersionDiff: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The name of the module, without its order */
+        name: string;
+        /** @description A commit of the history of the module */
+        rev: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleVersionDiff"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostComplianceModulesImport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          archive: string;
+          message?: string;
+          name: string;
+          order: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceModuleDetail"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      409: components["responses"]["409"];
+      /** @description The archive is larger than 20 MiB. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      500: components["responses"]["500"];
+    };
+  };
+  GetComplianceModulesArchive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The archive. */
+      200: {
+        headers: {
+          /** @description The commit of the repository archived. */
+          "X-Compliance-Modules-Commit"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/gzip": string;
+        };
+      };
       401: components["responses"]["401"];
       404: components["responses"]["404"];
       500: components["responses"]["500"];

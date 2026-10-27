@@ -2,8 +2,12 @@ import { createContext } from "react";
 import type { ObjectRef } from "./model";
 import type { HistoryObject } from "./use-compliance-history";
 
-/** What the editor shows: a ruleset or a moduleset of the draft, or a filterset or a group, read only. */
-export type Selection = ObjectRef | { kind: "filterset" | "group"; id: number };
+/**
+ * What the editor shows: a ruleset or a moduleset of the draft, or a filterset, a
+ * group or a compliance module, read only.
+ */
+export type Selection =
+  ObjectRef | { kind: "filterset" | "group"; id: number } | { kind: "module"; name: string };
 
 /** Selecting an object shows it in the editor; shared by every link to an object. */
 export const SelectContext = createContext<(selection: Selection) => void>(() => undefined);

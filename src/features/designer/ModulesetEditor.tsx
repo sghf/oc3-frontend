@@ -1,11 +1,13 @@
 import { useTranslation } from "react-i18next";
+import { Combobox } from "@/components/ui/Combobox";
 import { Switch } from "@/components/ui/Switch";
+import { useCompModules } from "@/features/comp-modules/comp-modules-api";
 import { CloseIcon } from "@/components/ui/icons";
 import { useDesigner } from "./designer-context";
 import { useDropTarget, type DragItem } from "./drag";
 import { EditorHeader, UsedBy } from "./editor-common";
 import type { Moduleset, ObjectRef, Operation } from "./model";
-import { AddByName, InlineName, ObjectPicker, Section, TeamsEditor } from "./parts";
+import { InlineName, ObjectPicker, Section, TeamsEditor } from "./parts";
 import { ChildList } from "./RulesetEditor";
 
 /** The editor of a moduleset of the draft, one section per aspect of it. */
@@ -26,6 +28,14 @@ export function ModulesetEditor({
       ? { op: "include", parent: ref, child: { kind: "ruleset", id: item.id } }
       : null,
   );
+  const moduleTarget = useDropTarget((item: DragItem): Operation | null =>
+    item.type === "module" ? { op: "addModule", modulesetId: moduleset.id, name: item.name } : null,
+  );
+  const repository = useCompModules();
+  // The modules of the repository by name, once read: a name of the moduleset
+  // missing from it is told so.
+  const known =
+    repository.data === undefined ? undefined : new Set(repository.data.map((m) => m.name));
   const modulesetTarget = useDropTarget((item: DragItem): Operation | null =>
     item.type === "moduleset"
       ? { op: "include", parent: ref, child: { kind: "moduleset", id: item.id } }
@@ -37,7 +47,24 @@ export function ModulesetEditor({
       <Section
         title={t("designer.modules")}
         count={moduleset.modules.length}
+        target={moduleTarget}
         hint={t("designer.modulesHint")}
+        actions={
+          <Combobox
+            options={(repository.data ?? [])
+              .filter((m) => !moduleset.modules.some((mod) => mod.name === m.name))
+              .map((m) => ({ value: m.name, label: m.name }))}
+            value=""
+            onChange={(name) => {
+              if (name !== "")
+                designer.runAndTell({ op: "addModule", modulesetId: moduleset.id, name });
+            }}
+            label={t("designer.pickModule")}
+            placeholder={t("designer.pickModule")}
+            emptyText={t("designer.noMatch")}
+            className="w-64"
+          />
+        }
       >
         {moduleset.modules.length === 0 ? (
           <p className="mb-2 text-ink-muted">{t("designer.noModule")}</p>
@@ -54,6 +81,17 @@ export function ModulesetEditor({
               {moduleset.modules.map((mod) => (
                 <tr key={mod.id} className="border-t border-line">
                   <td className="py-1 pr-3">
+                    {known !== undefined && !known.has(mod.name) && (
+                      <span
+                        className="mr-1 text-state-warn"
+                        title={t("designer.moduleNotInRepo", { name: mod.name })}
+                      >
+                        <span aria-hidden="true">▲</span>
+                        <span className="sr-only">
+                          {t("designer.moduleNotInRepo", { name: mod.name })}
+                        </span>
+                      </span>
+                    )}
                     <InlineName
                       value={mod.name}
                       label={mod.name}
@@ -105,17 +143,6 @@ export function ModulesetEditor({
             </tbody>
           </table>
         )}
-        <AddByName
-          label={t("designer.addModule")}
-          placeholder={t("designer.moduleName")}
-          onAdd={(name) => {
-            const operation: Operation = { op: "addModule", modulesetId: moduleset.id, name };
-            const line = designer.describe(operation);
-            const { refused } = designer.run(operation);
-            if (refused === null) designer.notify({ ...line, tone: "done" });
-            return refused;
-          }}
-        />
       </Section>
       <Section
         title={t("designer.attachedRulesets")}

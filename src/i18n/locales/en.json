@@ -71,7 +71,8 @@
     "complianceAttachments": "Attachments",
     "orchestrations": "Workflows",
     "orchestrationRuns": "Runs",
-    "formConnectors": "Form connectors"
+    "formConnectors": "Form connectors",
+    "compModules": "Modules"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -2992,7 +2993,7 @@
     "actions": "Actions",
     "title": "Compliance designer",
     "loading": "Loading the rulesets and modulesets…",
-    "navigator": "Rulesets and modulesets",
+    "navigator": "Compliance objects",
     "filter": "Filter by name",
     "quickFilters": "Quick filters",
     "quick": {
@@ -3013,7 +3014,8 @@
       "ruleset": "Ruleset",
       "moduleset": "Moduleset",
       "filterset": "Filterset",
-      "group": "Group"
+      "group": "Group",
+      "module": "compliance module"
     },
     "namePlaceholder": "Name",
     "noMatch": "Nothing matches",
@@ -3030,7 +3032,9 @@
       "rulesets_one": "{{count}} ruleset",
       "rulesets_other": "{{count}} rulesets",
       "objects_one": "{{count}} object",
-      "objects_other": "{{count}} objects"
+      "objects_other": "{{count}} objects",
+      "modulesets_one": "{{count}} moduleset",
+      "modulesets_other": "{{count}} modulesets"
     },
     "clone": "Clone",
     "export": {
@@ -3086,14 +3090,12 @@
     "includesHint": "Drop a ruleset here, or onto this ruleset in the list, to include it.",
     "includeRuleset": "Include a ruleset",
     "modules": "Modules",
-    "modulesHint": "Autofix lets the agent fix a module without being asked.",
+    "modulesHint": "Drop a module here, or onto this moduleset in the list, to add it. Autofix lets the agent fix a module without being asked.",
     "noModule": "No module yet.",
     "module": "Module",
     "autofix": "Autofix",
     "autofixOf": "Autofix of {{name}}",
     "removeModule": "Remove {{name}}",
-    "addModule": "Add a module",
-    "moduleName": "Module name",
     "attachedRulesets": "Attached rulesets",
     "attachedRulesetsHint": "Drop a ruleset here, or onto this moduleset in the list, to attach it.",
     "attachRuleset": "Attach a ruleset",
@@ -3340,7 +3342,16 @@
     "dump": {
       "open": "Import / Export",
       "title": "Import and export the compliance"
-    }
+    },
+    "modulesRepo": "Modules",
+    "moduleDragHint": "Drag onto a moduleset to add it to its modules",
+    "moduleNotRunnable": "An agent cannot run it",
+    "editInModules": "Open in Compliance modules",
+    "moduleReadOnly": "Its files are edited in the Compliance modules view; here it is added to modulesets, by dragging it onto one or with the picker.",
+    "moduleUsedBy": "Modulesets naming it",
+    "addToModuleset": "Add to a moduleset",
+    "pickModule": "Add a module of the repository",
+    "moduleNotInRepo": "{{name}} is not in the module repository: the agents get no such module from it"
   },
   "bookmarks": {
     "title": "Bookmarks",
@@ -4678,6 +4689,139 @@
       "running": "Calling…",
       "failed": "No answer: {{message}}",
       "answered": "Answered {{status}} in {{ms}} ms"
+    }
+  },
+  "compModules": {
+    "title": "Compliance modules",
+    "new": "New module",
+    "intro": "The scripts the agents run to check and fix a node, named by the modulesets. oc3 keeps them in a git repository: each creation is a commit, with its author.",
+    "empty": "No module yet.",
+    "distribution": "The agents get the modules as one archive: set node.repocomp to {{url}} for om node updatecomp. The archive is served to authenticated nodes only.",
+    "fields": {
+      "name": "Name",
+      "order": "Order",
+      "kind": "Kind",
+      "runnable": "Runnable",
+      "changed": "Last change",
+      "path": "Path",
+      "message": "Commit message",
+      "entry": "Runs",
+      "changed_date": "Last change",
+      "changed_author": "Author",
+      "changed_subject": "Message",
+      "changed_id": "Commit"
+    },
+    "kind": {
+      "script": "Script",
+      "directory": "Directory"
+    },
+    "runs": "runs {{entry}}",
+    "runnableYes": "Yes",
+    "notExecutable": "Not executable",
+    "noEntry": "No main to run",
+    "modulesets": "Modulesets naming it",
+    "noModuleset": "No moduleset names it.",
+    "files": "Files",
+    "size_one": "{{count}} byte",
+    "size_other": "{{count}} bytes",
+    "executable": "executable",
+    "script": "Script",
+    "binary": "Binary file, not shown.",
+    "truncated": "Only the first MiB is shown.",
+    "history": {
+      "title_one": "History ({{count}} version)",
+      "title_other": "History ({{count}} versions)",
+      "current": "current version",
+      "compare": "Compare with the current version",
+      "hideCompare": "Hide the comparison",
+      "restore": "Restore this version",
+      "restoreQuestion": "Restore the module as it was in {{version}}? A new commit, the history keeps every version.",
+      "restoreConfirm": "Restore",
+      "same": "No difference with the current version.",
+      "since": "Changes from {{version}} to the current version:",
+      "status": {
+        "added": "added since",
+        "removed": "removed since",
+        "modified": "modified"
+      },
+      "mode": "{{from}} → {{to}}",
+      "notExecutable": "not executable",
+      "binary": "Binary file: its content is not compared.",
+      "added": "added",
+      "removed": "removed",
+      "showAll_one": "Show the {{count}} line",
+      "showAll_other": "Show all {{count}} lines"
+    },
+    "form": {
+      "title": "New compliance module",
+      "pathHint": "Recorded as {{path}} in the compliance directory of the agents.",
+      "scriptHint": "Starts with #! naming its interpreter. Exit 0: compliant or fixed; 1: not; 2: not applicable.",
+      "messagePlaceholder": "add {{name}}",
+      "badName": "The name starts with a letter, followed by letters, digits and _.+- (64 at most).",
+      "badOrder": "The order is a number from 0 to {{max}}.",
+      "noShebang": "The script must start with #! naming its interpreter.",
+      "create": "Create the module",
+      "creating": "Creating…",
+      "language": "Template",
+      "replaceTemplate": "The script was edited: replace it with the {{language}} template",
+      "templateHint": "Choosing another template replaces the script as long as it is not edited.",
+      "kindHint": {
+        "script": "One executable file, written here from a template.",
+        "directory": "A folder: scripts/main, run by the agent, with any other file next to it."
+      },
+      "source": "Start from",
+      "sources": {
+        "skeleton": "A skeleton in a language",
+        "archive": "An archive of the files (.tar.gz or .zip)"
+      },
+      "skeletonHint": "These files are created; edit them in the panel afterwards.",
+      "archive": "Archive",
+      "archiveHint": "An archive holding one folder at its root is read from inside it. Links and devices are refused.",
+      "noArchive": "Choose the archive of the files."
+    },
+    "languages": {
+      "sh": "POSIX sh",
+      "bash": "Bash",
+      "python": "Python 3",
+      "perl": "Perl"
+    },
+    "twoEntries": "main and scripts/main both exist",
+    "edit": {
+      "reload": "Reload the module",
+      "uploadMessage": "upload {{path}}",
+      "noFile": "No file chosen.",
+      "download": "Download as archive",
+      "replace": "Replace from an archive",
+      "convert": "Convert to a directory",
+      "convertQuestion": "Turn the script into scripts/main of a directory module?",
+      "convertConfirm": "Convert",
+      "saving": "Saving…",
+      "replaceQuestion": "Replace every file of the module with those of {{file}}?",
+      "replaceSure": "Every file of the module is replaced.",
+      "replaceConfirm": "Replace the files",
+      "entry": "entry",
+      "rename": "Rename",
+      "renameTo": "New path of {{path}}",
+      "delete": "Delete",
+      "deleteQuestion": "Delete {{path}}?",
+      "newFile": "New file",
+      "newPath": "Path of the new file",
+      "write": "Write it",
+      "folder": "Upload into the folder",
+      "upload": "Upload files",
+      "edit": "Edit",
+      "entryExecutable": "the file the agent runs stays executable",
+      "messagePlaceholder": "update {{path}}",
+      "save": "Save",
+      "makeExecutable": "Make executable",
+      "makeNotExecutable": "Make not executable"
+    },
+    "props": {
+      "edit": "Edit name and order",
+      "entry": "Entry: {{from}} becomes {{to}}.",
+      "modulesetsFollow_one": "The moduleset naming it will name it {{name}}: {{modulesets}}.",
+      "modulesetsFollow_other": "The {{count}} modulesets naming it will name it {{name}}: {{modulesets}}.",
+      "messagePlaceholder": "rename {{from}} to {{to}}"
     }
   }
 }

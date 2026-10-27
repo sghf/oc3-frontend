@@ -71,7 +71,8 @@
     "complianceAttachments": "Attachements",
     "orchestrations": "Workflows",
     "orchestrationRuns": "Exécutions",
-    "formConnectors": "Connecteurs de formulaires"
+    "formConnectors": "Connecteurs de formulaires",
+    "compModules": "Modules"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -2992,7 +2993,7 @@
     "actions": "Actions",
     "title": "Concepteur de conformité",
     "loading": "Chargement des rulesets et des modulesets…",
-    "navigator": "Rulesets et modulesets",
+    "navigator": "Objets de conformité",
     "filter": "Filtrer par nom",
     "quickFilters": "Filtres rapides",
     "quick": {
@@ -3013,7 +3014,8 @@
       "ruleset": "Ruleset",
       "moduleset": "Moduleset",
       "filterset": "Filterset",
-      "group": "Groupe"
+      "group": "Groupe",
+      "module": "module de conformité"
     },
     "namePlaceholder": "Nom",
     "noMatch": "Aucune correspondance",
@@ -3030,7 +3032,9 @@
       "rulesets_one": "{{count}} ruleset",
       "rulesets_other": "{{count}} rulesets",
       "objects_one": "{{count}} objet",
-      "objects_other": "{{count}} objets"
+      "objects_other": "{{count}} objets",
+      "modulesets_one": "{{count}} moduleset",
+      "modulesets_other": "{{count}} modulesets"
     },
     "clone": "Cloner",
     "export": {
@@ -3086,14 +3090,12 @@
     "includesHint": "Déposer un ruleset ici, ou sur ce ruleset dans la liste, pour l'inclure.",
     "includeRuleset": "Inclure un ruleset",
     "modules": "Modules",
-    "modulesHint": "La correction automatique laisse l'agent corriger un module sans qu'on le lui demande.",
+    "modulesHint": "Déposer un module ici, ou sur ce moduleset dans la liste, pour l'ajouter. La correction automatique laisse l'agent corriger un module sans qu'on le lui demande.",
     "noModule": "Aucun module pour l'instant.",
     "module": "Module",
     "autofix": "Correction auto",
     "autofixOf": "Correction auto de {{name}}",
     "removeModule": "Retirer {{name}}",
-    "addModule": "Ajouter un module",
-    "moduleName": "Nom du module",
     "attachedRulesets": "Rulesets attachés",
     "attachedRulesetsHint": "Déposer un ruleset ici, ou sur ce moduleset dans la liste, pour l'attacher.",
     "attachRuleset": "Attacher un ruleset",
@@ -3340,7 +3342,16 @@
     "dump": {
       "open": "Importer / Exporter",
       "title": "Importer et exporter la conformité"
-    }
+    },
+    "modulesRepo": "Modules",
+    "moduleDragHint": "Glisser sur un moduleset pour l'ajouter à ses modules",
+    "moduleNotRunnable": "Un agent ne peut pas l'exécuter",
+    "editInModules": "Ouvrir dans Modules de conformité",
+    "moduleReadOnly": "Ses fichiers se modifient dans la vue Modules de conformité ; ici, il s'ajoute à des modulesets, en le glissant sur l'un d'eux ou avec le sélecteur.",
+    "moduleUsedBy": "Modulesets qui le nomment",
+    "addToModuleset": "Ajouter à un moduleset",
+    "pickModule": "Ajouter un module du dépôt",
+    "moduleNotInRepo": "{{name}} n'est pas dans le dépôt des modules : les agents n'y trouvent aucun module de ce nom"
   },
   "bookmarks": {
     "title": "Signets",
@@ -4678,6 +4689,139 @@
       "running": "Appel…",
       "failed": "Pas de réponse : {{message}}",
       "answered": "Réponse {{status}} en {{ms}} ms"
+    }
+  },
+  "compModules": {
+    "title": "Modules de conformité",
+    "new": "Nouveau module",
+    "intro": "Les scripts que les agents exécutent pour vérifier et corriger un nœud, nommés par les modulesets. oc3 les garde dans un dépôt git : chaque création est un commit, avec son auteur.",
+    "empty": "Aucun module pour l'instant.",
+    "distribution": "Les agents reçoivent les modules en une archive : régler node.repocomp sur {{url}} pour om node updatecomp. L'archive n'est servie qu'aux nœuds authentifiés.",
+    "fields": {
+      "name": "Nom",
+      "order": "Ordre",
+      "kind": "Type",
+      "runnable": "Exécutable",
+      "changed": "Dernier changement",
+      "path": "Chemin",
+      "message": "Message du commit",
+      "entry": "Exécute",
+      "changed_date": "Dernier changement",
+      "changed_author": "Auteur",
+      "changed_subject": "Message",
+      "changed_id": "Commit"
+    },
+    "kind": {
+      "script": "Script",
+      "directory": "Répertoire"
+    },
+    "runs": "exécute {{entry}}",
+    "runnableYes": "Oui",
+    "notExecutable": "Non exécutable",
+    "noEntry": "Aucun main à exécuter",
+    "modulesets": "Modulesets qui le nomment",
+    "noModuleset": "Aucun moduleset ne le nomme.",
+    "files": "Fichiers",
+    "size_one": "{{count}} octet",
+    "size_other": "{{count}} octets",
+    "executable": "exécutable",
+    "script": "Script",
+    "binary": "Fichier binaire, non affiché.",
+    "truncated": "Seul le premier Mio est affiché.",
+    "history": {
+      "title_one": "Historique ({{count}} version)",
+      "title_other": "Historique ({{count}} versions)",
+      "current": "version actuelle",
+      "compare": "Comparer avec la version actuelle",
+      "hideCompare": "Masquer la comparaison",
+      "restore": "Restaurer cette version",
+      "restoreQuestion": "Restaurer le module tel qu'il était en {{version}} ? Un nouveau commit, l'historique garde chaque version.",
+      "restoreConfirm": "Restaurer",
+      "same": "Aucune différence avec la version actuelle.",
+      "since": "Changements de {{version}} à la version actuelle :",
+      "status": {
+        "added": "ajouté depuis",
+        "removed": "supprimé depuis",
+        "modified": "modifié"
+      },
+      "mode": "{{from}} → {{to}}",
+      "notExecutable": "non exécutable",
+      "binary": "Fichier binaire : son contenu n'est pas comparé.",
+      "added": "ajouté",
+      "removed": "supprimé",
+      "showAll_one": "Afficher la {{count}} ligne",
+      "showAll_other": "Afficher les {{count}} lignes"
+    },
+    "form": {
+      "title": "Nouveau module de conformité",
+      "pathHint": "Enregistré sous {{path}} dans le répertoire de conformité des agents.",
+      "scriptHint": "Commence par #! qui nomme son interpréteur. Sortie 0 : conforme ou corrigé ; 1 : non ; 2 : sans objet.",
+      "messagePlaceholder": "add {{name}}",
+      "badName": "Le nom commence par une lettre, suivie de lettres, chiffres et _.+- (64 au plus).",
+      "badOrder": "L'ordre est un nombre de 0 à {{max}}.",
+      "noShebang": "Le script doit commencer par #! qui nomme son interpréteur.",
+      "create": "Créer le module",
+      "creating": "Création…",
+      "language": "Modèle",
+      "replaceTemplate": "Le script a été modifié : le remplacer par le modèle {{language}}",
+      "templateHint": "Choisir un autre modèle remplace le script tant qu'il n'est pas modifié.",
+      "kindHint": {
+        "script": "Un fichier exécutable, écrit ici à partir d'un modèle.",
+        "directory": "Un dossier : scripts/main, exécuté par l'agent, avec d'autres fichiers à côté."
+      },
+      "source": "Partir de",
+      "sources": {
+        "skeleton": "Un squelette dans un langage",
+        "archive": "Une archive des fichiers (.tar.gz ou .zip)"
+      },
+      "skeletonHint": "Ces fichiers sont créés ; ils se modifient ensuite dans le panneau.",
+      "archive": "Archive",
+      "archiveHint": "Une archive qui contient un seul dossier à sa racine est lue depuis l'intérieur. Les liens et périphériques sont refusés.",
+      "noArchive": "Choisir l'archive des fichiers."
+    },
+    "languages": {
+      "sh": "sh POSIX",
+      "bash": "Bash",
+      "python": "Python 3",
+      "perl": "Perl"
+    },
+    "twoEntries": "main et scripts/main existent tous les deux",
+    "edit": {
+      "reload": "Recharger le module",
+      "uploadMessage": "upload {{path}}",
+      "noFile": "Aucun fichier choisi.",
+      "download": "Télécharger l'archive",
+      "replace": "Remplacer depuis une archive",
+      "convert": "Convertir en répertoire",
+      "convertQuestion": "Faire du script le scripts/main d'un module répertoire ?",
+      "convertConfirm": "Convertir",
+      "saving": "Enregistrement…",
+      "replaceQuestion": "Remplacer tous les fichiers du module par ceux de {{file}} ?",
+      "replaceSure": "Tous les fichiers du module sont remplacés.",
+      "replaceConfirm": "Remplacer les fichiers",
+      "entry": "entrée",
+      "rename": "Renommer",
+      "renameTo": "Nouveau chemin de {{path}}",
+      "delete": "Supprimer",
+      "deleteQuestion": "Supprimer {{path}} ?",
+      "newFile": "Nouveau fichier",
+      "newPath": "Chemin du nouveau fichier",
+      "write": "L'écrire",
+      "folder": "Envoyer dans le dossier",
+      "upload": "Envoyer des fichiers",
+      "edit": "Modifier",
+      "entryExecutable": "le fichier exécuté par l'agent reste exécutable",
+      "messagePlaceholder": "update {{path}}",
+      "save": "Enregistrer",
+      "makeExecutable": "Rendre exécutable",
+      "makeNotExecutable": "Rendre non exécutable"
+    },
+    "props": {
+      "edit": "Modifier le nom et l'ordre",
+      "entry": "Entrée : {{from}} devient {{to}}.",
+      "modulesetsFollow_one": "Le moduleset qui le nomme le nommera {{name}} : {{modulesets}}.",
+      "modulesetsFollow_other": "Les {{count}} modulesets qui le nomment le nommeront {{name}} : {{modulesets}}.",
+      "messagePlaceholder": "rename {{from}} to {{to}}"
     }
   }
 }

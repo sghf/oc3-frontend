@@ -45,6 +45,7 @@ import { GroupsPage } from "@/features/groups/GroupsPage";
 import { InstancesPage } from "@/features/instances/InstancesPage";
 import { LogsPage } from "@/features/logs/LogsPage";
 import { ModulesetsPage } from "@/features/modulesets/ModulesetsPage";
+import { CompModulesPage } from "@/features/comp-modules/CompModulesPage";
 import { NetworksPage } from "@/features/networks/NetworksPage";
 import { NodesPage } from "@/features/nodes/NodesPage";
 import { ObsolescencePage } from "@/features/obsolescence/ObsolescencePage";
@@ -375,6 +376,15 @@ const modulesetsRoute = createRoute({
   validateSearch: parseListSearch,
 });
 
+// The scripts the modulesets name, kept by oc3 in git: everyone reads, a
+// CompManager creates, as the api.
+const compModulesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/compliance/modules",
+  component: CompModulesPage,
+  validateSearch: parseListSearch,
+});
+
 const designerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/compliance/designer",
@@ -477,6 +487,7 @@ const routeTree = rootRoute.addChildren([
   teamRequestsRoute,
   tiersRequestsRoute,
   modulesetsRoute,
+  compModulesRoute,
   rulesetsRoute,
   complianceStatusRoute,
   complianceLogsRoute,

@@ -28,17 +28,18 @@ import {
   type DesignerFilterset,
   type DesignerGroup,
 } from "./use-designer-data";
+import { useCompModules, type CompModule } from "@/features/comp-modules/comp-modules-api";
 
 type QuickFilter = "modified" | "contextual" | "private" | "unused";
 
 const QUICK_FILTERS: QuickFilter[] = ["modified", "contextual", "private", "unused"];
 
 /**
- * The list of the modulesets, rulesets, filtersets and groups, in sections stacked
- * in one column, so that anything can be dragged onto anything: a ruleset onto a
- * moduleset or a ruleset, a moduleset onto a moduleset, a filterset or a variable
- * onto a ruleset, a group onto a ruleset or a moduleset. Filtered as one types,
- * and by quick filters.
+ * The list of the modulesets, compliance modules, rulesets, filtersets and groups,
+ * in sections stacked in one column, so that anything can be dragged onto
+ * anything: a module onto a moduleset, a ruleset onto a moduleset or a ruleset,
+ * a moduleset onto a moduleset, a filterset or a variable onto a ruleset, a group
+ * onto a ruleset or a moduleset. Filtered as one types, and by quick filters.
  */
 export function Navigator({
   selected,
@@ -92,6 +93,20 @@ export function Navigator({
           (g) =>
             (needle === "" || g.role.toLowerCase().includes(needle)) &&
             !(filters.has("unused") && teamed.has(g.role)),
+        );
+  // The modules of the repository, not changed by the draft: the quick filters
+  // but "unused" leave none of them; unused, no moduleset of the draft names it.
+  const allModules = useCompModules();
+  const named = new Set(
+    Object.values(designer.draft.modulesets).flatMap((m) => m.modules.map((mod) => mod.name)),
+  );
+  const modules =
+    filters.has("modified") || filters.has("contextual") || filters.has("private")
+      ? []
+      : (allModules.data ?? []).filter(
+          (m) =>
+            (needle === "" || m.name.toLowerCase().includes(needle)) &&
+            !(filters.has("unused") && named.has(m.name)),
         );
   const allFiltersets = useDesignerFiltersets();
   const usedFiltersets = new Set(Object.values(designer.draft.rulesets).map((r) => r.filterset));
@@ -150,6 +165,7 @@ export function Navigator({
           selected={selected}
           onVariableDrop={onVariableDrop}
         />
+        <ModuleSection items={modules} filtering={filtering} selected={selected} />
         <NavSection
           kind="ruleset"
           items={rulesets}
@@ -313,6 +329,9 @@ function NavItem({
         return { op: "addTeam", ref, role: "publications", team: dragged.role };
       if (dragged.type === "filterset" && item.kind === "ruleset")
         return { op: "setFilterset", id: item.id, filterset: dragged.name };
+      // A compliance module dropped on a moduleset joins its modules.
+      if (dragged.type === "module" && item.kind === "moduleset")
+        return { op: "addModule", modulesetId: item.id, name: dragged.name };
       if (dragged.type === "variable" && item.kind === "ruleset")
         return {
           op: "copyVariable",
@@ -560,6 +579,97 @@ function GroupItem({ item, selected }: { item: DesignerGroup; selected: boolean 
         <span className="truncate">{item.role}</span>
         <span className="ml-auto shrink-0 text-ink-muted">
           {uses === 0 ? t("designer.unusedShort") : t("designer.count.objects", { count: uses })}
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/**
+ * The compliance modules of the repository, read only: dragged onto a moduleset,
+ * one joins its modules. Each tells how many modulesets of the draft name it,
+ * and whether an agent can run it.
+ */
+function ModuleSection({
+  items,
+  filtering,
+  selected,
+}: {
+  items: CompModule[];
+  filtering: boolean;
+  selected: Selection | null;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useSectionOpen(filtering);
+  return (
+    <section>
+      <div className="sticky top-0 z-10 flex items-center gap-1 bg-surface py-1">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => {
+            setOpen(!open);
+          }}
+          className="flex items-center gap-1 font-semibold"
+        >
+          <CaretRightIcon className={`h-3 w-3 transition-transform ${open ? "rotate-90" : ""}`} />
+          <ObjectIcon kind="compModule" className="h-4 w-4" />
+          {t("designer.modulesRepo")}
+          <span className="font-normal text-ink-muted">({items.length})</span>
+        </button>
+      </div>
+      {open && (
+        <ul className="space-y-0.5" onKeyDown={moveFocus}>
+          {items.length === 0 && <li className="px-2 text-ink-muted">{t("designer.noMatch")}</li>}
+          {items.map((item) => (
+            <ModuleItem
+              key={item.path}
+              item={item}
+              selected={selected?.kind === "module" && selected.name === item.name}
+            />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function ModuleItem({ item, selected }: { item: CompModule; selected: boolean }) {
+  const { t } = useTranslation();
+  const designer = useDesigner();
+  const select = useContext(SelectContext);
+  const drag = useDraggable({ type: "module", name: item.name }, item.name);
+  const uses = Object.values(designer.draft.modulesets).filter((m) =>
+    m.modules.some((mod) => mod.name === item.name),
+  ).length;
+  return (
+    <li>
+      <button
+        type="button"
+        data-nav-item
+        {...drag}
+        aria-current={selected ? "true" : undefined}
+        title={t("designer.moduleDragHint")}
+        onClick={() => {
+          select({ kind: "module", name: item.name });
+        }}
+        className={`flex w-full cursor-pointer items-center gap-1.5 rounded-(--radius-control) px-2 py-1 text-left ${
+          selected ? "bg-accent-soft text-ink" : "hover:bg-surface-sunken"
+        }`}
+      >
+        <ObjectIcon kind="compModule" className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate">{item.name}</span>
+        {!item.runnable && (
+          <span
+            className="shrink-0 text-state-warn"
+            title={t("designer.moduleNotRunnable")}
+            aria-label={t("designer.moduleNotRunnable")}
+          >
+            ▲
+          </span>
+        )}
+        <span className="ml-auto shrink-0 text-ink-muted">
+          {uses === 0 ? t("designer.unusedShort") : t("designer.count.modulesets", { count: uses })}
         </span>
       </button>
     </li>
