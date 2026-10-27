@@ -882,6 +882,13 @@
       "hint": "Les changements de colonnes, de tri, de filtres et de taille de page ne valent que pour cet onglet. Votre vue par défaut est celle des nouveaux onglets.",
       "saved": "Enregistrée comme votre vue par défaut : les nouveaux onglets s'ouvrent avec.",
       "saveFailed": "La vue par défaut n'a pas pu être enregistrée : {{message}}"
+    },
+    "fit": {
+      "hidden_one": "{{count}} colonne masquée, trop étroit",
+      "hidden_other": "{{count}} colonnes masquées, trop étroit",
+      "hiddenTitle": "Masquées faute de largeur : {{columns}}. Cliquer pour afficher toutes les colonnes malgré tout : plus étroites, sur plusieurs lignes ou en défilant horizontalement.",
+      "hiddenMark": "(trop étroit)",
+      "enable": "Ajuster les colonnes à la largeur"
     }
   },
   "detail": {

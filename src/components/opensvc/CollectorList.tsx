@@ -42,6 +42,7 @@ import type { ViewPrefsControl } from "@/lib/user-prefs";
 import { readProp } from "@/lib/row";
 import { labelMatches, normalizeSearch } from "@/lib/label-search";
 import { FlashCell, FlashScope } from "./Flash";
+import { useFitColumns, useFitColumnsEnabled } from "@/components/ui/use-fit-columns";
 
 export interface ListColumn<T> {
   /** Name of the apicollector prop: used for sorting and for picking the requested columns. */
@@ -347,6 +348,16 @@ export function CollectorList<T>({
   // At least one page, even for an empty list.
   const pageCount = total === undefined ? undefined : Math.max(1, Math.ceil(total / search.limit));
   const shown = visibleProps(search.cols, defaultCols, allProps);
+
+  // The columns asked that the width holds, from the first: those after them are
+  // hidden, not unticked, and come back when the window widens. The columns
+  // asked stay what the picker, the saved view and the export know.
+  const [fitEnabled, setFitEnabled] = useFitColumnsEnabled();
+  const shownKey = shown.join("\u0000");
+  const fitContent = useMemo(() => ({ rows, shownKey }), [rows, shownKey]);
+  const fit = useFitColumns(shown.length, fitContent, fitEnabled);
+  const fitted = new Set(shown.slice(0, fit.shown));
+  const hiddenForWidth = shown.slice(fit.shown);
 
   const columnDefs = useMemo<ColumnDef<T>[]>(
     () =>
@@ -704,6 +715,9 @@ export function CollectorList<T>({
                       />
                       <ColumnFamilyIcon family={meta.family} />
                       {t(meta.labelKey)}
+                      {checked && !fitted.has(meta.prop) && (
+                        <span className="text-ink-muted">{t("list.fit.hiddenMark")}</span>
+                      )}
                       {search.filters[meta.prop] !== undefined && (
                         <span title={t("list.filters.active")} className="ml-auto text-accent">
                           <FilterIcon className="h-3 w-3" />
@@ -727,6 +741,39 @@ export function CollectorList<T>({
             </button>
           </div>
         </details>
+
+        {hiddenForWidth.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              setFitEnabled(false);
+            }}
+            title={t("list.fit.hiddenTitle", {
+              columns: hiddenForWidth
+                .map((prop) => {
+                  const column = columns.find((entry) => entry.prop === prop);
+                  return column === undefined ? prop : t(column.labelKey);
+                })
+                .join(", "),
+            })}
+            className="flex h-7 items-center gap-1.5 rounded-(--radius-control) border border-line px-2 text-ink-muted hover:text-ink"
+          >
+            <ColumnsIcon />
+            {t("list.fit.hidden", { count: hiddenForWidth.length })}
+          </button>
+        )}
+        {fit.wouldHide && (
+          <button
+            type="button"
+            onClick={() => {
+              setFitEnabled(true);
+            }}
+            className="flex h-7 items-center gap-1.5 rounded-(--radius-control) border border-line px-2 text-ink-muted hover:text-ink"
+          >
+            <ColumnsIcon />
+            {t("list.fit.enable")}
+          </button>
+        )}
 
         {exportPage !== undefined && (
           <details ref={exportMenu} onKeyDown={onPickerKeyDown} className="relative">
@@ -1063,10 +1110,13 @@ export function CollectorList<T>({
       {/* A filterable list keeps its table when nothing matches: the filter row is
           where the filter that emptied it gets changed. */}
       {(rows.length > 0 || (filterable && !isPending)) && (
-        <div className="overflow-x-auto rounded-(--radius-panel) border border-line bg-surface-raised">
+        <div
+          ref={fit.containerRef}
+          className="overflow-x-auto rounded-(--radius-panel) border border-line bg-surface-raised"
+        >
           {/* What the list shows: changing it brings other rows, which are not updates. */}
           <FlashScope subject={viewSubject}>
-            <table className="w-full border-collapse text-data">
+            <table ref={fit.tableRef} className="w-full border-collapse text-data">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr
@@ -1091,81 +1141,86 @@ export function CollectorList<T>({
                         onChange={onToggleAll}
                       />
                     </th>
-                    {headerGroup.headers.map((header) => {
-                      const meta = getMeta(header.column.columnDef).column;
-                      const sorted = header.column.getIsSorted();
-                      const label = flexRender(header.column.columnDef.header, header.getContext());
-                      // The funnel of the column's filter, beside its label: it opens
-                      // the filter's popover, and a click on it does not sort.
-                      const filter =
-                        filterable && isFilterable(meta) ? (
-                          <ColumnFilterPopover
-                            column={meta}
-                            filters={search.filters}
-                            onChange={(expr) => {
-                              setFilter(meta.prop, expr);
-                            }}
-                            valueStats={valueStats}
-                            scope={[pathname]}
-                          />
-                        ) : null;
-                      if (!header.column.getCanSort()) {
+                    {headerGroup.headers
+                      .filter((header) => fitted.has(header.column.id))
+                      .map((header) => {
+                        const meta = getMeta(header.column.columnDef).column;
+                        const sorted = header.column.getIsSorted();
+                        const label = flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        );
+                        // The funnel of the column's filter, beside its label: it opens
+                        // the filter's popover, and a click on it does not sort.
+                        const filter =
+                          filterable && isFilterable(meta) ? (
+                            <ColumnFilterPopover
+                              column={meta}
+                              filters={search.filters}
+                              onChange={(expr) => {
+                                setFilter(meta.prop, expr);
+                              }}
+                              valueStats={valueStats}
+                              scope={[pathname]}
+                            />
+                          ) : null;
+                        if (!header.column.getCanSort()) {
+                          return (
+                            <th
+                              key={header.id}
+                              scope="col"
+                              className={`px-2 py-1.5 font-medium ${meta.numeric === true ? "text-right" : ""}`}
+                            >
+                              <span
+                                className={`flex items-center gap-1 ${meta.numeric === true ? "justify-end" : ""}`}
+                              >
+                                {label}
+                                {filter}
+                              </span>
+                            </th>
+                          );
+                        }
                         return (
                           <th
                             key={header.id}
                             scope="col"
-                            className={`px-2 py-1.5 font-medium ${meta.numeric === true ? "text-right" : ""}`}
+                            aria-sort={
+                              sorted === false
+                                ? "none"
+                                : sorted === "asc"
+                                  ? "ascending"
+                                  : "descending"
+                            }
+                            className={meta.numeric === true ? "text-right" : undefined}
                           >
                             <span
-                              className={`flex items-center gap-1 ${meta.numeric === true ? "justify-end" : ""}`}
+                              className={`flex items-center gap-0.5 pr-1 ${meta.numeric === true ? "justify-end" : ""}`}
                             >
-                              {label}
+                              <button
+                                type="button"
+                                onClick={header.column.getToggleSortingHandler()}
+                                className={`py-1.5 pl-2 font-medium hover:text-ink ${filter === null ? "w-full pr-2 text-left" : "text-left"}`}
+                              >
+                                {label}
+                                {sorted !== false && (
+                                  <span aria-hidden="true">
+                                    {sorted === "asc" ? " ▲" : " ▼"}
+                                    {sorting.length > 1 && header.column.getSortIndex() + 1}
+                                  </span>
+                                )}
+                              </button>
                               {filter}
                             </span>
                           </th>
                         );
-                      }
-                      return (
-                        <th
-                          key={header.id}
-                          scope="col"
-                          aria-sort={
-                            sorted === false
-                              ? "none"
-                              : sorted === "asc"
-                                ? "ascending"
-                                : "descending"
-                          }
-                          className={meta.numeric === true ? "text-right" : undefined}
-                        >
-                          <span
-                            className={`flex items-center gap-0.5 pr-1 ${meta.numeric === true ? "justify-end" : ""}`}
-                          >
-                            <button
-                              type="button"
-                              onClick={header.column.getToggleSortingHandler()}
-                              className={`py-1.5 pl-2 font-medium hover:text-ink ${filter === null ? "w-full pr-2 text-left" : "text-left"}`}
-                            >
-                              {label}
-                              {sorted !== false && (
-                                <span aria-hidden="true">
-                                  {sorted === "asc" ? " ▲" : " ▼"}
-                                  {sorting.length > 1 && header.column.getSortIndex() + 1}
-                                </span>
-                              )}
-                            </button>
-                            {filter}
-                          </span>
-                        </th>
-                      );
-                    })}
+                      })}
                   </tr>
                 ))}
               </thead>
               <tbody>
                 {rows.length === 0 && errorMessage === null && (
                   <tr>
-                    <td colSpan={shown.length + 1} className="px-2 py-3 text-ink-muted">
+                    <td colSpan={fitted.size + 1} className="px-2 py-3 text-ink-muted">
                       {activeFilters.length > 0 ? t("list.filters.noMatch") : t("list.empty")}
                     </td>
                   </tr>
@@ -1224,42 +1279,45 @@ export function CollectorList<T>({
                           }}
                         />
                       </td>
-                      {row.getVisibleCells().map((cell, index) => {
-                        const meta = getMeta(cell.column.columnDef).column;
-                        const content = flexRender(cell.column.columnDef.cell, cell.getContext());
-                        // The raw value stands for the cell: a live update changing it
-                        // flashes the cell, and a row it brings flashes whole.
-                        const signature = signatureOf(cell.getValue());
-                        return index === 0 ? (
-                          <FlashCell
-                            key={cell.id}
-                            header
-                            signature={signature}
-                            appear={shownOnce.current}
-                            className="px-2 text-left font-medium"
-                          >
-                            <span className="inline-flex items-center gap-1.5">
-                              {/* A slot as wide as the mark on every row, filled or
+                      {row
+                        .getVisibleCells()
+                        .filter((cell) => fitted.has(cell.column.id))
+                        .map((cell, index) => {
+                          const meta = getMeta(cell.column.columnDef).column;
+                          const content = flexRender(cell.column.columnDef.cell, cell.getContext());
+                          // The raw value stands for the cell: a live update changing it
+                          // flashes the cell, and a row it brings flashes whole.
+                          const signature = signatureOf(cell.getValue());
+                          return index === 0 ? (
+                            <FlashCell
+                              key={cell.id}
+                              header
+                              signature={signature}
+                              appear={shownOnce.current}
+                              className="px-2 text-left font-medium"
+                            >
+                              <span className="inline-flex items-center gap-1.5">
+                                {/* A slot as wide as the mark on every row, filled or
                                   not: the content of a frozen row lines up with
                                   the others instead of moving by the mark. */}
-                              {rowLead !== undefined && (
-                                <span className="inline-flex w-3.5 shrink-0 justify-center">
-                                  {rowLead(row.original)}
-                                </span>
-                              )}
+                                {rowLead !== undefined && (
+                                  <span className="inline-flex w-3.5 shrink-0 justify-center">
+                                    {rowLead(row.original)}
+                                  </span>
+                                )}
+                                {content}
+                              </span>
+                            </FlashCell>
+                          ) : (
+                            <FlashCell
+                              key={cell.id}
+                              signature={signature}
+                              className={meta.numeric === true ? "px-2 text-right" : "px-2"}
+                            >
                               {content}
-                            </span>
-                          </FlashCell>
-                        ) : (
-                          <FlashCell
-                            key={cell.id}
-                            signature={signature}
-                            className={meta.numeric === true ? "px-2 text-right" : "px-2"}
-                          >
-                            {content}
-                          </FlashCell>
-                        );
-                      })}
+                            </FlashCell>
+                          );
+                        })}
                     </tr>
                   );
                 })}

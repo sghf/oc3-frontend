@@ -882,6 +882,13 @@
       "hint": "Changes to the columns, sort, filters and page size apply to this tab only. Your default view is what new tabs open with.",
       "saved": "Saved as your default view: new tabs open with it.",
       "saveFailed": "The default view could not be saved: {{message}}"
+    },
+    "fit": {
+      "hidden_one": "{{count}} column hidden, too narrow",
+      "hidden_other": "{{count}} columns hidden, too narrow",
+      "hiddenTitle": "Hidden for lack of width: {{columns}}. Click to show every column anyway: narrower, wrapped, or scrolling sideways.",
+      "hiddenMark": "(too narrow)",
+      "enable": "Fit the columns to the width"
     }
   },
   "detail": {
