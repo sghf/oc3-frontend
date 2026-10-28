@@ -3624,8 +3624,9 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Restore the form definition of a revision, recorded as a new revision.
-     *     Requires the FormsManager privilege and responsibility for the form.
+     * @description Restore the form definition of a revision, recorded as a new revision
+     *     and logged (form.rollback). Requires the FormsManager privilege and
+     *     responsibility for the form.
      */
     post: operations["PostFormRollback"];
     delete?: never;
@@ -4110,7 +4111,10 @@ export interface paths {
     put?: never;
     /**
      * @description Create a log event. The entry type is forced to 'message', the default
-     *     level is 'info', and empty log events are discarded.
+     *     level is 'info', and empty log events are discarded. A user writes it in
+     *     their name, the user who really signed in kept when impersonating; a node
+     *     as "agent". A format over 200 characters, an unknown level or a log_dict
+     *     over 64 KiB is refused with 400.
      */
     post: operations["PostLogs"];
     delete?: never;
@@ -23667,8 +23671,10 @@ export interface operations {
       content: {
         "application/json": {
           log_dict?: Record<string, never>;
+          /** @description The message, its %(key)s placeholders taking the values of log_dict. */
           log_fmt: string;
-          log_level?: string;
+          /** @enum {string} */
+          log_level?: "debug" | "info" | "warning" | "error" | "critical";
           node_id?: string;
           svc_id?: string;
         };
