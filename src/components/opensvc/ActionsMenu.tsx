@@ -143,9 +143,11 @@ type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataAc
  * agent takes it: nothing runs during the request, so the menu announces a queuing
  * and not a result.
  *
- * Rights are checked by the API for each object: NodeExec privilege and
- * responsibility. In a multiple selection, a refusal applies to its object only and
- * the report names it.
+ * Rights are checked by the API for each object: NodeExec privilege (CompExec
+ * for a compliance run) and responsibility. The agent actions the user's
+ * privileges do not allow are not offered (`agentPrivileges`); responsibility is
+ * left to the API: in a multiple selection, a refusal applies to its object only
+ * and the report names it.
  *
  * Labels come from `<prefix>.items.<action>`, and the menu texts from
  * `<prefix>.open`, `.question`, `.confirm`, `.queueing`, `.queued` and `.failure`:
@@ -164,6 +166,15 @@ type Pending = { kind: "queue"; action: string } | { kind: "data"; entry: DataAc
  * the row of the button keeps its height and the button its place, in a list
  * toolbar as in a panel header.
  */
+/**
+ * The privileges the API asks of an agent action queued by `PUT /actions`, as
+ * oc3 checks them (`queueNodeAction`, `checkServiceAction`): CompExec for a
+ * compliance run, NodeExec for the others, a Manager holding both.
+ */
+function agentPrivileges(action: string): readonly string[] {
+  return action === "compliance_check" || action === "compliance_fix" ? ["CompExec"] : ["NodeExec"];
+}
+
 export function ActionsMenu({
   targets,
   actions = [],
@@ -306,7 +317,17 @@ export function ActionsMenu({
   });
   const items: MenuItem[] = [];
   const submenus = new Map<string, MenuItem>();
-  for (const entry of actions) {
+  // The agent actions, queued by `enqueue`, shown once the privileges are known
+  // and only those they allow; the other menus change records the API guards.
+  const offered =
+    enqueue === undefined
+      ? actions
+      : actions.filter(
+          (entry) =>
+            privileges.data !== undefined &&
+            hasPrivilege(privileges.data, agentPrivileges(entry.action)),
+        );
+  for (const entry of offered) {
     if (entry.group === undefined) {
       items.push(itemOf(entry));
       continue;
