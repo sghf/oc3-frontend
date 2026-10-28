@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { Combobox } from "@/components/ui/Combobox";
 import { Switch } from "@/components/ui/Switch";
 import { useCompModules } from "@/features/comp-modules/comp-modules-api";
@@ -81,6 +82,10 @@ export function ModulesetEditor({
               {moduleset.modules.map((mod) => (
                 <tr key={mod.id} className="border-t border-line">
                   <td className="py-1 pr-3">
+                    <ObjectIcon
+                      kind="compModule"
+                      className="mr-1.5 inline h-3.5 w-3.5 align-[-0.125em]"
+                    />
                     {known !== undefined && !known.has(mod.name) && (
                       <span
                         className="mr-1 text-state-warn"

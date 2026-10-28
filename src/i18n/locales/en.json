@@ -3360,7 +3360,11 @@
       "dismiss": "Dismiss",
       "elsewhere": "Another tab changed the pending changes kept in this browser. Load them, or the next change made here replaces them.",
       "load": "Load them"
-    }
+    },
+    "sectionModified_one": "{{count}} object with unsaved changes",
+    "sectionModified_other": "{{count}} objects with unsaved changes",
+    "publicTitle": "Public: listed on its own and attachable.",
+    "privateTitle": "Private: only reachable through the rulesets that include it."
   },
   "bookmarks": {
     "title": "Bookmarks",

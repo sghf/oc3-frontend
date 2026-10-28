@@ -15,6 +15,7 @@ import { useDesigner } from "./designer-context";
 import { useDraggable, useDropTarget, type DragItem } from "./drag";
 import {
   isModified,
+  modifiedCount,
   parentsOf,
   type Moduleset,
   type ObjectKind,
@@ -237,6 +238,8 @@ function NavSection({
   const [open, setOpen] = useSectionOpen(filtering);
   const [adding, setAdding] = useState(false);
   const title = t(kind === "ruleset" ? "designer.rulesets" : "designer.modulesets");
+  // The section holds pending changes, whatever the filter shows of it.
+  const modified = modifiedCount(designer.original, designer.draft, kind);
   return (
     <section>
       <div className="sticky top-0 z-10 flex items-center gap-1 bg-surface py-1">
@@ -252,6 +255,15 @@ function NavSection({
           <ObjectIcon kind={kind} className="h-4 w-4" />
           {title}
           <span className="font-normal text-ink-muted">({items.length})</span>
+          {modified > 0 && (
+            <span
+              className="font-normal text-state-warn"
+              title={t("designer.sectionModified", { count: modified })}
+            >
+              <span aria-hidden="true">●</span>
+              <span className="sr-only">{t("designer.sectionModified", { count: modified })}</span>
+            </span>
+          )}
         </button>
         <button
           type="button"
@@ -403,16 +415,15 @@ function NavItem({
             </span>
           ))}
         {item.kind === "ruleset" &&
+          // The visibility, and what it means, on hover.
           (item.isPublic ? (
-            <GlobeIcon
-              className="h-3 w-3 shrink-0 text-ink-muted"
-              aria-label={t("designer.public")}
-            />
+            <span className="shrink-0" title={t("designer.publicTitle")}>
+              <GlobeIcon className="h-3 w-3 text-ink-muted" aria-label={t("designer.public")} />
+            </span>
           ) : (
-            <LockIcon
-              className="h-3 w-3 shrink-0 text-ink-muted"
-              aria-label={t("designer.private")}
-            />
+            <span className="shrink-0" title={t("designer.privateTitle")}>
+              <LockIcon className="h-3 w-3 text-ink-muted" aria-label={t("designer.private")} />
+            </span>
           ))}
         <span className="ml-auto shrink-0 text-ink-muted">{count}</span>
         {modified && (

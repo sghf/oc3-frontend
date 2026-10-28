@@ -775,6 +775,18 @@ export function describe(draft: Draft, operation: Operation): LogLine {
 }
 
 /** Whether an object differs from its loaded version: created, or changed since. */
+/**
+ * How many objects of a kind the draft changed: created, edited or deleted, the
+ * deleted ones included although no list shows them any more.
+ */
+export function modifiedCount(original: Draft, draft: Draft, kind: ObjectKind): number {
+  const ids = (d: Draft) => Object.keys(kind === "ruleset" ? d.rulesets : d.modulesets).map(Number);
+  const changed = new Set<number>();
+  for (const id of ids(draft)) if (isModified(original, draft, { kind, id })) changed.add(id);
+  for (const id of ids(original)) if (objectOf(draft, { kind, id }) === undefined) changed.add(id);
+  return changed.size;
+}
+
 export function isModified(original: Draft, draft: Draft, ref: ObjectRef): boolean {
   if (ref.id < 0) return true;
   const before = objectOf(original, ref);

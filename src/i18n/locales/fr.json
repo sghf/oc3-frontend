@@ -3360,7 +3360,11 @@
       "dismiss": "Masquer",
       "elsewhere": "Un autre onglet a modifié les changements en attente conservés dans ce navigateur. Chargez-les, sinon la prochaine modification faite ici les remplacera.",
       "load": "Les charger"
-    }
+    },
+    "sectionModified_one": "{{count}} objet modifié, non enregistré",
+    "sectionModified_other": "{{count}} objets modifiés, non enregistrés",
+    "publicTitle": "Public : listé seul et attachable.",
+    "privateTitle": "Privé : accessible seulement par les rulesets qui l'incluent."
   },
   "bookmarks": {
     "title": "Signets",
