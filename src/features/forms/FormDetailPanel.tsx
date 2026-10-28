@@ -5,10 +5,13 @@ import { DetailContent, type DetailGroup } from "@/components/opensvc/DetailPane
 import { RelatedTabsPanel } from "@/components/opensvc/RelatedTabsPanel";
 import type { RelatedTab } from "@/components/opensvc/related-tabs";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
-import { PencilIcon, PuzzleIcon, TrashIcon } from "@/components/ui/icons";
+import { HistoryIcon, PencilIcon, PuzzleIcon, TrashIcon } from "@/components/ui/icons";
 import { problemText } from "@/lib/api/problem";
 import { formatDateTime } from "@/lib/format";
 import { FormPreview } from "./FormPreview";
+import { FormRevisions } from "./FormRevisions";
+import { FormTeams } from "./FormTeams";
+import { useFormRevisions } from "./form-admin-api";
 import { useForm, type FormRow } from "./use-form";
 
 const text = (prop: keyof FormRow) => (row: FormRow) => {
@@ -37,7 +40,7 @@ const GROUPS: DetailGroup<FormRow>[] = [
   },
 ];
 
-/** The preview of the form, as its users see it, in a tab of its own. */
+/** The tabs of a form: its preview, as its users see it; the revisions of its definition. */
 const FORM_TABS: RelatedTab[] = [
   {
     key: "preview",
@@ -47,11 +50,20 @@ const FORM_TABS: RelatedTab[] = [
     useSummary: () => ({ count: undefined }),
     render: (id) => <FormPreview formId={id} />,
   },
+  {
+    key: "revisions",
+    labelKey: "forms.revisions.tab",
+    descriptionKey: "forms.revisions.description",
+    icon: <HistoryIcon className="h-3.5 w-3.5 text-icon-form" />,
+    useSummary: (id) => ({ count: useFormRevisions(id).data?.length }),
+    render: (id) => <FormRevisions formId={id} />,
+  },
 ];
 
 /**
- * A form: its properties and its definition as stored, in YAML, then a tab
- * previewing it as its users see it. Editing opens the form panel; deleting also
+ * A form: its properties, the groups it is published to and those responsible
+ * for it, and its definition as stored, in YAML, then its tabs (`FORM_TABS`):
+ * its preview, its revisions. Editing opens the form panel; deleting also
  * removes its publications and responsibles, as the collector does. The open tab
  * lives in the URL (`tab`), held by the view.
  */
@@ -110,6 +122,11 @@ export function FormDetailPanel({
         errorMessage={isError ? error.message : null}
         actions={
           <div>
+            {formId !== undefined && (
+              <div className="mb-3">
+                <FormTeams formId={formId} />
+              </div>
+            )}
             <h3 className="mb-1 font-semibold text-ink-muted">{t("forms.fields.form_yaml")}</h3>
             {form?.form_yaml === undefined || form.form_yaml === "" ? (
               <p className="mb-3 text-ink-muted">{t("forms.detail.noDefinition")}</p>

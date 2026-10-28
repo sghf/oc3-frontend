@@ -2590,6 +2590,23 @@
           "done_other": "{{count}} formulaires supprimés."
         }
       }
+    },
+    "teams": {
+      "readOnly": "Seul un FormsManager responsable du formulaire modifie ses équipes."
+    },
+    "revisions": {
+      "tab": "Révisions",
+      "description": "Modifications de sa définition",
+      "empty": "Aucune révision enregistrée pour l'instant.",
+      "current": "version actuelle",
+      "change": "Voir la modification",
+      "compare": "Comparer avec la version actuelle",
+      "restore": "Restaurer cette version",
+      "restoreQuestion": "Restaurer la définition telle qu'elle était en {{version}} ? Une nouvelle révision : l'historique les garde toutes.",
+      "restoreConfirm": "Restaurer",
+      "restoring": "Restauration…",
+      "same": "Aucune modification de la définition.",
+      "since": "Modifications de {{version}} à la version actuelle :"
     }
   },
   "requests": {

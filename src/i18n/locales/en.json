@@ -2590,6 +2590,23 @@
           "done_other": "{{count}} forms deleted."
         }
       }
+    },
+    "teams": {
+      "readOnly": "Only a FormsManager responsible for the form changes its teams."
+    },
+    "revisions": {
+      "tab": "Revisions",
+      "description": "Changes of its definition",
+      "empty": "No revision recorded yet.",
+      "current": "current version",
+      "change": "Show the change",
+      "compare": "Compare with the current version",
+      "restore": "Restore this version",
+      "restoreQuestion": "Restore the definition as it was in {{version}}? A new revision: the history keeps every one.",
+      "restoreConfirm": "Restore",
+      "restoring": "Restoring…",
+      "same": "No change to the definition.",
+      "since": "Changes from {{version}} to the current version:"
     }
   },
   "requests": {

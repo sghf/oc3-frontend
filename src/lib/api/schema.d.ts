@@ -3447,7 +3447,8 @@ export interface paths {
     };
     /**
      * @description Show the change made by a revision, or the differences between cid and
-     *     other when set, as git prints them.
+     *     other when set, as git prints them: empty when the form is not published
+     *     to the caller.
      */
     get: operations["GetFormDiff"];
     put?: never;
@@ -3580,8 +3581,9 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description List the revisions of the form definition, from its git history: an empty
-     *     list when the form is not published to the caller.
+     * @description List the revisions of the form definition, from its git history, the
+     *     newest first, 300 at most: an empty list when the form is not published
+     *     to the caller.
      */
     get: operations["GetFormRevisions"];
     put?: never;
@@ -3599,7 +3601,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Show the form definition at a revision, as {"data": {"oid", "content"}}. */
+    /**
+     * @description Show the form definition at a revision: empty when the revision holds
+     *     none, or when the form is not published to the caller.
+     */
     get: operations["GetFormRevision"];
     put?: never;
     post?: never;
@@ -8920,6 +8925,10 @@ export interface components {
       /** @description The url called, without the query parameter carrying an api key. */
       url: string;
     };
+    FormDiffResponse: {
+      /** @description The diff, as git prints it. */
+      data: string;
+    };
     FormListResponse: {
       data:
         | components["schemas"]["FormRow"][]
@@ -8931,6 +8940,36 @@ export interface components {
       /** @description The change made, on a modification */
       info?: string;
       meta?: components["schemas"]["ListMeta"];
+    };
+    /** @description A revision of a form definition, a commit of its git history. */
+    FormRevision: {
+      cid: string;
+      /**
+       * @description "Author: Name <email>", followed for a rollback by "<br>" and the
+       *     line of the commit message naming the revision restored.
+       */
+      content?: string;
+      /** @description The form id. */
+      group: string;
+      /** @description The commit id, as cid. */
+      id: string;
+      /** @description When it was committed, "YYYY-MM-DDTHH:MM:SS". */
+      start: string;
+      /** @description The files the revision changed. */
+      stat: string[];
+      /** @description The stat summary line, "1 file changed, ...". */
+      summary?: string;
+    };
+    FormRevisionListResponse: {
+      data: components["schemas"]["FormRevision"][];
+    };
+    FormRevisionResponse: {
+      data: {
+        /** @description The form definition at the revision, in YAML. */
+        content: string;
+        /** @description The git object id of the definition, empty when none. */
+        oid: string;
+      };
     };
     /**
      * @description A form: its definition, form_yaml, drives the inputs a submission expects
@@ -21597,7 +21636,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": {
+            data: boolean;
+          };
         };
       };
       400: components["responses"]["400"];
@@ -21628,7 +21669,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["FormDiffResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21749,7 +21790,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse"];
+          "application/json": components["schemas"]["GroupListResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21778,7 +21819,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["InfoResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21808,7 +21849,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["InfoResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21888,7 +21929,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse"];
+          "application/json": components["schemas"]["GroupListResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21917,7 +21958,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["InfoResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21947,7 +21988,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["InfoResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -21975,7 +22016,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["FormRevisionListResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -22003,7 +22044,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["FormRevisionResponse"];
         };
       };
       400: components["responses"]["400"];
@@ -22031,7 +22072,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["InfoResponse"];
         };
       };
       400: components["responses"]["400"];
