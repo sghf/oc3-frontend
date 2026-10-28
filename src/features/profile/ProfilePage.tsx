@@ -253,12 +253,11 @@ function AppearanceCard() {
             name="dateFormat"
             label={t("profile.dateFormat.title")}
             options={DATE_FORMATS}
-            // Each convention said with a moment it shows, under the clock chosen.
-            optionLabel={(value) =>
-              t("profile.dateFormat.option", {
-                name: t(`profile.dateFormat.options.${value}`),
-                example: formatExample({ format: value, hourCycle: dates.hourCycle.value }),
-              })
+            optionLabel={(value) => t(`profile.dateFormat.options.${value}`)}
+            // Each convention shown with a moment it formats, under the clock chosen,
+            // in a column of its own: the conventions compare at a glance.
+            optionDetail={(value) =>
+              formatExample({ format: value, hourCycle: dates.hourCycle.value })
             }
             choice={dates.format}
           />
@@ -346,33 +345,55 @@ function ChoiceGroup<V extends string>({
   label,
   options,
   optionLabel,
+  optionDetail,
   choice,
 }: {
   name: string;
   label: string;
   options: readonly V[];
   optionLabel: (value: V) => string;
+  /**
+   * A second column, such as an example of the option: the options are then
+   * stacked, of one width, their labels and details aligned in two columns.
+   */
+  optionDetail?: (value: V) => string;
   choice: { value: V; set: (value: V) => void; isSaving: boolean; errorMessage: string | null };
 }) {
+  const stacked = optionDetail !== undefined;
   return (
     <>
-      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
+      <div
+        role="radiogroup"
+        aria-label={label}
+        className={
+          stacked ? "grid w-fit max-w-full grid-cols-[auto_auto] gap-1" : "flex flex-wrap gap-2"
+        }
+      >
         {options.map((value) => (
           <label
             key={value}
-            className="flex h-7 cursor-pointer items-center gap-1.5 rounded-(--radius-control) border border-line px-3 has-checked:border-accent has-checked:bg-accent-soft has-checked:text-ink"
+            className={`h-7 cursor-pointer items-center rounded-(--radius-control) border border-line px-3 has-checked:border-accent has-checked:bg-accent-soft has-checked:text-ink ${
+              stacked ? "col-span-2 grid grid-cols-subgrid gap-x-6" : "flex gap-1.5"
+            }`}
           >
-            <input
-              type="radio"
-              name={name}
-              value={value}
-              checked={choice.value === value}
-              disabled={choice.isSaving}
-              onChange={() => {
-                choice.set(value);
-              }}
-            />
-            {optionLabel(value)}
+            <span className="flex items-center gap-1.5">
+              <input
+                type="radio"
+                name={name}
+                value={value}
+                checked={choice.value === value}
+                disabled={choice.isSaving}
+                onChange={() => {
+                  choice.set(value);
+                }}
+              />
+              {optionLabel(value)}
+            </span>
+            {stacked && (
+              <span className="whitespace-nowrap text-ink-muted tabular-nums">
+                {optionDetail(value)}
+              </span>
+            )}
           </label>
         ))}
       </div>

@@ -12,7 +12,9 @@ import i18n from "i18next";
  * never takes the language of the interface for its locale. Words around the
  * dates ("5 minutes ago") stay in that language.
  */
-export const DATE_FORMATS = ["system", "en-US", "en-GB", "fr-FR", "de-DE", "iso"] as const;
+// A choice no longer offered (German, "de-DE"), still in the preferences of an
+// account, reads as "system", the browser's settings.
+export const DATE_FORMATS = ["system", "en-US", "en-GB", "fr-FR", "iso"] as const;
 export type DateFormatChoice = (typeof DATE_FORMATS)[number];
 
 export const HOUR_CYCLES = ["auto", "h23", "h12"] as const;

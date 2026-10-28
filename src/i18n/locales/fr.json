@@ -1827,13 +1827,11 @@
     },
     "dateFormat": {
       "title": "Dates et heures",
-      "option": "{{name}} — {{example}}",
       "options": {
         "system": "Réglages du navigateur",
         "en-US": "États-Unis",
         "en-GB": "Royaume-Uni",
         "fr-FR": "France",
-        "de-DE": "Allemagne",
         "iso": "ISO 8601"
       },
       "hint": "La façon dont les dates et les heures s'écrivent partout dans le collector, quelle que soit la langue de l'interface. Par défaut, les réglages régionaux de votre navigateur."

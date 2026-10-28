@@ -1827,13 +1827,11 @@
     },
     "dateFormat": {
       "title": "Dates and times",
-      "option": "{{name}} — {{example}}",
       "options": {
         "system": "Browser settings",
         "en-US": "United States",
         "en-GB": "United Kingdom",
         "fr-FR": "France",
-        "de-DE": "Germany",
         "iso": "ISO 8601"
       },
       "hint": "How dates and times read everywhere in the collector, whatever the language of the interface. By default, the regional settings of your browser."
