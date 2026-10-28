@@ -488,6 +488,59 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/arrays/{array_id}/diskgroups/{dg_id}/quotas": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description List the quotas of a disk group of a storage array.
+     *     A Manager or a StorageManager sees every quota, another user those of the
+     *     application codes one of their groups is responsible for.
+     */
+    get: operations["GetArrayDiskgroupQuotas"];
+    put?: never;
+    /**
+     * @description Give an application code, by app_id or app, a quota in a disk group, or
+     *     change the one it has. Requires the StorageManager privilege. Logged
+     *     (quota.add, quota.change); the space reserved in the disk group becomes
+     *     the sum of its quotas.
+     */
+    post: operations["PostArrayDiskgroupQuotas"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arrays/{array_id}/diskgroups/{dg_id}/quotas/{quota_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Change a quota: its size, or the application code it is for. Requires
+     *     the StorageManager privilege. Logged (quota.change); the space reserved
+     *     in the disk group becomes the sum of its quotas.
+     */
+    post: operations["PostArrayDiskgroupQuota"];
+    /**
+     * @description Delete a quota. Requires the StorageManager privilege. Logged
+     *     (quota.del); the space reserved in the disk group becomes the sum of its
+     *     quotas.
+     */
+    delete: operations["DeleteArrayDiskgroupQuota"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/arrays/{array_id}/disks": {
     parameters: {
       query?: never;
@@ -5489,6 +5542,29 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/quotas": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description List the quotas of the application codes in the disk groups of the
+     *     storage arrays, in MB, with the sizes of the disk groups and the space
+     *     each application uses there, from the v_disk_quota view.
+     *     A Manager or a StorageManager sees every quota, another user those of the
+     *     application codes one of their groups is responsible for.
+     */
+    get: operations["GetQuotas"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/realtime/token": {
     parameters: {
       query?: never;
@@ -7400,6 +7476,30 @@ export interface components {
       id?: number;
       updated?: string;
     };
+    ArrayListResponse: {
+      data:
+        | components["schemas"]["ArrayRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description A storage array. Every property is optional: the props query parameter
+     *     selects them. array_cache is in MB.
+     */
+    ArrayRow: {
+      array_cache?: number;
+      array_comment?: string;
+      array_firmware?: string;
+      array_level?: number;
+      array_model?: string;
+      array_name?: string;
+      array_updated?: string;
+      id?: number;
+    };
     /** @description The AG-UI AgentCapabilities of the agent. */
     AssistantCapabilities: {
       [key: string]: unknown;
@@ -8491,6 +8591,32 @@ export interface components {
       /** @description The commit id of the version before, absent for the first one. */
       previous_id?: string;
       version: components["schemas"]["ComplianceVersion"];
+    };
+    DiskGroupListResponse: {
+      data:
+        | components["schemas"]["DiskGroupRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description A disk group of a storage array, its sizes in MB: dg_reserved is the sum
+     *     of its quotas. Every property is optional: the props query parameter
+     *     selects them.
+     */
+    DiskGroupRow: {
+      /** @description The id of the array, as text. */
+      array_id?: string;
+      dg_free?: number;
+      dg_name?: string;
+      dg_reserved?: number;
+      dg_size?: number;
+      dg_updated?: string;
+      dg_used?: number;
+      id?: number;
     };
     DiskListResponse: {
       data:
@@ -9907,6 +10033,59 @@ export interface components {
        *     problem.
        */
       text: string;
+    };
+    QuotaChangeResponse: {
+      /**
+       * Format: int64
+       * @description The quota written or deleted.
+       */
+      id: number;
+      info: string;
+    };
+    /**
+     * @description A quota to set: its size in MB, and the application code it is for, by
+     *     app_id or app. Creating one requires both; changing one, either.
+     */
+    QuotaInput: {
+      app?: string;
+      /** Format: int64 */
+      app_id?: number;
+      /** Format: int64 */
+      quota?: number;
+    };
+    QuotaListResponse: {
+      data:
+        | components["schemas"]["QuotaRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description A quota of an application code in a disk group of a storage array, a
+     *     row of v_disk_quota. Sizes are in MB; dg_reservable is dg_size less
+     *     dg_reserved, the sum of the quotas of the disk group; quota_used the
+     *     space the disks of the application use there. Every property is
+     *     optional: the props query parameter selects them.
+     */
+    QuotaRow: {
+      app?: string;
+      app_id?: number;
+      array_id?: number;
+      array_model?: string;
+      array_name?: string;
+      dg_free?: number;
+      dg_id?: number;
+      dg_name?: string;
+      dg_reservable?: number;
+      dg_reserved?: number;
+      dg_size?: number;
+      dg_used?: number;
+      id?: number;
+      quota?: number;
+      quota_used?: number;
     };
     ReportListResponse: {
       data:
@@ -12077,7 +12256,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse"];
+          "application/json": components["schemas"]["QuotaListResponse"];
         };
       };
       404: components["responses"]["404"];
@@ -12476,7 +12655,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse"];
+          "application/json": components["schemas"]["ArrayListResponse"];
         };
       };
       500: components["responses"]["500"];
@@ -12552,11 +12731,192 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse"];
+          "application/json": components["schemas"]["DiskGroupListResponse"];
         };
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetArrayDiskgroupQuotas: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+      };
+      header?: never;
+      path: {
+        /** @description Storage array id or name */
+        array_id: string;
+        /** @description Disk group id */
+        dg_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuotaListResponse"];
+        };
+      };
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostArrayDiskgroupQuotas: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Storage array id or name */
+        array_id: string;
+        /** @description Disk group id */
+        dg_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuotaInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuotaChangeResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  PostArrayDiskgroupQuota: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Storage array id or name */
+        array_id: string;
+        /** @description Disk group id */
+        dg_id: number;
+        /** @description Quota id */
+        quota_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuotaInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuotaChangeResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
+      404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  DeleteArrayDiskgroupQuota: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Storage array id or name */
+        array_id: string;
+        /** @description Disk group id */
+        dg_id: number;
+        /** @description Quota id */
+        quota_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuotaChangeResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      403: components["responses"]["403"];
       404: components["responses"]["404"];
       500: components["responses"]["500"];
     };
@@ -27417,6 +27777,80 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetQuotas: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuotaListResponse"];
+        };
+      };
+      401: components["responses"]["401"];
       500: components["responses"]["500"];
     };
   };

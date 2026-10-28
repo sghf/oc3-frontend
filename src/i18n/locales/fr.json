@@ -72,7 +72,8 @@
     "orchestrations": "Workflows",
     "orchestrationRuns": "Exécutions",
     "formConnectors": "Connecteurs de formulaires",
-    "compModules": "Modules"
+    "compModules": "Modules",
+    "quotas": "Quotas disques"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -4876,6 +4877,67 @@
       "modulesetsFollow_one": "Le moduleset qui le nomme le nommera {{name}} : {{modulesets}}.",
       "modulesetsFollow_other": "Les {{count}} modulesets qui le nomment le nommeront {{name}} : {{modulesets}}.",
       "messagePlaceholder": "rename {{from}} to {{to}}"
+    }
+  },
+  "quotas": {
+    "title": "Quotas disques",
+    "intro": "L'espace que chaque code d'application peut utiliser dans un groupe de disques d'une baie, ce que ses disques en utilisent, et ce que chaque groupe de disques peut encore réserver. Un StorageManager les ajoute, les modifie et les supprime.",
+    "fields": {
+      "id": "Id",
+      "array_name": "Baie",
+      "array_model": "Modèle de baie",
+      "dg_name": "Groupe de disques",
+      "dg_size": "Taille du groupe",
+      "dg_reserved": "Réservé",
+      "dg_reservable": "Réservable",
+      "dg_used": "Utilisé du groupe",
+      "dg_free": "Libre du groupe",
+      "app": "App",
+      "quota": "Quota",
+      "quota_used": "Utilisé",
+      "array_id": "Id de baie",
+      "dg_id": "Id du groupe",
+      "app_id": "Id d'app"
+    },
+    "usage": {
+      "near": "proche du quota",
+      "over": "au-delà du quota",
+      "of": "{{used}} sur {{quota}}"
+    },
+    "size": {
+      "unit": "Unité",
+      "invalid": "Saisissez un nombre positif."
+    },
+    "detail": {
+      "title": "Quota",
+      "name": "{{app}} sur {{array}} / {{dg}}",
+      "missing": "Ce quota n'existe pas, ou vous n'y avez pas accès.",
+      "diskGroup": "Groupe de disques",
+      "overReserved": "{{size}} réservés de plus que sa taille"
+    },
+    "edit": {
+      "title": "Modifier le quota",
+      "from": "De {{from}} à {{to}}",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "done": "Quota de {{app}} fixé à {{size}}."
+    },
+    "delete": {
+      "label": "Supprimer le quota",
+      "question": "Supprimer le quota de {{app}} sur {{array}} / {{dg}} ?"
+    },
+    "create": {
+      "open": "Nouveau quota",
+      "title": "Nouveau quota",
+      "pickArray": "Choisir une baie",
+      "pickDiskGroup": "Choisir un groupe de disques",
+      "pickApp": "Choisir une app",
+      "dgSummary": "{{size}}, {{reserved}} réservés, {{reservable}} réservables",
+      "replaces": "{{app}} a déjà un quota de {{quota}} ici : il sera remplacé.",
+      "overReservable": "Plus que les {{reservable}} que le groupe peut encore réserver : il sera sur-réservé.",
+      "submit": "Ajouter le quota",
+      "replace": "Remplacer le quota",
+      "submitting": "Enregistrement…"
     }
   }
 }

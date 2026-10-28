@@ -19,6 +19,16 @@ export function formatSizeMiB(value: number | undefined, locale: string): string
 }
 
 /**
+ * A capacity of a storage array, in mebibytes as `formatSizeMiB`, but in
+ * tebibytes from one: arrays and their quotas count in hundreds of them.
+ */
+export function formatCapacityMiB(value: number | undefined, locale: string): string {
+  if (value === undefined || value < 1024 * 1024) return formatSizeMiB(value, locale);
+  const tib = value / (1024 * 1024);
+  return `${tib.toLocaleString(locale, { maximumFractionDigits: tib < 100 ? 1 : 0 })} TiB`;
+}
+
+/**
  * The collector returns "2026-09-15 15:06:23.000", which is not ISO 8601: without the
  * T, Safari refuses to parse it.
  *

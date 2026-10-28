@@ -72,7 +72,8 @@
     "orchestrations": "Workflows",
     "orchestrationRuns": "Runs",
     "formConnectors": "Form connectors",
-    "compModules": "Modules"
+    "compModules": "Modules",
+    "quotas": "Disk quotas"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -4876,6 +4877,67 @@
       "modulesetsFollow_one": "The moduleset naming it will name it {{name}}: {{modulesets}}.",
       "modulesetsFollow_other": "The {{count}} modulesets naming it will name it {{name}}: {{modulesets}}.",
       "messagePlaceholder": "rename {{from}} to {{to}}"
+    }
+  },
+  "quotas": {
+    "title": "Disk quotas",
+    "intro": "The space each application code may use in a disk group of a storage array, how much of it its disks use, and what each disk group can still reserve. A StorageManager adds, changes and deletes them.",
+    "fields": {
+      "id": "Id",
+      "array_name": "Array",
+      "array_model": "Array model",
+      "dg_name": "Disk group",
+      "dg_size": "Disk group size",
+      "dg_reserved": "Reserved",
+      "dg_reservable": "Reservable",
+      "dg_used": "Disk group used",
+      "dg_free": "Disk group free",
+      "app": "App",
+      "quota": "Quota",
+      "quota_used": "Used",
+      "array_id": "Array id",
+      "dg_id": "Disk group id",
+      "app_id": "App id"
+    },
+    "usage": {
+      "near": "close to the quota",
+      "over": "over the quota",
+      "of": "{{used}} of {{quota}}"
+    },
+    "size": {
+      "unit": "Unit",
+      "invalid": "Enter a positive number."
+    },
+    "detail": {
+      "title": "Quota",
+      "name": "{{app}} on {{array}} / {{dg}}",
+      "missing": "This quota does not exist, or is out of your reach.",
+      "diskGroup": "Disk group",
+      "overReserved": "{{size}} more reserved than its size"
+    },
+    "edit": {
+      "title": "Change the quota",
+      "from": "From {{from}} to {{to}}",
+      "save": "Save",
+      "saving": "Saving…",
+      "done": "Quota of {{app}} set to {{size}}."
+    },
+    "delete": {
+      "label": "Delete the quota",
+      "question": "Delete the quota of {{app}} on {{array}} / {{dg}}?"
+    },
+    "create": {
+      "open": "New quota",
+      "title": "New quota",
+      "pickArray": "Choose an array",
+      "pickDiskGroup": "Choose a disk group",
+      "pickApp": "Choose an app",
+      "dgSummary": "{{size}}, {{reserved}} reserved, {{reservable}} reservable",
+      "replaces": "{{app}} already has a quota of {{quota}} here: it will be replaced.",
+      "overReservable": "More than the {{reservable}} the disk group can still reserve: it will be over-reserved.",
+      "submit": "Add the quota",
+      "replace": "Replace the quota",
+      "submitting": "Saving…"
     }
   }
 }
