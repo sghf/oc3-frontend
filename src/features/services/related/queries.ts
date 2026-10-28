@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { ALERT_PROPS } from "@/components/opensvc/alerts";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
@@ -245,6 +246,49 @@ export interface ServiceResource extends ResourceRow {
   nodename: string;
 }
 
+/** The props of a resource the service and instance panels show. */
+export const SERVICE_RESOURCE_PROPS =
+  "id,node_id,vmname,rid,res_type,res_status,res_desc,res_log,res_monitor,res_disable,res_optional,updated";
+
+/**
+ * The instances of a service, for the names of its nodes and its own: the
+ * per-service resource endpoints give neither.
+ */
+export function getServiceInstanceNames(svcId: string, signal?: AbortSignal) {
+  return api.GET("/services_instances/{svc_id}", {
+    signal,
+    params: {
+      path: { svc_id: svcId },
+      query: { props: "node_id,nodes.nodename,services.svcname", limit: 0 },
+    },
+  });
+}
+
+/**
+ * Resources completed with their service and node, by id and name, as the
+ * Resources list gives them: what the actions menu queues and names.
+ */
+export function namedResources(
+  svcId: string,
+  rows: ResourceRow[],
+  instances: InstanceRow[],
+): ServiceResource[] {
+  const nodes = new Map(instances.map((row) => [row.node_id ?? "", row["nodes.nodename"] ?? ""]));
+  const svcname = instances.find((row) => (row["services.svcname"] ?? "") !== "")?.[
+    "services.svcname"
+  ];
+  return rows.map((row) => {
+    const nodename = nodes.get(row.node_id ?? "") || (row.node_id ?? "");
+    return {
+      ...row,
+      svc_id: svcId,
+      "services.svcname": svcname ?? svcId,
+      "nodes.nodename": nodename,
+      nodename,
+    };
+  });
+}
+
 /**
  * Resources of the service, as each of its instances reports them: the historical
  * "resources status" tab (`table_resources_svc`). The per-service endpoint has no
@@ -260,34 +304,18 @@ export function useServiceResources(svcId: string | undefined) {
           signal,
           params: {
             path: { svc_id: svcId ?? "" },
-            query: {
-              props:
-                "id,node_id,vmname,rid,res_type,res_status,res_desc,res_log,res_monitor,res_disable,res_optional,updated",
-              orderby: "node_id,vmname,rid",
-              limit: 0,
-            },
+            query: { props: SERVICE_RESOURCE_PROPS, orderby: "node_id,vmname,rid", limit: 0 },
           },
         }),
-        api.GET("/services_instances/{svc_id}", {
-          signal,
-          params: {
-            path: { svc_id: svcId ?? "" },
-            query: { props: "node_id,nodes.nodename", limit: 0 },
-          },
-        }),
+        getServiceInstanceNames(svcId ?? "", signal),
       ]);
       if (resources.error !== undefined) throw new Error(problemText(resources.error));
       if (instances.error !== undefined) throw new Error(problemText(instances.error));
-      const names = new Map(
-        (Array.isArray(instances.data.data) ? (instances.data.data as InstanceRow[]) : []).map(
-          (row) => [row.node_id ?? "", row["nodes.nodename"] ?? ""],
-        ),
+      return namedResources(
+        svcId ?? "",
+        (Array.isArray(resources.data.data) ? resources.data.data : []) as ResourceRow[],
+        Array.isArray(instances.data.data) ? (instances.data.data as InstanceRow[]) : [],
       );
-      const rows = (Array.isArray(resources.data.data) ? resources.data.data : []) as ResourceRow[];
-      return rows.map((row) => ({
-        ...row,
-        nodename: names.get(row.node_id ?? "") || (row.node_id ?? ""),
-      }));
     },
   });
 }
@@ -511,4 +539,102 @@ export function useUnackedActionErrors(svcId: string | undefined, nodeId?: strin
 /** The failed actions of a node not acknowledged yet, of every service. */
 export function useNodeUnackedActionErrors(nodeId: string | undefined) {
   return useScopedUnackedErrors(nodeScope(nodeId));
+}
+
+type AlertRow = components["schemas"]["AlertRow"];
+
+/** Alerts of the service, the most severe and the latest first. */
+export function useServiceAlerts(svcId: string | undefined) {
+  return useQuery({
+    queryKey: ["service", svcId, "alerts"],
+    enabled: svcId !== undefined,
+    queryFn: async ({ signal }) => {
+      const { data, error } = await api.GET("/services/{svc_id}/alerts", {
+        signal,
+        params: {
+          path: { svc_id: svcId ?? "" },
+          query: { props: ALERT_PROPS, orderby: "-dash_severity,-dash_updated", limit: 0 },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: AlertRow[] = Array.isArray(data.data) ? data.data : [];
+      return rows;
+    },
+  });
+}
+
+/**
+ * Instances of the service, with the names of their nodes: the historical
+ * Status tab (`table_service_instances`), one row per node and per container of
+ * an encapsulated service.
+ */
+export function useServiceInstances(svcId: string | undefined) {
+  return useQuery({
+    queryKey: ["service", svcId, "instances"],
+    enabled: svcId !== undefined,
+    queryFn: async ({ signal }) => {
+      const { data, error } = await api.GET("/services_instances/{svc_id}", {
+        signal,
+        params: {
+          path: { svc_id: svcId ?? "" },
+          query: {
+            props:
+              "svc_id,node_id,nodes.nodename,services.svcname,mon_vmname,mon_vmtype,mon_availstatus,mon_overallstatus,mon_frozen,mon_updated",
+            orderby: "nodes.nodename,mon_vmname",
+            limit: 0,
+          },
+        },
+      });
+      if (error !== undefined) throw new Error(problemText(error));
+      const rows: InstanceRow[] = Array.isArray(data.data) ? data.data : [];
+      return rows;
+    },
+  });
+}
+
+type ResinfoRow = components["schemas"]["ResinfoRow"];
+
+/** A key a resource of the service declares, with the name of its node. */
+export interface ServiceResinfo extends ResinfoRow {
+  nodename: string;
+}
+
+/**
+ * The keys and values the resources of the service declare, on each of its
+ * nodes: the historical Resinfo tab (`table_resinfo_svc`). The endpoint has no
+ * node names: they come from the service's instances.
+ */
+export function useServiceResinfo(svcId: string | undefined) {
+  return useQuery({
+    queryKey: ["service", svcId, "resinfo"],
+    enabled: svcId !== undefined,
+    queryFn: async ({ signal }): Promise<ServiceResinfo[]> => {
+      const [resinfo, instances] = await Promise.all([
+        api.GET("/services/{svc_id}/resinfo", {
+          signal,
+          params: {
+            path: { svc_id: svcId ?? "" },
+            query: {
+              props: "id,node_id,rid,res_key,res_value,updated",
+              orderby: "node_id,rid,res_key",
+              limit: 0,
+            },
+          },
+        }),
+        getServiceInstanceNames(svcId ?? "", signal),
+      ]);
+      if (resinfo.error !== undefined) throw new Error(problemText(resinfo.error));
+      if (instances.error !== undefined) throw new Error(problemText(instances.error));
+      const names = new Map(
+        (Array.isArray(instances.data.data) ? (instances.data.data as InstanceRow[]) : []).map(
+          (row) => [row.node_id ?? "", row["nodes.nodename"] ?? ""],
+        ),
+      );
+      const rows = (Array.isArray(resinfo.data.data) ? resinfo.data.data : []) as ResinfoRow[];
+      return rows.map((row) => ({
+        ...row,
+        nodename: names.get(row.node_id ?? "") || (row.node_id ?? ""),
+      }));
+    },
+  });
 }

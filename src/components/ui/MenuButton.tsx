@@ -88,6 +88,14 @@ export function MenuButton({
   }
 
   function onButtonKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    // Opened by the mouse, the menu leaves the focus on its button: Escape closes
+    // it from there too, and not the side panel listening at the document level.
+    if (event.key === "Escape" && open) {
+      event.preventDefault();
+      event.stopPropagation();
+      close(true);
+      return;
+    }
     const target =
       event.key === "ArrowDown" || event.key === "Enter" || event.key === " "
         ? "first"

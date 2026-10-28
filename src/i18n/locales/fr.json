@@ -984,8 +984,14 @@
         "nodediff": "Ce qui diffère entre ses nœuds",
         "actions": "Ce que les agents y ont lancé",
         "compliance": "Modules vérifiés et corrigés",
-        "logs": "Journal du collector pour le service"
-      }
+        "logs": "Journal du collector pour le service",
+        "instances": "Instances sur chaque nœud",
+        "alerts": "Alertes ouvertes",
+        "resinfo": "Clés déclarées par les ressources"
+      },
+      "instances": "Statut",
+      "alerts": "Alertes",
+      "resinfo": "Resinfo"
     },
     "actions": {
       "open": "Actions",
@@ -1145,7 +1151,6 @@
       "periodNote_other": "Actions des {{count}} derniers jours.",
       "unacked_one": "1 action en échec non acquittée",
       "unacked_other": "{{count}} actions en échec non acquittées",
-      "showUnacked": "Voir les actions",
       "view": {
         "label": "Afficher en",
         "table": "Tableau",
@@ -1236,6 +1241,23 @@
     "compare": {
       "noun_one": "1 service",
       "noun_other": "{{count}} services"
+    },
+    "alerts": {
+      "empty": "Aucune alerte sur ce service."
+    },
+    "instances": {
+      "empty": "Aucune instance : aucun agent n'a rapporté ce service."
+    },
+    "resinfo": {
+      "search": "Chercher une clé ou une valeur",
+      "count_one": "{{count}} clé",
+      "count_other": "{{count}} clés",
+      "matching_one": "{{count}} clé sur {{total}}",
+      "matching_other": "{{count}} clés sur {{total}}",
+      "empty": "Aucune clé : les ressources de ce service n'en déclarent aucune.",
+      "noMatch": "Aucune clé ne correspond à la recherche.",
+      "key": "Clé",
+      "value": "Valeur"
     }
   },
   "alerts": {
@@ -2331,7 +2353,9 @@
       "health": "Santé",
       "configuration": "Configuration",
       "overview": "Vue d’ensemble"
-    }
+    },
+    "selectAll": "Sélectionner toutes les lignes",
+    "selectRow": "Sélectionner {{name}}"
   },
   "storage": {
     "san": {

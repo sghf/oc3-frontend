@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { ALERT_PROPS } from "@/components/opensvc/alerts";
 import type { components } from "@/lib/api/schema";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
@@ -84,7 +85,7 @@ export function useNodeAlerts(nodeId: string | undefined) {
         params: {
           path: { node_id: nodeId ?? "" },
           query: {
-            props: "id,dash_severity,dash_type,alert,dash_env,dash_created,dash_updated",
+            props: ALERT_PROPS,
             orderby: "-dash_severity,-dash_updated",
             limit: 0,
           },

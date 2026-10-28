@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   RelatedTable,
   type RelatedColumn,
   type RelatedGroup,
 } from "@/components/opensvc/RelatedTable";
+import { SelectionBar } from "@/components/opensvc/SelectionBar";
 import { StatusBadge } from "@/components/opensvc/StatusBadge";
 import { statusBadge } from "@/components/opensvc/status";
 import { RelativeTime } from "@/components/ui/RelativeTime";
+import { ResourceActionsMenu } from "@/features/resources/ResourceActionsMenu";
 import { resourceFlag } from "@/features/resources/resource-format";
+import { hasPrivilege, useEffectivePrivileges } from "@/lib/api/effective-privileges";
 import { useServiceResources, type ServiceResource } from "./queries";
 
 /**
@@ -15,6 +19,7 @@ import { useServiceResources, type ServiceResource } from "./queries";
  * container of an encapsulated service), each with its status, its type and
  * description, its flags and the age of its last report; the first line of its log
  * when it has one. The whole list, with every column, is the Resources view.
+ * Ticked, resources get the agent actions of that view.
  */
 export function ServiceResources({ svcId, locale }: { svcId: string; locale: string }) {
   const resources = useServiceResources(svcId);
@@ -31,7 +36,9 @@ export function ServiceResources({ svcId, locale }: { svcId: string; locale: str
 
 /**
  * The resources of a service or of one of its instances: grouped by instance for a
- * service, a single list for an instance.
+ * service, a single list for an instance. A user whose privileges allow the
+ * resource actions (NodeExec, a Manager) ticks resources to run them, as from
+ * the Resources view.
  */
 export function ResourceStatusTable({
   rows,
@@ -47,6 +54,12 @@ export function ResourceStatusTable({
   locale: string;
 }) {
   const { t } = useTranslation();
+  const privileges = useEffectivePrivileges();
+  const canAct = privileges.data !== undefined && hasPrivilege(privileges.data, ["NodeExec"]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const rowKey = (row: ServiceResource) =>
+    String(row.id ?? `${row.node_id ?? ""}/${row.vmname ?? ""}/${row.rid ?? ""}`);
+  const ticked = canAct ? (rows ?? []).filter((row) => selected.has(rowKey(row))) : [];
 
   const groups = new Map<string, RelatedGroup<ServiceResource>>();
   for (const row of rows ?? []) {
@@ -113,17 +126,37 @@ export function ResourceStatusTable({
   ];
 
   return (
-    <RelatedTable
-      columns={columns}
-      groups={[...groups.values()].sort((a, b) => a.label.localeCompare(b.label))}
-      rowKey={(row) =>
-        String(row.id ?? `${row.node_id ?? ""}/${row.vmname ?? ""}/${row.rid ?? ""}`)
-      }
-      isPending={isPending}
-      errorMessage={errorMessage}
-      empty={t("services.resources.empty")}
-      caption={t("services.related.resources")}
-    />
+    <div className="flex flex-col gap-2">
+      <SelectionBar
+        count={ticked.length}
+        onClear={() => {
+          setSelected(new Set());
+        }}
+      >
+        <ResourceActionsMenu resources={ticked} />
+      </SelectionBar>
+      <RelatedTable
+        columns={columns}
+        groups={[...groups.values()].sort((a, b) => a.label.localeCompare(b.label))}
+        rowKey={rowKey}
+        isPending={isPending}
+        errorMessage={errorMessage}
+        empty={t("services.resources.empty")}
+        caption={t("services.related.resources")}
+        selection={
+          canAct
+            ? {
+                selected,
+                onChange: setSelected,
+                rowLabel: (row) =>
+                  row.vmname !== undefined && row.vmname !== ""
+                    ? `${row.rid ?? ""} @ ${row.nodename}/${row.vmname}`
+                    : `${row.rid ?? ""} @ ${row.nodename}`,
+              }
+            : undefined
+        }
+      />
+    </div>
   );
 }
 

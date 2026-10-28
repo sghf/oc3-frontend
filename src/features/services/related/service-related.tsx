@@ -4,7 +4,12 @@ import { ColumnFamilyIcon } from "@/components/opensvc/ColumnFamily";
 import { BookIcon, GearIcon } from "@/components/ui/icons";
 import type { RelatedTab, RelatedTabGroup } from "@/components/opensvc/related-tabs";
 import { useTranslation } from "react-i18next";
+import { alertsSummary } from "@/components/opensvc/alerts";
+import { statusSummary } from "@/components/opensvc/status-summary";
 import { ServiceActions } from "./ServiceActions";
+import { ServiceAlerts } from "./ServiceAlerts";
+import { ServiceInstances } from "./ServiceInstances";
+import { ServiceResinfo } from "./ServiceResinfo";
 import { ServiceCompliance } from "./ServiceCompliance";
 import { ServiceLogs } from "./ServiceLogs";
 import { nokCount, useCompStatus } from "@/lib/api/object-compliance";
@@ -15,8 +20,11 @@ import { actionStatusSummary } from "./action-status";
 import { ServiceStorage } from "./ServiceStorage";
 import {
   useServiceActionStats,
+  useServiceAlerts,
   useServiceDisks,
+  useServiceInstances,
   useServiceLogs,
+  useServiceResinfo,
   useServiceResources,
 } from "./queries";
 import { useNodesDiffSummary } from "./use-nodes-diff-summary";
@@ -24,8 +32,8 @@ import { useNodesDiffSummary } from "./use-nodes-diff-summary";
 /**
  * Data attached to a service, one tab each, on the model of the node
  * (`NODE_RELATED_TABS`), gathered in groups by `SERVICE_TAB_GROUPS`. Adding
- * instances, alerts or tags amounts to writing the component, adding it here and
- * naming it in a group.
+ * one, the checks or the tags say, amounts to writing the component, adding it
+ * here and naming it in a group.
  */
 export const SERVICE_RELATED_TABS: RelatedTab[] = [
   {
@@ -37,6 +45,41 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
     icon: <BookIcon className="h-4 w-4 shrink-0 text-icon-service" />,
     useSummary: () => ({ count: undefined }),
     render: (id) => <ObjectNotes kind="service" id={id} />,
+  },
+  {
+    key: "instances",
+    labelKey: "services.related.instances",
+    descriptionKey: "services.related.descriptions.instances",
+    icon: <ColumnFamilyIcon family="service" />,
+    // The instances down and in warning stand out, as on the node's Services.
+    useSummary: (svcId) => {
+      const { t } = useTranslation();
+      return statusSummary(
+        useServiceInstances(svcId).data?.map((row) => row.mon_overallstatus),
+        t,
+        "nodes.services",
+      );
+    },
+    render: (svcId, locale) => <ServiceInstances svcId={svcId} locale={locale} />,
+  },
+  {
+    key: "alerts",
+    labelKey: "services.related.alerts",
+    descriptionKey: "services.related.descriptions.alerts",
+    icon: <ColumnFamilyIcon family="alert" />,
+    useSummary: (svcId) => {
+      const { t } = useTranslation();
+      return alertsSummary(useServiceAlerts(svcId).data, t);
+    },
+    render: (svcId, locale) => <ServiceAlerts svcId={svcId} locale={locale} />,
+  },
+  {
+    key: "resinfo",
+    labelKey: "services.related.resinfo",
+    descriptionKey: "services.related.descriptions.resinfo",
+    icon: <ColumnFamilyIcon family="resource" />,
+    useSummary: (svcId) => ({ count: useServiceResinfo(svcId).data?.length }),
+    render: (svcId, locale) => <ServiceResinfo svcId={svcId} locale={locale} />,
   },
   {
     key: "resources",
@@ -129,9 +172,9 @@ export const SERVICE_RELATED_TABS: RelatedTab[] = [
 
 /**
  * The tabs of the service after its properties, grouped as the
- * node's (`NODE_TAB_GROUPS`): what the service runs and what the agents did, what
- * it is made of and how its nodes differ, what was logged. A Health group comes
- * with the alerts and checks of the service, which have no tab yet.
+ * node's (`NODE_TAB_GROUPS`): what the service runs, its instances first, and
+ * what the agents did; its alerts; what it is made of and how its nodes differ;
+ * what was logged.
  */
 export const SERVICE_TAB_GROUPS: RelatedTabGroup[] = [
   {
@@ -143,12 +186,17 @@ export const SERVICE_TAB_GROUPS: RelatedTabGroup[] = [
   {
     key: "workload",
     labelKey: "related.groups.workload",
-    tabs: ["resources", "actions"],
+    tabs: ["instances", "resources", "actions"],
+  },
+  {
+    key: "health",
+    labelKey: "related.groups.health",
+    tabs: ["alerts"],
   },
   {
     key: "configuration",
     labelKey: "related.groups.configuration",
-    tabs: ["storage", "nodediff", "compliance"],
+    tabs: ["storage", "resinfo", "nodediff", "compliance"],
   },
   {
     key: "logs",

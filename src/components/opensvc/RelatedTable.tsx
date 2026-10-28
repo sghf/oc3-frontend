@@ -30,6 +30,17 @@ export interface RelatedColumn<T> {
   divider?: boolean;
 }
 
+/**
+ * Rows ticked to act on them, by their `rowKey`: a checkbox leads each row,
+ * and one in the header ticks them all or none.
+ */
+export interface RelatedSelection<T> {
+  selected: ReadonlySet<string>;
+  onChange: (next: Set<string>) => void;
+  /** The name of a row, for its checkbox. */
+  rowLabel: (row: T) => string;
+}
+
 export interface RelatedGroup<T> {
   key: string;
   label: string;
@@ -53,6 +64,7 @@ export function RelatedTable<T>({
   blockKey,
   flashSignature = JSON.stringify,
   onRowOpen,
+  selection,
 }: {
   columns: RelatedColumn<T>[];
   groups: RelatedGroup<T>[];
@@ -87,6 +99,8 @@ export function RelatedTable<T>({
    * row keeps its own action. Rows in blocks (`blockKey`) do not open.
    */
   onRowOpen?: (row: T) => void;
+  /** Rows ticked to act on them. Not with `blockKey`. */
+  selection?: RelatedSelection<T>;
 }) {
   const { t } = useTranslation();
   // Ids of the headers, which the cells of a block name (`headers`).
@@ -108,6 +122,9 @@ export function RelatedTable<T>({
   const total = groups.reduce((sum, group) => sum + group.rows.length, 0);
   if (total === 0) return <p className="text-ink-muted">{empty}</p>;
   const grouped = groups.length > 1;
+  const selecting = selection !== undefined && blockKey === undefined;
+  const allKeys = groups.flatMap((group) => group.rows.map(rowKey));
+  const tickedCount = selecting ? allKeys.filter((key) => selection.selected.has(key)).length : 0;
   // The column heading each block, its cells and its header given the width of
   // the block's accent bar, so that they line up.
   const headColumn = columns.find((column) => column.spanBlock === true)?.key;
@@ -120,6 +137,22 @@ export function RelatedTable<T>({
         style={headerTop === undefined ? undefined : { top: headerTop }}
       >
         <tr className="border-b border-line text-left text-ink-muted">
+          {selecting && (
+            <th scope="col" className="w-0 px-2 py-1">
+              <input
+                type="checkbox"
+                aria-label={t("related.selectAll")}
+                checked={tickedCount === allKeys.length}
+                ref={(node) => {
+                  if (node !== null)
+                    node.indeterminate = tickedCount > 0 && tickedCount < allKeys.length;
+                }}
+                onChange={(event) => {
+                  selection.onChange(new Set(event.target.checked ? allKeys : []));
+                }}
+              />
+            </th>
+          )}
           {columns.map((column, index) => (
             <th
               key={column.key}
@@ -138,7 +171,7 @@ export function RelatedTable<T>({
           <tr>
             <th
               scope="colgroup"
-              colSpan={columns.length}
+              colSpan={columns.length + (selecting ? 1 : 0)}
               className="bg-surface px-2 pt-3 pb-1 text-left font-semibold text-ink-muted"
             >
               {group.label} <span className="font-normal tabular-nums">({group.rows.length})</span>
@@ -162,6 +195,21 @@ export function RelatedTable<T>({
                         onRowOpen(row);
                       }))}
                 >
+                  {selecting && (
+                    <td className="w-0 px-2 py-1">
+                      <input
+                        type="checkbox"
+                        aria-label={t("related.selectRow", { name: selection.rowLabel(row) })}
+                        checked={selection.selected.has(rowKey(row))}
+                        onChange={(event) => {
+                          const next = new Set(selection.selected);
+                          if (event.target.checked) next.add(rowKey(row));
+                          else next.delete(rowKey(row));
+                          selection.onChange(next);
+                        }}
+                      />
+                    </td>
+                  )}
                   {columns.map((column) => (
                     <td key={column.key} className={cellClass(column)}>
                       {column.render(row)}

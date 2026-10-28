@@ -984,8 +984,14 @@
         "nodediff": "How its nodes differ",
         "actions": "What the agents ran on it",
         "compliance": "Modules checked and fixed",
-        "logs": "Collector log of the service"
-      }
+        "logs": "Collector log of the service",
+        "instances": "Instances on each node",
+        "alerts": "Open alerts",
+        "resinfo": "Keys the resources declare"
+      },
+      "instances": "Status",
+      "alerts": "Alerts",
+      "resinfo": "Resinfo"
     },
     "actions": {
       "open": "Actions",
@@ -1145,7 +1151,6 @@
       "periodNote_other": "Actions of the last {{count}} days.",
       "unacked_one": "1 failed action not acknowledged",
       "unacked_other": "{{count}} failed actions not acknowledged",
-      "showUnacked": "Show the actions",
       "view": {
         "label": "Show as",
         "table": "Table",
@@ -1236,6 +1241,23 @@
     "compare": {
       "noun_one": "1 service",
       "noun_other": "{{count}} services"
+    },
+    "alerts": {
+      "empty": "No alert on this service."
+    },
+    "instances": {
+      "empty": "No instance: no agent reported this service."
+    },
+    "resinfo": {
+      "search": "Search a key or a value",
+      "count_one": "{{count}} key",
+      "count_other": "{{count}} keys",
+      "matching_one": "{{count}} of {{total}} key",
+      "matching_other": "{{count}} of {{total}} keys",
+      "empty": "No key: the resources of this service declare none.",
+      "noMatch": "No key matches the search.",
+      "key": "Key",
+      "value": "Value"
     }
   },
   "alerts": {
@@ -2331,7 +2353,9 @@
       "health": "Health",
       "configuration": "Configuration",
       "overview": "Overview"
-    }
+    },
+    "selectAll": "Select every row",
+    "selectRow": "Select {{name}}"
   },
   "storage": {
     "san": {

@@ -9885,6 +9885,31 @@ export interface components {
       report_name?: string;
       report_yaml?: string;
     };
+    ResinfoListResponse: {
+      data:
+        | components["schemas"]["ResinfoRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description A key/value pair a resource of a service declares on one of its nodes. Every
+     *     property is optional: the `props` query parameter selects which columns the
+     *     server returns.
+     */
+    ResinfoRow: {
+      id?: number;
+      node_id?: string;
+      res_key?: string;
+      res_value?: string;
+      rid?: string;
+      svc_id?: string;
+      topology?: string;
+      updated?: string;
+    };
     ResourceListResponse: {
       data:
         | components["schemas"]["ResourceRow"][]
@@ -30041,7 +30066,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse"];
+          "application/json": components["schemas"]["ResinfoListResponse"];
         };
       };
       404: components["responses"]["404"];
