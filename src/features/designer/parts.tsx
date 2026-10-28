@@ -1,4 +1,4 @@
-import { useContext, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { personalGroupUser, useTeamLabel } from "@/components/opensvc/use-team-label";
 import { Combobox } from "@/components/ui/Combobox";
@@ -132,6 +132,7 @@ export function AddByName({
   placeholder,
   fieldLabel,
   fill = false,
+  focusOnOpen = false,
   onAdd,
   children,
 }: {
@@ -142,6 +143,8 @@ export function AddByName({
   fieldLabel?: string;
   /** The field takes the width left by the button, as in the narrow navigator. */
   fill?: boolean;
+  /** The field takes the focus when it appears, opened by the user to type a name. */
+  focusOnOpen?: boolean;
   onAdd: (name: string) => Refusal | null;
   /** Controls between the field and the button, such as the class of a variable. */
   children?: ReactNode;
@@ -150,6 +153,9 @@ export function AddByName({
   const [name, setName] = useState("");
   const [error, setError] = useState<Refusal | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (focusOnOpen) input.current?.focus();
+  }, [focusOnOpen]);
   const submit = () => {
     const refused = onAdd(name);
     setError(refused);

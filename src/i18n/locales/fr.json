@@ -3226,7 +3226,7 @@
     "filtersetUsedBy": "Rulesets qui l'utilisent",
     "propertiesHint": "Déposer un filterset ici pour rendre ce ruleset contextuel avec lui.",
     "showFilterset": "Afficher",
-    "groups": "Groupes",
+    "groups": "Utilisateurs et groupes",
     "groupDragHint": "Glisser sur un ruleset ou un moduleset pour le publier à ce groupe, ou sur une liste des Équipes pour ce rôle",
     "editInGroups": "Gérer dans la vue Groupes",
     "groupReadOnly": "En lecture seule ici : le concepteur donne aux groupes un rôle sur les rulesets et les modulesets, le groupe lui-même se gère dans la vue Groupes.",

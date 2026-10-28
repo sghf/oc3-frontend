@@ -165,6 +165,8 @@ export function Navigator({
         ))}
       </div>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+        <GroupSection items={groups} filtering={filtering} selected={selected} />
+        <ModuleSection items={modules} filtering={filtering} selected={selected} />
         <NavSection
           kind="moduleset"
           items={modulesets}
@@ -172,7 +174,6 @@ export function Navigator({
           selected={selected}
           onVariableDrop={onVariableDrop}
         />
-        <ModuleSection items={modules} filtering={filtering} selected={selected} />
         <NavSection
           kind="ruleset"
           items={rulesets}
@@ -181,7 +182,6 @@ export function Navigator({
           onVariableDrop={onVariableDrop}
         />
         <FiltersetSection items={filtersets} filtering={filtering} selected={selected} />
-        <GroupSection items={groups} filtering={filtering} selected={selected} />
       </div>
     </nav>
   );
@@ -274,6 +274,7 @@ function NavSection({
             placeholder={t("designer.namePlaceholder")}
             fieldLabel={t(`designer.newName.${kind}`)}
             fill
+            focusOnOpen
             onAdd={(name) => {
               const { refused, created } = designer.run({ op: "create", kind, name });
               if (refused === null && created !== undefined) {
