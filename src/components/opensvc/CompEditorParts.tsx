@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { CrossLink, type CrossKind } from "@/components/opensvc/CrossLink";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { Combobox } from "@/components/ui/Combobox";
+import { personalGroupUser, useTeamLabel } from "@/components/opensvc/use-team-label";
 import { COMP_BUTTON, type ChangeOutcome } from "./comp-changes";
 import {
   AlertTriangleIcon,
@@ -92,6 +93,8 @@ export function ObjectChips({
   kind,
   names,
   linkId,
+  kindOf,
+  label,
   empty,
   removeLabel,
   onRemove,
@@ -99,6 +102,10 @@ export function ObjectChips({
   kind: CrossKind;
   names: string[];
   linkId?: (name: string) => string | undefined;
+  /** The kind of one chip, when it differs from `kind`; `linkId` then gives its id. */
+  kindOf?: (name: string) => CrossKind;
+  /** The text of a chip, the name when absent. */
+  label?: (name: string) => string;
   empty: string;
   removeLabel: (name: string) => string;
   onRemove?: (name: string) => void;
@@ -108,16 +115,18 @@ export function ObjectChips({
     <ul className="flex flex-wrap gap-1">
       {names.map((name) => {
         const id = linkId?.(name);
+        const chipKind = kindOf?.(name) ?? kind;
+        const text = label?.(name) ?? name;
         return (
           <li key={name} className="inline-flex items-center gap-0.5">
             {id !== undefined ? (
-              <CrossLink kind={kind} id={id}>
-                {name}
+              <CrossLink kind={chipKind} id={id}>
+                {text}
               </CrossLink>
             ) : (
               <span className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-1.5 text-data">
-                <ObjectIcon kind={kind} className="h-3.5 w-3.5 shrink-0" />
-                {name}
+                <ObjectIcon kind={chipKind} className="h-3.5 w-3.5 shrink-0" />
+                {text}
               </span>
             )}
             {onRemove !== undefined && (
@@ -308,6 +317,7 @@ export function TeamsPart({
   onRemove: (role: TeamRole, team: string, groupId: string, list: string) => void;
 }) {
   const { t } = useTranslation();
+  const label = useTeamLabel();
   const idOf = (team: string) => groups.find((g) => g.role === team)?.id;
   return (
     <EditorPart title={t("compEditor.teams")}>
@@ -321,12 +331,17 @@ export function TeamsPart({
               <ObjectChips
                 kind="group"
                 names={own}
+                // The private group of a user is named after them and opens their record.
+                kindOf={(team) => (personalGroupUser(team) === undefined ? "group" : "user")}
                 linkId={(team) => {
+                  const user = personalGroupUser(team);
+                  if (user !== undefined) return user;
                   const id = idOf(team);
                   return id === undefined ? undefined : String(id);
                 }}
+                label={label}
                 empty={t("compEditor.noTeam")}
-                removeLabel={(team) => t("compEditor.removeTeam", { team, list })}
+                removeLabel={(team) => t("compEditor.removeTeam", { team: label(team), list })}
                 onRemove={
                   editable && !busy
                     ? (team) => {
@@ -340,7 +355,7 @@ export function TeamsPart({
                   <Combobox
                     options={groups
                       .filter((g) => !own.includes(g.role))
-                      .map((g) => ({ value: String(g.id), label: g.role }))}
+                      .map((g) => ({ value: String(g.id), label: label(g.role) }))}
                     value=""
                     onChange={(id) => {
                       const group = groups.find((g) => String(g.id) === id);

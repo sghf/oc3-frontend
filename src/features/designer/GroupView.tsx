@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { personalGroupUser, useTeamLabel } from "@/components/opensvc/use-team-label";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import { useDesigner } from "./designer-context";
 import { useDraggable } from "./drag";
@@ -17,7 +18,10 @@ export function GroupView({ id }: { id: number }) {
   const { t } = useTranslation();
   const groups = useComplianceGroups();
   const group = groups.data?.find((g) => g.id === id);
-  const drag = useDraggable({ type: "group", id, role: group?.role ?? "" }, group?.role ?? "");
+  const label = useTeamLabel();
+  const role = group?.role ?? "";
+  const personal = personalGroupUser(role) !== undefined;
+  const drag = useDraggable({ type: "group", id, role }, label(role));
   if (groups.isPending) return <p className="text-ink-muted">{t("designer.loading")}</p>;
   if (group === undefined)
     return <p className="text-state-warn">▲ {t("designer.welcome.missing")}</p>;
@@ -29,10 +33,14 @@ export function GroupView({ id }: { id: number }) {
           title={t("designer.groupDragHint")}
           className="flex cursor-grab items-center gap-2"
         >
-          <ObjectIcon kind="group" className="h-5 w-5" />
-          <h2 className="text-title font-semibold">{group.role}</h2>
+          <ObjectIcon kind={personal ? "user" : "group"} className="h-5 w-5" />
+          <h2 className="text-title font-semibold">{label(group.role)}</h2>
         </span>
-        <span className="text-ink-muted">{t("designer.kind.group")}</span>
+        <span className="text-ink-muted">
+          {personal
+            ? t("designer.kind.personalGroup", { role: group.role })
+            : t("designer.kind.group")}
+        </span>
         <Link
           to="/groups"
           search={{ sel: String(id) }}

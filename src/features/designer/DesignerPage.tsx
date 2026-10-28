@@ -27,6 +27,7 @@ import type { LogLine, ObjectKind, Operation } from "./model";
 import { Navigator } from "./Navigator";
 import { RulesetEditor } from "./RulesetEditor";
 import { DesignerProvider } from "./store";
+import { useTeamValues } from "./team-values";
 import { FiltersetView } from "./FiltersetView";
 import { GroupView } from "./GroupView";
 import { BUTTON, OpenHistoryContext, SelectContext, type Selection } from "./ui";
@@ -409,6 +410,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
   // The refusal of the last commit: the change refused, when the collector names
   // it, and why. Nothing was saved.
   const [failure, setFailure] = useState<{ change: string; message: string } | null>(null);
+  const teams = useTeamValues();
   const count = designer.log.length;
   // The confirmation opens on its safe choice, for the keyboard.
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -431,7 +433,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
     if (!result.saved) {
       const { index, message } = result.failure;
       const line = index === undefined ? undefined : lines[index];
-      setFailure({ change: line === undefined ? "" : t(line.key, line.values), message });
+      setFailure({ change: line === undefined ? "" : t(line.key, teams(line.values)), message });
     }
   }
 
@@ -584,7 +586,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
       {showLog && count > 0 && (
         <ol className={`${ROW} max-h-40 list-decimal space-y-0.5 overflow-y-auto pl-6`}>
           {designer.log.map((line, i) => (
-            <li key={i}>{t(line.key, line.values)}</li>
+            <li key={i}>{t(line.key, teams(line.values))}</li>
           ))}
         </ol>
       )}
@@ -599,6 +601,7 @@ function SandboxBar({ onCommitStart }: { onCommitStart: () => void }) {
  */
 function Resumed({ resumed, onDismiss }: { resumed: ResumedChanges; onDismiss: () => void }) {
   const { t } = useTranslation();
+  const teams = useTeamValues();
   const dropped = resumed.dropped.length;
   return (
     <div className="mt-2 flex items-start gap-x-4 border-t border-state-warn/30 pt-2">
@@ -619,7 +622,7 @@ function Resumed({ resumed, onDismiss }: { resumed: ResumedChanges; onDismiss: (
             </p>
             <ul className="max-h-32 list-disc overflow-y-auto pl-6">
               {resumed.dropped.map((line, i) => (
-                <li key={i}>{t(line.key, line.values)}</li>
+                <li key={i}>{t(line.key, teams(line.values))}</li>
               ))}
             </ul>
           </>
@@ -659,9 +662,12 @@ function Notices() {
  */
 function NoticeItem({ notice, onDismiss }: { notice: Notice; onDismiss: () => void }) {
   const { t } = useTranslation();
+  const teams = useTeamValues();
   const text = t(notice.key, {
-    ...notice.values,
-    ...(notice.inner === undefined ? {} : { what: t(notice.inner.key, notice.inner.values) }),
+    ...teams(notice.values),
+    ...(notice.inner === undefined
+      ? {}
+      : { what: t(notice.inner.key, teams(notice.inner.values)) }),
   });
   const tone = notice.tone === "refused" ? "error" : "success";
   const dismissal = useAutoDismiss(

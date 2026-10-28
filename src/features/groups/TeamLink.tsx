@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { problemText } from "@/lib/api/problem";
 import { CrossLink } from "@/components/opensvc/CrossLink";
+import { personalGroupUser, useTeamLabel } from "@/components/opensvc/use-team-label";
 
 /**
  * Ids of the groups, by role name.
@@ -30,10 +31,22 @@ function useGroupIds() {
   });
 }
 
-/** Team name in a list: a badge that opens the Groups view on that group. */
+/**
+ * Team name in a list: a badge that opens the Groups view on that group. The
+ * private group of a user is named after them and opens their record.
+ */
 export function TeamLink({ name }: { name: unknown }) {
   const ids = useGroupIds();
+  const label = useTeamLabel();
   if (typeof name !== "string" || name === "") return <>{name}</>;
+  const user = personalGroupUser(name);
+  if (user !== undefined) {
+    return (
+      <CrossLink kind="user" id={user}>
+        {label(name)}
+      </CrossLink>
+    );
+  }
   return (
     <CrossLink kind="group" id={ids.data?.get(name)}>
       {name}

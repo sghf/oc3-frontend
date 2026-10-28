@@ -1,5 +1,6 @@
 import { useContext, useState, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { personalGroupUser, useTeamLabel } from "@/components/opensvc/use-team-label";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
 import {
   CaretRightIcon,
@@ -79,6 +80,7 @@ export function Navigator({
   const modulesets = Object.values(designer.draft.modulesets).filter(keep).sort(byName);
   const rulesets = Object.values(designer.draft.rulesets).filter(keep).sort(byName);
   const allGroups = useComplianceGroups();
+  const teamLabel = useTeamLabel();
   const teamed = new Set(
     [
       ...Object.values(designer.draft.rulesets),
@@ -89,11 +91,16 @@ export function Navigator({
   const groups =
     filters.has("modified") || filters.has("contextual") || filters.has("private")
       ? []
-      : (allGroups.data ?? []).filter(
-          (g) =>
-            (needle === "" || g.role.toLowerCase().includes(needle)) &&
-            !(filters.has("unused") && teamed.has(g.role)),
-        );
+      : (allGroups.data ?? [])
+          .filter(
+            (g) =>
+              // A private group is found by its user's name, or by its role.
+              (needle === "" ||
+                g.role.toLowerCase().includes(needle) ||
+                teamLabel(g.role).toLowerCase().includes(needle)) &&
+              !(filters.has("unused") && teamed.has(g.role)),
+          )
+          .sort((a, b) => teamLabel(a.role).localeCompare(teamLabel(b.role)));
   // The modules of the repository, not changed by the draft: the quick filters
   // but "unused" leave none of them; unused, no moduleset of the draft names it.
   const allModules = useCompModules();
@@ -555,7 +562,8 @@ function GroupItem({ item, selected }: { item: DesignerGroup; selected: boolean 
   const { t } = useTranslation();
   const designer = useDesigner();
   const select = useContext(SelectContext);
-  const drag = useDraggable({ type: "group", id: item.id, role: item.role }, item.role);
+  const name = useTeamLabel()(item.role);
+  const drag = useDraggable({ type: "group", id: item.id, role: item.role }, name);
   const uses = [
     ...Object.values(designer.draft.rulesets),
     ...Object.values(designer.draft.modulesets),
@@ -575,8 +583,11 @@ function GroupItem({ item, selected }: { item: DesignerGroup; selected: boolean 
           selected ? "bg-accent-soft text-ink" : "hover:bg-surface-sunken"
         }`}
       >
-        <ObjectIcon kind="group" className="h-3.5 w-3.5 shrink-0" />
-        <span className="truncate">{item.role}</span>
+        <ObjectIcon
+          kind={personalGroupUser(item.role) === undefined ? "group" : "user"}
+          className="h-3.5 w-3.5 shrink-0"
+        />
+        <span className="truncate">{name}</span>
         <span className="ml-auto shrink-0 text-ink-muted">
           {uses === 0 ? t("designer.unusedShort") : t("designer.count.objects", { count: uses })}
         </span>

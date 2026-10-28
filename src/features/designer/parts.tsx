@@ -1,5 +1,6 @@
 import { useContext, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { personalGroupUser, useTeamLabel } from "@/components/opensvc/use-team-label";
 import { Combobox } from "@/components/ui/Combobox";
 import { CloseIcon, PencilIcon, PlusIcon } from "@/components/ui/icons";
 import { ObjectIcon } from "@/components/opensvc/ObjectIcon";
@@ -280,6 +281,7 @@ function TeamList({
   const { t } = useTranslation();
   const designer = useDesigner();
   const groups = useComplianceGroups();
+  const label = useTeamLabel();
   const obj = objectOf(designer.draft, refTo);
   const target = useDropTarget((item: DragItem): Operation | null => {
     if (
@@ -310,7 +312,7 @@ function TeamList({
       <Combobox
         options={(groups.data ?? [])
           .filter((g) => !teams.includes(g.role))
-          .map((g) => ({ value: g.role, label: g.role }))}
+          .map((g) => ({ value: g.role, label: label(g.role) }))}
         value=""
         onChange={(team) => {
           if (team !== "") designer.runAndTell({ op: "addTeam", ref: refTo, role, team });
@@ -327,19 +329,24 @@ function TeamList({
 function TeamChip({ refTo, role, team }: { refTo: ObjectRef; role: TeamRole; team: string }) {
   const { t } = useTranslation();
   const designer = useDesigner();
-  const drag = useDraggable({ type: "team", kind: refTo.kind, id: refTo.id, role, team }, team);
+  const label = useTeamLabel();
+  const name = label(team);
+  const drag = useDraggable({ type: "team", kind: refTo.kind, id: refTo.id, role, team }, name);
   return (
     <li
       {...drag}
       title={t("designer.teams.dragHint")}
       className="inline-flex cursor-grab items-center gap-1 rounded-full border border-line bg-surface py-0.5 pr-1 pl-2"
     >
-      <ObjectIcon kind="group" className="h-3.5 w-3.5" />
-      {team}
+      <ObjectIcon
+        kind={personalGroupUser(team) === undefined ? "group" : "user"}
+        className="h-3.5 w-3.5"
+      />
+      {name}
       <button
         type="button"
-        aria-label={t("designer.teams.remove", { team })}
-        title={t("designer.teams.remove", { team })}
+        aria-label={t("designer.teams.remove", { team: name })}
+        title={t("designer.teams.remove", { team: name })}
         onClick={() => {
           designer.runAndTell({ op: "removeTeam", ref: refTo, role, team });
         }}

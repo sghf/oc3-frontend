@@ -3015,7 +3015,8 @@
       "moduleset": "Moduleset",
       "filterset": "Filterset",
       "group": "Group",
-      "module": "compliance module"
+      "module": "compliance module",
+      "personalGroup": "Private group of the user ({{role}})"
     },
     "namePlaceholder": "Name",
     "noMatch": "Nothing matches",

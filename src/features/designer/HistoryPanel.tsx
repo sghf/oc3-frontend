@@ -19,6 +19,8 @@ import {
   type HistoryObject,
 } from "./use-compliance-history";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { useTeamLabel } from "@/components/opensvc/use-team-label";
+import { useTeamValues } from "./team-values";
 import { useDesigner } from "./designer-context";
 import { planRestore } from "./restore";
 import { BUTTON } from "./ui";
@@ -281,6 +283,7 @@ function VersionView({
   onRestored: () => void;
 }) {
   const { t } = useTranslation();
+  const teams = useTeamValues();
   const designer = useDesigner();
   const detail = useComplianceVersion(commit);
   const [raw, setRaw] = useState(false);
@@ -421,7 +424,8 @@ function VersionView({
                         <ul className="list-disc pl-5">
                           {plan.skipped.map((s, i) => (
                             <li key={i}>
-                              {t(s.line.key, s.line.values)} — {t(s.refusal.key, s.refusal.values)}
+                              {t(s.line.key, teams(s.line.values))} —{" "}
+                              {t(s.refusal.key, teams(s.refusal.values))}
                             </li>
                           ))}
                         </ul>
@@ -545,6 +549,10 @@ function ChangeRow({
 
 function FieldRow({ field }: { field: FieldChange }) {
   const { t } = useTranslation();
+  const label = useTeamLabel();
+  // The teams added or removed: the private group of a user by the user's name.
+  const names = (items: string[]) =>
+    field.field === "publications" || field.field === "responsibles" ? items.map(label) : items;
   const parts: string[] = [];
   if (field.from !== undefined || field.to !== undefined)
     parts.push(
@@ -554,9 +562,9 @@ function FieldRow({ field }: { field: FieldChange }) {
       }),
     );
   if (field.added !== undefined && field.added.length > 0)
-    parts.push(`+ ${field.added.join(", ")}`);
+    parts.push(`+ ${names(field.added).join(", ")}`);
   if (field.removed !== undefined && field.removed.length > 0)
-    parts.push(`− ${field.removed.join(", ")}`);
+    parts.push(`− ${names(field.removed).join(", ")}`);
   if (field.changed !== undefined && field.changed.length > 0)
     parts.push(t("designer.historyPanel.changedItems", { items: field.changed.join(", ") }));
   if (parts.length === 0) parts.push(t("designer.historyPanel.changedField"));
