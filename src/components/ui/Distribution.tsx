@@ -25,6 +25,8 @@ export function Distribution({
   label,
   locale,
   onPick,
+  formatCount,
+  wide = false,
 }: {
   items: DistributionItem[];
   total: number;
@@ -33,11 +35,20 @@ export function Distribution({
   locale: string;
   /** `add`: toggle the value within the picked ones rather than pick it alone. */
   onPick: (key: string, add: boolean) => void;
+  /** How a line's count reads, a plain number by default: a size, say. */
+  formatCount?: (n: number) => string;
+  /**
+   * Room for longer labels and values, a size say, out of the narrow filter
+   * popover the defaults suit.
+   */
+  wide?: boolean;
 }) {
   const [active, setActive] = useState(0);
   const lines = useRef<(HTMLDivElement | null)[]>([]);
   const percent = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
   const count = new Intl.NumberFormat(locale);
+
+  const shown = (n: number) => (formatCount === undefined ? count.format(n) : formatCount(n));
 
   function share(n: number): string {
     if (total <= 0) return "";
@@ -80,7 +91,7 @@ export function Distribution({
             }}
             role="option"
             aria-selected={item.picked}
-            aria-label={`${item.text}: ${count.format(item.count)} (${share(item.count)})`}
+            aria-label={`${item.text}: ${shown(item.count)} (${share(item.count)})`}
             tabIndex={index === Math.min(active, items.length - 1) ? 0 : -1}
             onClick={(event: MouseEvent) => {
               setActive(index);
@@ -99,7 +110,7 @@ export function Distribution({
             >
               {item.picked && <CheckIcon className="h-3 w-3" />}
             </span>
-            <span className="w-32 shrink-0 truncate" title={item.text}>
+            <span className={`${wide ? "w-56" : "w-32"} shrink-0 truncate`} title={item.text}>
               {item.label}
             </span>
             <span aria-hidden="true" className="h-2 min-w-12 flex-1 rounded-full bg-surface-sunken">
@@ -109,8 +120,11 @@ export function Distribution({
                 style={{ width: `${String(Math.max(ratio * 100, ratio > 0 ? 2 : 0))}%` }}
               />
             </span>
-            <span aria-hidden="true" className="w-12 shrink-0 text-right tabular-nums">
-              {count.format(item.count)}
+            <span
+              aria-hidden="true"
+              className={`${wide ? "w-20" : "w-12"} shrink-0 text-right whitespace-nowrap tabular-nums`}
+            >
+              {shown(item.count)}
             </span>
             <span
               aria-hidden="true"

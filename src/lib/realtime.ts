@@ -102,6 +102,7 @@ const TABLE_KEYS: Record<string, readonly string[]> = {
   stor_array: ["disks", "disk", "quotas"],
   stor_array_dg: ["quotas"],
   stor_array_dg_quota: ["quotas"],
+  saves: ["saves"],
   switches: ["switches"],
   metrics: ["metrics", "metric"],
   reports: ["reports", "report"],

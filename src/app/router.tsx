@@ -36,6 +36,7 @@ import { SafePage } from "@/features/safe/SafePage";
 import { AssistantPage } from "@/features/assistant/AssistantPage";
 import { NewRequestPage } from "@/features/requests/NewRequestPage";
 import { QuotasPage } from "@/features/quotas/QuotasPage";
+import { SavesPage } from "@/features/saves/SavesPage";
 import {
   AllRequestsPage,
   TeamRequestsPage,
@@ -121,6 +122,13 @@ const checkContextualRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/checks/contextual",
   component: CheckContextualPage,
+  validateSearch: parseListSearch,
+});
+
+const savesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/saves",
+  component: SavesPage,
   validateSearch: parseListSearch,
 });
 
@@ -466,6 +474,7 @@ const routeTree = rootRoute.addChildren([
   networksRoute,
   disksRoute,
   quotasRoute,
+  savesRoute,
   checksRoute,
   checkDefaultsRoute,
   checkContextualRoute,

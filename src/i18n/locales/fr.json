@@ -73,7 +73,8 @@
     "orchestrationRuns": "Exécutions",
     "formConnectors": "Connecteurs de formulaires",
     "compModules": "Modules",
-    "quotas": "Quotas disques"
+    "quotas": "Quotas disques",
+    "saves": "Sauvegardes"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -4938,6 +4939,47 @@
       "submit": "Ajouter le quota",
       "replace": "Remplacer le quota",
       "submitting": "Enregistrement…"
+    }
+  },
+  "saves": {
+    "title": "Sauvegardes",
+    "intro": "Les sauvegardes que les serveurs de sauvegarde indexent : ce qui a été sauvegardé, de quel nœud ou service, par quel serveur et groupe, leur taille, leur date et leur fin de rétention. Les classements cumulent leur taille ; une ligne filtre la liste.",
+    "fields": {
+      "id": "Id",
+      "save_server": "Serveur",
+      "save_id": "Id de sauvegarde",
+      "save_app": "App",
+      "node_id": "Id de nœud",
+      "nodename": "Nœud",
+      "svc_id": "Id de service",
+      "svcname": "Service",
+      "save_name": "Nom",
+      "save_group": "Groupe",
+      "save_level": "Niveau",
+      "save_size": "Taille",
+      "save_volume": "Volume",
+      "save_date": "Date",
+      "save_retention": "Rétention"
+    },
+    "charts": {
+      "byApp": "Taille par app",
+      "byObject": "Taille par service ou nœud",
+      "byServer": "Taille par serveur",
+      "byGroup": "Taille par groupe",
+      "total_one": "{{size}} en {{count}} sauvegarde",
+      "total_other": "{{size}} en {{count}} sauvegardes",
+      "backups_one": "{{count}} sauvegarde",
+      "backups_other": "{{count}} sauvegardes",
+      "none": "Aucune sauvegarde.",
+      "unknown": "inconnu"
+    },
+    "detail": {
+      "title": "Sauvegarde",
+      "groups": {
+        "backup": "Sauvegarde",
+        "location": "Emplacement",
+        "owner": "Propriétaire"
+      }
     }
   }
 }

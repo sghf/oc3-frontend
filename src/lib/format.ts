@@ -19,6 +19,20 @@ export function formatSizeMiB(value: number | undefined, locale: string): string
 }
 
 /**
+ * A size in bytes, as the backups count it (`save_size`): in KiB below the
+ * mebibyte, then as `formatCapacityMiB`.
+ */
+export function formatSizeBytes(value: number | undefined, locale: string): string {
+  if (value === undefined || value <= 0) return "";
+  if (value < 1024) return `${value.toLocaleString(locale)} B`;
+  if (value < 1024 * 1024)
+    return `${(value / 1024).toLocaleString(locale, { maximumFractionDigits: 0 })} KiB`;
+  const mib = value / (1024 * 1024);
+  if (mib < 1024) return `${mib.toLocaleString(locale, { maximumFractionDigits: 0 })} MiB`;
+  return formatCapacityMiB(mib, locale);
+}
+
+/**
  * A capacity of a storage array, in mebibytes as `formatSizeMiB`, but in
  * tebibytes from one: arrays and their quotas count in hundreds of them.
  */

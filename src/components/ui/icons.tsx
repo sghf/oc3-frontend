@@ -86,6 +86,18 @@ export function DatabaseIcon(props: IconProps) {
   );
 }
 
+/** Backups: an archive box, its lid above, a handle on its front. */
+export function ArchiveIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path
+        fillRule="evenodd"
+        d="M3 3.5h18V8H3V3.5Zm1.5 6h15V20a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1V9.5Zm5 3v1.8h5v-1.8h-5Z"
+      />
+    </Svg>
+  );
+}
+
 /** Application codes: the collector's asterisk (fa-asterisk). */
 export function AsteriskIcon(props: IconProps) {
   return (

@@ -73,7 +73,8 @@
     "orchestrationRuns": "Runs",
     "formConnectors": "Form connectors",
     "compModules": "Modules",
-    "quotas": "Disk quotas"
+    "quotas": "Disk quotas",
+    "saves": "Backups"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -4938,6 +4939,47 @@
       "submit": "Add the quota",
       "replace": "Replace the quota",
       "submitting": "Saving…"
+    }
+  },
+  "saves": {
+    "title": "Backups",
+    "intro": "The backups the backup servers index: what was saved, from which node or service, by which server and group, how large, when, and until when it is kept. The rankings sum their size; a line filters the list.",
+    "fields": {
+      "id": "Id",
+      "save_server": "Server",
+      "save_id": "Backup id",
+      "save_app": "App",
+      "node_id": "Node id",
+      "nodename": "Node",
+      "svc_id": "Service id",
+      "svcname": "Service",
+      "save_name": "Name",
+      "save_group": "Group",
+      "save_level": "Level",
+      "save_size": "Size",
+      "save_volume": "Volume",
+      "save_date": "Date",
+      "save_retention": "Retention"
+    },
+    "charts": {
+      "byApp": "Size by app",
+      "byObject": "Size by service or node",
+      "byServer": "Size by server",
+      "byGroup": "Size by group",
+      "total_one": "{{size}} in {{count}} backup",
+      "total_other": "{{size}} in {{count}} backups",
+      "backups_one": "{{count}} backup",
+      "backups_other": "{{count}} backups",
+      "none": "No backup.",
+      "unknown": "unknown"
+    },
+    "detail": {
+      "title": "Backup",
+      "groups": {
+        "backup": "Backup",
+        "location": "Location",
+        "owner": "Owner"
+      }
     }
   }
 }

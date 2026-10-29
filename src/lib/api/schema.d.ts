@@ -1734,7 +1734,9 @@ export interface paths {
      * @description The compliance modules as the agents install them: a gzipped tarball of the
      *     repository, rooted at compliance/, its files owned by root. Set node.repocomp
      *     to the URL of /compliance/modules_repo for om node updatecomp to fetch it.
-     *     For an authenticated node, or user. 404 before the first module.
+     *     For an authenticated node, or user; for anyone when the server setting
+     *     server.compliance_modules.anonymous_download is true, for the v2 agents
+     *     fetching it without credentials. 404 before the first module.
      */
     get: operations["GetComplianceModulesArchive"];
     put?: never;
@@ -6008,6 +6010,77 @@ export interface paths {
      *     GET /san-switches. Any authenticated user sees every port.
      */
     get: operations["GetSanSwitchPort"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/saves": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description List the backups the backup servers index, with the node and the service
+     *     each is of, the latest first, as the historical Saves view does.
+     *     save_size is in bytes.
+     *     A Manager sees every backup, another user those of the application
+     *     codes one of their groups is responsible for; the session filterset
+     *     applies.
+     */
+    get: operations["GetSaves"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/saves/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The size of the backups and their number, summed by application code,
+     *     backup server, backup group, or object (the service of a backup, else
+     *     its node), the filters of the request applied: the charts of the
+     *     historical Saves view. The largest first.
+     *     A Manager sees every backup, another user those of the application
+     *     codes one of their groups is responsible for; the session filterset
+     *     applies.
+     */
+    get: operations["GetSavesSummary"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/saves/{save_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Show a backup, an empty list when it does not exist or is out of reach.
+     *     A Manager sees every backup, another user those of the application
+     *     codes one of their groups is responsible for; the session filterset
+     *     applies.
+     */
+    get: operations["GetSave"];
     put?: never;
     post?: never;
     delete?: never;
@@ -10377,6 +10450,66 @@ export interface components {
     };
     SanTopologyResponse: {
       data: components["schemas"]["SanTopology"];
+    };
+    SaveListResponse: {
+      data:
+        | components["schemas"]["SaveRow"][]
+        | {
+            [key: string]: {
+              [key: string]: number;
+            };
+          };
+      meta?: components["schemas"]["ListMeta"];
+    };
+    /**
+     * @description A backup a backup server indexes: what was saved (save_name, a path or a
+     *     database), from which node and service, by which server, in which group,
+     *     at which level, on which volume, when, and until when it is kept.
+     *     save_size is in bytes. Every property is optional: the props query
+     *     parameter selects them.
+     */
+    SaveRow: {
+      id?: number;
+      node_id?: string;
+      nodename?: string;
+      save_app?: string;
+      save_date?: string;
+      save_group?: string;
+      save_id?: string;
+      save_level?: string;
+      save_name?: string;
+      save_retention?: string;
+      save_server?: string;
+      /** Format: int64 */
+      save_size?: number;
+      save_volume?: string;
+      svc_id?: string;
+      svcname?: string;
+    };
+    SavesSummaryResponse: {
+      data: {
+        /** Format: int64 */
+        count: number;
+        /**
+         * @description The app, server or group; for an object, the column and the id
+         *     it is summed by, "svc_id:<id>" or "node_id:<id>".
+         */
+        key: string;
+        /** @description The key as it reads; the service or node name of an object. */
+        label: string;
+        /**
+         * Format: int64
+         * @description In bytes.
+         */
+        size: number;
+      }[];
+      /** Format: int64 */
+      total_count: number;
+      /**
+       * Format: int64
+       * @description The size of all the backups summed, in bytes.
+       */
+      total_size: number;
     };
     /** @description The objects of one kind matching a search. */
     SearchGroup: {
@@ -28957,6 +29090,159 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetSaves: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+        /** @description The maximum number of entries to return. 0 means no limit. */
+        limit?: components["parameters"]["inQueryLimit"];
+        /** @description Skip the first entries of the data cursor. */
+        offset?: components["parameters"]["inQueryOffset"];
+        /**
+         * @description Include metadata in the response. Enabled by default. Use false or 0 to omit
+         *     the meta field. The metadata of a list carries its total number of rows
+         *     without pagination (total), as well as the rows returned (count), the offset
+         *     and the limit.
+         */
+        meta?: components["parameters"]["inQueryMeta"];
+        /**
+         * @description With "1" or "true", the response counts the distinct values of each
+         *     selected property instead of listing the rows: `data` maps each property
+         *     to an object of value → number of rows ("empty" for a null or blank
+         *     value), over the whole selection (access control, filters and session
+         *     filterset applied, `offset` ignored). `limit`, when given, caps the
+         *     number of values returned per property, the most frequent first; without
+         *     it every value is returned. `meta.total` is the number of rows,
+         *     `meta.distinct` the number of distinct values of each property, and
+         *     `meta.other` the number of rows whose value was left out by the limit.
+         *     A count taking longer than 5 seconds is refused with a 400, asking to
+         *     narrow the selection.
+         */
+        stats?: components["parameters"]["inQueryStats"];
+        /** @description Comma-separated list of properties to sort by. Prefix a property with - for descending order (e.g. orderby=nodename,-app). */
+        orderby?: components["parameters"]["inQueryOrderby"];
+        /** @description Comma-separated list of properties to group the result by (e.g. groupby=app,svcname). */
+        groupby?: components["parameters"]["inQueryGroupby"];
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveListResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetSavesSummary: {
+    parameters: {
+      query: {
+        /**
+         * @description What the backups are summed by: app, server, group or object. Not an
+         *     enum in this spec: its values would collide with those of
+         *     SanTopologyNode.kind in the generated Go constants.
+         */
+        by: string;
+        /**
+         * @description Column filter, repeatable; several filters combine with AND. Each value is
+         *     `prop:expr`, `prop` being a property of the list (joined ones included, as
+         *     for orderby) and `expr` one of:
+         *       - text: case-insensitive match anywhere in the value;
+         *       - `~regex`: regular expression (RE2 syntax), case-insensitive;
+         *       - `in:a,b,c`: one of the listed values;
+         *       - `eq:v`, `ne:v`: equal, not equal;
+         *       - `gt:v`, `gte:v`, `lt:v`, `lte:v`: comparisons, for numbers and dates;
+         *         a date may be relative to now, `-` then a duration in weeks, days,
+         *         hours, minutes and seconds: `lt:-15m` keeps the dates older than 15
+         *         minutes, `gte:-1d12h` those of the last day and a half;
+         *       - `empty`: no value;
+         *       - `!expr`: the inverse of any of the above, that is the rows `expr` leaves
+         *         out, those without a value included: `!dev`, `!~^dev`, `!in:a,b`,
+         *         `!empty` (any value).
+         *     An unknown property, a property without a column, or an invalid regular
+         *     expression is answered with 400.
+         */
+        filter?: components["parameters"]["inQueryFilter"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavesSummaryResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      500: components["responses"]["500"];
+    };
+  };
+  GetSave: {
+    parameters: {
+      query?: {
+        /** @description A list of properties to include in each data dictionnary. */
+        props?: components["parameters"]["inQueryProps"];
+      };
+      header?: never;
+      path: {
+        /** @description Backup id */
+        save_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveListResponse"];
+        };
+      };
+      401: components["responses"]["401"];
       500: components["responses"]["500"];
     };
   };
